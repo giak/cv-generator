@@ -1,0 +1,32 @@
+name: production
+on: 
+  push:
+    branches:
+      - main
+
+environment:
+  name: production
+  url: https://cv-generator.app
+
+# Variables d'environnement spécifiques à la production
+env:
+  NODE_ENV: production
+  API_URL: https://api.cv-generator.app
+  ENABLE_ANALYTICS: true
+
+# Protection rules
+deployment_protection_rules:
+  required_reviewers: 2
+  wait_timer: 3600  # 1 heure
+  custom_rules:
+    - type: environment
+      pattern: production
+    - type: required_contexts
+      contexts: ["validate", "test", "build"]
+
+# Allowed deployment branches
+deployment_branch_policy:
+  protected_branches: true
+  custom_branches:
+    - main
+    - release/* 
