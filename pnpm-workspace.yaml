@@ -1,0 +1,7 @@
+packages:
+  # Tous les packages dans le dossier packages
+  - 'packages/*'
+  # Exclure les dossiers de build et les fichiers de test
+  - '!**/dist'
+  - '!**/build'
+  - '!**/test' 

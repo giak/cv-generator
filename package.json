@@ -1,0 +1,39 @@
+{
+  "name": "@cv-generator/root",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @cv-generator/ui dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @cv-generator/ui test:e2e",
+    "lint": "biome check .",
+    "lint:fix": "biome check --apply .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "clean": "pnpm -r clean",
+    "typecheck": "pnpm -r exec tsc --noEmit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.13.4",
+    "typescript": "~5.7.3",
+    "vite": "^6.1.0"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": ["esbuild", "puppeteer", "vue-demi"],
+    "onlyBuiltDependencies": ["@biomejs/biome"]
+  },
+  "lint-staged": {
+    "*.{js,ts,vue}": [
+      "biome check --apply",
+      "biome format --write",
+      "vitest related --run"
+    ]
+  }
+}

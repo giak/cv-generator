@@ -1,0 +1,286 @@
+---
+description: ENFORCE Test-Driven Development workflow with Vitest in Vue 3 components to ensure robust and maintainable code
+globs: src/**/*.{spec,test}.{ts,tsx}
+---
+# Test-Driven Development Workflow with Vitest
+
+---
+description: ENFORCE Test-Driven Development workflow with Vitest in Vue 3 components to ensure robust and maintainable code
+globs: src/**/*.{spec,test}.{ts,tsx}
+tags: [testing, vitest, vue3, tdd]
+priority: 1
+version: 2.0.0
+---
+
+## Context
+- Applied when developing new features or fixing bugs
+- Ensures code quality through test-first approach
+- Enforces clean and maintainable code
+- Maintains high test coverage
+- Follows Vue 3, Pinia, and Vitest best practices
+
+## Test Environment Setup
+
+### Configuration (vitest.config.ts)
+```typescript
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+
+export default defineConfig({
+  plugins: [vue()],
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./vitest.setup.ts"],
+    coverage: {
+      provider: "istanbul",
+      reporter: ["text", "json", "html"],
+      all: true,
+      include: ["src/**/*.{ts,vue}"],
+      exclude: ["**/*.d.ts", "**/*.test.ts", "**/*.spec.ts", "e2e/**/*"],
+    },
+    include: ["src/**/*.{test,spec}.{js,ts}"],
+    exclude: ["e2e/**/*", "node_modules/**/*"],
+  },
+});
+```
+
+### Setup File (vitest.setup.ts)
+```typescript
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/vue';
+import { afterEach } from 'vitest';
+
+afterEach(() => {
+  cleanup();
+});
+```
+
+## TDD Workflow
+
+### 1. Store Testing Pattern
+
+#### Store Test Structure
+```typescript
+import { Resume } from "@cv-generator/core/src/domain/entities/Resume";
+import type { Resume as ResumeType } from "@cv-generator/shared/src/types/resume";
+import { createPinia, setActivePinia } from "pinia";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+// Mock des dépendances
+const mockRepository = {
+  load: vi.fn(),
+  save: vi.fn(),
+  export: vi.fn(),
+  import: vi.fn(),
+};
+
+// Mock de la classe Resume
+vi.mock("@cv-generator/core/src/domain/entities/Resume", () => ({
+  Resume: {
+    create: (data: ResumeType) => ({
+      isValid: true,
+      resume: {
+        ...data,
+        toJSON: () => ({ ...data }),
+        get basics() {
+          return { ...data.basics };
+        },
+        get work() {
+          return [...(data.work || [])];
+        },
+        get education() {
+          return [...(data.education || [])];
+        },
+        get skills() {
+          return [...(data.skills || [])];
+        },
+      },
+    }),
+  },
+}));
+
+describe("Resume Store", () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
+    vi.clearAllMocks();
+  });
+
+  // Tests...
+});
+```
+
+### 2. Test Cases Pattern
+
+#### Success Case Pattern
+```typescript
+it("should load resume successfully", async () => {
+  const store = useResumeStore();
+  const mockResume = createMockResume();
+  mockRepository.load.mockResolvedValue(mockResume);
+
+  await store.loadResume();
+
+  expect(store.resume).toEqual(mockResume);
+  expect(store.loading).toBe(false);
+  expect(store.error).toBeNull();
+  expect(mockRepository.load).toHaveBeenCalledTimes(1);
+});
+```
+
+#### Error Case Pattern
+```typescript
+it("should handle load error", async () => {
+  const store = useResumeStore();
+  const error = new Error("Load failed");
+  mockRepository.load.mockRejectedValue(error);
+
+  await store.loadResume();
+
+  expect(store.resume).toBeNull();
+  expect(store.loading).toBe(false);
+  expect(store.error).toBe(error);
+  expect(mockRepository.load).toHaveBeenCalledTimes(1);
+});
+```
+
+#### Non-Error Case Pattern
+```typescript
+it("should handle non-Error load error", async () => {
+  const store = useResumeStore();
+  mockRepository.load.mockRejectedValue("Invalid resume");
+
+  await store.loadResume();
+
+  expect(store.resume).toBeNull();
+  expect(store.loading).toBe(false);
+  expect(store.error).toBeInstanceOf(Error);
+  expect(store.error?.message).toBe("Failed to load resume");
+});
+```
+
+### 3. Component Testing Pattern
+
+#### Component Test Structure
+```typescript
+import { render, screen } from "@testing-library/vue";
+import { describe, expect, it } from "vitest";
+import App from "../App.vue";
+
+describe("App.vue", () => {
+  it("should render the CV Generator title", () => {
+    render(App);
+    expect(screen.getByText("CV Generator")).toBeInTheDocument();
+  });
+
+  it("should render the ResumeForm component", () => {
+    render(App);
+    expect(document.querySelector(".min-h-screen")).toBeInTheDocument();
+  });
+});
+```
+
+## Testing Standards
+
+### Code Coverage Requirements
+<critical>
+- NEVER commit code without tests
+- NEVER skip unit tests for business logic
+- NEVER write tests after implementation
+- ALWAYS maintain minimum coverage:
+  - Stores: 100%
+  - Components: > 90%
+  - Utils: 100%
+</critical>
+
+### Test Organization
+- Follow AAA pattern (Arrange-Act-Assert)
+- Group related tests with describe blocks
+- Clear test descriptions
+- Proper test isolation
+- Mock external dependencies
+- Use beforeEach for common setup
+- Clear mocks between tests
+
+### Mock Data Pattern
+```typescript
+const mockResumeData: ResumeType = {
+  basics: {
+    name: "John Doe",
+    email: "john@example.com",
+  },
+  work: [],
+  education: [],
+  skills: [],
+};
+
+const createMockResume = () => {
+  const { resume } = Resume.create(mockResumeData);
+  return resume as Resume;
+};
+```
+
+## Best Practices
+- Write tests before implementation
+- Keep tests simple and focused
+- Use meaningful test descriptions
+- Maintain test isolation
+- Mock external dependencies
+- Follow the AAA pattern
+- Use TypeScript for type safety
+- Regular test maintenance
+- Use expect.objectContaining for partial object matching
+- Use vi.mock for dependency mocking
+- Use createPinia and setActivePinia for store testing
+- Clear mocks between tests with vi.clearAllMocks()
+- Use proper type imports
+- Separate type and value imports
+
+## Examples
+
+<example>
+// Good Practice - Store Test
+describe("saveResume", () => {
+  it("should save resume successfully", async () => {
+    const store = useResumeStore();
+    const mockResume = createMockResume();
+
+    mockRepository.save.mockResolvedValue(undefined);
+
+    await store.saveResume(mockResume);
+
+    expect(store.resume).toEqual(mockResume);
+    expect(store.loading).toBe(false);
+    expect(store.error).toBeNull();
+    expect(mockRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining(mockResumeData)
+    );
+  });
+});
+</example>
+
+<example type="invalid">
+// Poor Practice - Store Test
+describe("saveResume", () => {
+  it("should save resume", async () => {
+    const store = useResumeStore();
+    // BAD: No proper mock data
+    // BAD: No error handling test
+    // BAD: No loading state check
+    await store.saveResume({} as Resume);
+    expect(store.resume).toBeTruthy();
+  });
+});
+</example>
+
+## Performance Standards
+- Unit tests: < 100ms per test
+- Component tests: < 500ms per test
+- Full suite: < 2min
+- Watch mode for development
+
+## Continuous Integration
+- Run tests before commit
+- Maintain coverage thresholds
+- Regular test maintenance
+- Update tests when requirements change

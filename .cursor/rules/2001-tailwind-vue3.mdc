@@ -1,0 +1,229 @@
+---
+description: ENFORCE Tailwind CSS v4 standards and best practices in Vue 3 components to ensure consistent, maintainable, and performant UI
+globs: src/**/*.{vue,ts,js}
+---
+
+# Tailwind CSS v4 with Vue 3 Standards
+
+## Context
+- Applied when creating or modifying Vue 3 components
+- Ensures consistent design implementation using Tailwind CSS v4
+- Enforces component-based architecture with Tailwind utility classes
+- Maintains design system compliance through custom Tailwind configuration
+- Optimizes for production with proper build setup
+
+## Project Setup
+
+### Installation and Configuration
+```bash
+# Install Tailwind CSS and Vite plugin
+npm install tailwindcss @tailwindcss/vite
+
+# Install recommended plugins
+npm install @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio
+```
+
+### Directory Structure
+```
+src/
+├── assets/
+│   └── styles/
+│       ├── main.css         # Main CSS with Tailwind import
+│       └── themes/          # Theme configurations
+├── components/
+│   └── ui/                  # Reusable UI components
+└── types/                   # TypeScript definitions
+```
+
+## Configuration Files
+
+### Vite Configuration (vite.config.ts)
+```typescript
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    tailwindcss()
+  ]
+})
+```
+
+### Main CSS File (main.css)
+```css
+@import "tailwindcss";
+
+/* Custom base styles */
+@layer base {
+  :root {
+    /* Use oklch for better color science */
+    --color-primary-500: oklch(65% 0.2 142);
+    --color-primary-400: oklch(70% 0.19 142);
+    /* ... other shades */
+  }
+}
+
+/* Custom components */
+@layer components {
+  .btn-primary {
+    /* CORRECT: Use @apply only for non-color utilities */
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md;
+    /* CORRECT: Use CSS variables for colors */
+    background-color: var(--color-primary-500);
+    color: white;
+  }
+  .btn-primary:hover {
+    background-color: var(--color-primary-400);
+  }
+}
+```
+
+## Component Requirements
+
+### Base Component Structure
+- Use `<script setup lang="ts">` for composition API
+- Define proper TypeScript interfaces for props
+- Implement proper event handling with typed emits
+- Use Tailwind utility classes for styling
+- Follow atomic design principles
+
+### Styling Guidelines
+- Use Tailwind utility classes as primary styling method
+- Group utility classes in logical order:
+  1. Layout (display, position)
+  2. Box Model (margin, padding)
+  3. Typography
+  4. Visual (colors, borders)
+  5. Interactive States
+- Use CSS custom properties for theme values
+- Implement color-contrast utilities
+
+### Responsive Design
+- Use container queries when possible
+- Implement mobile-first approach
+- Use modern viewport units (dvh, svh, lvh)
+- Support dynamic viewport changes
+
+### Theme System
+- Use CSS custom properties for theming
+- Implement color schemes with `prefers-color-scheme`
+- Support high contrast mode
+- Use modern color formats (oklch, color-mix)
+
+## Examples
+
+<example>
+// Good Component Implementation
+<script setup lang="ts">
+interface ButtonProps {
+  variant?: 'primary' | 'secondary'
+  size?: 'sm' | 'md' | 'lg'
+  disabled?: boolean
+}
+
+const props = withDefaults(defineProps<ButtonProps>(), {
+  variant: 'primary',
+  size: 'md',
+  disabled: false
+})
+
+const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2'
+const variantClasses = {
+  primary: 'bg-[--color-primary] text-white hover:opacity-90',
+  secondary: 'bg-[--color-neutral-200] text-[--color-neutral-800] hover:bg-[--color-neutral-300]'
+}
+const sizeClasses = {
+  sm: 'px-3 py-1.5 text-sm',
+  md: 'px-4 py-2 text-base',
+  lg: 'px-6 py-3 text-lg'
+}
+</script>
+
+<template>
+  <button
+    :class="[
+      baseClasses,
+      variantClasses[variant],
+      sizeClasses[size],
+      disabled && 'opacity-50 cursor-not-allowed'
+    ]"
+    :disabled="disabled"
+  >
+    <slot />
+  </button>
+</template>
+</example>
+
+<example type="invalid">
+// Poor Implementation - Avoid in v4
+<script>
+export default {
+  props: ['type', 'size'],
+  computed: {
+    classes() {
+      // INCORRECT: Manual class string concatenation
+      return `btn ${this.type} ${this.size}`
+    }
+  }
+}
+</script>
+
+<template>
+  <button :class="classes" style="padding: 10px;">
+    <!-- INCORRECT: Inline styles -->
+    <slot></slot>
+  </button>
+</template>
+
+<style>
+/* INCORRECT: Direct usage of @apply */
+.btn {
+  @apply rounded-md;
+}
+</style>
+</example>
+
+## Critical Rules
+<critical>
+- NEVER use inline styles
+- NEVER use direct color values, use CSS custom properties
+- NEVER use @apply without clear necessity
+- NEVER mix different styling methodologies
+- NEVER hardcode theme values
+- ALWAYS use CSS custom properties for theming
+- ALWAYS use container queries when possible
+- ALWAYS use modern color formats
+- ALWAYS implement proper color contrasts
+- ALWAYS use semantic HTML elements
+- ALWAYS use proper viewport units
+- ALWAYS test in different color schemes
+- NEVER use @apply with color utilities (bg-*, text-*, border-*, etc.)
+- ALWAYS define colors as CSS variables in @layer base
+- ALWAYS use CSS variables for colors in components
+- ALWAYS use @apply for non-color utilities only
+- ALWAYS use modern color formats (oklch)
+- ALWAYS implement proper color contrasts
+- ALWAYS test in different color schemes
+</critical>
+
+## Performance Optimization
+- Use modern CSS features
+- Implement proper view transitions
+- Use container queries for modularity
+- Optimize for Core Web Vitals
+- Implement proper CSS layers
+- Use modern image formats
+- Enable proper caching strategies
+- Use CSS variables for dynamic color values
+
+## Accessibility Requirements
+- Maintain WCAG 2.2 AAA compliance
+- Support reduced-motion preferences
+- Implement proper color contrasts
+- Support forced-colors mode
+- Test with screen readers
+- Support keyboard navigation
+- Implement proper focus management
+- Support high contrast mode

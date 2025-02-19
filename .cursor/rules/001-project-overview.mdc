@@ -1,0 +1,375 @@
+---
+description: DEFINE core project architecture, technical stack, and development principles for the CV Generator application
+globs: src/**/*
+---
+
+# CV Generator - Project Overview & Technical Standards
+
+## Project Identity
+Le CV Generator est une application web moderne dédiée à la création, la gestion et la génération de CV au format JSON Resume, HTML et PDF. L'application est construite avec une architecture modulaire basée sur les principes SOLID, Domain-Driven Design (DDD), Clean Architecture et Test-Driven Development (TDD) pour garantir évolutivité, maintenabilité et robustesse.
+
+## Technical Stack
+
+### Core Technologies
+- pnpm 10+
+- TypeScript 5.7+
+- Node.js 22+
+- Vue.js 3.4+ avec Composition API
+- Pinia pour la gestion d'état
+- Tailwind CSS 4 (via Vite plugin)
+- Vite 6+ pour bundling et développement
+- Puppeteer (v24+) pour la génération de PDF
+- Zod pour la validation des schémas
+- Vitest 3+ pour les tests unitaires et d'intégration
+- Playwright pour les tests E2E
+
+### Data Model
+```typescript
+// Schéma JSON Resume avec Zod
+export const resumeSchema = z.object({
+  basics: z.object({
+    name: z.string().min(1),
+    label: z.string().optional(),
+    image: z.string().url().optional(),
+    email: z.string().email(),
+    phone: z.string().optional(),
+    url: z.string().url().optional(),
+    summary: z.string().optional(),
+    location: z.object({
+      address: z.string().optional(),
+      postalCode: z.string().optional(),
+      city: z.string().optional(),
+      countryCode: z.string().length(2).optional(),
+      region: z.string().optional()
+    }).optional(),
+    profiles: z.array(z.object({
+      network: z.string(),
+      username: z.string(),
+      url: z.string().url()
+    })).optional()
+  }),
+  work: z.array(z.object({
+    name: z.string(),
+    position: z.string(),
+    url: z.string().url().optional(),
+    startDate: z.string(), // YYYY-MM-DD
+    endDate: z.string().optional(), // YYYY-MM-DD
+    summary: z.string().optional(),
+    highlights: z.array(z.string()).optional()
+  })).optional(),
+  education: z.array(z.object({
+    institution: z.string(),
+    area: z.string(),
+    studyType: z.string(),
+    startDate: z.string(),
+    endDate: z.string().optional(),
+    score: z.string().optional(),
+    courses: z.array(z.string()).optional()
+  })).optional(),
+  skills: z.array(z.object({
+    name: z.string(),
+    level: z.string().optional(),
+    keywords: z.array(z.string()).optional()
+  })).optional()
+})
+
+export type ResumeType = z.infer<typeof resumeSchema>
+```
+
+### Frontend Architecture
+- Vue.js Composition API avec `<script setup>`
+- Vue Router 4 pour la navigation
+- Composables pour la logique réutilisable
+- Pinia pour un état global typé
+- Tailwind CSS pour un design utility-first
+- Support du mode sombre natif
+- Optimisation pour l'impression
+
+### Import/Export System
+- Parsers pour JSON Resume
+- Générateurs PDF avec Puppeteer
+- Export HTML responsive
+- Validation et transformation des données
+
+## Project Structure
+
+### Source Organization
+```
+src/
+├── modules/
+│   └── cv/
+│       ├── domain/
+│       │   ├── entities/
+│       │   │   └── Resume.ts       # Entité principale
+│       │   ├── validators/
+│       │   │   └── schema.ts       # Validation JSON Resume
+│       │   └── services/
+│       │       └── export/         # Services d'export
+│       ├── application/
+│       │   ├── use-cases/
+│       │   │   ├── ImportResume.ts
+│       │   │   └── ExportResume.ts
+│       │   └── services/
+│       │       ├── PdfGenerator.ts
+│       │       └── HtmlGenerator.ts
+│       ├── infrastructure/
+│       │   ├── repositories/
+│       │   │   └── ResumeRepository.ts
+│       │   └── adapters/
+│       │       ├── JsonResumeAdapter.ts
+│       │       └── PdfAdapter.ts
+│       └── presentation/
+│           ├── components/
+│           │   ├── ResumeEditor/
+│           │   └── ResumePreview/
+│           └── pages/
+│               └── Editor.vue
+├── assets/                  # Ressources statiques
+├── config/                  # Configuration
+├── stores/                  # Stores Pinia
+├── types/                  # Types TypeScript
+├── utils/                  # Utilitaires
+└── tests/                  # Tests
+```
+
+### Key Configuration Files
+```
+├── package.json            # Dépendances et scripts
+├── .env                    # Variables d'environnement
+├── tsconfig.json          # Configuration TypeScript
+├── .biome.json            # Configuration Biome
+├── vite.config.ts         # Configuration Vite
+└── vitest.config.ts       # Configuration Vitest
+```
+
+## Architecture Principles
+
+### Clean Architecture & DDD
+- Séparation stricte des couches :
+  1. Domain (cœur métier)
+  2. Application (orchestration)
+  3. Infrastructure (externe)
+  4. Presentation (UI)
+- Dépendances orientées vers l'intérieur
+- Interfaces clairement définies
+- Agrégats et entités isolés
+
+### Data Transformation Layer
+```typescript
+// Exemple d'adaptateur JSON Resume
+export class JsonResumeAdapter implements IResumeAdapter {
+  async import(json: string): Promise<Result<Resume, Error>> {
+    try {
+      const data = JSON.parse(json)
+      const validation = resumeSchema.safeParse(data)
+      
+      if (!validation.success) {
+        return Result.fail(new ValidationError(validation.error))
+      }
+      
+      return Result.ok(this.mapToEntity(validation.data))
+    } catch (error) {
+      return Result.fail(new ImportError('Invalid JSON format'))
+    }
+  }
+  
+  async export(resume: Resume): Promise<Result<string, Error>> {
+    try {
+      const data = this.mapToJson(resume)
+      const validation = resumeSchema.safeParse(data)
+      
+      if (!validation.success) {
+        return Result.fail(new ValidationError(validation.error))
+      }
+      
+      return Result.ok(JSON.stringify(data, null, 2))
+    } catch (error) {
+      return Result.fail(new ExportError('Failed to export resume'))
+    }
+  }
+}
+```
+
+### Vue.js Best Practices
+- Components:
+  ```vue
+  <script setup lang="ts">
+  // Imports en haut
+  import { ref, computed } from 'vue'
+  import type { PropType } from 'vue'
+  
+  // Props et émissions typés
+  interface Props {
+    modelValue: string
+    label?: string
+  }
+  
+  // Définition des props avec validation
+  const props = withDefaults(defineProps<Props>(), {
+    label: ''
+  })
+  
+  // Émissions typées
+  const emit = defineEmits<{
+    (e: 'update:modelValue', value: string): void
+    (e: 'change', value: string): void
+  }>()
+  
+  // Logique composant
+  const inputValue = computed({
+    get: () => props.modelValue,
+    set: (value) => emit('update:modelValue', value)
+  })
+  </script>
+  
+  <template>
+    <div class="form-field">
+      <label v-if="label">{{ label }}</label>
+      <input
+        v-model="inputValue"
+        class="input"
+        @change="emit('change', inputValue)"
+      />
+    </div>
+  </template>
+  ```
+
+### State Management
+- Stores Pinia typés :
+  ```typescript
+  export const useCvStore = defineStore('cv', () => {
+    // State typé
+    const resume = ref<ResumeInterface | null>(null)
+    
+    // Getters
+    const fullName = computed(() => 
+      resume.value ? `${resume.value.basics.firstName} ${resume.value.basics.lastName}` : ''
+    )
+    
+    // Actions
+    async function loadResume(id: string) {
+      try {
+        resume.value = await cvService.getResume(id)
+      } catch (error) {
+        handleError(error)
+      }
+    }
+    
+    return {
+      resume,
+      fullName,
+      loadResume
+    }
+  })
+  ```
+
+## Development Standards
+
+### TypeScript & Type Safety
+- Strict mode activé
+- Types explicites requis
+- Génériques pour la réutilisabilité
+- Interfaces pour les contrats
+- Validation runtime avec Zod
+
+### Testing Strategy
+- TDD comme approche principale
+- Tests unitaires pour la logique
+- Tests d'intégration pour les flows
+- Tests E2E pour les parcours critiques
+- Mocking intelligent des dépendances
+
+### Code Quality
+<critical>
+- NEVER use any type without explicit justification
+- NEVER mutate props directly
+- NEVER use non-typed reactive references
+- NEVER skip error handling
+- NEVER commit without tests
+- NEVER store sensitive data in JSON Resume
+- ALWAYS validate JSON Resume schema
+- ALWAYS sanitize HTML output
+- ALWAYS use TypeScript strict mode
+- ALWAYS follow SOLID principles
+- ALWAYS write tests first
+- ALWAYS use proper error boundaries
+- ALWAYS document public APIs
+- ALWAYS validate dates in YYYY-MM-DD format
+</critical>
+
+### Performance Guidelines
+- Lazy loading des routes
+- Code splitting automatique
+- Optimisation des assets
+- Caching intelligent
+- Mesures de performance
+
+## CI/CD & Deployment
+- Pipeline GitLab CI
+- Environnements distincts
+- Tests automatisés
+- Analyse de qualité
+- Déploiement automatisé
+
+## Examples
+
+<example>
+// Good Practice - Typed Composable
+export function useResume(id: string) {
+  const resume = ref<ResumeInterface | null>(null)
+  const loading = ref(false)
+  const error = ref<Error | null>(null)
+
+  async function loadResume() {
+    loading.value = true
+    error.value = null
+    
+    try {
+      resume.value = await cvService.getResume(id)
+    } catch (err) {
+      error.value = err instanceof Error ? err : new Error('Unknown error')
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return {
+    resume: readonly(resume),
+    loading: readonly(loading),
+    error: readonly(error),
+    loadResume
+  }
+}
+</example>
+
+<example type="invalid">
+// Poor Practice - Untyped Component
+export default {
+  data() {
+    return {
+      resume: null,  // No type information
+      loading: false
+    }
+  },
+  methods: {
+    async loadResume() {  // No error handling
+      this.resume = await fetch('/api/resume').then(r => r.json())
+    }
+  }
+}
+</example>
+
+## Documentation Requirements
+- Documentation technique à jour
+- Commentaires de code pertinents
+- README complet et maintenu
+- Changelog des versions
+- Documentation des APIs
+
+## Security Considerations
+- Validation des entrées JSON
+- Sanitization des sorties HTML
+- Protection contre l'injection de code
+- Validation des URLs et emails
+- Gestion sécurisée des fichiers
+- Audit des dépendances

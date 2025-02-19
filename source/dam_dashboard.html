@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Barrage Hydroélectrique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        main {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .stats-grid {
+            height: auto;
+            min-height: 10vh;
+            margin-bottom: 0.25rem;
+        }
+        .monitoring-section {
+            height: auto;
+            min-height: 50vh;
+        }
+
+   
+    
+    
+    </style>
+</head>
+<body class="text-gray-100 bg-gray-900">
+    <!-- Minimal header -->
+    <header class="h-12 bg-gray-800 border-b border-gray-700">
+        <div class="flex items-center justify-between h-full px-4">
+            <div class="flex items-center space-x-8">
+                <h1 class="text-sm font-bold tracking-wider uppercase">BARRAGE HE-01</h1>
+                <div class="flex space-x-4 text-xs">
+                    <span class="text-gray-400">LAT: 45°30'N</span>
+                    <span class="text-gray-400">LONG: 6°30'E</span>
+                    <span class="text-gray-400">ALT: 1850m</span>
+                </div>
+                <!-- Menu discret -->
+                <nav class="flex items-center space-x-6">
+                    <a href="#" class="text-xs text-gray-400 transition-colors hover:text-gray-200">ACCUEIL</a>
+                    <a href="#" class="text-xs text-gray-400 transition-colors hover:text-gray-200">MÉTÉO 🌤️</a>
+                    <a href="#" class="text-xs text-gray-400 transition-colors hover:text-gray-200">RIVIÈRES 💧</a>
+                    <a href="#" class="text-xs text-gray-400 transition-colors hover:text-gray-200">PRODUCTION ⚡</a>
+                    <a href="#" class="text-xs text-gray-400 transition-colors hover:text-gray-200">MAINTENANCE 🛠️</a>
+                    <a href="#" class="text-xs text-gray-400 transition-colors hover:text-gray-200">RAPPORTS 📊</a>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-6">
+                <div class="font-mono text-xs">
+                    <span class="text-gray-400">SYSTÈME:</span>
+                    <span class="text-green-400">OPÉRATIONNEL</span>
+                </div>
+                <div class="font-mono text-xs">
+                    <span class="text-gray-400">UTC:</span>
+                    <span>14:24:36</span>
+                </div>
+                <!-- Menu secondaire -->
+                <div class="flex items-center space-x-4">
+                    <button class="text-xs text-gray-400 transition-colors hover:text-gray-200">
+                        <span class="sr-only">Notifications</span>
+                        🔔
+                    </button>
+                    <button class="text-xs text-gray-400 transition-colors hover:text-gray-200">
+                        <span class="sr-only">Paramètres</span>
+                        ⚙️
+                    </button>
+                    <button class="text-xs text-gray-400 transition-colors hover:text-gray-200">
+                        <span class="sr-only">Aide</span>
+                        ❔
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content - Full screen -->
+    <main class="w-full h-full p-2">
+        <!-- Alert Dialog -->
+        <div class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <!-- Critical Alert -->
+            <div class="absolute p-4 border-2 border-red-700 shadow-lg pointer-events-auto right-4 top-16 w-96 bg-red-900/90">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="text-xl text-red-500">⚠️</div>
+                        <h4 class="text-sm font-bold text-red-100 uppercase">Alerte Critique</h4>
+                    </div>
+                    <button class="text-red-300 hover:text-red-100">✕</button>
+                </div>
+                <div class="mt-2 space-y-2">
+                    <div class="flex items-baseline justify-between text-xs">
+                        <span class="text-red-200">Turbine T2</span>
+                        <span class="font-mono text-red-100">VIBRATION ANORMALE</span>
+                    </div>
+                    <div class="flex items-baseline justify-between text-xs">
+                        <span class="text-red-200">Seuil</span>
+                        <span class="font-mono text-red-100">1.5 mm/s > 0.8 mm/s</span>
+                    </div>
+                    <div class="mt-2 text-xs text-red-300">
+                        Maintenance requise sous 2 heures
+                    </div>
+                </div>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button class="px-3 py-1 text-xs text-red-100 bg-red-800 hover:bg-red-700">
+                        ACQUITTER
+                    </button>
+                    <button class="px-3 py-1 text-xs text-red-100 bg-red-700 hover:bg-red-600">
+                        VOIR DÉTAILS
+                    </button>
+                </div>
+            </div>
+
+            <!-- Weather Warning -->
+            <div class="absolute p-4 border-2 border-yellow-600 shadow-lg pointer-events-auto right-4 top-64 w-96 bg-yellow-900/90">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="text-xl text-yellow-500">🌧️</div>
+                        <h4 class="text-sm font-bold text-yellow-100 uppercase">Alerte Météo</h4>
+                    </div>
+                    <button class="text-yellow-300 hover:text-yellow-100">✕</button>
+                </div>
+                <div class="mt-2 space-y-2">
+                    <div class="flex items-baseline justify-between text-xs">
+                        <span class="text-yellow-200">Précipitations</span>
+                        <span class="font-mono text-yellow-100">FORTES PLUIES</span>
+                    </div>
+                    <div class="flex items-baseline justify-between text-xs">
+                        <span class="text-yellow-200">Prévision</span>
+                        <span class="font-mono text-yellow-100">85 mm/3h</span>
+                    </div>
+                    <div class="mt-2 text-xs text-yellow-300">
+                        Risque de crue dans les prochaines 6 heures
+                    </div>
+                </div>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button class="px-3 py-1 text-xs text-yellow-100 bg-yellow-800 hover:bg-yellow-700">
+                        SURVEILLER
+                    </button>
+                    <button class="px-3 py-1 text-xs text-yellow-100 bg-yellow-700 hover:bg-yellow-600">
+                        PROTOCOLE CRUE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-6 gap-1 stats-grid">
+            <!-- Niveau du réservoir -->
+            <div class="p-2 bg-gray-800 border border-gray-700 box-3d">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold uppercase">Niveau réservoir</h3>
+                    <span class="px-1 text-xs text-green-400 rounded bg-green-900/80">+2%</span>
+                </div>
+                <div class="flex items-baseline mt-1 space-x-2">
+                    <p class="font-mono text-4xl font-bold text-gray-100">85%</p>
+                    <p class="text-xs text-gray-400">42,500 m³</p>
+                </div>
+                <div class="w-full h-1 mt-2 overflow-hidden rounded bg-gray-900/70">
+                    <div class="w-4/5 h-1 rounded bg-gradient-to-r from-blue-600 to-blue-400"></div>
+                </div>
+            </div>
+
+            <!-- Débit entrant -->
+            <div class="p-2 bg-gray-800 border border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold uppercase">Débit entrant</h3>
+                    <span class="px-1 text-xs text-red-400 bg-red-900">-5%</span>
+                </div>
+                <div class="flex items-baseline mt-1 space-x-2">
+                    <p class="font-mono text-4xl font-bold">280</p>
+                    <p class="text-xs text-gray-400">m³/s</p>
+                </div>
+                <div class="w-full h-1 mt-2 bg-gray-700">
+                    <div class="w-3/5 h-1 bg-yellow-500"></div>
+                </div>
+            </div>
+
+            <!-- Production -->
+            <div class="p-2 bg-gray-800 border border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold uppercase">Production</h3>
+                    <span class="px-1 text-xs text-green-400 bg-green-900">+8%</span>
+                </div>
+                <div class="flex items-baseline mt-1 space-x-2">
+                    <p class="font-mono text-4xl font-bold">450</p>
+                    <p class="text-xs text-gray-400">MW</p>
+                </div>
+                <div class="w-full h-1 mt-2 bg-gray-700">
+                    <div class="w-11/12 h-1 bg-green-500"></div>
+                </div>
+            </div>
+
+            <!-- État système -->
+            <div class="p-2 bg-gray-800 border border-gray-700">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold uppercase">État turbines</h3>
+                    <div class="flex space-x-1">
+                        <span class="w-2 h-2 bg-green-500"></span>
+                        <span class="w-2 h-2 bg-yellow-500"></span>
+                        <span class="w-2 h-2 bg-green-500"></span>
+                        <span class="w-2 h-2 bg-green-500"></span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-1">
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>T1</span>
+                        <span class="text-green-400">1500 RPM</span>
+                    </div>
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>T2</span>
+                        <span class="text-yellow-400">MAINT</span>
+                    </div>
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>T3</span>
+                        <span class="text-green-400">1480 RPM</span>
+                    </div>
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>T4</span>
+                        <span class="text-green-400">1495 RPM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Données Environnementales -->
+            <div class="p-2 bg-gray-800 border border-gray-700">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold uppercase">Environnement</h3>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>GLACIER</span>
+                        <span class="font-mono text-blue-400">-2.3 cm/j</span>
+                    </div>
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>PRÉCIP 24H</span>
+                        <span class="font-mono">12.5 mm</span>
+                    </div>
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>NEIGE</span>
+                        <span class="font-mono">125 cm</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qualité Eau -->
+            <div class="p-2 bg-gray-800 border border-gray-700">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold uppercase">Qualité Eau</h3>
+                    <span class="px-1 text-xs text-green-400 bg-green-900">OK</span>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>O₂</span>
+                        <span class="font-mono">8.5 mg/L</span>
+                    </div>
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>pH</span>
+                        <span class="font-mono">7.2</span>
+                    </div>
+                    <div class="flex justify-between p-1 text-xs bg-gray-700">
+                        <span>TURBIDITÉ</span>
+                        <span class="font-mono">2.1 NTU</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main monitoring section -->
+        <div class="grid grid-cols-6 gap-1 mt-2 monitoring-section">
+            <!-- System diagram - Larger -->
+            <div class="col-span-4 p-2 bg-gray-800 border border-gray-700">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold uppercase">Schéma système</h3>
+                    <div class="flex space-x-1">
+                        <button class="px-2 text-xs bg-gray-700">ZOOM+</button>
+                        <button class="px-2 text-xs bg-gray-700">ZOOM-</button>
+                        <button class="px-2 text-xs bg-gray-700">RESET</button>
+                    </div>
+                </div>
+                <div class="bg-gray-900 h-[calc(100%-2rem)]">
+                    <div class="relative w-full h-full overflow-hidden">
+                        <img src="./technical_diagram_hydroelectric_dam.png" 
+                             alt="Schéma technique du barrage" 
+                             class="absolute inset-0 object-cover object-center w-full h-full opacity-90"
+                        />
+                        <!-- Watermark SPECIMEN -->
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div class="transform rotate-[-30deg] text-gray-800/40 text-[8rem] font-bold tracking-[1rem] select-none">
+                                SPECIMEN
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="flex flex-col items-center space-y-2">
+                                <div class="px-2 py-1 text-xs text-gray-400 rounded bg-gray-900/80">
+                                    Schéma technique - Vue en plan
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side Monitoring -->
+            <div class="grid col-span-2 grid-rows-6 gap-1">
+                <!-- Meteorological Data -->
+                <div class="p-1 bg-gray-800 border border-gray-700">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-xs font-bold uppercase">Données Météo 🌤️</h3>
+                        <span class="text-xs text-gray-400">MAJ: 5s</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>TEMP. AIR</span>
+                                    <span class="font-mono">12.4 °C</span>
+                                </div>
+                                <div class="w-full h-0.5 mt-0.5 bg-gray-700">
+                                    <div class="w-1/2 h-0.5 bg-blue-500"></div>
+                                </div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>PRÉCIP.</span>
+                                    <span class="font-mono">2.1 mm/h</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>VENT</span>
+                                    <span class="font-mono">45 km/h</span>
+                                </div>
+                                <div class="text-xs text-gray-400">DIR: 285° NO</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>RAD. SOLAIRE</span>
+                                    <span class="font-mono">580 W/m²</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hydraulic Data -->
+                <div class="p-1 bg-gray-800 border border-gray-700">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-xs font-bold uppercase">Données Hydrauliques 💧</h3>
+                        <span class="text-xs text-gray-400">MAJ: 1min</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>DÉBIT AMONT</span>
+                                    <span class="font-mono">325 m³/s</span>
+                                </div>
+                                <div class="w-full h-0.5 mt-0.5 bg-gray-700">
+                                    <div class="w-3/4 h-0.5 bg-green-500"></div>
+                                </div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>FONTE GLACIER</span>
+                                    <span class="font-mono">1.2 m³/h</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>NIV. RETENUE</span>
+                                    <span class="font-mono">452.8 m</span>
+                                </div>
+                                <div class="text-xs text-gray-400">MAX: 455.0 m</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>DÉBIT ÉCOL.</span>
+                                    <span class="font-mono">12.5 m³/s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Qualité de l'Eau -->
+                <div class="p-1 bg-gray-800 border border-gray-700">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-xs font-bold uppercase">Qualité Eau</h3>
+                        <span class="px-1 text-xs text-green-400 bg-green-900">OK</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>pH</span>
+                                    <span class="font-mono">7.2</span>
+                                </div>
+                                <div class="text-xs text-gray-400">Norme: 6.5-8.5</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>TURBIDITÉ</span>
+                                    <span class="font-mono">0.3 NTU</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>O₂</span>
+                                    <span class="font-mono">8.5 mg/L</span>
+                                </div>
+                                <div class="text-xs text-gray-400">Min: 6.0 mg/L</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>CHLORE</span>
+                                    <span class="font-mono">0.5 mg/L</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribution d'Eau -->
+                <div class="p-1 bg-gray-800 border border-gray-700">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-xs font-bold uppercase">Distribution</h3>
+                        <span class="text-xs text-gray-400">MAJ: 1min</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>DÉBIT</span>
+                                    <span class="font-mono">2.4 m³/s</span>
+                                </div>
+                                <div class="text-xs text-gray-400">Cap: 3.0 m³/s</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>PRESSION</span>
+                                    <span class="font-mono">4.2 bar</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>VOL. 24H</span>
+                                    <span class="font-mono">156k m³</span>
+                                </div>
+                                <div class="text-xs text-gray-400">Quota: 180k m³</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>RÉSERVOIR</span>
+                                    <span class="font-mono">82%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Impact Environnemental -->
+                <div class="p-1 bg-gray-800 border border-gray-700">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-xs font-bold uppercase">Impact Env.</h3>
+                        <span class="px-1 text-xs text-green-400 bg-green-900">NORMAL</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>TEMP. AVAL</span>
+                                    <span class="font-mono">15.8°C</span>
+                                </div>
+                                <div class="text-xs text-gray-400">Δt: +1.2°C</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>POISSONS</span>
+                                    <span class="font-mono">+123/24h</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>DÉB. ÉCOL.</span>
+                                    <span class="font-mono">1.2 m³/s</span>
+                                </div>
+                                <div class="text-xs text-gray-400">Min: 1.0 m³/s</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>SÉDIMENTS</span>
+                                    <span class="font-mono">42 mg/L</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance -->
+                <div class="p-1 bg-gray-800 border border-gray-700">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-xs font-bold uppercase">Maintenance</h3>
+                        <span class="text-xs text-gray-400">MAJ: 15min</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>CHLORE</span>
+                                    <span class="font-mono">78%</span>
+                                </div>
+                                <div class="text-xs text-gray-400">Auto: 23j</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>FILTRES</span>
+                                    <span class="font-mono">OK</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>POMPES</span>
+                                    <span class="font-mono">3/4</span>
+                                </div>
+                                <div class="text-xs text-gray-400">Maint: 45j</div>
+                            </div>
+                            <div class="p-1 bg-gray-900">
+                                <div class="flex justify-between text-xs">
+                                    <span>UV</span>
+                                    <span class="font-mono">98%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- New sections -->
+        <div class="grid grid-cols-4 gap-4 p-4">
+            <!-- Section Qualité de l'Eau -->
+            <div class="col-span-2 p-4 bg-gray-800 border border-gray-700 rounded-sm">
+                <h3 class="mb-4 font-mono text-lg uppercase">Qualité de l'Eau Potable</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">pH</span>
+                        <div class="mt-1 font-mono text-2xl">7.2</div>
+                        <div class="text-xs text-gray-400">Norme: 6.5-8.5</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Turbidité</span>
+                        <div class="mt-1 font-mono text-2xl">0.3 NTU</div>
+                        <div class="text-xs text-gray-400">Max: 1.0 NTU</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Chlore résiduel</span>
+                        <div class="mt-1 font-mono text-2xl">0.5 mg/L</div>
+                        <div class="text-xs text-gray-400">Norme: 0.3-0.6 mg/L</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Bactériologie</span>
+                        <div class="mt-1 font-mono text-2xl">CONFORME</div>
+                        <div class="text-xs text-gray-400">Dernière analyse: 24h</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Distribution -->
+            <div class="col-span-2 p-4 bg-gray-800 border border-gray-700 rounded-sm">
+                <h3 class="mb-4 font-mono text-lg uppercase">Distribution d'Eau</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Débit Distribution</span>
+                        <div class="mt-1 font-mono text-2xl">2.4 m³/s</div>
+                        <div class="text-xs text-gray-400">Capacité: 3.0 m³/s</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Pression Réseau</span>
+                        <div class="mt-1 font-mono text-2xl">4.2 bar</div>
+                        <div class="text-xs text-gray-400">Consigne: 4.0-5.0 bar</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Volume Journalier</span>
+                        <div class="mt-1 font-mono text-2xl">156,420 m³</div>
+                        <div class="text-xs text-gray-400">Quota: 180,000 m³</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">État Réservoir</span>
+                        <div class="mt-1 font-mono text-2xl">82%</div>
+                        <div class="text-xs text-gray-400">Capacité: 50,000 m³</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Impact Environnemental -->
+            <div class="col-span-4 p-4 bg-gray-800 border border-gray-700 rounded-sm">
+                <h3 class="mb-4 font-mono text-lg uppercase">Impact Environnemental</h3>
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Débit Écologique</span>
+                        <div class="mt-1 font-mono text-2xl">1.2 m³/s</div>
+                        <div class="text-xs text-gray-400">Minimum: 1.0 m³/s</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Température Aval</span>
+                        <div class="mt-1 font-mono text-2xl">15.8°C</div>
+                        <div class="text-xs text-gray-400">Δt max: 3°C</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Oxygène Dissous</span>
+                        <div class="mt-1 font-mono text-2xl">8.4 mg/L</div>
+                        <div class="text-xs text-gray-400">Min: 6.0 mg/L</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Passage Poissons</span>
+                        <div class="mt-1 font-mono text-2xl">ACTIF</div>
+                        <div class="text-xs text-gray-400">+123 passages/24h</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Maintenance Eau Potable -->
+            <div class="col-span-4 p-4 bg-gray-800 border border-gray-700 rounded-sm">
+                <h3 class="mb-4 font-mono text-lg uppercase">Maintenance Traitement</h3>
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Stock Chlore</span>
+                        <div class="mt-1 font-mono text-2xl">78%</div>
+                        <div class="text-xs text-gray-400">Autonomie: 23j</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Filtres à Sable</span>
+                        <div class="mt-1 font-mono text-2xl">NORMAL</div>
+                        <div class="text-xs text-gray-400">Prochain lavage: 6h</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">Pompes Doseuses</span>
+                        <div class="mt-1 font-mono text-2xl">3/4 ACTIVES</div>
+                        <div class="text-xs text-gray-400">Maintenance: 45j</div>
+                    </div>
+                    <div class="p-3 bg-gray-900 border border-gray-700">
+                        <span class="font-mono text-sm">UV Désinfection</span>
+                        <div class="mt-1 font-mono text-2xl">98%</div>
+                        <div class="text-xs text-gray-400">Durée vie: 2890h</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html> 

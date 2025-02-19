@@ -1,0 +1,337 @@
+---
+description: DEFINE product requirements for CV Generator application with JSON Resume format support
+globs: src/**/*
+---
+
+# Product Requirements Document (PRD) for CV Generator
+
+## Status: Draft
+
+## 1. Introduction
+Le CV Generator est une application web moderne dédiée à la création, la gestion et la génération de CV professionnels. L'application permet aux utilisateurs de créer et maintenir leurs CV au format JSON Resume, avec export en HTML et PDF. Construite sur une architecture modulaire et moderne, elle offre une expérience utilisateur fluide et professionnelle.
+
+### Business Context
+- Besoin croissant de CV standardisés et professionnels
+- Demande pour des formats facilement maintenables et exportables
+- Nécessité d'une solution moderne et accessible
+
+### Target Users
+- Professionnels en recherche d'emploi
+- Recruteurs et RH
+- Étudiants et jeunes diplômés
+- Freelances et consultants
+
+## 2. Goals
+
+### Primary Objectives
+- Créer une plateforme intuitive de gestion de CV
+- Assurer une haute qualité et standardisation des CV
+- Faciliter la maintenance et la mise à jour des CV
+- Permettre l'export dans différents formats standards
+
+### Success Criteria
+- Temps moyen de création d'un CV < 30 minutes
+- Taux de satisfaction utilisateur > 90%
+- Taux de conversion visiteur/utilisateur > 40%
+- Score Lighthouse > 95 sur tous les critères
+
+### Key Performance Indicators (KPIs)
+- Nombre d'utilisateurs actifs mensuels
+- Nombre de CV générés
+- Taux de complétion des CV
+- Temps moyen passé sur l'application
+- Taux de réutilisation
+
+## 3. Features and Requirements
+
+### Functional Requirements
+
+#### Data Model
+```json
+// Schema de référence JSON Resume v1.0.0
+{
+  "basics": {
+    "name": "string",
+    "label": "string",
+    "image": "string (URL)",
+    "email": "string (email)",
+    "phone": "string",
+    "url": "string (URL)",
+    "summary": "string",
+    "location": {
+      "address": "string",
+      "postalCode": "string",
+      "city": "string",
+      "countryCode": "string",
+      "region": "string"
+    },
+    "profiles": [{
+      "network": "string",
+      "username": "string",
+      "url": "string (URL)"
+    }]
+  },
+  "work": [{
+    "name": "string",
+    "position": "string",
+    "url": "string (URL)",
+    "startDate": "string (YYYY-MM-DD)",
+    "endDate": "string (YYYY-MM-DD)",
+    "summary": "string",
+    "highlights": ["string"]
+  }],
+  "education": [{
+    "institution": "string",
+    "url": "string (URL)",
+    "area": "string",
+    "studyType": "string",
+    "startDate": "string (YYYY-MM-DD)",
+    "endDate": "string (YYYY-MM-DD)",
+    "score": "string",
+    "courses": ["string"]
+  }],
+  "skills": [{
+    "name": "string",
+    "level": "string",
+    "keywords": ["string"]
+  }],
+  // Autres sections: volunteer, awards, certificates, publications,
+  // languages, interests, references, projects
+}
+```
+
+#### Core Features
+- Création et édition de CV au format JSON Resume
+  - Import de fichiers JSON existants
+  - Validation du schéma JSON Resume
+  - Édition structurée par sections
+  - Support de tous les champs du schéma
+- Système de templates personnalisables
+  - Templates prédéfinis respectant le schéma
+  - Personnalisation visuelle
+  - Prévisualisation en temps réel
+- Export multi-format
+  - JSON (format source)
+  - PDF haute qualité
+    - Mise en page professionnelle
+    - Support des polices personnalisées
+    - En-têtes et pieds de page
+  - HTML responsive
+    - Optimisé pour l'impression
+    - SEO-friendly
+    - Microdata Schema.org
+- Gestion de versions des CV
+  - Historique des modifications
+  - Restauration de versions
+  - Comparaison de versions
+- Support multilingue
+  - Interface en plusieurs langues
+  - CV en plusieurs langues
+  - Détection automatique de la langue
+
+### Non-Functional Requirements
+
+#### Performance
+- Temps de chargement initial < 2s
+- Temps de génération PDF < 5s
+- Support de 1000 utilisateurs simultanés
+- Disponibilité 99.9%
+
+#### Security
+- Chiffrement des données
+- Authentification OAuth2
+- Conformité RGPD
+- Audit de sécurité régulier
+
+#### Technical Requirements
+- Architecture Clean/DDD
+- Tests automatisés > 90%
+- Documentation technique complète
+- API RESTful documentée
+
+## 4. Epic Structure
+
+### Epic-1: Core CV Management (Current)
+- Implémentation du format JSON Resume
+  - Validation du schéma avec Zod
+  - Import/Export JSON
+  - Édition structurée
+- Éditeur de CV basique
+  - Interface par sections
+  - Validation temps réel
+  - Prévisualisation
+- Validation des données
+  - Conformité au schéma
+  - Validation des URLs et emails
+  - Formats de dates
+- Sauvegarde locale
+  - LocalStorage
+  - IndexedDB
+  - Export JSON
+
+#### Story-1: Project Setup
+- Configuration de l'environnement Vue 3
+- Mise en place de Tailwind CSS
+- Configuration des tests
+- Setup CI/CD
+
+#### Story-2: JSON Resume Implementation
+- Définition des schémas Zod
+  ```typescript
+  // Exemple de schéma Zod pour la section basics
+  const basicsSchema = z.object({
+    name: z.string().min(1),
+    label: z.string().optional(),
+    image: z.string().url().optional(),
+    email: z.string().email(),
+    phone: z.string().optional(),
+    url: z.string().url().optional(),
+    summary: z.string().optional(),
+    location: z.object({
+      address: z.string().optional(),
+      postalCode: z.string().optional(),
+      city: z.string().optional(),
+      countryCode: z.string().length(2).optional(),
+      region: z.string().optional()
+    }).optional(),
+    profiles: z.array(z.object({
+      network: z.string(),
+      username: z.string(),
+      url: z.string().url()
+    })).optional()
+  })
+  ```
+- Validation des données
+  - Tests unitaires pour chaque section
+  - Validation des formats
+  - Messages d'erreur localisés
+- Documentation du schéma
+  - Documentation technique
+  - Guide d'utilisation
+  - Exemples
+
+#### Story-3: Basic Editor
+- Interface d'édition
+  - Formulaires par section
+  - Validation temps réel
+  - Aide contextuelle
+- Validation temps réel
+  - Feedback immédiat
+  - Suggestions de correction
+  - Indicateurs de complétion
+- Import/Export
+  - Upload JSON
+  - Validation du format
+  - Export basique
+- Tests d'intégration
+  - Scénarios d'import/export
+  - Validation des données
+  - Tests UI/UX
+
+### Epic-2: User System (Future)
+[Stories à détailler lors de l'activation de l'Epic]
+
+### Epic-3: Template Engine (Future)
+- Système de templates
+- Personnalisation
+- Prévisualisation live
+- Responsive design
+
+### Epic-4: Export System (Future)
+- Export PDF
+- Export HTML
+- Optimisation pour l'impression
+- Gestion des métadonnées
+
+### Epic-5: Advanced Features (Future)
+- Import LinkedIn
+- Suggestions IA
+- Analytics
+- Partage et collaboration
+
+## 5. Story List
+
+### Epic-1: Core CV Management (Current)
+
+#### Story-1: Project Setup
+- Configuration de l'environnement Vue 3
+- Mise en place de Tailwind CSS
+- Configuration des tests
+- Setup CI/CD
+
+#### Story-2: JSON Resume Implementation
+- Définition des schémas Zod
+- Validation des données
+- Tests unitaires
+- Documentation
+
+#### Story-3: Basic Editor
+- Interface d'édition
+- Validation temps réel
+- Sauvegarde automatique
+- Tests d'intégration
+
+#### Story-4: Data Management
+- Store Pinia
+- Gestion d'état
+- Persistence locale
+- Tests de performance
+
+### Epic-2: User System (Future)
+[Stories à détailler lors de l'activation de l'Epic]
+
+## 6. Future Enhancements
+
+### Planned Features
+- Intégration avec les plateformes de recrutement
+- Système de recommandations IA
+- Version mobile native
+- Marketplace de templates
+
+### Innovation Opportunities
+- Analyse de CV par IA
+- Suggestions d'amélioration
+- Statistiques de consultation
+- Intégration de portfolios
+
+## 7. Technical Architecture
+
+### Frontend
+- Vue 3.4+ avec Composition API
+- TypeScript 5.7+
+- Tailwind CSS 4
+- Pinia pour la gestion d'état
+
+### Build & Quality
+- Vite 6+ pour le bundling
+- Vitest pour les tests
+- Playwright pour les E2E
+- GitLab CI pour le CI/CD
+
+### Performance & Security
+- Optimisation des assets
+- Lazy loading
+- Protection XSS
+- Audit de dépendances
+
+## 8. Timeline & Milestones
+
+### Phase 1: Q1 2025
+- Setup du projet
+- Implémentation core
+- Tests fondamentaux
+
+### Phase 2: Q2 2025
+- Système utilisateur
+- Sauvegarde cloud
+- Templates basiques
+
+### Phase 3: Q3 2025
+- Export avancé
+- Templates premium
+- Analytics
+
+### Phase 4: Q4 2025
+- Fonctionnalités IA
+- Marketplace
+- Intégrations externes 
