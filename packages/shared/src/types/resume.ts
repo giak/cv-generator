@@ -60,3 +60,36 @@ export interface Resume {
 // Types utilitaires
 export type ResumeSection = keyof Resume;
 export type ValidationResult = { isValid: boolean; errors?: string[] };
+
+export interface ResumeType {
+  basics: {
+    name: string;
+    email: string;
+    phone?: string;
+    location?: {
+      address?: string;
+      city?: string;
+      countryCode?: string;
+    };
+    summary?: string;
+  };
+  work: Array<{
+    company: string;
+    position: string;
+    startDate: string;
+    endDate?: string;
+    summary?: string;
+  }>;
+  education: Array<{
+    institution: string;
+    area: string;
+    studyType: string;
+    startDate: string;
+    endDate?: string;
+  }>;
+  skills: Array<{
+    name: string;
+    level?: string;
+    keywords?: string[];
+  }>;
+}
