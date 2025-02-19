@@ -68,12 +68,12 @@ Story Points: 3 (3 jours de développement humain)
 3.  - [x] Configurer lint-staged
 4.  - [x] Mettre en place les conventional commits
 
-### 5. - [ ] Configuration CI/CD
+### 5. - [x] Configuration CI/CD
 
-1.  - [ ] Créer le pipeline GitHub Actions
-2.  - [ ] Configurer les environnements
-3.  - [ ] Setup des jobs de test et build
-4.  - [ ] Configurer les déploiements automatiques
+1.  - [x] Créer le pipeline GitHub Actions
+2.  - [x] Configurer les environnements
+3.  - [x] Setup des jobs de test et build
+4.  - [x] Configurer les déploiements automatiques
 
 ## Constraints
 

@@ -1,0 +1,24 @@
+name: preview
+on: pull_request
+
+environment:
+  name: preview
+  url: https://preview.cv-generator.app
+
+# Variables d'environnement spécifiques à la preview
+env:
+  NODE_ENV: preview
+  API_URL: https://api.preview.cv-generator.app
+  ENABLE_ANALYTICS: false
+
+# Protection rules
+deployment_protection_rules:
+  required_reviewers: 1
+  wait_timer: 0
+
+# Allowed deployment branches
+deployment_branch_policy:
+  protected_branches: true
+  custom_branches:
+    - 'feature/*'
+    - 'bugfix/*' 
