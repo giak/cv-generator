@@ -27,3 +27,61 @@ dist-ssr
 .cursor/rules/_*.mdc
 
 xnotes
+
+# Test reports
+**/coverage/
+**/playwright-report/
+**/test-results/
+**/.nyc_output/
+
+# Build
+**/dist/
+**/.vite/
+
+# Dependencies
+**/node_modules/
+.pnpm-store/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# System
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+.tscache/
+tsconfig.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Temp files
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# Logs supplémentaires
+*.cpuprofile
+*.heapprofile
+*.heapsnapshot
+
+# Tests additionnels
+**/test-results.xml
+**/junit.xml
+**/coverage.xml
+
+# Divers
+.history/
+.vercel/
+.netlify/
