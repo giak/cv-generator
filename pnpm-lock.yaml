@@ -11,6 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: ^1.9.4
         version: 1.9.4
+      '@commitlint/types':
+        specifier: ^19.5.0
+        version: 19.5.0
       '@types/node':
         specifier: ^22.13.4
         version: 22.13.4

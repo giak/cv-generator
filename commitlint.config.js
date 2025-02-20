@@ -1,4 +1,7 @@
-module.exports = {
+// @ts-check
+
+/** @type {import('@commitlint/types').UserConfig} */
+const config = {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'type-enum': [
@@ -25,4 +28,6 @@ module.exports = {
     'subject-full-stop': [2, 'never', '.'],
     'body-leading-blank': [2, 'always'],
   },
-}; 
+};
+
+export default config; 

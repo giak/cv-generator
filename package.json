@@ -21,13 +21,20 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@commitlint/types": "^19.5.0",
     "@types/node": "^22.13.4",
     "typescript": "~5.7.3",
     "vite": "^6.1.0"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": ["esbuild", "puppeteer", "vue-demi"],
-    "onlyBuiltDependencies": ["@biomejs/biome"]
+    "ignoredBuiltDependencies": [
+      "esbuild",
+      "puppeteer",
+      "vue-demi"
+    ],
+    "onlyBuiltDependencies": [
+      "@biomejs/biome"
+    ]
   },
   "lint-staged": {
     "*.{js,ts,vue}": [
