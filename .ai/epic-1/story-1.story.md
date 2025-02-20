@@ -1,6 +1,6 @@
 # Epic-1: Core CV Management
 
-# Story-1: Project Sxtup
+# Story-1: Project Setup
 
 ## Story
 

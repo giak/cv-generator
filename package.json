@@ -3,6 +3,26 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "author": {
+    "name": "giak",
+    "url": "https://github.com/giak"
+  },
+  "description": "Modern CV builder with JSON Resume support",
+  "homepage": "https://github.com/giak/cv-generator#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giak/cv-generator"
+  },
+  "bugs": {
+    "url": "https://github.com/giak/cv-generator/issues"
+  },
+  "keywords": [
+    "cv",
+    "resume",
+    "json-resume",
+    "vue",
+    "typescript"
+  ],
   "engines": {
     "node": ">=22.0.0",
     "pnpm": ">=10.0.0"

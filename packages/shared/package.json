@@ -1,27 +1,39 @@
 {
   "name": "@cv-generator/shared",
-  "version": "0.1.0",
   "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "author": {
+    "name": "giak",
+    "url": "https://github.com/giak"
+  },
+  "description": "Shared types and utilities for CV Generator",
+  "homepage": "https://github.com/giak/cv-generator/tree/main/packages/shared#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giak/cv-generator",
+    "directory": "packages/shared"
+  },
+  "bugs": {
+    "url": "https://github.com/giak/cv-generator/issues"
+  },
+  "keywords": [
+    "cv",
+    "resume",
+    "types",
+    "typescript"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf dist",
     "test": "vitest run",
-    "lint": "biome check .",
-    "format": "biome format . --write"
-  },
-  "dependencies": {
-    "zod": "^3.24.2"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/vue": "^8.1.0",
-    "@vitejs/plugin-vue": "^5.2.1",
-    "rimraf": "^6.0.1",
-    "typescript": "~5.7.3",
-    "vitest": "^3.0.6"
+    "typescript": "~5.3.3",
+    "vitest": "^1.2.2"
   }
 }
