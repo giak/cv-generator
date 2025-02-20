@@ -10,7 +10,7 @@
 
 ## Status
 
-Draft
+Complete
 
 ## Context
 
@@ -36,7 +36,7 @@ Cette story est la première de l'Epic-1 qui implémente les fonctionnalités co
 
 ## Estimation
 
-Story Points: 3 (3 jours de développement humain)
+Story Points: 3 (3 jours de développement humain ; réel 6 heures)
 
 ## Tasks
 

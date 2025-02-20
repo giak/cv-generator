@@ -2,11 +2,18 @@
 description: ENFORCE Tailwind CSS v4 standards and best practices in Vue 3 components to ensure consistent, maintainable, and performant UI
 globs: src/**/*.{vue,ts,js}
 ---
+---
+description: ENFORCE Tailwind CSS v4 standards and best practices in Vue 3 components to ensure consistent, maintainable, and performant UI
+globs: ["packages/ui/**/*.vue", "packages/ui/**/*.css"]
+tags: ["vue", "tailwind", "ui", "css"]
+priority: 1
+version: 1.1.0
+---
 
 # Tailwind CSS v4 with Vue 3 Standards
 
 ## Context
-- Applied when creating or modifying Vue 3 components
+- Applied when creating or modifying Vue 3 components in the UI package
 - Ensures consistent design implementation using Tailwind CSS v4
 - Enforces component-based architecture with Tailwind utility classes
 - Maintains design system compliance through custom Tailwind configuration
@@ -16,28 +23,38 @@ globs: src/**/*.{vue,ts,js}
 
 ### Installation and Configuration
 ```bash
-# Install Tailwind CSS and Vite plugin
-npm install tailwindcss @tailwindcss/vite
+# Install dependencies in the UI package
+pnpm add -w tailwindcss @tailwindcss/vite
 
 # Install recommended plugins
-npm install @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio
+pnpm add -w @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio
 ```
 
-### Directory Structure
+### Monorepo Structure
 ```
-src/
-├── assets/
-│   └── styles/
-│       ├── main.css         # Main CSS with Tailwind import
-│       └── themes/          # Theme configurations
-├── components/
-│   └── ui/                  # Reusable UI components
-└── types/                   # TypeScript definitions
+packages/
+├── ui/                      # UI Package
+│   ├── src/
+│   │   ├── assets/
+│   │   │   └── styles/
+│   │   │       ├── main.css    # Main CSS with Tailwind
+│   │   │       └── themes/     # Theme configurations
+│   │   ├── modules/
+│   │   │   └── cv/
+│   │   │       └── presentation/
+│   │   │           └── components/  # Module-specific components
+│   │   └── components/
+│   │       └── shared/         # Shared UI components
+│   ├── vite.config.ts         # Vite configuration
+│   └── tailwind.config.ts     # Tailwind configuration
+└── shared/                    # Shared package
+    └── src/
+        └── types/             # Shared TypeScript types
 ```
 
 ## Configuration Files
 
-### Vite Configuration (vite.config.ts)
+### Vite Configuration (packages/ui/vite.config.ts)
 ```typescript
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -47,11 +64,17 @@ export default defineConfig({
   plugins: [
     vue(),
     tailwindcss()
-  ]
+  ],
+  resolve: {
+    alias: {
+      '@cv': resolve(__dirname, './src/modules/cv'),
+      '@shared': resolve(__dirname, './src/components/shared')
+    }
+  }
 })
 ```
 
-### Main CSS File (main.css)
+### Main CSS File (packages/ui/src/assets/styles/main.css)
 ```css
 @import "tailwindcss";
 
@@ -88,6 +111,7 @@ export default defineConfig({
 - Implement proper event handling with typed emits
 - Use Tailwind utility classes for styling
 - Follow atomic design principles
+- Import types from shared package
 
 ### Styling Guidelines
 - Use Tailwind utility classes as primary styling method
@@ -115,72 +139,68 @@ export default defineConfig({
 ## Examples
 
 <example>
-// Good Component Implementation
+// Good Component Implementation (packages/ui/src/modules/cv/presentation/components/ResumeForm.vue)
 <script setup lang="ts">
-interface ButtonProps {
-  variant?: 'primary' | 'secondary'
-  size?: 'sm' | 'md' | 'lg'
-  disabled?: boolean
+import type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface'
+import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type'
+
+interface Props {
+  resume: ResumeInterface
+  validation?: ValidationResultType
 }
 
-const props = withDefaults(defineProps<ButtonProps>(), {
-  variant: 'primary',
-  size: 'md',
-  disabled: false
-})
-
-const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2'
-const variantClasses = {
-  primary: 'bg-[--color-primary] text-white hover:opacity-90',
-  secondary: 'bg-[--color-neutral-200] text-[--color-neutral-800] hover:bg-[--color-neutral-300]'
-}
-const sizeClasses = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-base',
-  lg: 'px-6 py-3 text-lg'
-}
+const props = defineProps<Props>()
+const emit = defineEmits<{
+  (e: 'update', value: Partial<ResumeInterface>): void
+  (e: 'validate'): void
+}>()
 </script>
 
 <template>
-  <button
-    :class="[
-      baseClasses,
-      variantClasses[variant],
-      sizeClasses[size],
-      disabled && 'opacity-50 cursor-not-allowed'
-    ]"
-    :disabled="disabled"
+  <form
+    class="container mx-auto p-6 space-y-8 bg-[--color-neutral-50] rounded-lg shadow-sm"
+    @submit.prevent="emit('validate')"
   >
-    <slot />
-  </button>
+    <div class="space-y-4">
+      <label class="block">
+        <span class="text-[--color-neutral-700] font-medium">Name</span>
+        <input
+          v-model="resume.basics.name"
+          type="text"
+          class="mt-1 block w-full rounded-md border-[--color-neutral-300] focus:border-[--color-primary-500] focus:ring focus:ring-[--color-primary-200]"
+          @input="emit('update', { basics: { name: $event.target.value } })"
+        />
+      </label>
+    </div>
+  </form>
 </template>
 </example>
 
 <example type="invalid">
-// Poor Implementation - Avoid in v4
+// Poor Implementation - Avoid
 <script>
 export default {
-  props: ['type', 'size'],
-  computed: {
-    classes() {
-      // INCORRECT: Manual class string concatenation
-      return `btn ${this.type} ${this.size}`
+  props: ['resume'],
+  methods: {
+    update(value) {
+      // INCORRECT: No type safety
+      this.$emit('update', value)
     }
   }
 }
 </script>
 
 <template>
-  <button :class="classes" style="padding: 10px;">
+  <form style="padding: 20px;">
     <!-- INCORRECT: Inline styles -->
-    <slot></slot>
-  </button>
+    <input class="input" v-model="resume.name" />
+  </form>
 </template>
 
 <style>
-/* INCORRECT: Direct usage of @apply */
-.btn {
-  @apply rounded-md;
+/* INCORRECT: Direct usage of @apply with colors */
+.input {
+  @apply bg-gray-100 text-gray-800;
 }
 </style>
 </example>
@@ -206,6 +226,9 @@ export default {
 - ALWAYS use modern color formats (oklch)
 - ALWAYS implement proper color contrasts
 - ALWAYS test in different color schemes
+- ALWAYS import types from shared package
+- ALWAYS use typed props and emits
+- ALWAYS follow monorepo import conventions
 </critical>
 
 ## Performance Optimization

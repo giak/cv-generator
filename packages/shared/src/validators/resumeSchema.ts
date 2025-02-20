@@ -1,18 +1,27 @@
 import { z } from "zod";
+import type { 
+  LocationInterface,
+  ProfileInterface,
+  BasicsInterface,
+  WorkInterface,
+  EducationInterface,
+  SkillInterface,
+  ResumeInterface
+} from '../types'
 
-const locationSchema = z.object({
+export const locationSchema = z.object({
   address: z.string().optional(),
   postalCode: z.string().optional(),
   city: z.string().optional(),
   countryCode: z.string().length(2).optional(),
-  region: z.string().optional(),
-});
+  region: z.string().optional()
+}).strict() as z.ZodType<LocationInterface>
 
-const profileSchema = z.object({
-  network: z.string().min(1),
-  username: z.string().min(1),
-  url: z.string().url(),
-});
+export const profileSchema = z.object({
+  network: z.string(),
+  username: z.string(),
+  url: z.string().url()
+}).strict() as z.ZodType<ProfileInterface>
 
 export const basicsSchema = z.object({
   name: z.string().min(1),
@@ -23,46 +32,40 @@ export const basicsSchema = z.object({
   url: z.string().url().optional(),
   summary: z.string().optional(),
   location: locationSchema.optional(),
-  profiles: z.array(profileSchema).optional(),
-});
+  profiles: z.array(profileSchema).optional()
+}).strict() as z.ZodType<BasicsInterface>
 
-const workExperienceSchema = z.object({
-  name: z.string().min(1),
-  position: z.string().min(1),
+export const workSchema = z.object({
+  name: z.string(),
+  position: z.string(),
   url: z.string().url().optional(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  endDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format').optional(),
   summary: z.string().optional(),
-  highlights: z.array(z.string()).optional(),
-});
+  highlights: z.array(z.string()).optional()
+}).strict() as z.ZodType<WorkInterface>
 
-const educationSchema = z.object({
-  institution: z.string().min(1),
-  area: z.string().min(1),
-  studyType: z.string().min(1),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  endDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional(),
+export const educationSchema = z.object({
+  institution: z.string(),
+  area: z.string(),
+  studyType: z.string(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format').optional(),
   score: z.string().optional(),
-  courses: z.array(z.string()).optional(),
-});
+  courses: z.array(z.string()).optional()
+}).strict() as z.ZodType<EducationInterface>
 
-const skillSchema = z.object({
-  name: z.string().min(1),
+export const skillSchema = z.object({
+  name: z.string(),
   level: z.string().optional(),
-  keywords: z.array(z.string()).optional(),
-});
+  keywords: z.array(z.string()).optional()
+}).strict() as z.ZodType<SkillInterface>
 
 export const resumeSchema = z.object({
   basics: basicsSchema,
-  work: z.array(workExperienceSchema).optional(),
+  work: z.array(workSchema).optional(),
   education: z.array(educationSchema).optional(),
-  skills: z.array(skillSchema).optional(),
-});
+  skills: z.array(skillSchema).optional()
+}).strict() as z.ZodType<ResumeInterface>
 
-export type ResumeSchema = z.infer<typeof resumeSchema>;
+export type ResumeSchemaType = z.infer<typeof resumeSchema>

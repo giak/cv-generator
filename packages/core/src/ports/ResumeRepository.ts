@@ -1,8 +1,8 @@
-import type { Resume } from "../domain/entities/Resume";
+import type { Resume } from '../domain/entities/Resume'
 
-export interface ResumeRepository {
-  save(resume: Resume): Promise<void>;
-  load(): Promise<Resume | null>;
-  export(format: "json" | "pdf" | "html"): Promise<Blob>;
-  import(file: Blob): Promise<Resume>;
+export interface ResumeRepositoryInterface {
+  save(resume: Resume): Promise<Resume>
+  findById(id: string): Promise<Resume | null>
+  import(file: File): Promise<Resume>
+  export(resume: Resume, format: 'json' | 'pdf'): Promise<Blob>
 }
