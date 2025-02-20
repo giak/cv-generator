@@ -1,7 +1,7 @@
-import { Resume } from "@cv-generator/core/src/domain/entities/Resume";
-import type { Resume as ResumeType } from "@cv-generator/shared/src/types/resume";
+import type { ResumeInterface } from "@cv-generator/shared/src/types/resume.interface";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Resume } from "@cv-generator/core";
 
 // Mock des dépendances
 const mockRepository = {
@@ -11,10 +11,10 @@ const mockRepository = {
   import: vi.fn(),
 };
 
-// Mock de la classe Resume
-vi.mock("@cv-generator/core/src/domain/entities/Resume", () => ({
+// Mock du package core
+vi.mock("@cv-generator/core", () => ({
   Resume: {
-    create: (data: ResumeType) => ({
+    create: (data: ResumeInterface) => ({
       isValid: true,
       resume: {
         ...data,
@@ -34,6 +34,12 @@ vi.mock("@cv-generator/core/src/domain/entities/Resume", () => ({
       },
     }),
   },
+  ManageResume: vi.fn().mockImplementation(() => ({
+    loadResume: () => mockRepository.load(),
+    createResume: (data: ResumeInterface) => mockRepository.save(data),
+    exportResume: (format: string) => mockRepository.export(format),
+    importResume: (file: Blob) => mockRepository.import(file),
+  })),
 }));
 
 vi.mock("@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository", () => ({
@@ -44,7 +50,7 @@ vi.mock("@cv-generator/infrastructure/src/repositories/LocalStorageResumeReposit
 import { useResumeStore } from "../resume";
 
 // Mock du résumé complet
-const mockResumeData: ResumeType = {
+const mockResumeData: ResumeInterface = {
   basics: {
     name: "John Doe",
     email: "john@example.com",
@@ -57,7 +63,7 @@ const mockResumeData: ResumeType = {
 // Création d'un mock Resume
 const createMockResume = () => {
   const { resume } = Resume.create(mockResumeData);
-  return resume as Resume;
+  return resume;
 };
 
 describe("Resume Store", () => {

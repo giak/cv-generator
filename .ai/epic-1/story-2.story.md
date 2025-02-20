@@ -37,12 +37,33 @@ Story Points: 2 (2 jours de développement humain)
 
 ## Tasks
 
-### 1. - [ ] Setup du Domain Layer
+### 1. - [x] Setup du Domain Layer
 
-1. - [ ] Créer l'entité Basics
-2. - [ ] Implémenter le schéma Zod pour la validation
-3. - [ ] Créer les Value Objects pour email, phone, etc.
-4. - [ ] Écrire les tests unitaires du domain
+1. - [x] Créer l'entité Basics
+   - ✅ Implémentation de la classe avec constructeur privé
+   - ✅ Méthode factory create() avec validation
+   - ✅ Méthode update() pour modifications immutables
+   - ✅ Méthode toJSON() pour sérialisation
+   - ✅ Tests unitaires complets
+
+2. - [x] Implémenter le schéma Zod pour la validation
+   - ✅ Schéma pour Location avec champs optionnels
+   - ✅ Schéma pour Profile avec validation d'URL
+   - ✅ Schéma pour Basics avec tous les champs requis/optionnels
+   - ✅ Types TypeScript générés depuis les schémas
+   - ✅ Tests de validation pour tous les cas
+
+3. - [x] Créer les Value Objects pour email, phone, etc.
+   - ✅ Value Object Email avec validation Zod
+   - ✅ Value Object Phone avec validation et formatage
+   - ✅ Tests unitaires pour Email
+   - ✅ Tests unitaires pour Phone
+
+4. - [x] Écrire les tests unitaires du domain
+   - ✅ Tests de l'entité Resume
+   - ✅ Tests d'intégration avec les Value Objects
+   - ✅ Tests des cas limites et erreurs
+   - ✅ Tests de sérialisation JSON
 
 ### 2. - [ ] Implémentation du Store
 
@@ -167,3 +188,11 @@ export type BasicsType = z.infer<typeof basicsSchema>;
 - Agent: Création de la structure de la story avec les tâches détaillées
 - User: Validation du schéma et des composants prévus
 - Agent: Ajout des contraintes et points critiques
+- User: Implémentation de l'entité Basics
+- Agent: Création de l'entité avec tests
+- User: Implémentation du schéma Zod
+- Agent: Création des schémas de validation avec types TypeScript
+- User: Implémentation des Value Objects
+- Agent: Création des Value Objects Email et Phone avec leurs tests
+- User: Écriture des tests unitaires du domaine
+- Agent: Création des tests pour l'entité Resume et intégration avec les Value Objects

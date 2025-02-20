@@ -95,16 +95,28 @@ importers:
       vue:
         specifier: ^3.4.15
         version: 3.5.13(typescript@5.3.3)
+      vue-router:
+        specifier: ^4.2.5
+        version: 4.5.0(vue@3.5.13(typescript@5.3.3))
     devDependencies:
+      '@pinia/testing':
+        specifier: ^1.0.0
+        version: 1.0.0(pinia@2.3.1(typescript@5.3.3)(vue@3.5.13(typescript@5.3.3)))
       '@testing-library/jest-dom':
         specifier: ^6.4.2
         version: 6.6.3
+      '@testing-library/user-event':
+        specifier: ^14.5.2
+        version: 14.6.1(@testing-library/dom@9.3.4)
       '@testing-library/vue':
         specifier: ^8.0.2
         version: 8.1.0(@vue/compiler-sfc@3.5.13)(vue@3.5.13(typescript@5.3.3))
       '@vitejs/plugin-vue':
         specifier: ^5.0.3
         version: 5.2.1(vite@5.4.14(@types/node@22.13.4)(lightningcss@1.29.1))(vue@3.5.13(typescript@5.3.3))
+      '@vitest/coverage-istanbul':
+        specifier: ^1.2.2
+        version: 1.6.1(vitest@1.6.1(@types/node@22.13.4)(jsdom@24.1.3)(lightningcss@1.29.1))
       '@vue/test-utils':
         specifier: ^2.4.4
         version: 2.4.6
@@ -609,6 +621,11 @@ packages:
   '@one-ini/wasm@0.1.1':
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
 
+  '@pinia/testing@1.0.0':
+    resolution: {integrity: sha512-a0QquMJqIdgOsb64f8u6YznRbZD4aJxjpyiWXJbs6e2mn7qn6xx/y1hSdTzqK8jfjX0rGPYniHHvF6zpP73ilg==}
+    peerDependencies:
+      pinia: '>=3.0.0'
+
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
@@ -718,6 +735,12 @@ packages:
   '@testing-library/jest-dom@6.6.3':
     resolution: {integrity: sha512-IteBhl4XqYNkM54f4ejhLRJiZNqcSCoXUOG2CPK7qbD322KjQozM4kHQOfkG2oln9b9HTYqs+Sae8vBATubxxA==}
     engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
+
+  '@testing-library/user-event@14.6.1':
+    resolution: {integrity: sha512-vq7fv0rnt+QTXgPxr5Hjc210p6YKq2kmdziLgnsZGgLJ9e6VAShx1pACLuRjd/AS/sr7phAR58OIIpf0LlmQNw==}
+    engines: {node: '>=12', npm: '>=6'}
+    peerDependencies:
+      '@testing-library/dom': '>=7.21.4'
 
   '@testing-library/vue@8.1.0':
     resolution: {integrity: sha512-ls4RiHO1ta4mxqqajWRh8158uFObVrrtAPoxk7cIp4HrnQUj/ScKzqz53HxYpG3X6Zb7H2v+0eTGLSoy8HQ2nA==}
@@ -1962,6 +1985,11 @@ packages:
       '@vue/composition-api':
         optional: true
 
+  vue-router@4.5.0:
+    resolution: {integrity: sha512-HDuk+PuH5monfNuY+ct49mNmkCRK4xJAV9Ts4z9UFc4rzdDnxQLyCMGGc8pKhZhHTVzfanpNwB/lwqevcBwI4w==}
+    peerDependencies:
+      vue: ^3.2.0
+
   vue-template-compiler@2.7.16:
     resolution: {integrity: sha512-AYbUWAJHLGGQM7+cNTELw+KsOG9nl2CnSv467WobS5Cv9uk3wFcnr1Etsz2sEIHEZvw1U+o9mRlEO6QbZvUPGQ==}
 
@@ -2423,6 +2451,10 @@ snapshots:
 
   '@one-ini/wasm@0.1.1': {}
 
+  '@pinia/testing@1.0.0(pinia@2.3.1(typescript@5.3.3)(vue@3.5.13(typescript@5.3.3)))':
+    dependencies:
+      pinia: 2.3.1(typescript@5.3.3)(vue@3.5.13(typescript@5.3.3))
+
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
@@ -2506,6 +2538,10 @@ snapshots:
       lodash: 4.17.21
       redent: 3.0.0
 
+  '@testing-library/user-event@14.6.1(@testing-library/dom@9.3.4)':
+    dependencies:
+      '@testing-library/dom': 9.3.4
+
   '@testing-library/vue@8.1.0(@vue/compiler-sfc@3.5.13)(vue@3.5.13(typescript@5.3.3))':
     dependencies:
       '@babel/runtime': 7.26.9
@@ -2531,6 +2567,21 @@ snapshots:
     dependencies:
       vite: 5.4.14(@types/node@22.13.4)(lightningcss@1.29.1)
       vue: 3.5.13(typescript@5.3.3)
+
+  '@vitest/coverage-istanbul@1.6.1(vitest@1.6.1(@types/node@22.13.4)(jsdom@24.1.3)(lightningcss@1.29.1))':
+    dependencies:
+      debug: 4.4.0
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-instrument: 6.0.3
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 5.0.6
+      istanbul-reports: 3.1.7
+      magicast: 0.3.5
+      picocolors: 1.1.1
+      test-exclude: 6.0.0
+      vitest: 1.6.1(@types/node@22.13.4)(jsdom@24.1.3)(lightningcss@1.29.1)
+    transitivePeerDependencies:
+      - supports-color
 
   '@vitest/coverage-istanbul@1.6.1(vitest@1.6.1(@types/node@22.13.4)(jsdom@26.0.0)(lightningcss@1.29.1))':
     dependencies:
@@ -3899,6 +3950,11 @@ snapshots:
 
   vue-demi@0.14.10(vue@3.5.13(typescript@5.3.3)):
     dependencies:
+      vue: 3.5.13(typescript@5.3.3)
+
+  vue-router@4.5.0(vue@3.5.13(typescript@5.3.3)):
+    dependencies:
+      '@vue/devtools-api': 6.6.4
       vue: 3.5.13(typescript@5.3.3)
 
   vue-template-compiler@2.7.16:

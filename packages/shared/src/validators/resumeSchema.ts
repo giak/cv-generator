@@ -7,7 +7,7 @@ import type {
   EducationInterface,
   SkillInterface,
   ResumeInterface
-} from '../types'
+} from '../types/resume.interface'
 
 export const locationSchema = z.object({
   address: z.string().optional(),

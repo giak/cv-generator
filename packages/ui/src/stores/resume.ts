@@ -1,5 +1,5 @@
-import { ManageResume } from "@cv-generator/core/src/application/useCases/ManageResume";
-import type { Resume } from "@cv-generator/core/src/domain/entities/Resume";
+import { ManageResume } from "@cv-generator/core";
+import type { Resume } from "@cv-generator/core";
 import { LocalStorageResumeRepository } from "@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository";
 import { defineStore } from "pinia";
 import { ref } from "vue";

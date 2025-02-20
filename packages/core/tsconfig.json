@@ -5,11 +5,17 @@
     "rootDir": "src",
     "composite": true,
     "baseUrl": "src",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
     "paths": {
       "@cv/*": ["modules/cv/*"]
     },
     "types": ["vitest/globals"]
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"],
+  "references": [
+    { "path": "../shared" }
+  ]
 } 

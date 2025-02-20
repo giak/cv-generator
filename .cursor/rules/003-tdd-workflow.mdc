@@ -6,10 +6,10 @@ globs: src/**/*.{spec,test}.{ts,tsx}
 
 ---
 description: ENFORCE Test-Driven Development workflow with Vitest in Vue 3 components to ensure robust and maintainable code
-globs: src/**/*.{spec,test}.{ts,tsx}
-tags: [testing, vitest, vue3, tdd]
+globs: ["packages/**/*.{spec,test}.{ts,tsx}", "packages/**/__tests__/*.{ts,tsx}"]
+tags: [testing, vitest, vue3, tdd, ddd]
 priority: 1
-version: 2.0.0
+version: 2.1.0
 ---
 
 ## Context
@@ -17,167 +17,257 @@ version: 2.0.0
 - Ensures code quality through test-first approach
 - Enforces clean and maintainable code
 - Maintains high test coverage
-- Follows Vue 3, Pinia, and Vitest best practices
+- Follows DDD, Vue 3, Pinia, and Vitest best practices
+- Supports monorepo architecture with multiple packages
 
 ## Test Environment Setup
 
-### Configuration (vitest.config.ts)
+### Core Package Configuration (packages/core/vitest.config.ts)
 ```typescript
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'node',
+    coverage: {
+      provider: 'istanbul',
+      reporter: ['text', 'json', 'html'],
+      all: true,
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.d.ts', 'src/**/*.test.ts', 'src/**/*.spec.ts']
+    },
+    include: ['src/**/*.{test,spec}.ts']
+  }
+})
+```
+
+### UI Package Configuration (packages/ui/vitest.config.ts)
+```typescript
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+      '@cv': resolve(__dirname, './src/modules/cv'),
+      '@shared': resolve(__dirname, './src/components/shared'),
+      '@stores': resolve(__dirname, './src/stores'),
+      '@composables': resolve(__dirname, './src/composables')
+    }
+  },
   test: {
     globals: true,
-    environment: "jsdom",
-    setupFiles: ["./vitest.setup.ts"],
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+    include: [
+      'src/**/*.{test,spec}.{js,ts}',
+      'src/**/__tests__/*.{js,ts}'
+    ],
+    exclude: ['e2e/**/*', 'node_modules/**/*'],
     coverage: {
-      provider: "istanbul",
-      reporter: ["text", "json", "html"],
+      provider: 'istanbul',
+      reporter: ['text', 'json', 'html'],
       all: true,
-      include: ["src/**/*.{ts,vue}"],
-      exclude: ["**/*.d.ts", "**/*.test.ts", "**/*.spec.ts", "e2e/**/*"],
-    },
-    include: ["src/**/*.{test,spec}.{js,ts}"],
-    exclude: ["e2e/**/*", "node_modules/**/*"],
-  },
-});
+      include: ['src/**/*.{vue,ts}'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/**/*.test.ts',
+        'src/**/*.spec.ts',
+        'src/main.ts',
+        'src/types/**/*'
+      ]
+    }
+  }
+})
 ```
 
-### Setup File (vitest.setup.ts)
-```typescript
-import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/vue';
-import { afterEach } from 'vitest';
+## DDD Testing Patterns
 
-afterEach(() => {
-  cleanup();
-});
+### 1. Domain Layer Testing
+
+#### Value Objects Test Pattern
+```typescript
+// Phone.spec.ts
+describe('Phone Value Object', () => {
+  describe('create', () => {
+    it('should create a valid Phone with international format', () => {
+      const result = Phone.create('+33612345678')
+      expect(result.isSuccess).toBe(true)
+      if (!result.isSuccess) return
+      const phone = result.getValue()
+      expect(phone.toString()).toBe('+33612345678')
+    })
+
+    it('should fail with invalid phone format', () => {
+      const result = Phone.create('invalid-phone')
+      expect(result.isFailure).toBe(true)
+      if (!result.isFailure) return
+      expect(result.error).toContain('Format de téléphone invalide')
+    })
+  })
+
+  describe('format', () => {
+    it('should format international number correctly', () => {
+      const phone = Phone.create('+33612345678').getValue()
+      expect(phone.format()).toBe('+33 61 23 45 67')
+    })
+  })
+})
 ```
 
-## TDD Workflow
-
-### 1. Store Testing Pattern
-
-#### Store Test Structure
+#### Entity Test Pattern
 ```typescript
-import { Resume } from "@cv-generator/core/src/domain/entities/Resume";
-import type { Resume as ResumeType } from "@cv-generator/shared/src/types/resume";
-import { createPinia, setActivePinia } from "pinia";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+// Resume.spec.ts
+describe('Resume Entity', () => {
+  describe('create', () => {
+    it('should create a valid Resume', () => {
+      const result = Resume.create({
+        basics: {
+          name: 'John Doe',
+          email: 'john@example.com'
+        }
+      })
+      expect(result.isValid).toBe(true)
+      expect(result.resume).toBeDefined()
+    })
 
-// Mock des dépendances
-const mockRepository = {
-  load: vi.fn(),
-  save: vi.fn(),
-  export: vi.fn(),
-  import: vi.fn(),
-};
+    it('should validate email format', () => {
+      const result = Resume.create({
+        basics: {
+          name: 'John Doe',
+          email: 'invalid-email'
+        }
+      })
+      expect(result.isValid).toBe(false)
+      expect(result.errors).toContain('Format email invalide')
+    })
+  })
+})
+```
 
-// Mock de la classe Resume
-vi.mock("@cv-generator/core/src/domain/entities/Resume", () => ({
-  Resume: {
-    create: (data: ResumeType) => ({
-      isValid: true,
-      resume: {
-        ...data,
-        toJSON: () => ({ ...data }),
-        get basics() {
-          return { ...data.basics };
-        },
-        get work() {
-          return [...(data.work || [])];
-        },
-        get education() {
-          return [...(data.education || [])];
-        },
-        get skills() {
-          return [...(data.skills || [])];
-        },
-      },
-    }),
-  },
-}));
+### 2. Application Layer Testing
 
-describe("Resume Store", () => {
+#### Use Case Test Pattern
+```typescript
+// ManageResume.spec.ts
+describe('ManageResume Use Case', () => {
+  const mockRepository = {
+    load: vi.fn(),
+    save: vi.fn(),
+    export: vi.fn(),
+    import: vi.fn()
+  }
+
+  const useCase = new ManageResume(mockRepository)
+
   beforeEach(() => {
-    setActivePinia(createPinia());
-    vi.clearAllMocks();
-  });
+    vi.clearAllMocks()
+  })
 
-  // Tests...
-});
+  describe('createResume', () => {
+    it('should create and save a valid resume', async () => {
+      const data = {
+        basics: {
+          name: 'John Doe',
+          email: 'john@example.com'
+        }
+      }
+
+      await useCase.createResume(data)
+
+      expect(mockRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining(data)
+      )
+    })
+  })
+})
 ```
 
-### 2. Test Cases Pattern
+### 3. Infrastructure Layer Testing
 
-#### Success Case Pattern
+#### Repository Test Pattern
 ```typescript
-it("should load resume successfully", async () => {
-  const store = useResumeStore();
-  const mockResume = createMockResume();
-  mockRepository.load.mockResolvedValue(mockResume);
+// LocalStorageResumeRepository.spec.ts
+describe('LocalStorageResumeRepository', () => {
+  const repository = new LocalStorageResumeRepository()
 
-  await store.loadResume();
+  beforeEach(() => {
+    localStorage.clear()
+  })
 
-  expect(store.resume).toEqual(mockResume);
-  expect(store.loading).toBe(false);
-  expect(store.error).toBeNull();
-  expect(mockRepository.load).toHaveBeenCalledTimes(1);
-});
+  describe('save', () => {
+    it('should save resume to localStorage', async () => {
+      const data = {
+        basics: {
+          name: 'John Doe',
+          email: 'john@example.com'
+        }
+      }
+
+      await repository.save(data)
+
+      const stored = JSON.parse(localStorage.getItem('resume') || '')
+      expect(stored).toEqual(data)
+    })
+  })
+})
 ```
 
-#### Error Case Pattern
+### 4. UI Layer Testing
+
+#### Store Test Pattern
 ```typescript
-it("should handle load error", async () => {
-  const store = useResumeStore();
-  const error = new Error("Load failed");
-  mockRepository.load.mockRejectedValue(error);
+// resume.spec.ts
+describe('Resume Store', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+  })
 
-  await store.loadResume();
+  describe('loadResume', () => {
+    it('should load resume successfully', async () => {
+      const store = useResumeStore()
+      const mockResume = createMockResume()
+      mockRepository.load.mockResolvedValue(mockResume)
 
-  expect(store.resume).toBeNull();
-  expect(store.loading).toBe(false);
-  expect(store.error).toBe(error);
-  expect(mockRepository.load).toHaveBeenCalledTimes(1);
-});
+      await store.loadResume()
+
+      expect(store.resume).toEqual(mockResume)
+      expect(store.loading).toBe(false)
+      expect(store.error).toBeNull()
+    })
+  })
+})
 ```
 
-#### Non-Error Case Pattern
+#### Component Test Pattern
 ```typescript
-it("should handle non-Error load error", async () => {
-  const store = useResumeStore();
-  mockRepository.load.mockRejectedValue("Invalid resume");
+// ResumeForm.spec.ts
+describe('ResumeForm.vue', () => {
+  it('should emit save event with valid data', async () => {
+    const wrapper = mount(ResumeForm, {
+      global: {
+        plugins: [createTestingPinia()]
+      }
+    })
 
-  await store.loadResume();
+    await wrapper.find('[data-test="name-input"]').setValue('John Doe')
+    await wrapper.find('[data-test="email-input"]').setValue('john@example.com')
+    await wrapper.find('form').trigger('submit')
 
-  expect(store.resume).toBeNull();
-  expect(store.loading).toBe(false);
-  expect(store.error).toBeInstanceOf(Error);
-  expect(store.error?.message).toBe("Failed to load resume");
-});
-```
-
-### 3. Component Testing Pattern
-
-#### Component Test Structure
-```typescript
-import { render, screen } from "@testing-library/vue";
-import { describe, expect, it } from "vitest";
-import App from "../App.vue";
-
-describe("App.vue", () => {
-  it("should render the CV Generator title", () => {
-    render(App);
-    expect(screen.getByText("CV Generator")).toBeInTheDocument();
-  });
-
-  it("should render the ResumeForm component", () => {
-    render(App);
-    expect(document.querySelector(".min-h-screen")).toBeInTheDocument();
-  });
-});
+    expect(wrapper.emitted('save')).toBeTruthy()
+    expect(wrapper.emitted('save')[0][0]).toEqual({
+      basics: {
+        name: 'John Doe',
+        email: 'john@example.com'
+      }
+    })
+  })
+})
 ```
 
 ## Testing Standards
@@ -187,10 +277,12 @@ describe("App.vue", () => {
 - NEVER commit code without tests
 - NEVER skip unit tests for business logic
 - NEVER write tests after implementation
+- ALWAYS follow DDD layer testing patterns
 - ALWAYS maintain minimum coverage:
-  - Stores: 100%
-  - Components: > 90%
-  - Utils: 100%
+  - Domain Layer: 100%
+  - Application Layer: 100%
+  - Infrastructure Layer: > 90%
+  - UI Layer: > 90%
 </critical>
 
 ### Test Organization
@@ -201,23 +293,38 @@ describe("App.vue", () => {
 - Mock external dependencies
 - Use beforeEach for common setup
 - Clear mocks between tests
+- Respect DDD layer boundaries in tests
 
 ### Mock Data Pattern
 ```typescript
-const mockResumeData: ResumeType = {
+// Domain Layer Mock
+const mockResumeData: ResumeInterface = {
   basics: {
-    name: "John Doe",
-    email: "john@example.com",
-  },
-  work: [],
-  education: [],
-  skills: [],
-};
+    name: 'John Doe',
+    email: 'john@example.com'
+  }
+}
 
-const createMockResume = () => {
-  const { resume } = Resume.create(mockResumeData);
-  return resume as Resume;
-};
+// Application Layer Mock
+const mockRepository: ResumeRepository = {
+  load: vi.fn(),
+  save: vi.fn(),
+  export: vi.fn(),
+  import: vi.fn()
+}
+
+// UI Layer Mock
+vi.mock('@cv-generator/core', () => ({
+  Resume: {
+    create: (data: ResumeInterface) => ({
+      isValid: true,
+      resume: {
+        ...data,
+        toJSON: () => ({ ...data })
+      }
+    })
+  }
+}))
 ```
 
 ## Best Practices
@@ -235,47 +342,14 @@ const createMockResume = () => {
 - Clear mocks between tests with vi.clearAllMocks()
 - Use proper type imports
 - Separate type and value imports
-
-## Examples
-
-<example>
-// Good Practice - Store Test
-describe("saveResume", () => {
-  it("should save resume successfully", async () => {
-    const store = useResumeStore();
-    const mockResume = createMockResume();
-
-    mockRepository.save.mockResolvedValue(undefined);
-
-    await store.saveResume(mockResume);
-
-    expect(store.resume).toEqual(mockResume);
-    expect(store.loading).toBe(false);
-    expect(store.error).toBeNull();
-    expect(mockRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining(mockResumeData)
-    );
-  });
-});
-</example>
-
-<example type="invalid">
-// Poor Practice - Store Test
-describe("saveResume", () => {
-  it("should save resume", async () => {
-    const store = useResumeStore();
-    // BAD: No proper mock data
-    // BAD: No error handling test
-    // BAD: No loading state check
-    await store.saveResume({} as Resume);
-    expect(store.resume).toBeTruthy();
-  });
-});
-</example>
+- Respect DDD layer boundaries
+- Test error cases thoroughly
 
 ## Performance Standards
-- Unit tests: < 100ms per test
-- Component tests: < 500ms per test
+- Domain Layer tests: < 50ms per test
+- Application Layer tests: < 100ms per test
+- Infrastructure Layer tests: < 200ms per test
+- UI Layer tests: < 500ms per test
 - Full suite: < 2min
 - Watch mode for development
 
@@ -284,3 +358,4 @@ describe("saveResume", () => {
 - Maintain coverage thresholds
 - Regular test maintenance
 - Update tests when requirements change
+- Test all DDD layers independently
