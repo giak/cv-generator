@@ -65,12 +65,31 @@ Story Points: 2 (2 jours de développement humain)
    - ✅ Tests des cas limites et erreurs
    - ✅ Tests de sérialisation JSON
 
-### 2. - [ ] Implémentation du Store
+### 2. - [x] Implémentation du Store
 
-1. - [ ] Créer le store Pinia pour la gestion d'état
-2. - [ ] Implémenter les actions CRUD
-3. - [ ] Ajouter la persistence locale
-4. - [ ] Écrire les tests du store
+1. - [x] Créer le store Pinia pour la gestion d'état
+   - ✅ Configuration du store avec Composition API
+   - ✅ État pour le CV, chargement et erreurs
+   - ✅ Factory pattern pour l'injection des dépendances
+   - ✅ Types TypeScript stricts
+
+2. - [x] Implémenter les actions CRUD
+   - ✅ Action loadResume pour charger le CV
+   - ✅ Action saveResume pour sauvegarder
+   - ✅ Action exportResume pour l'export (JSON, PDF, HTML)
+   - ✅ Action importResume pour l'import de fichiers
+
+3. - [x] Ajouter la persistence locale
+   - ✅ Intégration avec LocalStorageResumeRepository
+   - ✅ Gestion des erreurs de persistence
+   - ✅ Tests d'intégration avec le repository
+
+4. - [x] Écrire les tests du store
+   - ✅ Tests des actions asynchrones
+   - ✅ Mock du repository et des use cases
+   - ✅ Tests des cas d'erreur
+   - ✅ Tests de l'état de chargement
+   - ✅ Coverage 100%
 
 ### 3. - [ ] Développement des Composants
 
@@ -196,3 +215,5 @@ export type BasicsType = z.infer<typeof basicsSchema>;
 - Agent: Création des Value Objects Email et Phone avec leurs tests
 - User: Écriture des tests unitaires du domaine
 - Agent: Création des tests pour l'entité Resume et intégration avec les Value Objects
+- User: Implémentation du store Pinia
+- Agent: Création du store avec tests complets et intégration DDD

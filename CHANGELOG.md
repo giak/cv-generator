@@ -46,6 +46,9 @@ version: 0.1.0
   - Actions pour charger, sauvegarder, exporter et importer
   - Gestion des états de chargement et des erreurs
   - Tests unitaires complets avec mocks
+  - Factory pattern pour l'injection des dépendances
+  - Intégration avec le use case ManageResume
+  - Support complet TypeScript avec types stricts
 
 #### Testing Infrastructure 🧪
 
@@ -62,6 +65,10 @@ version: 0.1.0
   - Mock du repository et des use cases
   - Tests des cas d'erreur
   - Tests de l'état de chargement
+  - Tests d'intégration avec le core package
+  - Tests des formats d'export (JSON, PDF, HTML)
+  - Tests d'import de fichiers
+  - Coverage 100% du store
 
 ### Changed 🔄
 
