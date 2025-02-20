@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: oklch(65% 0.2 142);
+    --primary-light: oklch(75% 0.2 142);
+    --primary-dark: oklch(55% 0.2 142);
+  }
+}
+
+/* Test component */
+@layer components {
+  .test-btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md;
+    background-color: var(--primary);
+    color: white;
+  }
+}
+
+/* Form components */
+@layer components {
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .form-input {
+    @apply block w-full rounded-md border-gray-300 shadow-sm sm:text-sm;
+  }
+
+  .form-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+    outline: none;
+  }
+
+  .form-error {
+    @apply mt-1 text-sm text-red-600;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md;
+    background-color: var(--primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--primary-light);
+  }
+}
