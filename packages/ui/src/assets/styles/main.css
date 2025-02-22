@@ -1,49 +1,65 @@
 @import "tailwindcss";
 
+/* Custom base styles */
 @layer base {
   :root {
-    --primary: oklch(65% 0.2 142);
-    --primary-light: oklch(75% 0.2 142);
-    --primary-dark: oklch(55% 0.2 142);
+    /* Primary colors */
+    --color-primary-400: oklch(70% 0.19 142);
+    --color-primary-500: oklch(65% 0.2 142);
+    --color-primary-600: oklch(60% 0.21 142);
+
+    /* Neutral colors */
+    --color-neutral-50: oklch(98% 0.005 142);
+    --color-neutral-100: oklch(95% 0.01 142);
+    --color-neutral-200: oklch(90% 0.015 142);
+    --color-neutral-300: oklch(85% 0.02 142);
+    --color-neutral-400: oklch(80% 0.025 142);
+    --color-neutral-500: oklch(75% 0.03 142);
+    --color-neutral-600: oklch(65% 0.04 142);
+    --color-neutral-700: oklch(55% 0.05 142);
+    --color-neutral-800: oklch(45% 0.055 142);
+    --color-neutral-900: oklch(35% 0.06 142);
+
+    /* Error colors */
+    --color-error-400: oklch(70% 0.15 30);
+    --color-error-500: oklch(65% 0.2 30);
+    --color-error-600: oklch(55% 0.25 30);
   }
 }
 
-/* Test component */
+/* Custom components */
 @layer components {
-  .test-btn {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md;
-    background-color: var(--primary);
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md transition-colors;
+    background-color: var(--color-primary-500);
     color: white;
   }
-}
-
-/* Form components */
-@layer components {
-  .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+  .btn-primary:hover {
+    background-color: var(--color-primary-400);
+  }
+  .btn-primary:focus {
+    @apply outline-none ring-2;
+    ring-color: var(--color-primary-500);
+    ring-offset-color: white;
   }
 
   .form-input {
-    @apply block w-full rounded-md border-gray-300 shadow-sm sm:text-sm;
+    @apply block w-full rounded-md transition-colors;
+    border-color: var(--color-neutral-300);
+  }
+  .form-input:focus {
+    @apply outline-none ring-2;
+    border-color: var(--color-primary-500);
+    ring-color: var(--color-primary-200);
   }
 
-  .form-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary);
-    outline: none;
+  .form-label {
+    @apply block font-medium;
+    color: var(--color-neutral-700);
   }
 
   .form-error {
-    @apply mt-1 text-sm text-red-600;
-  }
-
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md;
-    background-color: var(--primary);
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background-color: var(--primary-light);
+    @apply mt-1 text-sm;
+    color: var(--color-error-500);
   }
 }

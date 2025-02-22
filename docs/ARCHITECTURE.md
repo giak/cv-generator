@@ -142,8 +142,20 @@ export class Resume {
 │   ├── ui/                    # Presentation layer
 │   │   └── src/
 │   │       ├── components/    # Vue components
-│   │       ├── composables/   # Vue composables
-│   │       └── pages/        # Vue pages/routes
+│   │       │   └── shared/    # Shared components
+│   │       │       └── form/  # Form components
+│   │       │           ├── Form.vue      # Base form component
+│   │       │           └── FormField.vue # Reusable form field
+│   │       ├── modules/       # Feature modules
+│   │       │   └── cv/       # CV module
+│   │       │       └── presentation/
+│   │       │           ├── components/
+│   │       │           │   └── BasicsForm.vue
+│   │       │           └── composables/
+│   │       │               ├── useFieldValidation.ts
+│   │       │               └── useModelUpdate.ts
+│   │       └── stores/       # Pinia stores
+│   │           └── resume.ts
 │   ├── infrastructure/        # Infrastructure layer
 │   │   └── src/
 │   │       ├── repositories/  # Data persistence
@@ -167,10 +179,16 @@ export class Resume {
 #### UI (@cv-generator/ui)
 
 - Composants Vue.js
+  - Composants partagés réutilisables (`Form`, `FormField`)
+  - Composants spécifiques aux modules (`BasicsForm`)
+- Composables pour la logique réutilisable
+  - Validation des champs (`useFieldValidation`)
+  - Gestion du v-model (`useModelUpdate`)
 - Gestion d'état avec Pinia
-- Routing
-- Styles avec Tailwind
-- Internationalisation
+- Styles avec Tailwind CSS v4
+  - Variables CSS pour le theming
+  - Plugins forms, typography, aspect-ratio
+  - Support de l'accessibilité
 
 #### Infrastructure (@cv-generator/infrastructure)
 
@@ -188,20 +206,31 @@ export class Resume {
 
 ## Change Log
 
-| Change                     | Story ID | Description                                           |
-| -------------------------- | -------- | ----------------------------------------------------- |
-| Initial Architecture       | story-1  | Setup initial project structure and core architecture |
-| Core Domain Implementation | story-2  | Implementation of Basics entity with validation       |
-| Remove Barrel Files        | story-2  | Removed index.ts files and updated import conventions |
+| Change                     | Story ID | Description                                                                  |
+| -------------------------- | -------- | ---------------------------------------------------------------------------- |
+| Initial Architecture       | story-1  | Setup initial project structure and core architecture                        |
+| Core Domain Implementation | story-2  | Implementation of Basics entity with validation                              |
+| Remove Barrel Files        | story-2  | Removed index.ts files and updated import conventions                        |
+| Form Components            | story-2  | Added shared form components (Form, FormField) and BasicsForm implementation |
+| Composables                | story-2  | Added validation and model update composables with tests                     |
+| UI Architecture Update     | story-2  | Enhanced component architecture with form validation system                  |
 
 ## Future Considerations
 
-### Scalability
+### Component Library
 
-- Lazy loading des modules
-- Code splitting automatique
-- Optimisation des bundles
-- Caching intelligent
+- Documentation des composants avec Storybook
+- Tests d'accessibilité automatisés
+- Guidelines de design system
+- Support des thèmes personnalisés
+- Validation de formulaire avancée
+
+### Performance
+
+- Lazy loading des composants
+- Optimisation des re-renders
+- Memoization des calculs coûteux
+- Bundle splitting intelligent
 
 ### Security
 

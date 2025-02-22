@@ -1,0 +1,343 @@
+---
+description: ENFORCE Vue.js 3 component creation standards with SOLID principles, composables, and TDD in CV Generator application
+globs: packages/**/*.vue", "packages/**/*.spec.ts", "packages/**/__tests__/*.ts
+alwaysApply: false
+---
+---
+description: ENFORCE Vue.js 3 component creation standards with SOLID principles, composables, and TDD in CV Generator application
+globs: ["packages/**/*.vue", "packages/**/*.spec.ts", "packages/**/__tests__/*.ts"]
+tags: ["vue3", "components", "tdd", "solid", "composables", "clean-architecture", "ddd"]
+priority: 1
+version: 1.1.0
+---
+
+# Vue.js 3 Component Creation Standards
+
+## Context
+- Applied when creating or modifying Vue.js 3 components in CV Generator
+- Ensures consistent implementation of SOLID principles
+- Enforces Test-Driven Development workflow
+- Promotes reusability through composables
+- Follows Clean Architecture and DDD principles
+- Follows KISS (Keep It Simple, Stupid)
+- Adheres to YAGNI (You Aren't Gonna Need It)
+- Respects DRY (Don't Repeat Yourself)
+
+## Technical Requirements
+- Vue.js 3.4+ avec Composition API
+- TypeScript 5.7+
+- Vitest 3+ pour les tests
+- Tailwind CSS 4 pour les styles
+- Pinia pour la gestion d'état
+- Zod pour la validation des schémas
+
+## Component Structure
+
+### File Organization
+```
+modules/
+└── cv/
+    └── presentation/
+        ├── components/
+        │   ├── BasicsForm/
+        │   │   ├── BasicsForm.vue
+        │   │   └── __tests__/
+        │   │       └── BasicsForm.spec.ts
+        │   └── shared/
+        │       └── ValidationMessage.vue
+        └── composables/
+            ├── useValidation.ts
+            └── __tests__/
+                └── useValidation.spec.ts
+```
+
+### Base Template
+```vue
+<script setup lang="ts">
+// 1. Type imports
+import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
+import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type'
+
+// 2. Composable imports
+import { useValidation } from '../composables/useValidation'
+
+// 3. Props interface
+interface Props {
+  modelValue: BasicsInterface
+}
+
+// 4. Props definition
+const props = defineProps<Props>()
+
+// 5. Emits definition
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: BasicsInterface): void
+  (e: 'validate'): void
+}>()
+
+// 6. Composables initialization
+const { errors, validate } = useValidation(props.modelValue)
+
+// 7. Event handlers
+const handleSubmit = async (e: Event) => {
+  e.preventDefault()
+  if (validate()) {
+    emit('validate')
+  }
+}
+</script>
+
+<template>
+  <form
+    data-test="form"
+    class="container mx-auto p-6 space-y-8 bg-[--color-neutral-50] rounded-lg shadow-sm"
+    @submit="handleSubmit"
+  >
+    <!-- Form content -->
+  </form>
+</template>
+```
+
+## Clean Architecture Integration
+
+### Presentation Layer Responsibilities
+<critical>
+- NEVER import directly from domain layer
+- NEVER implement business logic in components
+- ALWAYS use application layer use cases
+- ALWAYS communicate through interfaces
+- KEEP components focused on UI concerns
+</critical>
+
+### Layer Dependencies
+```typescript
+// ✅ Good - Proper layer dependencies
+import type { BasicsInterface } from '@cv-generator/shared/src/types'
+import { useManageResume } from '@cv-generator/core'
+
+// ❌ Bad - Breaking layer boundaries
+import { Resume } from '@cv-generator/core/src/domain/entities/Resume'
+```
+
+## SOLID Principles Implementation
+
+### Single Responsibility (S)
+<critical>
+- NEVER mix business logic with presentation
+- ALWAYS extract complex logic to composables
+- KEEP components focused on UI concerns
+- LIMIT component responsibilities
+</critical>
+
+### Open/Closed (O)
+```typescript
+// ✅ Good - Extensible through props and slots
+interface Props {
+  variant?: 'primary' | 'secondary'
+  size?: 'sm' | 'md' | 'lg'
+  theme?: ThemeInterface
+}
+
+// ❌ Bad - Hard-coded behavior
+const style = {
+  backgroundColor: 'blue',
+  size: '16px'
+}
+```
+
+### Liskov Substitution (L)
+```typescript
+// ✅ Good - Consistent interface
+interface InputPropsInterface {
+  modelValue: string
+  label: string
+  error?: string
+}
+
+// ❌ Bad - Inconsistent behavior
+interface TextInputPropsInterface extends InputPropsInterface {
+  modelValue: number // Breaking parent contract
+}
+```
+
+### Interface Segregation (I)
+```typescript
+// ✅ Good - Specific interfaces
+interface ValidationPropsInterface {
+  rules?: ValidationRuleInterface[]
+}
+
+interface StylePropsInterface {
+  theme?: ThemeInterface
+}
+
+// ❌ Bad - Monolithic interface
+interface PropsInterface {
+  rules?: ValidationRuleInterface[]
+  theme?: ThemeInterface
+  api?: ApiConfigInterface
+}
+```
+
+### Dependency Inversion (D)
+```typescript
+// ✅ Good - Depends on abstractions
+interface PropsInterface {
+  validator: ValidatorInterface
+}
+
+// ❌ Bad - Concrete implementations
+import { EmailValidator } from './EmailValidator'
+```
+
+## Composables Guidelines
+
+### Structure
+```typescript
+// useFeature.ts
+export function useFeature(props: Props, emit: EmitFn) {
+  // 1. State
+  const state = ref<StateType>()
+
+  // 2. Computed
+  const computed = computed(() => {})
+
+  // 3. Methods
+  const methods = {
+    handleAction() {}
+  }
+
+  // 4. Watchers
+  watch(props, () => {})
+
+  // 5. Lifecycle hooks
+  onMounted(() => {})
+
+  return {
+    ...toRefs(state),
+    ...methods
+  }
+}
+```
+
+### Testing
+```typescript
+// useFeature.spec.ts
+describe('useFeature', () => {
+  it('should initialize with default state', () => {
+    const { state } = useFeature()
+    expect(state.value).toBeDefined()
+  })
+
+  it('should react to prop changes', async () => {
+    const props = ref({ value: 'initial' })
+    const { state } = useFeature(props)
+    
+    props.value = 'updated'
+    await nextTick()
+    expect(state.value).toBe('updated')
+  })
+})
+```
+
+## TDD Workflow
+
+### 1. Test First
+```typescript
+// component.spec.ts
+describe('Component', () => {
+  it('should render with required props', () => {
+    const wrapper = mount(Component, {
+      props: { required: 'value' }
+    })
+    expect(wrapper.find('[data-test="root"]').exists()).toBe(true)
+  })
+})
+```
+
+### 2. Implementation
+```vue
+<script setup lang="ts">
+const props = defineProps<{
+  required: string
+}>()
+</script>
+
+<template>
+  <div data-test="root">
+    {{ required }}
+  </div>
+</template>
+```
+
+### 3. Refactor
+```typescript
+// Extract to composable
+export function useComponent(props: Props) {
+  // Refactored logic
+  return {
+    // Component logic
+  }
+}
+```
+
+## Best Practices
+
+### Component Organization
+<critical>
+- ALWAYS use TypeScript with strict mode
+- ALWAYS write tests first (TDD)
+- ALWAYS use composables for logic
+- ALWAYS follow naming conventions
+- NEVER mix business logic in components
+- NEVER use barrel imports
+- KEEP components small and focused
+- USE data-test attributes for testing
+</critical>
+
+### Performance
+```typescript
+// ✅ Good - Memoized computation
+const computed = computed(() => expensiveOperation(props.value))
+
+// ❌ Bad - Recalculated every render
+const value = expensiveOperation(props.value)
+```
+
+### Accessibility
+```vue
+<template>
+  <!-- ✅ Good - Accessible form -->
+  <form @submit="handleSubmit">
+    <label :for="id">{{ label }}</label>
+    <input
+      :id="id"
+      :aria-describedby="error ? `${id}-error` : undefined"
+      v-bind="$attrs"
+    />
+    <p v-if="error" :id="`${id}-error`" role="alert">
+      {{ error }}
+    </p>
+  </form>
+</template>
+```
+
+## Critical Rules
+<critical>
+- NEVER skip writing tests
+- NEVER mix business logic with presentation
+- NEVER use any type without explicit reason
+- NEVER use barrel imports
+- NEVER break layer boundaries
+- ALWAYS write tests first (TDD)
+- ALWAYS use TypeScript with strict mode
+- ALWAYS extract complex logic to composables
+- ALWAYS provide proper types for props and emits
+- ALWAYS use data-test attributes
+- ALWAYS follow SOLID principles
+- ALWAYS follow Clean Architecture principles
+- ALWAYS keep components simple (KISS)
+- ALWAYS use proper naming conventions
+- ONLY add features that are needed (YAGNI)
+- AVOID duplicating code (DRY)
+</critical>

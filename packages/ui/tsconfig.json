@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@ui/*": ["src/*"],
+      "@ui/components/*": ["src/components/*"],
+      "@ui/shared/*": ["src/components/shared/*"],
+      "@ui/modules/*": ["src/modules/*"],
+      "@ui/utils/*": ["src/utils/*"],
+      "@ui/types/*": ["src/types/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+} 

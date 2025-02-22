@@ -1,13 +1,14 @@
 ---
 description: ENFORCE Tailwind CSS v4 standards and best practices in Vue 3 components to ensure consistent, maintainable, and performant UI
 globs: src/**/*.{vue,ts,js}
+alwaysApply: false
 ---
 ---
 description: ENFORCE Tailwind CSS v4 standards and best practices in Vue 3 components to ensure consistent, maintainable, and performant UI
 globs: ["packages/ui/**/*.vue", "packages/ui/**/*.css"]
 tags: ["vue", "tailwind", "ui", "css"]
 priority: 1
-version: 1.1.0
+version: 1.2.0
 ---
 
 # Tailwind CSS v4 with Vue 3 Standards
@@ -103,148 +104,118 @@ export default defineConfig({
 }
 ```
 
+## CSS Variables Usage
+
+### Correct Syntax
+- ALWAYS use `var()` function when referencing CSS variables in Tailwind classes
+- Format: `class="bg-[var(--color-name)]"`
+- Apply to all color utilities (bg, text, border, ring, etc.)
+
+```vue
+<!-- ✅ Correct Usage -->
+<div class="bg-[var(--color-primary-500)] text-[var(--color-neutral-900)]">
+  <p class="border-[var(--color-neutral-200)]">Content</p>
+</div>
+
+<!-- ❌ Incorrect Usage -->
+<div class="bg-[--color-primary-500] text-[--color-neutral-900]">
+  <p class="border-[--color-neutral-200]">Content</p>
+</div>
+```
+
+### Variable Definition
+```css
+/* Custom base styles */
+@layer base {
+  :root {
+    /* Use oklch for better color science */
+    --color-primary-500: oklch(65% 0.2 142);
+    --color-primary-400: oklch(70% 0.19 142);
+  }
+}
+```
+
+## Critical Rules
+<critical>
+- NEVER use CSS variables without var() function in Tailwind classes
+- NEVER use direct color values, use CSS custom properties with var()
+- NEVER use @apply with color utilities
+- ALWAYS use var() syntax when referencing CSS variables
+- ALWAYS format as bg-[var(--color-name)]
+- ALWAYS use CSS variables for theming
+- ALWAYS use modern color formats (oklch)
+- ALWAYS test color contrast with var() syntax
+- ALWAYS follow consistent var() syntax across components
+</critical>
+
+## Examples
+
+<example>
+// Good Implementation with var() syntax
+<template>
+  <div class="rounded-lg bg-[var(--color-neutral-50)] p-6">
+    <h2 class="text-2xl font-semibold text-[var(--color-primary-500)]">
+      Title
+    </h2>
+    <button class="bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-400)]">
+      Action
+    </button>
+  </div>
+</template>
+</example>
+
+<example type="invalid">
+// Poor Implementation - Avoid
+<template>
+  <div class="rounded-lg bg-[--color-neutral-50] p-6">
+    <!-- INCORRECT: Missing var() syntax -->
+    <h2 class="text-2xl font-semibold text-[--color-primary-500]">
+      Title
+    </h2>
+    <button class="bg-[--color-primary-500] hover:bg-[--color-primary-400]">
+      Action
+    </button>
+  </div>
+</template>
+</example>
+
 ## Component Requirements
 
 ### Base Component Structure
 - Use `<script setup lang="ts">` for composition API
 - Define proper TypeScript interfaces for props
 - Implement proper event handling with typed emits
-- Use Tailwind utility classes for styling
+- Use Tailwind utility classes with proper var() syntax
 - Follow atomic design principles
 - Import types from shared package
 
 ### Styling Guidelines
 - Use Tailwind utility classes as primary styling method
+- Use `var()` syntax for all CSS variable references
 - Group utility classes in logical order:
   1. Layout (display, position)
   2. Box Model (margin, padding)
   3. Typography
-  4. Visual (colors, borders)
+  4. Visual (colors with var() syntax)
   5. Interactive States
-- Use CSS custom properties for theme values
-- Implement color-contrast utilities
 
-### Responsive Design
-- Use container queries when possible
-- Implement mobile-first approach
-- Use modern viewport units (dvh, svh, lvh)
-- Support dynamic viewport changes
-
-### Theme System
-- Use CSS custom properties for theming
-- Implement color schemes with `prefers-color-scheme`
+## Theme System
+- Use CSS custom properties with var() syntax
+- Implement color schemes with proper var() references
 - Support high contrast mode
 - Use modern color formats (oklch, color-mix)
-
-## Examples
-
-<example>
-// Good Component Implementation (packages/ui/src/modules/cv/presentation/components/ResumeForm.vue)
-<script setup lang="ts">
-import type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface'
-import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type'
-
-interface Props {
-  resume: ResumeInterface
-  validation?: ValidationResultType
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<{
-  (e: 'update', value: Partial<ResumeInterface>): void
-  (e: 'validate'): void
-}>()
-</script>
-
-<template>
-  <form
-    class="container mx-auto p-6 space-y-8 bg-[--color-neutral-50] rounded-lg shadow-sm"
-    @submit.prevent="emit('validate')"
-  >
-    <div class="space-y-4">
-      <label class="block">
-        <span class="text-[--color-neutral-700] font-medium">Name</span>
-        <input
-          v-model="resume.basics.name"
-          type="text"
-          class="mt-1 block w-full rounded-md border-[--color-neutral-300] focus:border-[--color-primary-500] focus:ring focus:ring-[--color-primary-200]"
-          @input="emit('update', { basics: { name: $event.target.value } })"
-        />
-      </label>
-    </div>
-  </form>
-</template>
-</example>
-
-<example type="invalid">
-// Poor Implementation - Avoid
-<script>
-export default {
-  props: ['resume'],
-  methods: {
-    update(value) {
-      // INCORRECT: No type safety
-      this.$emit('update', value)
-    }
-  }
-}
-</script>
-
-<template>
-  <form style="padding: 20px;">
-    <!-- INCORRECT: Inline styles -->
-    <input class="input" v-model="resume.name" />
-  </form>
-</template>
-
-<style>
-/* INCORRECT: Direct usage of @apply with colors */
-.input {
-  @apply bg-gray-100 text-gray-800;
-}
-</style>
-</example>
-
-## Critical Rules
-<critical>
-- NEVER use inline styles
-- NEVER use direct color values, use CSS custom properties
-- NEVER use @apply without clear necessity
-- NEVER mix different styling methodologies
-- NEVER hardcode theme values
-- ALWAYS use CSS custom properties for theming
-- ALWAYS use container queries when possible
-- ALWAYS use modern color formats
-- ALWAYS implement proper color contrasts
-- ALWAYS use semantic HTML elements
-- ALWAYS use proper viewport units
-- ALWAYS test in different color schemes
-- NEVER use @apply with color utilities (bg-*, text-*, border-*, etc.)
-- ALWAYS define colors as CSS variables in @layer base
-- ALWAYS use CSS variables for colors in components
-- ALWAYS use @apply for non-color utilities only
-- ALWAYS use modern color formats (oklch)
-- ALWAYS implement proper color contrasts
-- ALWAYS test in different color schemes
-- ALWAYS import types from shared package
-- ALWAYS use typed props and emits
-- ALWAYS follow monorepo import conventions
-</critical>
 
 ## Performance Optimization
 - Use modern CSS features
 - Implement proper view transitions
 - Use container queries for modularity
 - Optimize for Core Web Vitals
-- Implement proper CSS layers
-- Use modern image formats
-- Enable proper caching strategies
-- Use CSS variables for dynamic color values
+- Use CSS variables with var() syntax for dynamic values
 
 ## Accessibility Requirements
 - Maintain WCAG 2.2 AAA compliance
 - Support reduced-motion preferences
-- Implement proper color contrasts
+- Test color contrasts with var() syntax
 - Support forced-colors mode
 - Test with screen readers
 - Support keyboard navigation

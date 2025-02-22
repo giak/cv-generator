@@ -1,0 +1,103 @@
+---
+description: ENFORCE alias configuration standards in monorepo packages for consistent import paths
+globs: ["**/vite.config.ts", "**/vitest.config.ts", "**/tsconfig.json"]
+alwaysApply: false
+---
+
+# Alias Configuration Standards
+
+## Context
+- Applied in monorepo package configuration files
+- Ensures consistent import path resolution
+- Prevents import conflicts between packages
+- Maintains clean and maintainable imports
+
+## Requirements
+
+### Package-Specific Prefix
+<critical>
+- ALWAYS prefix aliases with package name (e.g., `@ui/`)
+- NEVER use generic aliases (e.g., `@/`)
+- MUST use consistent prefix across all config files
+</critical>
+
+### Directory Mapping
+```typescript
+// ✅ Correct - Point to directories
+{
+  "@ui/*": ["src/*"],
+  "@ui/components/*": ["src/components/*"]
+}
+
+// ❌ Incorrect - Point to specific files
+{
+  "@ui": ["src/index.ts"],
+  "@ui/form": ["src/components/form/Form.vue"]
+}
+```
+
+### Configuration Alignment
+- MUST maintain parallel structure in vite.config.ts and tsconfig.json
+- MUST use resolve() in Vite configs
+- SHOULD group related paths together
+
+## Examples
+
+<example>
+// ✅ Good Configuration
+// tsconfig.json
+{
+  "paths": {
+    "@ui/*": ["src/*"],
+    "@ui/components/*": ["src/components/*"],
+    "@ui/shared/*": ["src/components/shared/*"],
+    "@ui/modules/*": ["src/modules/*"]
+  }
+}
+
+// vite.config.ts
+resolve: {
+  alias: {
+    '@ui': resolve(__dirname, 'src'),
+    '@ui/components': resolve(__dirname, 'src/components'),
+    '@ui/shared': resolve(__dirname, 'src/components/shared'),
+    '@ui/modules': resolve(__dirname, 'src/modules')
+  }
+}
+
+// vitest.config.ts
+import { defineConfig } from 'vitest/config'
+import { resolve } from 'path'
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@ui': resolve(__dirname, 'src'),
+      '@ui/components': resolve(__dirname, 'src/components'),
+      '@ui/shared': resolve(__dirname, 'src/components/shared'),
+      '@ui/modules': resolve(__dirname, 'src/modules')
+    }
+  },
+  test: {
+    // ... configuration des tests
+  }
+})
+</example>
+
+<example type="invalid">
+// ❌ Bad Configuration
+// Mixing styles, inconsistent naming
+{
+  "@/*": ["src/*"],
+  "@ui-components": ["src/components/index.ts"],
+  "shared": ["src/shared"],
+  "@ui/utils.ts": ["src/utils/index.ts"]
+}
+</example>
+
+## Benefits
+- Clear package boundaries
+- Improved IDE support
+- Simplified refactoring
+- Prevents import conflicts
+- Better maintainability

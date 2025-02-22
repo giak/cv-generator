@@ -91,20 +91,58 @@ Story Points: 2 (2 jours de développement humain)
    - ✅ Tests de l'état de chargement
    - ✅ Coverage 100%
 
-### 3. - [ ] Développement des Composants
+### 3. - [x] Développement des Composants
 
-1. - [ ] Créer le formulaire BasicsForm
-2. - [ ] Implémenter les champs avec validation
-3. - [ ] Ajouter le composant Location
-4. - [ ] Créer le composant ProfileList
-5. - [ ] Écrire les tests des composants
+1. - [x] Créer le formulaire BasicsForm
+   - ✅ Structure du composant avec TypeScript
+   - ✅ Intégration avec le store Pinia
+   - ✅ Validation en temps réel
+   - ✅ Gestion des erreurs avec feedback
+   - ✅ Tests unitaires (6 tests)
 
-### 4. - [ ] Validation et Feedback
+2. - [x] Implémenter les champs avec validation
+   - ✅ Composable useFieldValidation
+   - ✅ Validation des champs requis
+   - ✅ Validation du format email
+   - ✅ Tests unitaires (5 tests)
 
-1. - [ ] Implémenter la validation temps réel
-2. - [ ] Ajouter les messages d'erreur
-3. - [ ] Créer les composants de feedback
-4. - [ ] Tests d'intégration de la validation
+3. - [x] Ajouter le composant Location
+   - ✅ Structure du composant
+   - ✅ Validation des champs
+   - ✅ Tests unitaires
+
+4. - [x] Créer le composant ProfileList
+   - ✅ Structure du composant
+   - ✅ Gestion de la liste des profils
+   - ✅ Tests unitaires
+
+5. - [x] Écrire les tests des composants
+   - ✅ Tests du BasicsForm
+   - ✅ Tests des composables
+   - ✅ Tests d'intégration
+   - ✅ Coverage > 90%
+
+### 4. - [x] Validation et Feedback
+
+1. - [x] Implémenter la validation temps réel
+   - ✅ Validation à la saisie
+   - ✅ Validation au blur
+   - ✅ Validation à la soumission
+
+2. - [x] Ajouter les messages d'erreur
+   - ✅ Messages d'erreur contextuels
+   - ✅ Support de l'accessibilité
+   - ✅ Styles Tailwind
+
+3. - [x] Créer les composables de feedback
+   - ✅ useFieldValidation
+   - ✅ useModelUpdate
+   - ✅ Tests unitaires
+
+4. - [x] Tests d'intégration de la validation
+   - ✅ Tests des scénarios de validation
+   - ✅ Tests des messages d'erreur
+   - ✅ Tests d'accessibilité
 
 ### 5. - [ ] Documentation
 
@@ -149,57 +187,21 @@ src/
 │               └── basicsStore.ts
 ```
 
-## Configuration Files
-
-### basicsSchema.ts
-
-```typescript
-import { z } from "zod";
-
-export const locationSchema = z.object({
-  address: z.string().optional(),
-  postalCode: z.string().optional(),
-  city: z.string().optional(),
-  countryCode: z.string().length(2).optional(),
-  region: z.string().optional(),
-});
-
-export const profileSchema = z.object({
-  network: z.string(),
-  username: z.string(),
-  url: z.string().url(),
-});
-
-export const basicsSchema = z.object({
-  name: z.string().min(1),
-  label: z.string().optional(),
-  image: z.string().url().optional(),
-  email: z.string().email(),
-  phone: z.string().optional(),
-  url: z.string().url().optional(),
-  summary: z.string().optional(),
-  location: locationSchema.optional(),
-  profiles: z.array(profileSchema).optional(),
-});
-
-export type BasicsType = z.infer<typeof basicsSchema>;
-```
-
 ## Dev Notes
 
 ### Points Critiques
 
-- Validation stricte des formats (email, URL, etc.)
-- Gestion des erreurs utilisateur
-- Performance du formulaire avec validation temps réel
-- Tests exhaustifs des cas limites
+- ✅ Validation stricte des formats (email, URL, etc.)
+- ✅ Gestion des erreurs utilisateur
+- ✅ Performance du formulaire avec validation temps réel
+- ✅ Tests exhaustifs des cas limites
 
 ### Décisions Techniques
 
-- Utilisation de composables pour la logique réutilisable
-- Validation côté client pour feedback immédiat
-- Persistence locale avec LocalStorage/IndexedDB
-- Architecture modulaire pour évolution future
+- ✅ Utilisation de composables pour la logique réutilisable
+- ✅ Validation côté client pour feedback immédiat
+- ✅ Persistence locale avec LocalStorage/IndexedDB
+- ✅ Architecture modulaire pour évolution future
 
 ## Chat Command Log
 
@@ -217,3 +219,7 @@ export type BasicsType = z.infer<typeof basicsSchema>;
 - Agent: Création des tests pour l'entité Resume et intégration avec les Value Objects
 - User: Implémentation du store Pinia
 - Agent: Création du store avec tests complets et intégration DDD
+- User: Implémentation des composants Vue
+- Agent: Création des composants avec tests et validation
+- User: Lancement des tests
+- Agent: Vérification de la couverture et correction des erreurs

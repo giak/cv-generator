@@ -1,26 +1,35 @@
-import tailwindcss from "@tailwindcss/vite";
-import vue from "@vitejs/plugin-vue";
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
+import { resolve } from 'path'
 
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [
+    vue(),
+    tailwindcss(),
+  ],
   resolve: {
     alias: {
-      "@": "/src",
+      '@ui': resolve(__dirname, 'src'),
+      '@ui/components': resolve(__dirname, 'src/components'),
+      '@ui/shared': resolve(__dirname, 'src/components/shared'),
+      '@ui/modules': resolve(__dirname, 'src/modules'),
+      '@ui/utils': resolve(__dirname, 'src/utils'),
+      '@ui/types': resolve(__dirname, 'src/types')
     },
   },
   optimizeDeps: {
-    exclude: ["@cv-generator/core", "@cv-generator/infrastructure", "@cv-generator/shared"],
+    exclude: ['@cv-generator/core', '@cv-generator/infrastructure', '@cv-generator/shared'],
   },
   build: {
-    target: "esnext",
+    target: 'esnext',
     rollupOptions: {
       output: {
-        format: "esm",
+        format: 'esm',
       },
     },
   },
   worker: {
-    format: "es",
+    format: 'es',
   },
-});
+})
