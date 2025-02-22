@@ -21,7 +21,8 @@ export const useResumeStore = defineStore("resume", () => {
     loading.value = true;
     error.value = null;
     try {
-      resume.value = await useCase.loadResume();
+      const result = await useCase.loadResume();
+      resume.value = result;
     } catch (err) {
       console.error("Failed to load resume:", err);
       error.value = err instanceof Error ? err : new Error("Failed to load resume");
@@ -48,29 +49,37 @@ export const useResumeStore = defineStore("resume", () => {
     }
   }
 
-  async function exportResume(format: "json" | "pdf" | "html") {
-    if (loading.value) return;
+  async function exportResume(format: "json" | "pdf" | "html"): Promise<Blob> {
+    if (loading.value) return Promise.reject(new Error("Operation in progress"));
     
     loading.value = true;
     error.value = null;
     try {
-      return await useCase.exportResume(format);
+      const result = await useCase.exportResume(format);
+      if (!result) {
+        throw new Error("Failed to export resume");
+      }
+      return result;
     } catch (err) {
-      console.error(`Failed to export resume as ${format}:`, err);
-      error.value = err instanceof Error ? err : new Error(`Failed to export resume as ${format}`);
+      console.error("Failed to export resume:", err);
+      error.value = err instanceof Error ? err : new Error("Failed to export resume");
       throw error.value;
     } finally {
       loading.value = false;
     }
   }
 
-  async function importResume(file: Blob) {
-    if (loading.value) return;
+  async function importResume(file: File) {
+    if (loading.value) return Promise.reject(new Error("Operation in progress"));
     
     loading.value = true;
     error.value = null;
     try {
-      resume.value = await useCase.importResume(file);
+      const result = await useCase.importResume(file);
+      if (!result) {
+        throw new Error("Failed to import resume");
+      }
+      resume.value = result;
     } catch (err) {
       console.error("Failed to import resume:", err);
       error.value = err instanceof Error ? err : new Error("Failed to import resume");
@@ -79,9 +88,6 @@ export const useResumeStore = defineStore("resume", () => {
       loading.value = false;
     }
   }
-
-  // Charger les données immédiatement
-  loadResume();
 
   return {
     resume,

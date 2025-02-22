@@ -11,14 +11,24 @@ const mockRepository = {
   import: vi.fn(),
 };
 
+// Mock du résumé complet
+const mockResumeData: ResumeInterface = {
+  basics: {
+    name: "John Doe",
+    email: "john@example.com",
+  },
+  work: [],
+  education: [],
+  skills: [],
+};
+
 // Mock du package core
 vi.mock("@cv-generator/core", () => ({
   Resume: {
     create: (data: ResumeInterface) => ({
       isValid: true,
       resume: {
-        ...data,
-        toJSON: () => ({ ...data }),
+        data,
         get basics() {
           return { ...data.basics };
         },
@@ -31,6 +41,7 @@ vi.mock("@cv-generator/core", () => ({
         get skills() {
           return [...(data.skills || [])];
         },
+        toJSON: () => ({ ...data }),
       },
     }),
   },
@@ -48,17 +59,6 @@ vi.mock("@cv-generator/infrastructure/src/repositories/LocalStorageResumeReposit
 
 // Import après les mocks
 import { useResumeStore } from "../resume";
-
-// Mock du résumé complet
-const mockResumeData: ResumeInterface = {
-  basics: {
-    name: "John Doe",
-    email: "john@example.com",
-  },
-  work: [],
-  education: [],
-  skills: [],
-};
 
 describe("Resume Store", () => {
   beforeEach(() => {
@@ -112,7 +112,7 @@ describe("Resume Store", () => {
       const error = new Error("Save failed");
       mockRepository.save.mockRejectedValue(error);
 
-      await expect(store.saveResume(mockResume)).rejects.toThrow("Save failed");
+      await expect(store.saveResume(mockResume)).rejects.toThrow(error);
       expect(store.loading).toBe(false);
       expect(store.error).toBe(error);
     });
@@ -137,7 +137,7 @@ describe("Resume Store", () => {
       const error = new Error("Export failed");
       mockRepository.export.mockRejectedValue(error);
 
-      await expect(store.exportResume("json")).rejects.toThrow("Export failed");
+      await expect(store.exportResume("json")).rejects.toThrow(error);
       expect(store.loading).toBe(false);
       expect(store.error).toBe(error);
     });
@@ -168,7 +168,7 @@ describe("Resume Store", () => {
       });
       mockRepository.import.mockRejectedValue(error);
 
-      await expect(store.importResume(file)).rejects.toThrow("Import failed");
+      await expect(store.importResume(file)).rejects.toThrow(error);
       expect(store.loading).toBe(false);
       expect(store.error).toBe(error);
     });

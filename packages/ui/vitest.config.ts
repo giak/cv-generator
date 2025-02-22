@@ -7,6 +7,12 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
+      '@ui': resolve(__dirname, 'src'),
+      '@ui/components': resolve(__dirname, 'src/components'),
+      '@ui/shared': resolve(__dirname, 'src/components/shared'),
+      '@ui/modules': resolve(__dirname, 'src/modules'),
+      '@ui/utils': resolve(__dirname, 'src/utils'),
+      '@ui/types': resolve(__dirname, 'src/types'),
       '@': resolve(__dirname, './src'),
       '@cv': resolve(__dirname, './src/modules/cv'),
       '@shared': resolve(__dirname, './src/components/shared'),

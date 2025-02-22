@@ -31,6 +31,7 @@ const emit = defineEmits<{
       :aria-required="required"
       :aria-invalid="!!error"
       :aria-describedby="error ? `${name}-error` : undefined"
+      :data-test="`${name}-input`"
       class="mt-1 block w-full rounded-md border-[var(--color-neutral-300)] 
              focus:border-[var(--color-primary-500)] focus:ring focus:ring-[var(--color-primary-200)]
              disabled:bg-[var(--color-neutral-100)] disabled:cursor-not-allowed
@@ -42,6 +43,7 @@ const emit = defineEmits<{
     <p
       v-if="error"
       :id="`${name}-error`"
+      :data-test="`${name}-error`"
       class="mt-1 text-sm text-[var(--color-error-500)]"
     >
       {{ error }}

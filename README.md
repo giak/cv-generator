@@ -8,7 +8,29 @@ version: 0.1.0
 
 # CV Generator
 
+[![Build Status](https://github.com/giak/cv-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/giak/cv-generator/actions)
+[![Coverage](https://codecov.io/gh/giak/cv-generator/branch/main/graph/badge.svg)](https://codecov.io/gh/giak/cv-generator)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/giak/cv-generator/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 > 💡 **Modern CV builder with JSON Resume support**
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+  - [Key Principles](#key-principles)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Development Commands](#development-commands)
+- [Features](#features)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Maintenance](#maintenance)
 
 ## Overview
 
@@ -220,3 +242,34 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [JSON Resume](https://jsonresume.org/) for the CV schema standard
 - [Vue.js](https://vuejs.org/) for the excellent framework
 - [Vite](https://vitejs.dev/) for the blazing fast build tool
+
+## Maintenance
+
+### Known Issues
+
+- PDF export may have formatting issues with certain special characters
+- Local storage has a size limitation of 5MB for saved resumes
+
+### Troubleshooting
+
+- If the development server fails to start, ensure all dependencies are installed with `pnpm install`
+- For PDF export issues, try using plain text characters instead of special Unicode characters
+- Clear browser cache and local storage if the application behaves unexpectedly
+
+### Update Procedures
+
+1. Update dependencies: `pnpm update`
+2. Run tests: `pnpm test`
+3. Check for breaking changes in the [CHANGELOG.md](CHANGELOG.md)
+4. Follow the migration guides in the documentation if available
+
+### FAQ
+
+**Q: Can I use npm instead of pnpm?**
+A: While possible, we recommend using pnpm for consistent dependency management and better disk space usage.
+
+**Q: How do I customize the CV themes?**
+A: Themes can be customized by modifying the files in `packages/ui/src/assets/themes/`.
+
+**Q: What's the maximum size of a resume?**
+A: The local storage implementation has a 5MB limit. For larger resumes, consider using the export feature.
