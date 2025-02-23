@@ -1,9 +1,16 @@
+/// <reference types="vitest" />
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/vue";
 import { afterEach } from "vitest";
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 import { config } from '@vue/test-utils'
+
+// Extend Vitest's expect with jest-dom matchers
+declare module 'vitest' {
+  interface Assertion<T = any> extends jest.Matchers<void, T> {}
+  interface AsymmetricMatchersContaining extends jest.Matchers<void, any> {}
+}
 
 // Clean up after each test
 afterEach(() => {

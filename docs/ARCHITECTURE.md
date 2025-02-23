@@ -1,42 +1,86 @@
 # Architecture for CV Generator
 
-## Status: Draft
+## Status: Approved
 
 ## Technical Summary
 
 Le CV Generator est une application web moderne pour la création et la gestion de CV au format JSON Resume. L'architecture suit les principes de Clean Architecture et Domain-Driven Design (DDD) pour assurer une séparation claire des responsabilités, une maintenance facilitée et une évolution flexible du système.
 
-L'application est structurée en modules indépendants suivant une architecture monorepo, permettant une séparation claire entre le domaine métier, l'interface utilisateur et l'infrastructure.
+### Key Architectural Decisions
+
+1. **Clean Architecture**
+
+   - Séparation stricte des couches (UI, Application, Domain, Infrastructure)
+   - Dépendances orientées vers l'intérieur
+   - Inversion de dépendance pour les repositories
+
+2. **Domain-Driven Design**
+
+   - Entités riches avec logique métier encapsulée
+   - Value Objects pour les types complexes
+   - Agrégats pour maintenir la cohérence
+
+3. **Monorepo Structure**
+   - Packages indépendants avec responsabilités claires
+   - Shared utilities pour la réutilisation
+   - Tests co-localisés avec le code
 
 ## Technology Table
 
-| Technology      | Description                                 |
-| --------------- | ------------------------------------------- |
-| TypeScript 5.7+ | Langage principal avec typage strict        |
-| Vue.js 3.4+     | Framework UI avec Composition API           |
-| Vite 6+         | Build tool et dev server                    |
-| Pinia           | State management                            |
-| Tailwind CSS 4  | Utility-first CSS framework                 |
-| Zod             | Validation de schéma et typage runtime      |
-| Vitest          | Framework de test unitaire et d'intégration |
-| Playwright      | Tests end-to-end                            |
-| pnpm            | Package manager avec support workspaces     |
-| Biome           | Linting et formatting                       |
+| Technology   | Version | Description                             | Status |
+| ------------ | ------- | --------------------------------------- | ------ |
+| TypeScript   | 5.7+    | Langage principal avec typage strict    | ✅     |
+| Vue.js       | 3.4+    | Framework UI avec Composition API       | ✅     |
+| Vite         | 6+      | Build tool et dev server                | ✅     |
+| Pinia        | 2.1+    | State management                        | ✅     |
+| Tailwind CSS | 4.0     | Utility-first CSS framework             | ✅     |
+| Zod          | 3.22+   | Validation de schéma et typage runtime  | ✅     |
+| Vitest       | 1.6+    | Framework de test                       | ✅     |
+| Playwright   | Latest  | Tests end-to-end                        | 🚧     |
+| pnpm         | 10+     | Package manager avec support workspaces | ✅     |
+| Biome        | Latest  | Linting et formatting                   | ✅     |
 
 ## Architectural Diagrams
 
-### Clean Architecture Overview
+### System Overview
 
 ```mermaid
+---
+title: CV Generator System Architecture
+---
 graph TD
-    UI[UI Layer<br>Vue Components]
-    APP[Application Layer<br>Use Cases]
-    DOM[Domain Layer<br>Entities]
-    INF[Infrastructure Layer<br>Repositories]
+    subgraph UI["UI Layer (Vue.js)"]
+        C1[Components]
+        S1[Stores]
+        COM[Composables]
+    end
 
-    UI -->|depends on| APP
-    APP -->|depends on| DOM
-    INF -->|implements| DOM
+    subgraph APP["Application Layer"]
+        UC[Use Cases]
+        SVC[Services]
+    end
+
+    subgraph DOM["Domain Layer"]
+        E[Entities]
+        VO[Value Objects]
+        R[Repository Interfaces]
+    end
+
+    subgraph INF["Infrastructure Layer"]
+        LS[LocalStorage]
+        EXP[Export Services]
+        REP[Repository Implementations]
+    end
+
+    C1 --> S1
+    S1 --> UC
+    COM --> UC
+    UC --> E
+    UC --> R
+    E --> VO
+    REP --> R
+    REP --> LS
+    EXP --> UC
 
     style UI fill:#f9f,stroke:#333
     style APP fill:#bbf,stroke:#333
@@ -44,33 +88,38 @@ graph TD
     style INF fill:#fbb,stroke:#333
 ```
 
-### Module Communication
+### Data Flow
 
 ```mermaid
-graph LR
-    UI[UI Package<br>@cv-generator/ui]
-    CORE[Core Package<br>@cv-generator/core]
-    INFRA[Infrastructure Package<br>@cv-generator/infrastructure]
-    SHARED[Shared Package<br>@cv-generator/shared]
+---
+title: CV Data Flow
+---
+sequenceDiagram
+    participant U as User
+    participant C as Components
+    participant S as Store
+    participant UC as Use Cases
+    participant R as Repository
+    participant LS as LocalStorage
 
-    UI -->|uses| CORE
-    UI -->|uses| SHARED
-    CORE -->|uses| SHARED
-    INFRA -->|implements| CORE
-    INFRA -->|uses| SHARED
-
-    style UI fill:#f9f,stroke:#333
-    style CORE fill:#bfb,stroke:#333
-    style INFRA fill:#fbb,stroke:#333
-    style SHARED fill:#bbf,stroke:#333
+    U->>C: Edit CV
+    C->>S: Update State
+    S->>UC: Save Changes
+    UC->>R: Persist Data
+    R->>LS: Store Data
+    LS-->>R: Confirm Storage
+    R-->>UC: Return Result
+    UC-->>S: Update State
+    S-->>C: Reflect Changes
+    C-->>U: Show Feedback
 ```
 
 ## Data Models
 
-### Domain Interfaces
+### Core Interfaces
 
 ```typescript
-// Core Resume Types
+// Resume Domain Model
 export interface ResumeInterface {
   basics: BasicsInterface;
   work?: WorkInterface[];
@@ -102,26 +151,7 @@ export const basicsSchema = z
     location: locationSchema.optional(),
     profiles: z.array(profileSchema).optional(),
   })
-  .strict() as z.ZodType<BasicsInterface>;
-```
-
-### Domain Entities
-
-```typescript
-export class Resume {
-  private constructor(private readonly data: ResumeInterface) {}
-
-  static create(
-    data: ResumeInterface
-  ): ValidationResultType & { resume?: Resume } {
-    const validation = resumeSchema.safeParse(data);
-    // ... validation logic
-  }
-
-  toJSON(): ResumeInterface {
-    return { ...this.data };
-  }
-}
+  .strict();
 ```
 
 ## Project Structure
@@ -144,18 +174,12 @@ export class Resume {
 │   │       ├── components/    # Vue components
 │   │       │   └── shared/    # Shared components
 │   │       │       └── form/  # Form components
-│   │       │           ├── Form.vue      # Base form component
-│   │       │           └── FormField.vue # Reusable form field
 │   │       ├── modules/       # Feature modules
 │   │       │   └── cv/       # CV module
 │   │       │       └── presentation/
 │   │       │           ├── components/
-│   │       │           │   └── BasicsForm.vue
 │   │       │           └── composables/
-│   │       │               ├── useFieldValidation.ts
-│   │       │               └── useModelUpdate.ts
 │   │       └── stores/       # Pinia stores
-│   │           └── resume.ts
 │   ├── infrastructure/        # Infrastructure layer
 │   │   └── src/
 │   │       ├── repositories/  # Data persistence
@@ -170,78 +194,60 @@ export class Resume {
 
 #### Core (@cv-generator/core)
 
-- Entités du domaine
-- Logique métier
+- Entités du domaine et logique métier
 - Validation des données
-- Use cases
-- Interfaces des repositories
+- Use cases et interfaces des repositories
 
 #### UI (@cv-generator/ui)
 
-- Composants Vue.js
-  - Composants partagés réutilisables (`Form`, `FormField`)
-  - Composants spécifiques aux modules (`BasicsForm`)
-- Composables pour la logique réutilisable
-  - Validation des champs (`useFieldValidation`)
-  - Gestion du v-model (`useModelUpdate`)
+- Composants Vue.js et composables
 - Gestion d'état avec Pinia
-- Styles avec Tailwind CSS v4
-  - Variables CSS pour le theming
-  - Plugins forms, typography, aspect-ratio
-  - Support de l'accessibilité
+- Styles avec Tailwind CSS
 
 #### Infrastructure (@cv-generator/infrastructure)
 
 - Implémentation des repositories
-- Gestion de la persistence
-- Services externes
-- Adapters
+- Services externes et adapters
 
 #### Shared (@cv-generator/shared)
 
-- Types partagés
-- Utilitaires communs
-- Constants
-- Helpers
+- Types et utilitaires partagés
+- Schémas de validation
 
 ## Change Log
 
-| Change                     | Story ID | Description                                                                  |
-| -------------------------- | -------- | ---------------------------------------------------------------------------- |
-| Initial Architecture       | story-1  | Setup initial project structure and core architecture                        |
-| Core Domain Implementation | story-2  | Implementation of Basics entity with validation                              |
-| Remove Barrel Files        | story-2  | Removed index.ts files and updated import conventions                        |
-| Form Components            | story-2  | Added shared form components (Form, FormField) and BasicsForm implementation |
-| Composables                | story-2  | Added validation and model update composables with tests                     |
-| UI Architecture Update     | story-2  | Enhanced component architecture with form validation system                  |
+| Change                     | Story ID | Description                                           |
+| -------------------------- | -------- | ----------------------------------------------------- |
+| Initial Architecture       | story-1  | Setup initial project structure and core architecture |
+| Core Domain Implementation | story-2  | Implementation of Basics entity with validation       |
+| Form Components            | story-2  | Added shared form components and BasicsForm           |
+| Composables                | story-2  | Added validation and model update composables         |
+| Remove Barrel Files        | story-2  | Removed index.ts files for better maintainability     |
+| UI Architecture Update     | story-2  | Enhanced component architecture with validation       |
 
 ## Future Considerations
 
-### Component Library
+### Technical Roadmap
 
-- Documentation des composants avec Storybook
-- Tests d'accessibilité automatisés
-- Guidelines de design system
-- Support des thèmes personnalisés
-- Validation de formulaire avancée
+1. **Component Library**
 
-### Performance
+   - Documentation avec Storybook
+   - Tests d'accessibilité
+   - Design system guidelines
 
-- Lazy loading des composants
-- Optimisation des re-renders
-- Memoization des calculs coûteux
-- Bundle splitting intelligent
+2. **Performance**
 
-### Security
+   - Lazy loading
+   - Bundle splitting
+   - Optimisation des re-renders
 
-- Validation stricte des entrées
-- Sanitization des sorties
-- Protection XSS
-- Audit des dépendances
+3. **Security**
 
-### Maintainability
+   - Validation stricte
+   - Protection XSS
+   - Audit des dépendances
 
-- Tests exhaustifs
-- Documentation complète
-- Standards de code stricts
-- Monitoring et logging
+4. **Maintainability**
+   - Tests exhaustifs
+   - Documentation complète
+   - Monitoring et logging

@@ -3,6 +3,7 @@
 ---
 
 title: CV Generator Changelog
+author: Giak
 date: 2024-02-20
 status: maintained
 version: 0.1.2
@@ -13,145 +14,146 @@ version: 0.1.2
 
 ## [Unreleased]
 
-### Added 🎉
+### Core Features 🏗️
 
-#### Core Module Setup 🏗️
+#### Domain Layer
+
+> 💡 **Domain Entities and Business Logic**
+
+| Component     | Status | Description                    |
+| :------------ | :----: | :----------------------------- |
+| Basics Entity |   ✅   | Core CV information management |
+| Resume Entity |   ✅   | Complete resume aggregation    |
+| Validation    |   ✅   | Zod schema implementation      |
+
+```typescript
+// Example: Basics Entity Implementation
+class Basics {
+  private constructor(
+    private readonly _name: string,
+    private readonly _email: string
+  ) {}
+
+  static create(data: Partial<BasicsInterface>): Result<Basics>;
+  update(data: Partial<BasicsInterface>): Result<Basics>;
+  toJSON(): BasicsInterface;
+}
+```
+
+#### Application Layer
+
+> 💡 **Use Cases and Application Services**
+
+```mermaid
+---
+title: ManageResume Use Case Flow
+---
+graph TD
+    A[Start] --> B[Load Resume]
+    B --> C{Resume Exists?}
+    C -->|Yes| D[Update Resume]
+    C -->|No| E[Create Resume]
+    D --> F[Save Resume]
+    E --> F
+    F --> G[End]
+```
+
+| Use Case     | Status | Description                 |
+| :----------- | :----: | :-------------------------- |
+| ManageResume |   ✅   | CRUD operations for resumes |
+| ExportResume |   ✅   | Multiple format exports     |
+| ImportResume |   ✅   | Resume data import          |
+
+#### Infrastructure Layer
+
+> 💡 **External Integrations and Persistence**
+
+- Repository Implementations
+- External Service Adapters
+- Storage Solutions
+
+### UI Components 🎨
+
+#### Form Components
+
+> 💡 **Core Form Implementation**
+
+| Component  | Tests | Status |
+| :--------- | :---: | :----: |
+| BasicsForm |  6/6  |   ✅   |
+| FormField  |  4/4  |   ✅   |
+| Form       |  3/3  |   ✅   |
+
+#### Composables
+
+> 💡 **Reusable Logic**
+
+| Composable         | Tests | Status |
+| :----------------- | :---: | :----: |
+| useFieldValidation |  5/5  |   ✅   |
+| useModelUpdate     |  3/3  |   ✅   |
+
+### Test Coverage 🧪
+
+```mermaid
+---
+title: Test Coverage by Package
+---
+pie
+    title Package Test Coverage
+    "UI" : 29
+    "Core" : 15
+    "Shared" : 1
+```
+
+| Package        | Files | Tests | Status |
+| :------------- | :---: | :---: | :----: |
+| shared         |   1   |   1   |   ✅   |
+| core           |   2   |  15   |   ✅   |
+| ui             |   6   |  29   |   ✅   |
+| infrastructure |   0   |   0   |   ⚠️   |
+
+### Dependencies 📦
+
+| Package    | Version | Status |
+| :--------- | :-----: | :----: |
+| vue        | ^3.4.15 |   ✅   |
+| typescript | ~5.7.3  |   ✅   |
+| zod        | ^3.22.4 |   ✅   |
+| vitest     | ^1.6.1  |   ✅   |
+| pinia      | ^2.1.7  |   ✅   |
+
+### Story Progress 📋
+
+> 🚀 **Implementation Progress**
+
+| Story   | Status | Description                  |
+| :------ | :----: | :--------------------------- |
+| Story-1 |   ✅   | Project Setup & Architecture |
+| Story-2 |   🚧   | Basics Implementation        |
+
+## [0.1.2] - 2024-02-20
+
+### Added 🎉
 
 - Configuration TypeScript avec support strict mode
 - Configuration Vitest pour les tests
 - Configuration Biome pour le linting
 - Structure de dossiers Clean Architecture
 
-#### Domain Layer Implementation ✨
-
-- Implémentation de l'entité `Basics` pour le CV
-  - Support complet du schéma JSON Resume
-  - Validation stricte via Zod
-  - Pattern Result pour la gestion des erreurs
-  - Méthodes de création et mise à jour immutables
-  - Sérialisation JSON avec gestion des champs optionnels
-
-#### Application Layer Implementation 🔄
-
-- Implémentation du use case `ManageResume`
-  - Interface `ResumeRepository` pour l'abstraction de la persistence
-  - Méthodes CRUD pour la gestion des CV
-  - Support de l'export en différents formats (JSON, PDF, HTML)
-  - Gestion des erreurs avec types TypeScript
-
-#### UI Layer Implementation 🎨
-
-- Configuration du store Pinia pour la gestion d'état
-  - Store `resume` avec gestion asynchrone
-  - Actions pour charger, sauvegarder, exporter et importer
-  - Gestion des états de chargement et des erreurs
-  - Tests unitaires complets avec mocks
-  - Factory pattern pour l'injection des dépendances
-  - Intégration avec le use case ManageResume
-  - Support complet TypeScript avec types stricts
-
-#### Testing Infrastructure 🧪
-
-- Mise en place des tests pour tous les packages
-  - `shared`: 1 test passé
-  - `core`: 15 tests passés
-  - `ui`: 29 tests passés dans 6 fichiers
-    - Tests des composables (`useModelUpdate`, `useFieldValidation`)
-    - Tests des composants (`BasicsForm`, `ResumeForm`)
-    - Tests du store Pinia
-    - Tests de l'application
-
-#### UI Components Implementation ✨
-
-- Implémentation du composant `BasicsForm`
-
-  - Support de la validation en temps réel
-  - Gestion des erreurs avec feedback visuel
-  - Tests unitaires complets (6 tests)
-  - Intégration avec les composables
-  - Utilisation des CSS variables pour le theming
-  - Support complet de l'accessibilité (ARIA)
-  - Gestion des états de chargement
-
-- Création des composants de formulaire partagés
-  - `Form.vue`: Composant de base pour les formulaires
-  - `FormField.vue`: Champ de formulaire réutilisable
-  - Support des différents types d'input (text, email)
-  - Gestion des états required et disabled
-  - Feedback visuel des erreurs
-
-#### Composables Development 🔄
-
-- Création du composable `useFieldValidation`
-
-  - Validation des champs requis
-  - Validation du format email
-  - Tests unitaires (5 tests)
-  - Support des messages d'erreur personnalisés
-  - Validation en temps réel et à la soumission
-
-- Création du composable `useModelUpdate`
-  - Gestion du v-model avec TypeScript
-  - Tests unitaires (3 tests)
-  - Support des mises à jour partielles
-  - Préservation de l'immutabilité
-
-#### Styling Enhancement 🎨
-
-- Intégration de Tailwind CSS v4
-  - Configuration personnalisée avec variables CSS
-  - Support des plugins forms, typography et aspect-ratio
-  - Thème adaptatif avec variables CSS
-  - Styles de formulaire optimisés
-
 ### Changed 🔄
 
-- Migration de `ResumeForm` vers `BasicsForm` pour une meilleure séparation des responsabilités
+- Migration de `ResumeForm` vers `BasicsForm`
 - Amélioration de la gestion d'état avec Pinia
-  - Initialisation immédiate des données
-  - Prévention des chargements multiples
-  - Gestion améliorée des erreurs
 - Optimisation de la configuration TypeScript
-  - Ajout des alias de chemins pour une meilleure DX
-  - Support strict des types pour les composants Vue
-  - Configuration optimisée pour le développement
-- Suppression des barrel files (index.ts) pour améliorer la maintenabilité
-- Amélioration de la gestion des erreurs
-  - Types d'erreur plus précis
-  - Messages d'erreur plus descriptifs
-  - Gestion des erreurs non-Error
-- Amélioration de la structure des tests
-  - Organisation par feature
-  - Tests isolés par composant
-  - Meilleure couverture du code
+- Suppression des barrel files (index.ts)
 
 ### Technical Details 🔧
 
-#### Domain Entities
+> 💡 **Implementation Details**
 
 ```typescript
-// Basics Entity - Core domain logic for CV basic information
-class Basics {
-  private constructor(
-    private readonly _name: string,
-    private readonly _email: string // ... autres champs
-  ) {}
-
-  // Factory method avec validation
-  static create(data: Partial<BasicsInterface>): Result<Basics>;
-
-  // Méthode de mise à jour immutable
-  update(data: Partial<BasicsInterface>): Result<Basics>;
-
-  // Sérialisation JSON avec gestion des champs optionnels
-  toJSON(): BasicsInterface;
-}
-```
-
-#### Use Cases
-
-```typescript
-// ManageResume - Application layer use case
+// ManageResume Use Case
 export class ManageResume {
   constructor(private readonly repository: ResumeRepository) {}
 
@@ -162,62 +164,28 @@ export class ManageResume {
 }
 ```
 
-#### Store Implementation
+## [0.1.1] - 2024-02-15
 
-```typescript
-// Resume Store - UI layer state management
-export const useResumeStore = defineStore("resume", () => {
-  const resume = ref<Resume | null>(null);
-  const loading = ref(false);
-  const error = ref<Error | null>(null);
+### Added 🎉
 
-  async function loadResume(): Promise<void>;
-  async function saveResume(data: Resume): Promise<void>;
-  async function exportResume(format: string): Promise<Blob>;
-  async function importResume(file: Blob): Promise<void>;
-});
-```
+- Support initial du format JSON Resume
+- Validation de base des données
+- Interface utilisateur minimale
 
-#### Test Coverage
+### Changed 🔄
 
-| Package        | Files | Tests | Status |
-| :------------- | :---: | :---: | -----: |
-| shared         |   1   |   1   |     ✅ |
-| core           |   2   |  15   |     ✅ |
-| ui             |   6   |  29   |     ✅ |
-| infrastructure |   0   |   0   |     ⚠️ |
+- Refactoring de la structure du projet
+- Amélioration des tests unitaires
 
-#### Performance des Tests
+## [0.1.0] - 2024-02-10
 
-```mermaid
----
-title: Temps d'Exécution des Tests UI
----
-graph LR
-    A[Start] --> B[Transform 653ms]
-    B --> C[Setup 1.31s]
-    C --> D[Collect 934ms]
-    D --> E[Tests 157ms]
-    E --> F[End]
-```
+### Added 🎉
 
-### Dependencies 📦
+- Configuration initiale du projet
+- Setup de base Vue.js avec TypeScript
+- Premiers composants UI
 
-| Package                   | Version | Description              |
-| :------------------------ | :-----: | :----------------------- |
-| zod                       | ^3.22.4 | Validation de schéma     |
-| vitest                    | ^1.6.1  | Framework de test        |
-| @vitest/coverage-istanbul | ^1.4.0  | Couverture de code       |
-| typescript                | ~5.7.3  | Langage de programmation |
-| pinia                     | ^2.1.7  | Gestion d'état           |
-| @pinia/testing            | ^1.0.0  | Tests de store           |
-| vue                       | ^3.4.15 | Framework UI             |
-
-> 💡 **Prochaines étapes:** Implémentation des tests pour le package infrastructure
-
-### Story Progress 📋
-
-| Story ID | Status | Description                                           |
-| :------- | :----: | :---------------------------------------------------- |
-| story-1  |   ✅   | Setup initial project structure and core architecture |
-| story-2  |   🚧   | Implementation of Basics entity with validation       |
+[Unreleased]: https://github.com/giak/cv-generator/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/giak/cv-generator/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/giak/cv-generator/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/giak/cv-generator/releases/tag/v0.1.0

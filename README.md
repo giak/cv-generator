@@ -15,35 +15,131 @@ version: 0.1.0
 
 > 💡 **Modern CV builder with JSON Resume support**
 
+## Quick Start
+
+```bash
+# Installation
+pnpm install
+
+# Development
+pnpm dev
+```
+
 ## Table of Contents
 
 - [Overview](#overview)
+- [Features](#features)
 - [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Architecture](#architecture)
-  - [Key Principles](#key-principles)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Development Commands](#development-commands)
-- [Features](#features)
-- [Contributing](#contributing)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+  - [Key Principles](#key-principles)
+  - [Clean Architecture](#clean-architecture)
+  - [Domain-Driven Design](#domain-driven-design)
+- [Development](#development)
+  - [Testing Strategy](#testing-strategy)
+  - [Code Style](#code-style)
+  - [Contributing](#contributing)
+- [Deployment](#deployment)
+  - [Build](#build)
+  - [Configuration](#configuration)
+- [Maintenance](#maintenance)
+  - [Known Issues](#known-issues)
+  - [Troubleshooting](#troubleshooting)
+  - [Update Procedures](#update-procedures)
+  - [FAQ](#faq)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
-- [Maintenance](#maintenance)
 
 ## Overview
 
-CV Generator is a modern web application built with Vue 3, TypeScript, and Vite that helps you create professional CVs using the JSON Resume standard. The application features a clean, intuitive interface and supports multiple export formats.
+CV Generator is a modern web application that helps you create professional CVs using the JSON Resume standard. Built with Vue 3, TypeScript, and following Clean Architecture principles, it offers a seamless experience for creating, editing, and exporting CVs in multiple formats.
+
+### Problem Statement
+
+Managing and updating CVs in various formats can be challenging and time-consuming. Traditional word processors lack standardization and make it difficult to maintain consistent formatting across different versions.
+
+### Solution
+
+CV Generator provides a structured, standardized approach to CV creation using the JSON Resume format, combined with a modern, intuitive interface and real-time preview capabilities.
+
+## Features
+
+- 📝 **JSON Resume Format**
+
+  - Standard-compliant schema
+  - Validation and formatting
+  - Import/Export support
+
+- 🎨 **Modern UI/UX**
+
+  - Real-time preview
+  - Responsive design
+  - Customizable themes
+
+- 💾 **Data Management**
+
+  - Local storage support
+  - Offline capabilities
+  - Auto-save functionality
+
+- 📤 **Export Options**
+  - PDF export
+  - HTML export
+  - JSON export
 
 ## Tech Stack
 
-- Vue 3 with Composition API
-- TypeScript 5.7+
-- Vite 6.1
-- Tailwind CSS 4
-- Vitest for Testing
-- Clean Architecture & DDD principles
+| Technology   | Version | Purpose            |
+| ------------ | ------- | ------------------ |
+| Vue.js       | 3.4+    | Frontend framework |
+| TypeScript   | 5.7+    | Type safety        |
+| Vite         | 6.1     | Build tool         |
+| Tailwind CSS | 4.0     | Styling            |
+| Vitest       | Latest  | Testing framework  |
+| Pinia        | Latest  | State management   |
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 22+
+- pnpm 10+
+- Modern web browser
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/giak/cv-generator.git
+   cd cv-generator
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   pnpm install
+   ```
+
+3. Start development server:
+   ```bash
+   pnpm dev
+   ```
+
+### Development Commands
+
+| Command         | Description              |
+| --------------- | ------------------------ |
+| `pnpm dev`      | Start development server |
+| `pnpm build`    | Build for production     |
+| `pnpm test`     | Run unit tests           |
+| `pnpm test:e2e` | Run end-to-end tests     |
+| `pnpm lint`     | Lint code                |
+| `pnpm format`   | Format code              |
 
 ## Project Structure
 
@@ -183,47 +279,23 @@ graph TD
    - E2E tests for critical paths
    - Component tests for UI
 
-## Getting Started
+## Development
 
-### Prerequisites
+### Testing Strategy
 
-- Node.js 22+
-- pnpm 10+
+- **Unit Tests**: Core business logic and components
+- **Integration Tests**: API and store interactions
+- **E2E Tests**: Critical user flows
+- **Component Tests**: UI components
 
-### Installation
+### Code Style
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/cv-generator.git
+- ESLint configuration
+- Prettier formatting
+- TypeScript strict mode
+- Component conventions
 
-# Install dependencies
-pnpm install
-
-# Start development server
-pnpm dev
-```
-
-### Development Commands
-
-| Command         | Description              |
-| :-------------- | :----------------------- |
-| `pnpm dev`      | Start development server |
-| `pnpm build`    | Build for production     |
-| `pnpm test`     | Run unit tests           |
-| `pnpm test:e2e` | Run end-to-end tests     |
-| `pnpm lint`     | Lint code                |
-| `pnpm format`   | Format code              |
-
-## Features
-
-- 📝 JSON Resume format support
-- 🎨 Modern, responsive design
-- 📤 Multiple export formats
-- 🔄 Real-time preview
-- 💾 Local storage support
-- 🌐 Offline capabilities
-
-## Contributing
+### Contributing
 
 1. Fork the repository
 2. Create your feature branch
@@ -233,43 +305,76 @@ pnpm dev
 
 > ℹ️ **Note:** Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and development process.
 
-## License
+## Deployment
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Build
 
-## Acknowledgments
+```bash
+# Production build
+pnpm build
 
-- [JSON Resume](https://jsonresume.org/) for the CV schema standard
-- [Vue.js](https://vuejs.org/) for the excellent framework
-- [Vite](https://vitejs.dev/) for the blazing fast build tool
+# Preview build
+pnpm preview
+```
+
+### Configuration
+
+- Environment variables
+- Build configuration
+- Deployment platforms
 
 ## Maintenance
 
 ### Known Issues
 
-- PDF export may have formatting issues with certain special characters
-- Local storage has a size limitation of 5MB for saved resumes
+- PDF export formatting with special characters
+- 5MB local storage limitation
+- [Track issues on GitHub](https://github.com/giak/cv-generator/issues)
 
 ### Troubleshooting
 
-- If the development server fails to start, ensure all dependencies are installed with `pnpm install`
-- For PDF export issues, try using plain text characters instead of special Unicode characters
-- Clear browser cache and local storage if the application behaves unexpectedly
+1. **Development Server Issues**
+
+   - Clear node_modules: `pnpm clean && pnpm install`
+   - Check Node.js version: `node --version`
+
+2. **Build Problems**
+   - Clear cache: `pnpm clean:cache`
+   - Update dependencies: `pnpm update`
 
 ### Update Procedures
 
-1. Update dependencies: `pnpm update`
-2. Run tests: `pnpm test`
-3. Check for breaking changes in the [CHANGELOG.md](CHANGELOG.md)
-4. Follow the migration guides in the documentation if available
+1. Update dependencies:
+
+   ```bash
+   pnpm update
+   ```
+
+2. Run tests:
+
+   ```bash
+   pnpm test
+   ```
+
+3. Check for breaking changes in [CHANGELOG.md](CHANGELOG.md)
 
 ### FAQ
 
 **Q: Can I use npm instead of pnpm?**
-A: While possible, we recommend using pnpm for consistent dependency management and better disk space usage.
+A: Yes, but pnpm is recommended for better dependency management.
 
-**Q: How do I customize the CV themes?**
-A: Themes can be customized by modifying the files in `packages/ui/src/assets/themes/`.
+**Q: How do I customize themes?**
+A: Edit files in `packages/ui/src/assets/themes/`.
 
-**Q: What's the maximum size of a resume?**
-A: The local storage implementation has a 5MB limit. For larger resumes, consider using the export feature.
+**Q: What's the maximum CV size?**
+A: Local storage limit is 5MB. Use export for larger files.
+
+## License
+
+[MIT License](LICENSE)
+
+## Acknowledgments
+
+- [JSON Resume](https://jsonresume.org/)
+- [Vue.js](https://vuejs.org/)
+- [Vite](https://vitejs.dev/)

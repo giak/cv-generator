@@ -7,12 +7,12 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@ui': resolve(__dirname, 'src'),
-      '@ui/components': resolve(__dirname, 'src/components'),
-      '@ui/shared': resolve(__dirname, 'src/components/shared'),
-      '@ui/modules': resolve(__dirname, 'src/modules'),
-      '@ui/utils': resolve(__dirname, 'src/utils'),
-      '@ui/types': resolve(__dirname, 'src/types'),
+      '@ui': resolve(__dirname, './src'),
+      '@ui/components': resolve(__dirname, './src/components'),
+      '@ui/shared': resolve(__dirname, './src/components/shared'),
+      '@ui/modules': resolve(__dirname, './src/modules'),
+      '@ui/utils': resolve(__dirname, './src/utils'),
+      '@ui/types': resolve(__dirname, './src/types'),
       '@': resolve(__dirname, './src'),
       '@cv': resolve(__dirname, './src/modules/cv'),
       '@shared': resolve(__dirname, './src/components/shared'),
@@ -26,10 +26,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./vitest.setup.ts'],
+    setupFiles: ['./src/test/setup.ts'],
     include: [
-      'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-      'src/**/__tests__/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'
+      'src/**/*.{test,spec}.{js,ts}',
+      'src/**/__tests__/*.{js,ts}'
     ],
     exclude: ['e2e/**/*', 'node_modules/**/*'],
     coverage: {

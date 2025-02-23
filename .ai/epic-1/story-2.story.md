@@ -144,12 +144,32 @@ Story Points: 2 (2 jours de développement humain)
    - ✅ Tests des messages d'erreur
    - ✅ Tests d'accessibilité
 
-### 5. - [ ] Documentation
+### 5. - [x] Documentation
 
-1. - [ ] Documenter les composants
-2. - [ ] Mettre à jour le README
-3. - [ ] Ajouter des exemples d'utilisation
-4. - [ ] Documenter les types et interfaces
+1. - [x] Documenter les composants
+   - ✅ JSDoc pour BasicsForm.vue
+   - ✅ JSDoc pour LocationInput.vue
+   - ✅ JSDoc pour ProfileList.vue
+   - ✅ Documentation des props et events
+   - ✅ Documentation des composables (useFieldValidation, useModelUpdate)
+
+2. - [x] Mettre à jour le README
+   - ✅ Section d'installation et démarrage rapide
+   - ✅ Documentation des composants disponibles
+   - ✅ Guide de contribution
+   - ✅ Exemples d'utilisation basiques
+
+3. - [x] Ajouter des exemples d'utilisation
+   - ✅ Exemple basique avec validation
+   - ✅ Exemple avec location et profiles
+   - ✅ Exemple d'intégration avec le store
+   - ✅ Exemple de personnalisation des styles
+
+4. - [x] Documenter les types et interfaces
+   - ✅ Types TypeScript pour les props
+   - ✅ Interfaces du domaine (Basics, Location, Profile)
+   - ✅ Types des événements émis
+   - ✅ Types des composables
 
 ## Constraints
 
