@@ -4,8 +4,8 @@ const STORAGE_KEY = "cv-generator-resume";
 
 const EMPTY_RESUME = {
   basics: {
-    name: "Nouveau CV",
-    email: "email@exemple.com",
+    name: "",
+    email: "",
     label: "",
     phone: "",
     summary: "",
@@ -51,25 +51,55 @@ export class LocalStorageResumeRepository implements ResumeRepository {
   }
 
   async save(resume: Resume): Promise<void> {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(resume.toJSON()));
+    console.log('=== [LocalStorage] save ===')
+    console.log('[LocalStorage] Received resume instance:', resume)
+    
+    try {
+      // Convertir l'instance Resume en objet JSON
+      const jsonData = resume.toJSON()
+      console.log('[LocalStorage] Converted to JSON:', jsonData)
+      
+      // Sauvegarder dans le localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(jsonData))
+      console.log('[LocalStorage] Saved successfully')
+    } catch (error) {
+      console.error('[LocalStorage] Error saving:', error)
+      throw error
+    }
   }
 
   async load(): Promise<Resume> {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) {
-      const result = Resume.create(EMPTY_RESUME);
-      if (!result.isValid || !result.resume) {
-        throw new Error(`Failed to create empty resume: ${result.errors?.join(", ")}`);
+    console.log('=== [LocalStorage] load ===')
+    
+    try {
+      // Récupérer les données du localStorage
+      const data = localStorage.getItem(STORAGE_KEY)
+      console.log('[LocalStorage] Raw data:', data)
+      
+      // Si pas de données, retourner un CV vide
+      if (!data) {
+        console.log('[LocalStorage] No data found, creating empty resume')
+        const result = Resume.create(EMPTY_RESUME)
+        console.log('[LocalStorage] Empty resume created:', result)
+        return result.resume!
       }
-      return result.resume;
-    }
 
-    const parsed = JSON.parse(data);
-    const result = Resume.create(parsed);
-    if (!result.isValid || !result.resume) {
-      throw new Error(`Invalid resume data: ${result.errors?.join(", ")}`);
+      // Parser les données et créer une instance Resume
+      const parsed = JSON.parse(data)
+      console.log('[LocalStorage] Parsed data:', parsed)
+      
+      const result = Resume.create(parsed)
+      console.log('[LocalStorage] Resume instance created:', result)
+      
+      if (!result.resume) {
+        throw new Error('Failed to create Resume instance')
+      }
+      
+      return result.resume
+    } catch (error) {
+      console.error('[LocalStorage] Error loading:', error)
+      throw error
     }
-    return result.resume;
   }
 
   async export(format: "json" | "pdf" | "html"): Promise<Blob> {

@@ -33,7 +33,7 @@ Cette story fait suite à la Story-1 qui a établi la fondation technique du pro
 
 ## Estimation
 
-Story Points: 2 (2 jours de développement humain)
+Story Points: 2 (2 jours de développement humain ; réel 8 heures)
 
 ## Tasks
 

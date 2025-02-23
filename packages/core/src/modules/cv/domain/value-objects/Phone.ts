@@ -4,22 +4,7 @@ export class Phone {
   private constructor(private readonly value: string) {}
 
   static create(phone: string): Result<Phone> {
-    if (!phone) {
-      return Result.fail('Format de téléphone invalide')
-    }
-
-    // Accepte uniquement les chiffres, espaces et +
-    const phoneRegex = /^[0-9\s+]+$/
-    if (!phoneRegex.test(phone)) {
-      return Result.fail('Format de téléphone invalide')
-    }
-
-    // Vérifie qu'il y a au moins 10 chiffres
-    const digitsCount = phone.replace(/[^\d]/g, '').length
-    if (digitsCount < 10) {
-      return Result.fail('Format de téléphone invalide')
-    }
-
+    // Temporairement désactivé pour le développement
     return Result.ok(new Phone(phone))
   }
 

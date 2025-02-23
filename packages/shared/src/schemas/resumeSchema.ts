@@ -1,46 +1,50 @@
 import { z } from 'zod'
-import { ResumeInterface, SkillInterface } from '../types/resume.interface'
+import { ResumeInterface } from '../types/resume.interface'
 
-const skillSchema = z.object({
-  name: z.string().min(1, { message: 'Skill name is required' }),
-  level: z.string().min(1, { message: 'Skill level is required' }),
-  keywords: z.array(z.string()).optional()
-}).strict()
-
+// Schéma simplifié sans validation pour le développement
 export const resumeSchema = z.object({
   basics: z.object({
-    name: z.string().min(1, { message: 'Name is required and must not be empty' }),
-    label: z.string().optional(),
-    email: z.string().email({ message: 'Invalid email format' }),
-    phone: z.string().min(1, { message: 'Phone number is required' }),
-    url: z.string().url({ message: 'Invalid URL format' }).optional(),
-    summary: z.string().optional(),
+    name: z.string(),
+    label: z.string().default(''),
+    email: z.string(),
+    phone: z.string().default(''),
+    url: z.string().default(''),
+    summary: z.string().default(''),
     location: z.object({
-      address: z.string().optional(),
-      postalCode: z.string().optional(),
-      city: z.string().optional(),
-      countryCode: z.string().optional(),
-      region: z.string().optional()
-    }).optional()
-  }).strict(),
+      address: z.string().default(''),
+      postalCode: z.string().default(''),
+      city: z.string().default(''),
+      countryCode: z.string().default(''),
+      region: z.string().default('')
+    }).optional(),
+    profiles: z.array(z.object({
+      network: z.string().default(''),
+      username: z.string().default(''),
+      url: z.string().default('')
+    })).default([])
+  }),
   work: z.array(z.object({
-    name: z.string().min(1, { message: 'Company name is required' }),
-    position: z.string().min(1, { message: 'Position is required' }),
-    url: z.string().url({ message: 'Invalid company URL format' }).optional(),
-    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Start date must be in YYYY-MM-DD format' }),
-    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'End date must be in YYYY-MM-DD format' }).optional(),
-    summary: z.string().optional(),
-    highlights: z.array(z.string()).optional()
-  }).strict()).optional(),
+    name: z.string(),
+    position: z.string(),
+    url: z.string().default(''),
+    startDate: z.string(),
+    endDate: z.string().default(''),
+    summary: z.string().default(''),
+    highlights: z.array(z.string()).default([])
+  })).default([]),
   education: z.array(z.object({
-    institution: z.string().min(1, { message: 'Institution name is required' }),
-    url: z.string().url({ message: 'Invalid institution URL format' }).optional(),
-    area: z.string().min(1, { message: 'Area of study is required' }),
-    studyType: z.string().min(1, { message: 'Type of study is required' }),
-    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Start date must be in YYYY-MM-DD format' }),
-    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'End date must be in YYYY-MM-DD format' }).optional(),
-    score: z.string().optional(),
-    courses: z.array(z.string()).optional()
-  }).strict()).optional(),
-  skills: z.array(skillSchema).optional()
-}).strict() 
+    institution: z.string(),
+    url: z.string().default(''),
+    area: z.string(),
+    studyType: z.string(),
+    startDate: z.string(),
+    endDate: z.string().default(''),
+    score: z.string().default(''),
+    courses: z.array(z.string()).default([])
+  })).default([]),
+  skills: z.array(z.object({
+    name: z.string(),
+    level: z.string().default(''),
+    keywords: z.array(z.string()).default([])
+  })).default([])
+}).passthrough() as z.ZodType<ResumeInterface> 

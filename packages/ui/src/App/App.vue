@@ -1,8 +1,7 @@
-<!-- App.vue -->
 <script setup lang="ts">
 import { useResumeStore } from '@ui/modules/cv/presentation/stores/resume'
 import BasicsForm from '@ui/modules/cv/presentation/components/BasicsForm.vue'
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { Resume } from '@cv-generator/core'
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
 
@@ -16,7 +15,12 @@ const basics = reactive<BasicsInterface>({
   phone: '',
   url: '',
   summary: '',
-  location: undefined,
+  location: {
+    address: '',
+    postalCode: '',
+    city: '',
+    region: ''
+  },
   profiles: []
 })
 
@@ -26,6 +30,7 @@ onMounted(async () => {
   // Initialiser basics avec les données du store
   if (store.resume?.basics) {
     const storeBasics = store.resume.basics
+    console.log('Loading data from store:', storeBasics)
     Object.assign(basics, {
       name: storeBasics.name ?? '',
       email: storeBasics.email ?? '',
@@ -33,23 +38,73 @@ onMounted(async () => {
       phone: storeBasics.phone ?? '',
       url: storeBasics.url ?? '',
       summary: storeBasics.summary ?? '',
-      location: storeBasics.location,
+      location: storeBasics.location ?? {
+        address: '',
+        postalCode: '',
+        city: '',
+        region: ''
+      },
       profiles: storeBasics.profiles ?? []
     })
+    console.log('Loaded data into basics:', basics)
   }
 })
 
+// Gérer la mise à jour du formulaire
+const handleBasicsUpdate = (value: BasicsInterface) => {
+  console.log('=== UI Layer - Basics Update ===')
+  console.log('Received update:', value)
+  
+  // Mettre à jour le modèle directement
+  basics.name = value.name || ''
+  basics.email = value.email || ''
+  basics.label = value.label || ''
+  basics.phone = value.phone || ''
+  basics.url = value.url || ''
+  basics.summary = value.summary || ''
+  
+  // Mettre à jour location
+  if (value.location) {
+    basics.location.address = value.location.address || ''
+    basics.location.postalCode = value.location.postalCode || ''
+    basics.location.city = value.location.city || ''
+    basics.location.region = value.location.region || ''
+  }
+  
+  // Mettre à jour profiles
+  basics.profiles = [...(value.profiles || [])]
+  
+  console.log('Updated basics:', JSON.parse(JSON.stringify(basics)))
+}
+
 // Gérer la sauvegarde du formulaire
 const handleValidate = async () => {
-  const resumeData = store.resume 
-    ? { ...store.resume.toJSON(), basics }
-    : { basics }
+  try {
+    console.log('=== UI Layer - Form Submission ===')
+    console.log('Current basics state:', JSON.parse(JSON.stringify(basics)))
+    
+    // Créer les données du CV
+    const resumeData = {
+      basics: {
+        ...basics,
+        location: { ...basics.location },
+        profiles: [...basics.profiles]
+      }
+    }
+    console.log('Complete resume data to save:', resumeData)
 
-  const result = Resume.create(resumeData)
-  if (result.isValid && result.resume) {
-    await store.saveResume(result.resume)
+    // Sauvegarder les données du CV
+    await store.saveResume(resumeData)
+    console.log('CV sauvegardé avec succès dans App.vue')
+  } catch (error) {
+    console.error('Erreur dans App.vue lors de la sauvegarde:', error)
   }
 }
+
+// Log changes to basics
+watch(basics, (newValue) => {
+  console.log('Basics updated:', JSON.parse(JSON.stringify(newValue)))
+}, { deep: true })
 </script>
 
 <template>
@@ -69,6 +124,7 @@ const handleValidate = async () => {
         <BasicsForm
           v-model="basics"
           :loading="store.loading"
+          @update:modelValue="handleBasicsUpdate"
           @validate="handleValidate"
         />
       </div>
