@@ -2,7 +2,7 @@
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
-import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useFieldValidation'
+import { useFieldValidation as useCVFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
 import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
 import { computed, reactive, watch } from 'vue'
 
@@ -34,7 +34,7 @@ const formModel = computed(() => ({
   profiles: [...(props.modelValue.profiles || [])]
 }))
 
-const { errors, validateField, validateForm } = useFieldValidation()
+const { errors, validateField, validateForm } = useCVFieldValidation()
 const { updateField } = useModelUpdate({ emit, modelValue: computed(() => props.modelValue) })
 
 // Update field handler

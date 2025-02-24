@@ -1,49 +1,48 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath } from 'url'
 import { resolve } from 'path'
+
+const root = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
   plugins: [vue()],
-  resolve: {
-    alias: {
-      '@ui': resolve(__dirname, './src'),
-      '@ui/components': resolve(__dirname, './src/components'),
-      '@ui/shared': resolve(__dirname, './src/components/shared'),
-      '@ui/modules': resolve(__dirname, './src/modules'),
-      '@ui/utils': resolve(__dirname, './src/utils'),
-      '@ui/types': resolve(__dirname, './src/types'),
-      '@': resolve(__dirname, './src'),
-      '@cv': resolve(__dirname, './src/modules/cv'),
-      '@shared': resolve(__dirname, './src/components/shared'),
-      '@stores': resolve(__dirname, './src/stores'),
-      '@composables': resolve(__dirname, './src/composables'),
-      '@assets': resolve(__dirname, './src/assets'),
-      '@pages': resolve(__dirname, './src/pages'),
-      '@types': resolve(__dirname, './src/types')
-    }
-  },
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ['./src/test/setup/index.ts'],
     include: [
-      'src/**/*.{test,spec}.{js,ts}',
-      'src/**/__tests__/*.{js,ts}'
+      'src/**/__tests__/**/*.{test,spec}.{js,ts,jsx,tsx}',
+      'src/**/*.{test,spec}.{js,ts,jsx,tsx}'
     ],
-    exclude: ['e2e/**/*', 'node_modules/**/*'],
+    exclude: [
+      'src/test/e2e/**/*',
+      'node_modules/**/*',
+      'dist/**/*'
+    ],
     coverage: {
       provider: 'istanbul',
       reporter: ['text', 'json', 'html'],
-      all: true,
-      include: ['src/**/*.{vue,ts}'],
+      include: ['src/**/*.{js,ts,vue}'],
       exclude: [
-        'src/**/*.d.ts',
-        'src/**/*.test.ts',
-        'src/**/*.spec.ts',
-        'src/main.ts',
-        'src/types/**/*'
+        'src/**/__tests__/**/*',
+        'src/test/**/*'
       ]
+    }
+  },
+  resolve: {
+    alias: {
+      '@ui': resolve(root, 'src'),
+      '@core': resolve(root, 'src/core'),
+      '@modules': resolve(root, 'src/modules'),
+      '@shared': resolve(root, 'src/shared'),
+      '@test': resolve(root, 'src/test'),
+      '@cv': resolve(root, 'src/modules/cv'),
+      '@components': resolve(root, 'src/core/components'),
+      '@composables': resolve(root, 'src/core/composables'),
+      '@utils': resolve(root, 'src/core/utils'),
+      '@assets': resolve(root, 'src/assets')
     }
   }
 })

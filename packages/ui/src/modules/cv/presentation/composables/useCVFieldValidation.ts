@@ -1,6 +1,6 @@
 import { ref, Ref } from 'vue'
 import { z } from 'zod'
-import debounce from 'lodash/debounce'
+import { debounce } from 'lodash-es'
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { Email } from '@cv-generator/core'
 

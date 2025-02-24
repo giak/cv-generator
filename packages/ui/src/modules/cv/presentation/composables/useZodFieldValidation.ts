@@ -1,6 +1,6 @@
 import { ref, Ref } from 'vue';
 import { z } from 'zod';
-import debounce from 'lodash/debounce';
+import { debounce } from 'lodash-es';
 
 interface ValidationOptions {
   debounce?: number;

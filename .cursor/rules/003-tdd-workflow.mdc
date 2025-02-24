@@ -7,9 +7,9 @@ globs: src/**/*.{spec,test}.{ts,tsx}
 ---
 description: ENFORCE Test-Driven Development workflow with Vitest in Vue 3 components to ensure robust and maintainable code
 globs: ["packages/**/*.{spec,test}.{ts,tsx}", "packages/**/__tests__/*.{ts,tsx}"]
-tags: [testing, vitest, vue3, tdd, ddd]
+tags: [testing, vitest, vue3, tdd, ddd, composables, components]
 priority: 1
-version: 2.1.0
+version: 3.0.0
 ---
 
 ## Context
@@ -19,58 +19,24 @@ version: 2.1.0
 - Maintains high test coverage
 - Follows DDD, Vue 3, Pinia, and Vitest best practices
 - Supports monorepo architecture with multiple packages
+- Provides reusable test patterns and snippets
 
 ## Test Environment Setup
 
-### Core Package Configuration (packages/core/vitest.config.ts)
+### Base Vitest Configuration (vitest.shared.ts)
 ```typescript
-import { defineConfig } from 'vitest/config'
-
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: 'node',
-    coverage: {
-      provider: 'istanbul',
-      reporter: ['text', 'json', 'html'],
-      all: true,
-      include: ['src/**/*.ts'],
-      exclude: ['src/**/*.d.ts', 'src/**/*.test.ts', 'src/**/*.spec.ts']
-    },
-    include: ['src/**/*.{test,spec}.ts']
-  }
-})
-```
-
-### UI Package Configuration (packages/ui/vitest.config.ts)
-```typescript
-import { defineConfig } from 'vite'
+import { defineConfig, mergeConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
-export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, './src'),
-      '@cv': resolve(__dirname, './src/modules/cv'),
-      '@shared': resolve(__dirname, './src/components/shared'),
-      '@stores': resolve(__dirname, './src/stores'),
-      '@composables': resolve(__dirname, './src/composables')
-    }
-  },
+const baseConfig = defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
-    include: [
-      'src/**/*.{test,spec}.{js,ts}',
-      'src/**/__tests__/*.{js,ts}'
-    ],
-    exclude: ['e2e/**/*', 'node_modules/**/*'],
     coverage: {
       provider: 'istanbul',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
       all: true,
       include: ['src/**/*.{vue,ts}'],
       exclude: [
@@ -80,191 +46,240 @@ export default defineConfig({
         'src/main.ts',
         'src/types/**/*'
       ]
+    },
+    reporters: ['default', 'html'],
+    include: [
+      'src/**/*.{test,spec}.{js,ts}',
+      'src/**/__tests__/*.{js,ts}'
+    ],
+    exclude: ['e2e/**/*', 'node_modules/**/*'],
+    pool: 'vmThreads',
+    maxThreads: 4,
+    minThreads: 1
+  }
+})
+
+export const createPackageConfig = (packagePath: string) => {
+  return mergeConfig(baseConfig, {
+    plugins: [vue()],
+    resolve: {
+      alias: {
+        '@': resolve(packagePath, './src'),
+        '@tests': resolve(packagePath, './tests'),
+        '@shared': resolve(packagePath, './src/shared'),
+        '@components': resolve(packagePath, './src/components'),
+        '@composables': resolve(packagePath, './src/composables'),
+        '@stores': resolve(packagePath, './src/stores')
+      }
     }
-  }
+  })
+}
+
+### Setup File (vitest.setup.ts)
+```typescript
+import { expect, vi, beforeAll, afterAll } from 'vitest'
+import { cleanup } from '@testing-library/vue'
+import matchers from '@testing-library/jest-dom/matchers'
+import { setActivePinia, createPinia } from 'pinia'
+import { config } from '@vue/test-utils'
+
+// Extend matchers
+expect.extend(matchers)
+
+// Global test setup
+beforeAll(() => {
+  // Mock ResizeObserver
+  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }))
+
+  // Mock IntersectionObserver
+  global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }))
 })
+
+// Global test cleanup
+afterAll(() => {
+  cleanup()
+})
+
+// Configure Vue Test Utils
+config.global.stubs = {
+  transition: false,
+  'router-link': true
+}
 ```
 
-## DDD Testing Patterns
+## Test Patterns Library
 
-### 1. Domain Layer Testing
-
-#### Value Objects Test Pattern
+### 1. Composable Test Pattern
 ```typescript
-// Phone.spec.ts
-describe('Phone Value Object', () => {
-  describe('create', () => {
-    it('should create a valid Phone with international format', () => {
-      const result = Phone.create('+33612345678')
-      expect(result.isSuccess).toBe(true)
-      if (!result.isSuccess) return
-      const phone = result.getValue()
-      expect(phone.toString()).toBe('+33612345678')
-    })
+// useFeature.spec.ts
+import { renderComposable } from '@tests/utils'
+import { useFeature } from './useFeature'
+import { describe, it, expect, beforeEach } from 'vitest'
 
-    it('should fail with invalid phone format', () => {
-      const result = Phone.create('invalid-phone')
-      expect(result.isFailure).toBe(true)
-      if (!result.isFailure) return
-      expect(result.error).toContain('Format de téléphone invalide')
-    })
-  })
-
-  describe('format', () => {
-    it('should format international number correctly', () => {
-      const phone = Phone.create('+33612345678').getValue()
-      expect(phone.format()).toBe('+33 61 23 45 67')
-    })
-  })
-})
-```
-
-#### Entity Test Pattern
-```typescript
-// Resume.spec.ts
-describe('Resume Entity', () => {
-  describe('create', () => {
-    it('should create a valid Resume', () => {
-      const result = Resume.create({
-        basics: {
-          name: 'John Doe',
-          email: 'john@example.com'
-        }
-      })
-      expect(result.isValid).toBe(true)
-      expect(result.resume).toBeDefined()
-    })
-
-    it('should validate email format', () => {
-      const result = Resume.create({
-        basics: {
-          name: 'John Doe',
-          email: 'invalid-email'
-        }
-      })
-      expect(result.isValid).toBe(false)
-      expect(result.errors).toContain('Format email invalide')
-    })
-  })
-})
-```
-
-### 2. Application Layer Testing
-
-#### Use Case Test Pattern
-```typescript
-// ManageResume.spec.ts
-describe('ManageResume Use Case', () => {
-  const mockRepository = {
-    load: vi.fn(),
-    save: vi.fn(),
-    export: vi.fn(),
-    import: vi.fn()
-  }
-
-  const useCase = new ManageResume(mockRepository)
-
+describe('useFeature', () => {
+  const { result } = renderComposable(() => useFeature())
+  
   beforeEach(() => {
-    vi.clearAllMocks()
+    // Reset state if needed
   })
 
-  describe('createResume', () => {
-    it('should create and save a valid resume', async () => {
-      const data = {
-        basics: {
-          name: 'John Doe',
-          email: 'john@example.com'
-        }
-      }
+  it('should initialize with default state', () => {
+    expect(result.value).toBeDefined()
+  })
 
-      await useCase.createResume(data)
+  it('should handle async operations', async () => {
+    await result.execute()
+    expect(result.data).toBeDefined()
+  })
 
-      expect(mockRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining(data)
-      )
-    })
+  it('should handle errors gracefully', async () => {
+    // Test error scenarios
   })
 })
 ```
 
-### 3. Infrastructure Layer Testing
-
-#### Repository Test Pattern
+### 2. Component Test Pattern
 ```typescript
-// LocalStorageResumeRepository.spec.ts
-describe('LocalStorageResumeRepository', () => {
-  const repository = new LocalStorageResumeRepository()
+// Feature.spec.ts
+import { render, screen, fireEvent } from '@testing-library/vue'
+import { createTestingPinia } from '@pinia/testing'
+import Feature from './Feature.vue'
 
-  beforeEach(() => {
-    localStorage.clear()
+describe('Feature.vue', () => {
+  const renderComponent = (props = {}) => {
+    return render(Feature, {
+      props,
+      global: {
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn
+          })
+        ]
+      }
+    })
+  }
+
+  it('should render correctly', () => {
+    const { container } = renderComponent()
+    expect(container).toMatchSnapshot()
   })
 
-  describe('save', () => {
-    it('should save resume to localStorage', async () => {
-      const data = {
-        basics: {
-          name: 'John Doe',
-          email: 'john@example.com'
-        }
-      }
-
-      await repository.save(data)
-
-      const stored = JSON.parse(localStorage.getItem('resume') || '')
-      expect(stored).toEqual(data)
-    })
+  it('should handle user interactions', async () => {
+    renderComponent()
+    await fireEvent.click(screen.getByRole('button'))
+    expect(screen.getByText('Updated')).toBeInTheDocument()
   })
 })
 ```
 
-### 4. UI Layer Testing
-
-#### Store Test Pattern
+### 3. Store Test Pattern
 ```typescript
-// resume.spec.ts
-describe('Resume Store', () => {
+// featureStore.spec.ts
+import { setActivePinia, createPinia } from 'pinia'
+import { useFeatureStore } from './featureStore'
+import { describe, it, expect, beforeEach } from 'vitest'
+
+describe('Feature Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    vi.clearAllMocks()
   })
 
-  describe('loadResume', () => {
-    it('should load resume successfully', async () => {
-      const store = useResumeStore()
-      const mockResume = createMockResume()
-      mockRepository.load.mockResolvedValue(mockResume)
+  it('should manage state correctly', () => {
+    const store = useFeatureStore()
+    expect(store.items).toEqual([])
+    store.addItem({ id: 1 })
+    expect(store.items).toHaveLength(1)
+  })
 
-      await store.loadResume()
-
-      expect(store.resume).toEqual(mockResume)
-      expect(store.loading).toBe(false)
-      expect(store.error).toBeNull()
-    })
+  it('should handle async actions', async () => {
+    const store = useFeatureStore()
+    await store.fetchItems()
+    expect(store.isLoading).toBe(false)
   })
 })
 ```
 
-#### Component Test Pattern
+### 4. API Test Pattern
 ```typescript
-// ResumeForm.spec.ts
-describe('ResumeForm.vue', () => {
-  it('should emit save event with valid data', async () => {
-    const wrapper = mount(ResumeForm, {
-      global: {
-        plugins: [createTestingPinia()]
-      }
+// api.spec.ts
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { api } from './api'
+
+describe('API Client', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should handle successful requests', async () => {
+    const mockData = { id: 1 }
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockData)
     })
 
-    await wrapper.find('[data-test="name-input"]').setValue('John Doe')
-    await wrapper.find('[data-test="email-input"]').setValue('john@example.com')
-    await wrapper.find('form').trigger('submit')
+    const result = await api.get('/endpoint')
+    expect(result).toEqual(mockData)
+  })
 
-    expect(wrapper.emitted('save')).toBeTruthy()
-    expect(wrapper.emitted('save')[0][0]).toEqual({
-      basics: {
-        name: 'John Doe',
-        email: 'john@example.com'
+  it('should handle errors', async () => {
+    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
+    await expect(api.get('/endpoint')).rejects.toThrow('Network error')
+  })
+})
+```
+
+### 5. Form Test Pattern
+```typescript
+// Form.spec.ts
+import { render, screen, fireEvent } from '@testing-library/vue'
+import { Form } from './Form.vue'
+
+describe('Form.vue', () => {
+  const submitHandler = vi.fn()
+
+  const renderForm = (props = {}) => {
+    return render(Form, {
+      props: {
+        onSubmit: submitHandler,
+        ...props
       }
+    })
+  }
+
+  it('should validate form inputs', async () => {
+    renderForm()
+    
+    await fireEvent.update(
+      screen.getByLabelText('Email'),
+      'invalid-email'
+    )
+    
+    await fireEvent.submit(screen.getByRole('form'))
+    
+    expect(screen.getByText('Invalid email')).toBeInTheDocument()
+    expect(submitHandler).not.toHaveBeenCalled()
+  })
+
+  it('should submit valid form data', async () => {
+    renderForm()
+    
+    await fireEvent.update(
+      screen.getByLabelText('Email'),
+      'test@example.com'
+    )
+    
+    await fireEvent.submit(screen.getByRole('form'))
+    
+    expect(submitHandler).toHaveBeenCalledWith({
+      email: 'test@example.com'
     })
   })
 })
@@ -283,6 +298,7 @@ describe('ResumeForm.vue', () => {
   - Application Layer: 100%
   - Infrastructure Layer: > 90%
   - UI Layer: > 90%
+  - Composables: 100%
 </critical>
 
 ### Test Organization
@@ -294,37 +310,43 @@ describe('ResumeForm.vue', () => {
 - Use beforeEach for common setup
 - Clear mocks between tests
 - Respect DDD layer boundaries in tests
+- Separate unit, integration, and e2e tests
+- Use test utilities for common operations
 
-### Mock Data Pattern
+### Test Utilities
 ```typescript
-// Domain Layer Mock
-const mockResumeData: ResumeInterface = {
-  basics: {
-    name: 'John Doe',
-    email: 'john@example.com'
+// @tests/utils/index.ts
+import { ref } from 'vue'
+import { flushPromises } from '@vue/test-utils'
+
+export const renderComposable = <T>(composable: () => T) => {
+  const result = ref<T>()
+  result.value = composable()
+  return { result }
+}
+
+export const waitForNextTick = async () => {
+  await new Promise(resolve => setTimeout(resolve, 0))
+}
+
+export const waitForAnimation = async () => {
+  await new Promise(resolve => setTimeout(resolve, 300))
+}
+
+export const mockApiResponse = (data: any) => {
+  return {
+    ok: true,
+    json: () => Promise.resolve(data)
   }
 }
 
-// Application Layer Mock
-const mockRepository: ResumeRepository = {
-  load: vi.fn(),
-  save: vi.fn(),
-  export: vi.fn(),
-  import: vi.fn()
-}
-
-// UI Layer Mock
-vi.mock('@cv-generator/core', () => ({
-  Resume: {
-    create: (data: ResumeInterface) => ({
-      isValid: true,
-      resume: {
-        ...data,
-        toJSON: () => ({ ...data })
-      }
-    })
+export const mockApiError = (status = 400, message = 'Error') => {
+  return {
+    ok: false,
+    status,
+    json: () => Promise.resolve({ message })
   }
-}))
+}
 ```
 
 ## Best Practices
@@ -344,6 +366,12 @@ vi.mock('@cv-generator/core', () => ({
 - Separate type and value imports
 - Respect DDD layer boundaries
 - Test error cases thoroughly
+- Use data-testid for test selectors
+- Avoid testing implementation details
+- Test component contracts and behaviors
+- Use snapshots sparingly
+- Mock time-based operations
+- Test accessibility requirements
 
 ## Performance Standards
 - Domain Layer tests: < 50ms per test
@@ -352,6 +380,10 @@ vi.mock('@cv-generator/core', () => ({
 - UI Layer tests: < 500ms per test
 - Full suite: < 2min
 - Watch mode for development
+- Parallel test execution
+- Efficient test setup and teardown
+- Minimal use of beforeAll/afterAll
+- Smart use of test.concurrent for parallel tests
 
 ## Continuous Integration
 - Run tests before commit
@@ -359,3 +391,8 @@ vi.mock('@cv-generator/core', () => ({
 - Regular test maintenance
 - Update tests when requirements change
 - Test all DDD layers independently
+- Automated test runs on PR
+- Performance monitoring
+- Test result reporting
+- Coverage reporting
+- Test timing analysis

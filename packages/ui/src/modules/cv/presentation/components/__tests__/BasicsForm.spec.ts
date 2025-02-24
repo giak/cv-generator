@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
-import BasicsForm from '../components/BasicsForm.vue'
+import BasicsForm from '../BasicsForm.vue'
 import { nextTick } from 'vue'
 
 const mockBasics: BasicsInterface = {

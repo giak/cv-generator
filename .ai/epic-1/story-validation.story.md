@@ -29,13 +29,13 @@ Story Points: 3
 
 ## Tasks
 
-1. - [ ] UI Layer Validation
+1. - [x] UI Layer Validation
 
-   1. - [ ] Write tests for field validation
-   2. - [ ] Implement useFieldValidation composable
-   3. - [ ] Write tests for form validation
-   4. - [ ] Implement useFormValidation composable
-   5. - [ ] Add validation feedback UI components
+   1. - [x] Write tests for field validation
+   2. - [x] Implement useFieldValidation composable
+   3. - [x] Write tests for form validation
+   4. - [x] Implement useFormValidation composable
+   5. - [x] Add validation feedback UI components
 
 2. - [ ] Application Layer Validation
 

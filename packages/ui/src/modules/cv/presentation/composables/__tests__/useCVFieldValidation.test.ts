@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { useFieldValidation } from '../../../composables/useFieldValidation';
+import { useFieldValidation as useCVFieldValidation } from '../useCVFieldValidation';
 import { z } from 'zod';
 import { nextTick } from 'vue';
 
-describe('useFieldValidation', () => {
+describe('useCVFieldValidation', () => {
   describe('String Validation', () => {
     it('should start with initial state', () => {
-      const validation = useFieldValidation(
+      const validation = useCVFieldValidation(
         z.string().min(2, "Le nom est requis")
       );
       expect(validation.error.value).toBe('');
@@ -15,7 +15,7 @@ describe('useFieldValidation', () => {
     });
 
     it('should validate valid string', async () => {
-      const validation = useFieldValidation(
+      const validation = useCVFieldValidation(
         z.string().min(2, "Le nom est requis")
       );
       validation.validate('John');
@@ -25,7 +25,7 @@ describe('useFieldValidation', () => {
     });
 
     it('should fail for too short string', async () => {
-      const validation = useFieldValidation(
+      const validation = useCVFieldValidation(
         z.string().min(2, "Le nom est requis")
       );
       validation.validate('a');
@@ -37,7 +37,7 @@ describe('useFieldValidation', () => {
 
   describe('Email Validation', () => {
     it('should validate email format', async () => {
-      const validation = useFieldValidation(
+      const validation = useCVFieldValidation(
         z.string().email("Format email invalide")
       );
 
@@ -53,7 +53,7 @@ describe('useFieldValidation', () => {
     });
 
     it('should handle empty email', async () => {
-      const validation = useFieldValidation(
+      const validation = useCVFieldValidation(
         z.string().email("Format email invalide")
       );
 
@@ -66,7 +66,7 @@ describe('useFieldValidation', () => {
 
   describe('Optional Fields', () => {
     it('should handle undefined value', async () => {
-      const validation = useFieldValidation(
+      const validation = useCVFieldValidation(
         z.string().min(2).optional()
       );
 
@@ -77,7 +77,7 @@ describe('useFieldValidation', () => {
     });
 
     it('should validate when value is provided', async () => {
-      const validation = useFieldValidation(
+      const validation = useCVFieldValidation(
         z.string().min(2).optional()
       );
 
@@ -95,7 +95,7 @@ describe('useFieldValidation', () => {
 
   describe('Debounce', () => {
     it('should debounce validation', async () => {
-      const validation = useFieldValidation(
+      const validation = useCVFieldValidation(
         z.string().min(2, "Le nom est requis"),
         { debounce: 100 }
       );
@@ -112,7 +112,7 @@ describe('useFieldValidation', () => {
 
   describe('Legacy Validation', () => {
     it('should validate required name field', () => {
-      const validation = useFieldValidation();
+      const validation = useCVFieldValidation();
       
       expect(validation.validateField('name', '')).toBe(false);
       expect(validation.errors.value.name).toBe('Le nom est requis');
@@ -122,7 +122,7 @@ describe('useFieldValidation', () => {
     });
 
     it('should validate email format', () => {
-      const validation = useFieldValidation();
+      const validation = useCVFieldValidation();
       
       expect(validation.validateField('email', 'invalid-email')).toBe(false);
       expect(validation.errors.value.email).toBe('Format email invalide');
@@ -132,7 +132,7 @@ describe('useFieldValidation', () => {
     });
 
     it('should validate form data', () => {
-      const validation = useFieldValidation();
+      const validation = useCVFieldValidation();
       const validData = {
         name: 'John Doe',
         email: 'john@example.com'
