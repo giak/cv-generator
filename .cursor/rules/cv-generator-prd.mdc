@@ -1,6 +1,13 @@
 ---
 description: DEFINE product requirements for CV Generator application with JSON Resume format support
-globs: src/**/*
+globs: 
+alwaysApply: false
+---
+---
+description: DEFINE product requirements for CV Generator application with JSON Resume format support
+tags: [cv, resume, json-resume, generator, web-app, vue3]
+priority: 1
+version: 1.2.0
 ---
 
 # Product Requirements Document (PRD) for CV Generator
@@ -103,182 +110,126 @@ Le CV Generator est une application web moderne dédiée à la création, la ges
 #### Core Features
 - Création et édition de CV au format JSON Resume
   - Import de fichiers JSON existants
-  - Validation du schéma JSON Resume
+  - Validation du schéma JSON Resume avec Zod
   - Édition structurée par sections
-  - Support de tous les champs du schéma
-- Système de templates personnalisables
-  - Templates prédéfinis respectant le schéma
-  - Personnalisation visuelle
-  - Prévisualisation en temps réel
-- Export multi-format
+  - Support des champs principaux du schéma
+- Validation des données
+  - Validation en temps réel des champs
+  - Messages d'erreur contextuels et localisés
+  - Validation complète avant sauvegarde
+- Sauvegarde et gestion des données
+  - Sauvegarde automatique locale
+  - Persistance entre les sessions
+  - Interface de gestion des versions
+- Export multi-format (future)
   - JSON (format source)
   - PDF haute qualité
-    - Mise en page professionnelle
-    - Support des polices personnalisées
-    - En-têtes et pieds de page
   - HTML responsive
-    - Optimisé pour l'impression
-    - SEO-friendly
-    - Microdata Schema.org
-- Gestion de versions des CV
-  - Historique des modifications
-  - Restauration de versions
-  - Comparaison de versions
-- Support multilingue
-  - Interface en plusieurs langues
-  - CV en plusieurs langues
-  - Détection automatique de la langue
 
 ### Non-Functional Requirements
 
 #### Performance
 - Temps de chargement initial < 2s
-- Temps de génération PDF < 5s
-- Support de 1000 utilisateurs simultanés
-- Disponibilité 99.9%
+- Réactivité de l'interface < 100ms
+- Support de sauvegarde locale efficace
+- Application optimisée pour les appareils mobiles
 
 #### Security
-- Chiffrement des données
-- Authentification OAuth2
+- Validation côté client et serveur
+- Protection des données personnelles
 - Conformité RGPD
-- Audit de sécurité régulier
 
 #### Technical Requirements
 - Architecture Clean/DDD
+- Structure monorepo multi-packages
 - Tests automatisés > 90%
 - Documentation technique complète
-- API RESTful documentée
 
 ## 4. Epic Structure
 
 ### Epic-1: Core CV Management (Current)
 - Implémentation du format JSON Resume
   - Validation du schéma avec Zod
-  - Import/Export JSON
   - Édition structurée
-- Éditeur de CV basique
-  - Interface par sections
-  - Validation temps réel
-  - Prévisualisation
+- Interface utilisateur principale
+  - Vue principale de l'application
+  - Formulaire de base pour les informations essentielles  
 - Validation des données
-  - Conformité au schéma
-  - Validation des URLs et emails
-  - Formats de dates
+  - Composables de validation
+  - Intégration avec la couche domaine
 - Sauvegarde locale
-  - LocalStorage
-  - IndexedDB
-  - Export JSON
+  - Persistance dans LocalStorage/IndexedDB
+  - Gestion d'état avec Pinia
 
-#### Story-1: Project Setup
-- Configuration de l'environnement Vue 3
-- Mise en place de Tailwind CSS
-- Configuration des tests
-- Setup CI/CD
+### Epic-2: Sections Avancées (Future)
+- Formulaires pour sections additionnelles
+  - Work experience
+  - Education
+  - Skills
+  - Projects
+- Interface d'ajout/suppression d'éléments
+- Validation avancée des dates et relations
 
-#### Story-2: JSON Resume Implementation
-- Définition des schémas Zod
-  ```typescript
-  // Exemple de schéma Zod pour la section basics
-  const basicsSchema = z.object({
-    name: z.string().min(1),
-    label: z.string().optional(),
-    image: z.string().url().optional(),
-    email: z.string().email(),
-    phone: z.string().optional(),
-    url: z.string().url().optional(),
-    summary: z.string().optional(),
-    location: z.object({
-      address: z.string().optional(),
-      postalCode: z.string().optional(),
-      city: z.string().optional(),
-      countryCode: z.string().length(2).optional(),
-      region: z.string().optional()
-    }).optional(),
-    profiles: z.array(z.object({
-      network: z.string(),
-      username: z.string(),
-      url: z.string().url()
-    })).optional()
-  })
-  ```
-- Validation des données
-  - Tests unitaires pour chaque section
-  - Validation des formats
-  - Messages d'erreur localisés
-- Documentation du schéma
-  - Documentation technique
-  - Guide d'utilisation
-  - Exemples
+### Epic-3: Import/Export (Future)
+- Import de formats externes
+  - JSON Resume existant
+  - LinkedIn data
+  - PDF parsing
+- Export vers différents formats
+  - PDF configurable
+  - HTML responsive
+  - JSON standard
 
-#### Story-3: Basic Editor
-- Interface d'édition
-  - Formulaires par section
-  - Validation temps réel
-  - Aide contextuelle
-- Validation temps réel
-  - Feedback immédiat
-  - Suggestions de correction
-  - Indicateurs de complétion
-- Import/Export
-  - Upload JSON
-  - Validation du format
-  - Export basique
-- Tests d'intégration
-  - Scénarios d'import/export
-  - Validation des données
-  - Tests UI/UX
-
-### Epic-2: User System (Future)
-[Stories à détailler lors de l'activation de l'Epic]
-
-### Epic-3: Template Engine (Future)
+### Epic-4: Templates et Personnalisation (Future)
 - Système de templates
-- Personnalisation
-- Prévisualisation live
-- Responsive design
+- Prévisualisation en temps réel
+- Personnalisation des couleurs et polices
 
-### Epic-4: Export System (Future)
-- Export PDF
-- Export HTML
-- Optimisation pour l'impression
-- Gestion des métadonnées
-
-### Epic-5: Advanced Features (Future)
-- Import LinkedIn
-- Suggestions IA
-- Analytics
-- Partage et collaboration
+### Epic-5: Stockage Cloud et Partage (Future)
+- Authentification utilisateur
+- Stockage cloud des CV
+- Partage de CV via URL
 
 ## 5. Story List
 
 ### Epic-1: Core CV Management (Current)
 
-#### Story-1: Project Setup
-- Configuration de l'environnement Vue 3
+#### Story-1: Project Setup (Complete)
+- Configuration du monorepo avec pnpm
+- Structure des packages Core, UI, Shared
+- Configuration TypeScript, ESLint, Prettier
+- Setup des tests avec Vitest
 - Mise en place de Tailwind CSS
-- Configuration des tests
-- Setup CI/CD
 
-#### Story-2: JSON Resume Implementation
-- Définition des schémas Zod
-- Validation des données
-- Tests unitaires
-- Documentation
+#### Story-2: Domain Models (Complete)
+- Définition des interfaces du CV
+- Implémentation des schémas Zod
+- Création des entités du domaine (Resume)
+- Tests unitaires pour les modèles
 
-#### Story-3: Basic Editor
-- Interface d'édition
-- Validation temps réel
-- Sauvegarde automatique
+#### Story-3: Basics Form Implementation (Complete)
+- Interface du formulaire pour informations de base
+- Composants de formulaire réutilisables
+- Validation en temps réel des champs
+- Tests des composants
+
+#### Story-4: Data Management (In Progress)
+- Store Pinia pour la gestion d'état
+- Implémentation du use case ManageResume
+- Repository pour la persistence locale
 - Tests d'intégration
 
-#### Story-4: Data Management
-- Store Pinia
-- Gestion d'état
-- Persistence locale
-- Tests de performance
+#### Story-5: User Experience Improvements (Planned)
+- Feedback visuel sur les actions
+- Gestion des erreurs utilisateur
+- Accessibilité (ARIA, contraste, navigation clavier)
+- Support mobile responsive
 
-### Epic-2: User System (Future)
-[Stories à détailler lors de l'activation de l'Epic]
+### Epic-2: Sections Avancées (Future)
+- Story-6: Work Experience Form
+- Story-7: Education Form
+- Story-8: Skills Interface
+- Story-9: Navigation Between Sections
 
 ## 6. Future Enhancements
 
@@ -296,42 +247,77 @@ Le CV Generator est une application web moderne dédiée à la création, la ges
 
 ## 7. Technical Architecture
 
-### Frontend
-- Vue 3.4+ avec Composition API
+### Architecture Overview
+```mermaid
+graph TD
+    subgraph UI["UI Layer (Vue.js)"]
+        C1[Components]
+        S1[Stores]
+        COM[Composables]
+    end
+
+    subgraph APP["Application Layer"]
+        UC[Use Cases]
+        SVC[Services]
+    end
+
+    subgraph DOM["Domain Layer"]
+        E[Entities]
+        VO[Value Objects]
+        R[Repository Interfaces]
+    end
+
+    subgraph INF["Infrastructure Layer"]
+        LS[LocalStorage]
+        EXP[Export Services]
+        REP[Repository Implementations]
+    end
+
+    C1 --> S1
+    S1 --> UC
+    COM --> UC
+    UC --> E
+    UC --> R
+    E --> VO
+    REP --> R
+    REP --> LS
+    EXP --> UC
+```
+
+### Technical Stack
+- Vue 3 avec Composition API
 - TypeScript 5.7+
 - Tailwind CSS 4
 - Pinia pour la gestion d'état
+- Zod pour la validation
+- Vitest pour les tests
+- Architecture Clean/DDD
 
 ### Build & Quality
-- Vite 6+ pour le bundling
-- Vitest pour les tests
-- Playwright pour les E2E
-- GitLab CI pour le CI/CD
-
-### Performance & Security
-- Optimisation des assets
-- Lazy loading
-- Protection XSS
-- Audit de dépendances
+- Vite pour le bundling
+- ESLint et Prettier pour le linting
+- Vitest pour les tests unitaires
+- Playwright pour les tests E2E
+- GitHub Actions pour CI/CD
 
 ## 8. Timeline & Milestones
 
-### Phase 1: Q1 2025
-- Setup du projet
-- Implémentation core
-- Tests fondamentaux
+### Phase 1: Q3 2024
+- Implémentation de l'Epic-1
+- Tests de base
+- Premier prototype fonctionnel
 
-### Phase 2: Q2 2025
-- Système utilisateur
-- Sauvegarde cloud
-- Templates basiques
+### Phase 2: Q4 2024
+- Implémentation de l'Epic-2
+- Complétion des formulaires pour toutes les sections
+- Tests d'utilisabilité
 
-### Phase 3: Q3 2025
-- Export avancé
-- Templates premium
-- Analytics
+### Phase 3: Q1 2025
+- Epic-3: Système d'import/export
+- Intégration avec services externes
+- Optimisation des performances
 
-### Phase 4: Q4 2025
-- Fonctionnalités IA
-- Marketplace
-- Intégrations externes 
+### Phase 4: Q2 2025
+- Epic-4 et Epic-5
+- Lancement beta public
+- Feedback des premiers utilisateurs

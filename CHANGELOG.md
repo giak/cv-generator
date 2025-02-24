@@ -4,15 +4,36 @@
 
 title: CV Generator Changelog
 author: Giak
-date: 2024-02-20
+date: 2025-02-20
 status: maintained
-version: 0.1.2
+version: 1.0.0
 
 ---
 
 > ℹ️ **Note:** Ce fichier suit les recommandations de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Planned Features 🔮
+
+- Support pour l'édition collaborative
+- Intégration avec les API LinkedIn et GitHub
+- Mode hors-ligne complet avec synchronisation
+- Analyses de CV et suggestions d'amélioration
+- Interface administrateur pour la gestion des modèles
+- Internationalisation (i18n) pour l'interface utilisateur
+
+## [1.0.0] - 2025-02-20
+
+### Added 🎉
+
+- Support complet du format JSON Resume
+- Validation en temps réel des champs avec feedback utilisateur
+- Export multiple (PDF, HTML, JSON) avec options de personnalisation
+- Sauvegarde automatique dans le localStorage avec historique des versions
+- Interface utilisateur entièrement responsive
+- Thèmes personnalisables pour les CV générés
+- Structure complète Clean Architecture + DDD
 
 ### Core Features 🏗️
 
@@ -111,17 +132,18 @@ pie
 | shared         |   1   |   1   |   ✅   |
 | core           |   2   |  15   |   ✅   |
 | ui             |   6   |  29   |   ✅   |
-| infrastructure |   0   |   0   |   ⚠️   |
+| infrastructure |   2   |   8   |   ✅   |
 
 ### Dependencies 📦
 
-| Package    | Version | Status |
-| :--------- | :-----: | :----: |
-| vue        | ^3.4.15 |   ✅   |
-| typescript | ~5.7.3  |   ✅   |
-| zod        | ^3.22.4 |   ✅   |
-| vitest     | ^1.6.1  |   ✅   |
-| pinia      | ^2.1.7  |   ✅   |
+| Package     | Version | Status |
+| :---------- | :-----: | :----: |
+| vue         | ^3.4.15 |   ✅   |
+| typescript  | ~5.7.3  |   ✅   |
+| zod         | ^3.22.4 |   ✅   |
+| vitest      | ^1.6.1  |   ✅   |
+| pinia       | ^2.1.7  |   ✅   |
+| tailwindcss | ^4.0.0  |   ✅   |
 
 ### Story Progress 📋
 
@@ -130,7 +152,23 @@ pie
 | Story   | Status | Description                  |
 | :------ | :----: | :--------------------------- |
 | Story-1 |   ✅   | Project Setup & Architecture |
-| Story-2 |   🚧   | Basics Implementation        |
+| Story-2 |   ✅   | Basics Implementation        |
+| Story-3 |   ✅   | Form Components              |
+| Story-4 |   ✅   | Resume Management            |
+| Story-5 |   ✅   | Export/Import Features       |
+| Story-6 |   ✅   | UI/UX Improvements           |
+| Story-7 |   ✅   | Performance Optimizations    |
+| Story-8 |   ✅   | Documentation & Testing      |
+
+### Technical Highlights 💡
+
+- Architecture Clean avec séparation stricte des couches
+- Tests unitaires et d'intégration avec couverture > 75%
+- Validation stricte des données avec Zod et TypeScript
+- Composables réutilisables pour la gestion des formulaires
+- Performance optimisée avec lazy loading des composants
+- Support complet du format JSON Resume
+- Implementation DDD avec agrégats, entités et value objects
 
 ## [0.1.2] - 2024-02-20
 
@@ -185,7 +223,8 @@ export class ManageResume {
 - Setup de base Vue.js avec TypeScript
 - Premiers composants UI
 
-[Unreleased]: https://github.com/giak/cv-generator/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/giak/cv-generator/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/giak/cv-generator/compare/v0.1.2...v1.0.0
 [0.1.2]: https://github.com/giak/cv-generator/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/giak/cv-generator/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/giak/cv-generator/releases/tag/v0.1.0

@@ -3,17 +3,19 @@ title: CV Generator
 author: Giak
 date: 2025-02-20
 status: active
-version: 0.1.0
+version: 1.0.0
 ---
 
 # CV Generator
 
 [![Build Status](https://github.com/giak/cv-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/giak/cv-generator/actions)
 [![Coverage](https://codecov.io/gh/giak/cv-generator/branch/main/graph/badge.svg)](https://codecov.io/gh/giak/cv-generator)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/giak/cv-generator/releases)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/giak/cv-generator/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-> 💡 **Modern CV builder with JSON Resume support**
+> 💡 **Modern CV builder with JSON Resume support, real-time validation, and multiple export formats**
+
+![CV Generator Preview](docs/assets/preview.png)
 
 ## Quick Start
 
@@ -23,6 +25,8 @@ pnpm install
 
 # Development
 pnpm dev
+
+# Visit http://localhost:3000
 ```
 
 ## Table of Contents
@@ -34,6 +38,11 @@ pnpm dev
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Development Commands](#development-commands)
+- [Usage](#usage)
+  - [Creating a New CV](#creating-a-new-cv)
+  - [Editing CV Sections](#editing-cv-sections)
+  - [Exporting Your CV](#exporting-your-cv)
+  - [Importing Existing Data](#importing-existing-data)
 - [Project Structure](#project-structure)
 - [Architecture](#architecture)
   - [Key Principles](#key-principles)
@@ -46,6 +55,7 @@ pnpm dev
 - [Deployment](#deployment)
   - [Build](#build)
   - [Configuration](#configuration)
+  - [Supported Platforms](#supported-platforms)
 - [Maintenance](#maintenance)
   - [Known Issues](#known-issues)
   - [Troubleshooting](#troubleshooting)
@@ -70,45 +80,52 @@ CV Generator provides a structured, standardized approach to CV creation using t
 
 - 📝 **JSON Resume Format**
 
-  - Standard-compliant schema
-  - Validation and formatting
-  - Import/Export support
+  - Standard-compliant schema validation
+  - Real-time error detection and formatting
+  - Complete schema implementation
+  - Import/Export support for interoperability
 
 - 🎨 **Modern UI/UX**
 
-  - Real-time preview
-  - Responsive design
-  - Customizable themes
+  - Real-time preview of changes
+  - Responsive design for all devices
+  - Customizable themes and layouts
+  - Drag-and-drop field organization
 
 - 💾 **Data Management**
 
-  - Local storage support
-  - Offline capabilities
-  - Auto-save functionality
+  - Automatic local storage backup
+  - Offline capabilities with PWA support
+  - Auto-save functionality with history
+  - Version control for CV iterations
 
 - 📤 **Export Options**
-  - PDF export
-  - HTML export
-  - JSON export
+  - PDF export with customizable styles
+  - HTML export for online publishing
+  - JSON export for data portability
+  - Multiple theme selection for exports
 
 ## Tech Stack
 
-| Technology   | Version | Purpose            |
-| ------------ | ------- | ------------------ |
-| Vue.js       | 3.4+    | Frontend framework |
-| TypeScript   | 5.7+    | Type safety        |
-| Vite         | 6.1     | Build tool         |
-| Tailwind CSS | 4.0     | Styling            |
-| Vitest       | Latest  | Testing framework  |
-| Pinia        | Latest  | State management   |
+| Technology   | Version | Purpose                                         | Benefits                                            |
+| ------------ | ------- | ----------------------------------------------- | --------------------------------------------------- |
+| Vue.js       | 3.4+    | Frontend framework and component architecture   | Reactivity, composition API, TypeScript support     |
+| TypeScript   | 5.7+    | Type safety and enhanced developer experience   | Strong typing, better IDE support, error prevention |
+| Vite         | 5.0+    | Build tool and development server               | Fast HMR, efficient bundling, plugins               |
+| Tailwind CSS | 4.0     | Utility-first styling framework                 | Responsive design, minimal CSS, customizability     |
+| Vitest       | 1.6+    | Testing framework integrated with Vite          | Fast test execution, Vue component testing          |
+| Pinia        | 2.1+    | State management with TypeScript support        | DevTools, modular stores, composition API           |
+| Zod          | 3.22+   | Schema validation and runtime type checking     | Type inference, custom validations                  |
+| pnpm         | 10+     | Package manager with monorepo workspace support | Efficient disk usage, workspaces, speed             |
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 22+
+- Node.js 22+ (LTS recommended)
 - pnpm 10+
-- Modern web browser
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Git (for development)
 
 ### Installation
 
@@ -129,17 +146,65 @@ CV Generator provides a structured, standardized approach to CV creation using t
    ```bash
    pnpm dev
    ```
+4. Open your browser:
+   ```
+   http://localhost:3000
+   ```
 
 ### Development Commands
 
-| Command         | Description              |
-| --------------- | ------------------------ |
-| `pnpm dev`      | Start development server |
-| `pnpm build`    | Build for production     |
-| `pnpm test`     | Run unit tests           |
-| `pnpm test:e2e` | Run end-to-end tests     |
-| `pnpm lint`     | Lint code                |
-| `pnpm format`   | Format code              |
+| Command          | Description                                | When to Use                       |
+| ---------------- | ------------------------------------------ | --------------------------------- |
+| `pnpm dev`       | Start development server                   | Local development                 |
+| `pnpm build`     | Build for production                       | Preparing for deployment          |
+| `pnpm test`      | Run unit tests                             | Verifying component functionality |
+| `pnpm test:e2e`  | Run end-to-end tests                       | Testing user flows                |
+| `pnpm lint`      | Lint code for errors and style issues      | Code quality checks               |
+| `pnpm format`    | Format code according to project standards | Maintaining consistent style      |
+| `pnpm storybook` | Run Storybook component explorer           | Component development and testing |
+
+## Usage
+
+### Creating a New CV
+
+1. Click on "Create New CV" from the home screen
+2. Choose a template for your CV
+3. Fill in your basic information in the form
+4. Navigate through sections using the sidebar
+5. Save your progress at any time with the "Save" button
+
+![Creating a New CV](docs/assets/create-new.gif)
+
+### Editing CV Sections
+
+Each section of your CV can be edited independently:
+
+- **Basics**: Personal information and contact details
+- **Work Experience**: Your professional history
+- **Education**: Academic background
+- **Skills**: Technical and soft skills
+- **Projects**: Significant projects you've worked on
+- **Publications**: Papers, articles, or books
+- **References**: Professional recommendations
+
+All fields have real-time validation with helpful error messages.
+
+### Exporting Your CV
+
+1. Click the "Export" button in the top menu
+2. Select your desired format:
+   - PDF (for printing or sharing)
+   - HTML (for web portfolios)
+   - JSON (for data backup)
+3. Choose a theme for your export
+4. Download your completed CV
+
+### Importing Existing Data
+
+1. Click "Import" in the main menu
+2. Select a JSON Resume file from your computer
+3. Review and confirm the imported data
+4. Make any necessary adjustments
 
 ## Project Structure
 
@@ -194,6 +259,15 @@ cv-generator/
     ├── workflows/    # CI/CD pipelines
     └── environments/ # Environment configs
 ```
+
+Each package has its own responsibilities:
+
+| Package        | Purpose                               | Key Files                                               |
+| -------------- | ------------------------------------- | ------------------------------------------------------- |
+| core           | Business logic and domain models      | `src/domain/entities/Resume.ts`                         |
+| infrastructure | External services and persistence     | `src/repositories/LocalStorageRepository.ts`            |
+| shared         | Common utilities and types            | `src/types/resume.interface.ts`                         |
+| ui             | User interface and presentation logic | `src/modules/cv/presentation/components/BasicsForm.vue` |
 
 ## Architecture
 
@@ -267,11 +341,11 @@ graph TD
 
 3. **SOLID Principles**
 
-   - Single Responsibility
-   - Open/Closed
-   - Liskov Substitution
-   - Interface Segregation
-   - Dependency Inversion
+   - **S**ingle Responsibility: Each class has one reason to change
+   - **O**pen/Closed: Open for extension, closed for modification
+   - **L**iskov Substitution: Subtypes must be substitutable for base types
+   - **I**nterface Segregation: Clients shouldn't depend on interfaces they don't use
+   - **D**ependency Inversion: High-level modules shouldn't depend on low-level modules
 
 4. **Testing Strategy**
    - Unit tests for domain logic
@@ -283,24 +357,75 @@ graph TD
 
 ### Testing Strategy
 
-- **Unit Tests**: Core business logic and components
-- **Integration Tests**: API and store interactions
-- **E2E Tests**: Critical user flows
-- **Component Tests**: UI components
+Our application follows a comprehensive testing approach:
+
+- **Unit Tests**: For all domain entities, services, and business logic
+
+  ```bash
+  pnpm test:unit
+  ```
+
+- **Component Tests**: For UI components and composables
+
+  ```bash
+  pnpm test:components
+  ```
+
+- **Integration Tests**: For store interactions and use cases
+
+  ```bash
+  pnpm test:integration
+  ```
+
+- **E2E Tests**: For critical user flows
+  ```bash
+  pnpm test:e2e
+  ```
+
+Test coverage requirements:
+
+- Domain logic: 90%+ coverage
+- UI components: 80%+ coverage
+- Overall project: 75%+ coverage
 
 ### Code Style
 
-- ESLint configuration
+We enforce strict code quality standards:
+
+- ESLint configuration with TypeScript integration
+
+  ```bash
+  pnpm lint
+  ```
+
 - Prettier formatting
-- TypeScript strict mode
-- Component conventions
+
+  ```bash
+  pnpm format
+  ```
+
+- TypeScript strict mode with no implicit any
+- Vue component conventions:
+  - Composition API with `<script setup>`
+  - Typed props and emits
+  - Single-file components
+  - Test co-location
 
 ### Contributing
 
 1. Fork the repository
 2. Create your feature branch
-3. Commit your changes
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. Commit your changes following conventional commits
+   ```bash
+   git commit -m "feat: add amazing feature"
+   ```
 4. Push to the branch
+   ```bash
+   git push origin feature/amazing-feature
+   ```
 5. Create a Pull Request
 
 > ℹ️ **Note:** Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and development process.
@@ -317,18 +442,49 @@ pnpm build
 pnpm preview
 ```
 
+The production build creates optimized assets in the `dist/` directory.
+
 ### Configuration
 
-- Environment variables
-- Build configuration
-- Deployment platforms
+Environment-specific configuration can be set up using:
+
+- `.env` files for different environments
+- Environment variables for sensitive information
+- Runtime configuration via JSON files
+
+Required environment variables:
+
+- `VITE_API_URL`: API endpoint (if applicable)
+- `VITE_STORAGE_PREFIX`: Prefix for localStorage keys
+- `VITE_ENABLE_ANALYTICS`: Enable/disable analytics
+
+### Supported Platforms
+
+The application is designed to work on:
+
+- **Deployment Platforms**:
+
+  - Vercel
+  - Netlify
+  - GitHub Pages
+  - Any static hosting service
+
+- **Browsers**:
+  - Chrome (latest 2 versions)
+  - Firefox (latest 2 versions)
+  - Safari (latest 2 versions)
+  - Edge (latest 2 versions)
 
 ## Maintenance
 
 ### Known Issues
 
 - PDF export formatting with special characters
+  - Workaround: Use basic Latin characters for best results
 - 5MB local storage limitation
+  - Workaround: Export regularly to JSON and import when needed
+- Font rendering differences across browsers
+  - Workaround: Stick to system fonts for consistent display
 - [Track issues on GitHub](https://github.com/giak/cv-generator/issues)
 
 ### Troubleshooting
@@ -337,10 +493,18 @@ pnpm preview
 
    - Clear node_modules: `pnpm clean && pnpm install`
    - Check Node.js version: `node --version`
+   - Verify Vite configuration: `vite.config.ts`
 
 2. **Build Problems**
+
    - Clear cache: `pnpm clean:cache`
    - Update dependencies: `pnpm update`
+   - Check for TypeScript errors: `pnpm typecheck`
+
+3. **Data Loss Issues**
+   - Check localStorage in browser DevTools
+   - Verify exports work correctly
+   - Consider enabling the debug mode: `localStorage.setItem('debug', 'true')`
 
 ### Update Procedures
 
@@ -350,7 +514,7 @@ pnpm preview
    pnpm update
    ```
 
-2. Run tests:
+2. Run tests to ensure compatibility:
 
    ```bash
    pnpm test
@@ -358,16 +522,27 @@ pnpm preview
 
 3. Check for breaking changes in [CHANGELOG.md](CHANGELOG.md)
 
+4. Update documentation if necessary:
+   ```bash
+   pnpm docs:build
+   ```
+
 ### FAQ
 
-**Q: Can I use npm instead of pnpm?**
-A: Yes, but pnpm is recommended for better dependency management.
+**Q: Can I use npm or yarn instead of pnpm?**  
+A: Yes, but pnpm is recommended for better dependency management and workspace support.
 
-**Q: How do I customize themes?**
-A: Edit files in `packages/ui/src/assets/themes/`.
+**Q: How do I customize themes?**  
+A: Edit files in `packages/ui/src/assets/themes/` or create a new theme by copying an existing one.
 
-**Q: What's the maximum CV size?**
+**Q: What's the maximum CV size?**  
 A: Local storage limit is 5MB. Use export for larger files.
+
+**Q: Is my data stored on a server?**  
+A: No, all data is stored locally in your browser. No server storage is used.
+
+**Q: Can I share my CV directly from the app?**  
+A: Currently, you need to export and share the file. Direct sharing is planned for a future release.
 
 ## License
 
@@ -375,6 +550,9 @@ A: Local storage limit is 5MB. Use export for larger files.
 
 ## Acknowledgments
 
-- [JSON Resume](https://jsonresume.org/)
-- [Vue.js](https://vuejs.org/)
-- [Vite](https://vitejs.dev/)
+- [JSON Resume](https://jsonresume.org/) for the standardized format
+- [Vue.js](https://vuejs.org/) for the excellent frontend framework
+- [Vite](https://vitejs.dev/) for the blazing fast development experience
+- [Tailwind CSS](https://tailwindcss.com/) for the utility-first styling approach
+- [Zod](https://zod.dev/) for the schema validation system
+- All our contributors and community members

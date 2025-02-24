@@ -2,7 +2,7 @@
 
 # Story-3: Implement Validation Strategy
 
-## Story
+## Story Description
 
 **As a** developer
 **I want** to implement a robust validation strategy across all layers
@@ -23,9 +23,11 @@ The CV Generator needs a comprehensive validation strategy that works across all
 
 Previous stories have established the basic form structure and data flow. This story focuses on implementing the validation strategy.
 
+The validation strategy should align with the Clean Architecture principles defined in our project standards and follow SOLID principles. It will leverage Zod for schema validation as specified in our technical stack.
+
 ## Estimation
 
-Story Points: 3
+Story Points: 3 (1 SP = 1 day of Human Development = 10 minutes of AI development)
 
 ## Tasks
 
@@ -55,9 +57,15 @@ Story Points: 3
    2. - [ ] Implement schema validation
    3. - [ ] Add storage constraint checks
 
-## Implementation Details
+## Constraints
 
-### Data Models
+- Must follow TDD practices as defined in 003-tdd-workflow.mdc
+- Validation implementation must respect Clean Architecture layers
+- User feedback must be immediate and contextual for optimal UX
+- CSS styling must follow Tailwind standards defined in 2001-tailwind-vue3.mdc
+- Must validate against the JSON Resume schema
+
+## Data Models / Schema
 
 ```typescript
 import { z } from "zod";
@@ -99,7 +107,7 @@ export const resumeSchema = z.object({
 export type ResumeType = z.infer<typeof resumeSchema>;
 ```
 
-### Structure
+## Structure
 
 ```
 src/
@@ -120,6 +128,8 @@ src/
     └── repositories/
         └── LocalStorageResumeRepository.ts
 ```
+
+## Diagrams
 
 ### Validation Flow
 
@@ -152,9 +162,9 @@ sequenceDiagram
     end
 ```
 
-### Implementation Patterns
+## Implementation Patterns
 
-1. **Domain Layer (Value Objects & Entities)**
+### 1. Domain Layer (Value Objects & Entities)
 
 ```typescript
 // domain/value-objects/Email.ts
@@ -221,7 +231,7 @@ export class Resume extends AggregateRoot {
 }
 ```
 
-2. **Application Layer (Use Cases)**
+### 2. Application Layer (Use Cases)
 
 ```typescript
 // application/use-cases/CreateResume.ts
@@ -269,7 +279,7 @@ export class ResumeValidator {
 }
 ```
 
-3. **Presentation Layer (Vue Components & Composables)**
+### 3. Presentation Layer (Vue Components & Composables)
 
 ```typescript
 // presentation/composables/useFieldValidation.ts
@@ -320,7 +330,7 @@ export default defineComponent({
 });
 ```
 
-4. **Infrastructure Layer (Repositories & Adapters)**
+### 4. Infrastructure Layer (Repositories & Adapters)
 
 ```typescript
 // infrastructure/repositories/LocalStorageResumeRepository.ts
@@ -391,3 +401,5 @@ export class LocalStorageResumeRepository implements ResumeRepository {
 - User: Demande de création d'une story pour la stratégie de validation
 - Agent: Création de la story avec une approche complète de la validation
 - User: Demande de vérification du format et des redondances
+- User: Mise à jour de la story selon le standard 903-story.mdc
+- Agent: Restructuration du document pour respecter le standard tout en préservant le contenu
