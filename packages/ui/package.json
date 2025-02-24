@@ -38,9 +38,12 @@
     "@cv-generator/core": "workspace:*",
     "@cv-generator/infrastructure": "workspace:*",
     "@cv-generator/shared": "workspace:*",
+    "@types/lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "pinia": "^2.1.7",
     "vue": "^3.4.15",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@pinia/testing": "^1.0.0",

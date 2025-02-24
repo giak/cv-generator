@@ -4,8 +4,17 @@ export class Phone {
   private constructor(private readonly value: string) {}
 
   static create(phone: string): Result<Phone> {
-    // Temporairement désactivé pour le développement
-    return Result.ok(new Phone(phone))
+    if (!phone) {
+      return Result.fail('Format de téléphone invalide')
+    }
+
+    const cleanedPhone = phone.replace(/[\s.-]/g, '')
+    const phoneRegex = /^(?:\+\d{2}|0)\d{9}$/
+    if (!phoneRegex.test(cleanedPhone)) {
+      return Result.fail('Format de téléphone invalide')
+    }
+
+    return Result.ok(new Phone(cleanedPhone))
   }
 
   format(): string {

@@ -35,6 +35,7 @@ const formModel = computed(() => ({
 }))
 
 const { errors, validateField, validateForm } = useFieldValidation()
+const { updateField } = useModelUpdate({ emit, modelValue: computed(() => props.modelValue) })
 
 // Update field handler
 const handleFieldUpdate = (field: keyof BasicsInterface, value: string) => {
@@ -52,7 +53,7 @@ const handleFieldUpdate = (field: keyof BasicsInterface, value: string) => {
   }
   
   console.log('Emitting update with data:', updatedData)
-  emit('update:modelValue', updatedData)
+  updateField(field, value)
 }
 
 // Validate form before emitting validate event

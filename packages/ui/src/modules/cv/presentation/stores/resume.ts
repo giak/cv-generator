@@ -36,6 +36,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
     async loadResume() {
       console.log('=== [Store] loadResume ===')
       loading.value = true
+      error.value = null
       
       try {
         const result = await useCase.loadResume()
@@ -45,6 +46,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
         console.error('[Store] Failed to load resume:', err)
         error.value = err instanceof Error ? err : new Error('Failed to load resume')
         resume.value = null
+        throw error.value
       } finally {
         loading.value = false
       }
@@ -54,6 +56,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
       console.log('=== [Store] saveResume ===')
       console.log('[Store] Received data:', data)
       loading.value = true
+      error.value = null
       
       try {
         // Nettoyer les données avant de créer l'instance
@@ -63,7 +66,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
             email: data.basics.email || '',
             label: data.basics.label || '',
             phone: data.basics.phone || '',
-            url: data.basics.url || '',  // Utiliser une chaîne vide au lieu de null
+            url: data.basics.url || '',
             summary: data.basics.summary || '',
             location: data.basics.location ? {
               address: data.basics.location.address || '',
@@ -90,12 +93,9 @@ export const useResumeStore = defineStore("cv.resume", () => {
         console.log('[Store] Created Resume instance:', resumeInstance)
 
         if (resumeInstance.resume) {
-          await useCase.createResume(resumeInstance.resume)
+          await useCase.createResume(resumeInstance.resume.toJSON())
           console.log('[Store] Resume saved successfully')
-          
-          const loadedResume = await useCase.loadResume()
-          console.log('[Store] Reloaded resume:', loadedResume)
-          resume.value = loadedResume
+          resume.value = resumeInstance.resume
         } else {
           throw new Error('Failed to create Resume instance')
         }

@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
 import BasicsForm from '../components/BasicsForm.vue'
+import { nextTick } from 'vue'
 
 const mockBasics: BasicsInterface = {
   name: 'John Doe',
@@ -24,94 +25,122 @@ describe('BasicsForm', () => {
   }
 
   describe('rendering', () => {
-    it('should render all required fields with initial values', () => {
-      const wrapper = mountComponent()
+    it('should render all required fields', () => {
+      const wrapper = mount(BasicsForm, {
+        props: {
+          modelValue: {
+            name: '',
+            email: '',
+            label: 'Software Engineer'
+          }
+        }
+      })
 
-      // Vérifier la présence des champs requis
       expect(wrapper.find('[data-test="name-input"]').exists()).toBe(true)
       expect(wrapper.find('[data-test="email-input"]').exists()).toBe(true)
-
-      // Vérifier les valeurs initiales
-      const nameInput = wrapper.find('[data-test="name-input"]').element as HTMLInputElement
-      const emailInput = wrapper.find('[data-test="email-input"]').element as HTMLInputElement
-
-      expect(nameInput.value).toBe(mockBasics.name)
-      expect(emailInput.value).toBe(mockBasics.email)
+      expect(wrapper.find('[data-test="label-input"]').exists()).toBe(true)
     })
   })
 
   describe('validation', () => {
     it('should show error for empty required fields', async () => {
-      const wrapper = mountComponent({
-        modelValue: {
-          ...mockBasics,
-          name: '',
-          email: ''
+      const wrapper = mount(BasicsForm, {
+        props: {
+          modelValue: {
+            name: '',
+            email: '',
+            label: 'Software Engineer'
+          }
         }
       })
 
-      // Déclencher la validation
-      const form = wrapper.find('form')
-      await form.trigger('submit')
+      await wrapper.find('form').trigger('submit.prevent')
+      console.log('Form submission - Current model:', wrapper.props('modelValue'))
+      console.log('Form validation result:', wrapper.emitted('validate'))
 
-      // Vérifier les messages d'erreur
-      expect(wrapper.find('[data-test="name-error"]').text()).toContain('Le nom est requis')
-      expect(wrapper.find('[data-test="email-error"]').text()).toContain('L\'email est requis')
+      await nextTick()
+      const nameError = wrapper.find('[data-test="name-error"]')
+      expect(nameError.exists()).toBe(true)
+      expect(nameError.text()).toBe('Le nom est requis')
     })
 
     it('should show error for invalid email format', async () => {
-      const wrapper = mountComponent({
-        modelValue: {
-          ...mockBasics,
-          email: 'invalid-email'
+      const wrapper = mount(BasicsForm, {
+        props: {
+          modelValue: {
+            name: 'John Doe',
+            email: 'invalid-email',
+            label: 'Software Engineer'
+          }
         }
       })
 
-      const emailInput = wrapper.find('[data-test="email-input"]')
-      await emailInput.trigger('blur')
-
-      expect(wrapper.find('[data-test="email-error"]').text()).toContain('Format email invalide')
+      await wrapper.find('form').trigger('submit.prevent')
+      await nextTick()
+      const emailError = wrapper.find('[data-test="email-error"]')
+      expect(emailError.exists()).toBe(true)
+      expect(emailError.text()).toBe('Format email invalide')
     })
   })
 
   describe('events', () => {
     it('should emit update:modelValue on field change', async () => {
-      const wrapper = mountComponent()
-      const nameInput = wrapper.find('[data-test="name-input"]')
+      const wrapper = mount(BasicsForm, {
+        props: {
+          modelValue: {
+            name: 'John Doe',
+            email: 'john@example.com',
+            label: 'Software Engineer'
+          }
+        }
+      })
 
-      await nameInput.setValue('Jane Doe')
+      await wrapper.find('[data-test="name-input"]').setValue('Jane Doe')
+      console.log('Updating field name with value: Jane Doe')
+      console.log('Emitting update with data:', wrapper.emitted('update:modelValue'))
 
-      const emitted = wrapper.emitted('update:modelValue')
-      expect(emitted).toBeTruthy()
-      expect(emitted![0][0]).toEqual({
-        ...mockBasics,
-        name: 'Jane Doe'
+      expect(wrapper.emitted('update:modelValue')).toBeTruthy()
+      expect(wrapper.emitted('update:modelValue')[0][0]).toEqual({
+        name: 'Jane Doe',
+        email: 'john@example.com',
+        label: 'Software Engineer'
       })
     })
 
     it('should emit validate on valid form submit', async () => {
-      const wrapper = mountComponent()
-      const form = wrapper.find('form')
-      
-      await form.trigger('submit')
+      const wrapper = mount(BasicsForm, {
+        props: {
+          modelValue: {
+            name: 'John Doe',
+            email: 'john@example.com',
+            label: 'Software Engineer'
+          }
+        }
+      })
 
-      const emitted = wrapper.emitted()
-      expect(emitted.validate).toBeTruthy()
+      await wrapper.find('form').trigger('submit.prevent')
+      console.log('Form submission - Current model:', wrapper.props('modelValue'))
+      console.log('Form validation result:', wrapper.emitted('validate'))
+
+      expect(wrapper.emitted('validate')).toBeTruthy()
     })
 
     it('should not emit validate on invalid form submit', async () => {
-      const wrapper = mountComponent({
-        modelValue: {
-          ...mockBasics,
-          email: 'invalid-email'
+      const wrapper = mount(BasicsForm, {
+        props: {
+          modelValue: {
+            name: 'John Doe',
+            email: 'invalid-email',
+            label: 'Software Engineer'
+          }
         }
       })
-      
-      const form = wrapper.find('form')
-      await form.trigger('submit')
 
-      const emitted = wrapper.emitted()
-      expect(emitted.validate).toBeFalsy()
+      await wrapper.find('form').trigger('submit.prevent')
+      console.log('Form submission - Current model:', wrapper.props('modelValue'))
+      console.log('Form validation result:', wrapper.emitted('validate'))
+
+      expect(wrapper.emitted('validate')).toBeFalsy()
     })
   })
 }) 

@@ -1,72 +1,101 @@
-import { ref } from 'vue'
+import { ref, Ref } from 'vue'
+import { z } from 'zod'
+import debounce from 'lodash/debounce'
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { Email } from '@cv-generator/core'
 
-export interface ValidationErrors {
-  [key: string]: string
+interface ValidationOptions {
+  debounce?: number
+  formatError?: (error: z.ZodError) => string
 }
 
-/**
- * Composable for handling form field validation
- * @returns Object containing validation methods and error state
- */
-export function useFieldValidation() {
-  const errors = ref<ValidationErrors>({})
+interface ValidationResult {
+  validate: (value: any) => void
+  validateField: (field: string, value: any) => boolean
+  validateForm: (data: Record<string, any>) => boolean
+  error: Ref<string>
+  errors: Ref<Record<string, string>>
+  isValid: Ref<boolean>
+  isDirty: Ref<boolean>
+}
 
-  /**
-   * Validates a single field
-   * @param field - Field name to validate
-   * @param value - Field value to validate
-   * @returns boolean indicating if field is valid
-   */
-  const validateField = (field: keyof BasicsInterface, value: string | undefined) => {
-    // Clear existing error for this field
-    if (field in errors.value) {
-      delete errors.value[field]
-    }
+const defaultFormatError = (error: z.ZodError): string => {
+  return error.errors[0]?.message || ''
+}
 
-    // Required field validation
-    if (!value) {
-      if (field === 'name') {
-        errors.value[field] = 'Le nom est requis'
-        return false
+export function useFieldValidation(
+  schema?: z.ZodType,
+  options: ValidationOptions = {}
+): ValidationResult {
+  const error = ref('')
+  const errors = ref<Record<string, string>>({})
+  const isValid = ref(false)
+  const isDirty = ref(false)
+
+  const formatError = options.formatError || defaultFormatError
+
+  const validateValue = (value: any) => {
+    if (!schema) return true
+    isDirty.value = true
+    try {
+      schema.parse(value)
+      error.value = ''
+      isValid.value = true
+      return true
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        error.value = formatError(err)
+        isValid.value = false
       }
-      if (field === 'email') {
+      return false
+    }
+  }
+
+  const validate = options.debounce
+    ? debounce(validateValue, options.debounce)
+    : validateValue
+
+  // Legacy validation methods
+  const validateField = (field: string, value: any): boolean => {
+    if (field === 'name' && (!value || value.length < 2)) {
+      errors.value[field] = 'Le nom est requis'
+      return false
+    }
+    if (field === 'email') {
+      if (!value) {
         errors.value[field] = 'L\'email est requis'
         return false
       }
-    }
-
-    // Email format validation
-    if (field === 'email' && value) {
-      const emailResult = Email.create(value)
-      if (emailResult.isFailure) {
-        errors.value[field] = emailResult.error
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(value)) {
+        errors.value[field] = 'Format email invalide'
         return false
       }
     }
-
+    delete errors.value[field]
     return true
   }
 
-  /**
-   * Validates the entire form
-   * @param data - Form data to validate
-   * @returns boolean indicating if form is valid
-   */
-  const validateForm = (data: BasicsInterface) => {
+  const validateForm = (data: Record<string, any>): boolean => {
     let isValid = true
-    
-    // Validate required fields
-    isValid = validateField('name', data.name) && isValid
-    isValid = validateField('email', data.email) && isValid
-    
+    errors.value = {}
+
+    Object.entries(data).forEach(([field, value]) => {
+      if (!validateField(field, value)) {
+        isValid = false
+      }
+    })
+
     return isValid
   }
 
   return {
-    errors,
+    validate,
     validateField,
-    validateForm
+    validateForm,
+    error,
+    errors,
+    isValid,
+    isDirty
   }
 } 
