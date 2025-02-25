@@ -2,12 +2,12 @@ import type { Resume, ResumeInterface } from "@cv-generator/core"
 import { ManageResume, Resume as ResumeEntity } from "@cv-generator/core"
 import { LocalStorageResumeRepository } from "@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository"
 import { defineStore } from "pinia"
-import { ref } from "vue"
+import { ref, inject } from "vue"
+import { useErrorStore } from "../../../../core/stores/error"
 
 interface ResumeStoreState {
   resume: Resume | null
   loading: boolean
-  error: Error | null
 }
 
 interface ResumeStoreActions {
@@ -26,7 +26,9 @@ export const useResumeStore = defineStore("cv.resume", () => {
   // State
   const resume = ref<Resume | null>(null)
   const loading = ref(false)
-  const error = ref<Error | null>(null)
+  
+  // Get error store
+  const errorStore = useErrorStore()
 
   // Use case instance
   const useCase = createUseCase()
@@ -36,17 +38,16 @@ export const useResumeStore = defineStore("cv.resume", () => {
     async loadResume() {
       console.log('=== [Store] loadResume ===')
       loading.value = true
-      error.value = null
       
       try {
-        const result = await useCase.loadResume()
-        console.log('[Store] Loaded resume:', result)
-        resume.value = result
-      } catch (err) {
-        console.error('[Store] Failed to load resume:', err)
-        error.value = err instanceof Error ? err : new Error('Failed to load resume')
-        resume.value = null
-        throw error.value
+        const result = await errorStore.executeWithErrorHandling(async () => {
+          return await useCase.loadResume()
+        })
+        
+        if (result) {
+          console.log('[Store] Loaded resume:', result)
+          resume.value = result
+        }
       } finally {
         loading.value = false
       }
@@ -56,7 +57,6 @@ export const useResumeStore = defineStore("cv.resume", () => {
       console.log('=== [Store] saveResume ===')
       console.log('[Store] Received data:', data)
       loading.value = true
-      error.value = null
       
       try {
         // Nettoyer les données avant de créer l'instance
@@ -88,21 +88,19 @@ export const useResumeStore = defineStore("cv.resume", () => {
         
         console.log('[Store] Cleaned data:', cleanData)
         
-        // Créer une instance de Resume avec les données nettoyées
-        const resumeInstance = ResumeEntity.create(cleanData)
-        console.log('[Store] Created Resume instance:', resumeInstance)
+        await errorStore.executeWithErrorHandling(async () => {
+          // Créer une instance de Resume avec les données nettoyées
+          const resumeInstance = ResumeEntity.create(cleanData)
+          console.log('[Store] Created Resume instance:', resumeInstance)
 
-        if (resumeInstance.resume) {
-          await useCase.createResume(resumeInstance.resume.toJSON())
-          console.log('[Store] Resume saved successfully')
-          resume.value = resumeInstance.resume
-        } else {
-          throw new Error('Failed to create Resume instance')
-        }
-      } catch (err) {
-        console.error('[Store] Error saving resume:', err)
-        error.value = err instanceof Error ? err : new Error('Failed to save resume')
-        throw error.value
+          if (resumeInstance.resume) {
+            await useCase.createResume(resumeInstance.resume.toJSON())
+            console.log('[Store] Resume saved successfully')
+            resume.value = resumeInstance.resume
+          } else {
+            throw new Error('Failed to create Resume instance')
+          }
+        }, { showToast: true });
       } finally {
         loading.value = false
       }
@@ -112,17 +110,17 @@ export const useResumeStore = defineStore("cv.resume", () => {
       if (loading.value) return Promise.reject(new Error("Operation in progress"))
       
       loading.value = true
-      error.value = null
+      
       try {
-        const result = await useCase.exportResume(format)
-        if (!result) {
-          throw new Error("Failed to export resume")
-        }
-        return result
-      } catch (err) {
-        console.error("Failed to export resume:", err)
-        error.value = err instanceof Error ? err : new Error("Failed to export resume")
-        throw error.value
+        const result = await errorStore.executeWithErrorHandling(async () => {
+          const exportResult = await useCase.exportResume(format)
+          if (!exportResult) {
+            throw new Error("Failed to export resume")
+          }
+          return exportResult
+        }, { rethrow: true });
+        
+        return result as Blob;
       } finally {
         loading.value = false
       }
@@ -132,14 +130,15 @@ export const useResumeStore = defineStore("cv.resume", () => {
       if (loading.value) return Promise.reject(new Error("Operation in progress"))
       
       loading.value = true
-      error.value = null
+      
       try {
-        const result = await useCase.importResume(file)
-        resume.value = result
-      } catch (err) {
-        console.error("Failed to import resume:", err)
-        error.value = err instanceof Error ? err : new Error("Failed to import resume")
-        throw error.value
+        const result = await errorStore.executeWithErrorHandling(async () => {
+          return await useCase.importResume(file)
+        });
+        
+        if (result) {
+          resume.value = result
+        }
       } finally {
         loading.value = false
       }
@@ -150,8 +149,18 @@ export const useResumeStore = defineStore("cv.resume", () => {
     // State
     resume,
     loading,
-    error,
     // Actions
-    ...actions
+    ...actions,
+    // Expose hasErrors pour les composants
+    get hasErrors() {
+      return errorStore.hasErrors
+    },
+    // Expose les méthodes pour vérifier les erreurs de champ
+    hasFieldError(field: string) {
+      return errorStore.hasFieldError(field)
+    },
+    getFieldError(field: string) {
+      return errorStore.getFieldError(field)
+    }
   }
-}) 
+}); 

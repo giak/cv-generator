@@ -2,7 +2,7 @@ import type { ResumeInterface } from '@cv-generator/shared/src/types/resume.inte
 import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type'
 import { Email } from '../value-objects/Email'
 import { Phone } from '../value-objects/Phone'
-import { Result } from '../shared/Result'
+import { Result } from '../../../modules/cv/domain/shared/Result'
 
 export class Resume {
   private constructor(private readonly data: ResumeInterface) {}

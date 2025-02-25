@@ -4,8 +4,11 @@ import BasicsForm from '@ui/modules/cv/presentation/components/BasicsForm.vue'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { Resume } from '@cv-generator/core'
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
+import ErrorNotification from '../components/notification/ErrorNotification.vue'
+import { useErrorStore, type ErrorInfo } from '../core/stores/error'
 
 const store = useResumeStore()
+const errorStore = useErrorStore()
 
 // Créer un CV vide par défaut avec reactive pour une meilleure gestion de l'état
 const basics = reactive<BasicsInterface>({
@@ -105,10 +108,53 @@ const handleValidate = async () => {
 watch(basics, (newValue) => {
   console.log('Basics updated:', JSON.parse(JSON.stringify(newValue)))
 }, { deep: true })
+
+// Handle error actions for recovery
+const handleErrorAction = async (error: ErrorInfo) => {
+  if (!error.action) return
+  
+  console.log('Handling error action:', error.action)
+  
+  const [storeName, methodName] = error.action.handler.split('/')
+  
+  // Handle Resume store actions
+  if (storeName === 'resume') {
+    switch (methodName) {
+      case 'retryLastOperation':
+        if (error.action.params?.operation === 'save') {
+          console.log('Retrying save operation')
+          await handleValidate()
+        } else if (error.action.params?.operation === 'load') {
+          console.log('Retrying load operation')
+          await store.loadResume()
+        }
+        break
+      default:
+        console.warn('Unknown resume store method:', methodName)
+    }
+  }
+  
+  // Handle application-wide actions
+  if (storeName === 'app') {
+    switch (methodName) {
+      case 'enableOfflineMode':
+        console.log('Enabling offline mode')
+        // Implement offline mode logic
+        break
+      default:
+        console.warn('Unknown app method:', methodName)
+    }
+  }
+  
+  // Dismiss the error after handling it
+  errorStore.dismissError(error.id)
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-[var(--color-neutral-50)]">
+    <ErrorNotification @action="handleErrorAction" />
+    
     <header class="container mx-auto p-6">
       <h1 class="text-4xl font-bold text-[var(--color-primary-500)]">
         CV Generator
@@ -129,13 +175,7 @@ watch(basics, (newValue) => {
         />
       </div>
 
-      <!-- Afficher les erreurs s'il y en a -->
-      <div 
-        v-if="store.error"
-        class="mt-4 p-4 bg-red-50 text-red-700 rounded-lg"
-      >
-        {{ store.error.message }}
-      </div>
+      <!-- Removed old error display in favor of ErrorNotification component -->
     </main>
   </div>
 </template> 

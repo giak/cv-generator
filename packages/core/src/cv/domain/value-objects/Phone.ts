@@ -1,4 +1,4 @@
-import { Result } from '../shared/Result'
+import { Result } from '../../../modules/cv/domain/shared/Result'
 
 export class Phone {
   private constructor(private readonly value: string) {}

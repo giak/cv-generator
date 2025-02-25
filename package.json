@@ -43,6 +43,7 @@
     "@biomejs/biome": "^1.9.4",
     "@commitlint/types": "^19.5.0",
     "@types/node": "^22.13.4",
+    "@types/uuid": "^10.0.0",
     "typescript": "~5.7.3",
     "vite": "^6.1.0"
   },
@@ -62,5 +63,8 @@
       "biome format --write",
       "vitest related --run"
     ]
+  },
+  "dependencies": {
+    "uuid": "^11.1.0"
   }
 }
