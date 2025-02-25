@@ -4,400 +4,182 @@ globs: ["packages/**/*"]
 alwaysApply: false
 ---
 ---
-description: DEFINE core project architecture, technical stack, and development principles for the CV Generator application
-globs: ["packages/**/*"]
-tags: ["architecture", "standards", "typescript", "vue", "clean-architecture", "SOLID principles"]
-priority: 1
-version: 1.3.1
+title: CV Generator - Project Overview & Technical Standards
+date: 2024-06-01
+version: 2.1.0
+status: approved
 ---
 
 # CV Generator - Project Overview & Technical Standards
 
+> Ce document fournit une vue d'ensemble du projet. Pour une documentation détaillée, y compris les diagrammes et explications complètes, veuillez consulter le fichier [ARCHITECTURE.md](mdc:ARCHITECTURE.md).
+
 ## Project Identity
-Le CV Generator est une application web moderne dédiée à la création, la gestion et la génération de CV au format JSON Resume, HTML et PDF. L'application est construite avec une architecture modulaire basée sur les principes SOLID, Domain-Driven Design (DDD), Clean Architecture et Test-Driven Development (TDD) pour garantir évolutivité, maintenabilité et robustesse.
+
+Le CV Generator est une application web moderne pour la création et la gestion de CV au format JSON Resume. L'architecture suit les principes de Clean Architecture et Domain-Driven Design (DDD) pour assurer une séparation claire des responsabilités, une maintenance facilitée et une évolution flexible du système.
 
 ## Technical Stack
 
-### Core Technologies
-- pnpm 10+
-- TypeScript 5.7+
-- Node.js 22+
-- Vue.js 3.4+ avec Composition API
-- Pinia pour la gestion d'état
-- Tailwind CSS 4 (via Vite plugin)
-- Vite 6+ pour bundling et développement
-- Puppeteer (v24+) pour la génération de PDF
-- Zod pour la validation des schémas
-- Vitest 3+ pour les tests unitaires et d'intégration
-- Playwright pour les tests E2E
-- Biome pour le linting et le formatting
+| Technology   | Version | Description                             | Status      |
+| ------------ | ------- | --------------------------------------- | ----------- |
+| TypeScript   | 5.7+    | Langage principal avec typage strict    | ✅ Utilisé  |
+| Vue.js       | 3.4+    | Framework UI avec Composition API       | ✅ Utilisé  |
+| Vite         | 5.0+    | Build tool et dev server                | ✅ Utilisé  |
+| Pinia        | 2.1+    | State management                        | ✅ Utilisé  |
+| Tailwind CSS | 4.0     | Utility-first CSS framework             | ✅ Utilisé  |
+| Zod          | 3.22+   | Validation de schéma et typage runtime  | ✅ Utilisé  |
+| Vitest       | 1.6+    | Framework de test                       | ✅ Utilisé  |
+| Playwright   | Latest  | Tests end-to-end                        | 🚧 Planifié |
+| pnpm         | 10+     | Package manager avec support workspaces | ✅ Utilisé  |
+| ESLint       | Latest  | Linting du code                         | ✅ Utilisé  |
+| Prettier     | Latest  | Formatting du code                      | ✅ Utilisé  |
+
+## Key Architectural Decisions
+
+### 1. Clean Architecture
+
+- 🔄 Séparation stricte des couches (UI, Application, Domain, Infrastructure)
+- 🔄 Dépendances orientées vers l'intérieur
+- 🔄 Inversion de dépendance pour les repositories
+
+### 2. Domain-Driven Design
+
+- 📦 Organisation par bounded contexts (CV, Export, User)
+- 💎 Entités riches avec logique métier encapsulée
+- 💠 Value Objects pour les types complexes (Email, Phone)
+- 📋 Agrégats pour maintenir la cohérence (Resume)
+- 🔌 Interfaces de ports explicites dans chaque bounded context
+
+### 3. Monorepo Structure
+
+- 📂 Packages indépendants avec responsabilités claires
+- 🔄 Shared utilities pour la réutilisation
+- 🧪 Tests co-localisés avec le code
+
+### 4. Validation Strategy
+
+- ✅ Validation de schéma avec Zod
+- 🔄 Composables spécialisés pour la validation des formulaires
+- 📝 Validation en temps réel avec feedback utilisateur
+- 🔀 Séparation entre validation UI et validation domaine
 
 ## Project Structure
 
-### Monorepo Organization
 ```
 /
-├── packages/                     # Monorepo workspace
-│   ├── core/                     # Domain & Application layers
+├── packages/                    # Monorepo workspace
+│   ├── core/                   # Domain & Application layers
 │   │   └── src/
-│   │       └── modules/
-│   │           └── cv/
-│   │               ├── domain/       # Domain layer
-│   │               │   ├── entities/     # Domain entities
-│   │               │   ├── validators/   # Schema validation
-│   │               │   └── shared/       # Shared domain logic
-│   │               └── application/   # Application layer
-│   │                   └── use-cases/    # Business use cases
-│   ├── ui/                       # Presentation layer
+│   │       ├── cv/              # CV Bounded Context
+│   │       │   ├── domain/      # Domain layer
+│   │       │   │   ├── entities/   # Domain entities
+│   │       │   │   │   └── Resume.ts
+│   │       │   │   └── value-objects/ # Value Objects
+│   │       │   │       ├── Email.ts
+│   │       │   │       └── Phone.ts
+│   │       │   ├── application/ # Application layer
+│   │       │   │   └── use-cases/  # Business use cases
+│   │       │   │       └── ManageResume.ts
+│   │       │   └── ports/       # Interface ports
+│   │       │       └── repositories/
+│   │       │           └── ResumeRepository.ts
+│   │       ├── export/          # Export Bounded Context
+│   │       │   ├── domain/
+│   │       │   │   └── entities/
+│   │       │   │       └── ExportFormat.ts
+│   │       │   ├── application/
+│   │       │   │   └── use-cases/
+│   │       │   │       └── ExportResume.ts
+│   │       │   └── ports/
+│   │       │       └── services/
+│   │       │           └── ExportService.ts
+│   │       ├── user/            # User Bounded Context
+│   │       │   ├── domain/
+│   │       │   │   └── entities/
+│   │       │   │       └── User.ts
+│   │       │   ├── application/
+│   │       │   │   └── use-cases/
+│   │       │   │       └── ManageUserPreferences.ts
+│   │       │   └── ports/
+│   │       │       └── repositories/
+│   │       │           └── UserRepository.ts
+│   │       └── shared/          # Shared domain elements
+│   │           ├── domain/
+│   │           │   ├── errors/
+│   │           │   │   └── ValidationError.ts
+│   │           │   └── value-objects/
+│   │           │       └── Result.ts
+│   │           └── application/
+│   │               └── interfaces/
+│   ├── ui/                    # Presentation layer
 │   │   └── src/
-│   │       ├── components/       # Shared UI components
-│   │       │   └── form/         # Form components
-│   │       │       └── __tests__/    # Component tests
-│   │       ├── modules/          # Module-specific code
-│   │       │   └── cv/           # CV module
-│   │       │       └── presentation/  # CV presentation layer
-│   │       │           ├── components/    # CV components
-│   │       │           │   └── __tests__/     # Component tests
-│   │       │           ├── composables/    # CV composables
-│   │       │           │   └── __tests__/     # Composable tests
-│   │       │           └── stores/         # State management
-│   │       │               └── __tests__/     # Store tests
-│   │       ├── composables/      # Shared composables
-│   │       └── pages/            # Vue pages/routes
-│   ├── infrastructure/           # Infrastructure layer
+│   │       ├── components/    # Vue components
+│   │       │   └── shared/    # Shared components
+│   │       │       └── form/  # Form components
+│   │       │           ├── Form.vue    # Composant formulaire
+│   │       │           └── FormField.vue # Champ de formulaire
+│   │       ├── modules/       # Feature modules
+│   │       │   └── cv/       # CV module
+│   │       │       └── presentation/
+│   │       │           ├── components/   # Composants de présentation
+│   │       │           │   ├── BasicsForm.vue # Formulaire informations de base
+│   │       │           │   └── __tests__/   # Tests co-localisés
+│   │       │           ├── composables/   # Logique réutilisable
+│   │       │           │   ├── useCVFieldValidation.ts # Validation spécifique CV
+│   │       │           │   ├── useModelUpdate.ts # Gestion des modèles
+│   │       │           │   └── __tests__/  # Tests des composables
+│   │       │           └── stores/      # Stores Pinia
+│   │       │               └── resume.ts  # Store principal
+│   │       └── App/       # Application root
+│   │           └── App.vue  # Composant principal
+│   ├── infrastructure/        # Infrastructure layer
 │   │   └── src/
-│   │       ├── repositories/     # Data persistence
-│   │       └── services/         # External services
-│   └── shared/                   # Shared utilities
+│   │       ├── repositories/  # Data persistence
+│   │       │   └── LocalStorageResumeRepository.ts # Stockage local
+│   │       └── services/     # External services
+│   └── shared/               # Shared utilities
 │       └── src/
-│           ├── types/            # Shared TypeScript types
-│           └── validators/       # Shared validation schemas
+│           ├── types/        # Shared TypeScript types
+│           │   └── resume.interface.ts # Interfaces partagées
+│           └── validators/   # Shared validation schemas
+│               └── resumeSchema.ts # Schémas Zod
 ```
 
-## Test Organization
+## Package Responsibilities
 
-### Co-location Pattern
-- Tests SHOULD be co-located with the code they test
-- Test directories MUST use the `__tests__` naming convention
-- Test files MUST follow the naming pattern `{fileName}.spec.ts` or `{fileName}.test.ts`
+### Core (@cv-generator/core)
 
-```
-component/
-├── ComponentName.vue
-└── __tests__/
-    └── ComponentName.spec.ts
+- Organisation en bounded contexts DDD:
+  - **CV Context**: Entités de CV, logique métier, validation
+  - **Export Context**: Formats d'export, gestion des conversions
+  - **User Context**: Gestion utilisateur, préférences
+  - **Shared**: Utilities partagées (Result, ValidationError)
+- Interfaces de ports explicites pour l'inversion de dépendance
+- Alias TypeScript par contexte métier (@core/cv/_, @core/export/_, etc.)
 
-composables/
-├── useFeature.ts
-└── __tests__/
-    └── useFeature.test.ts
-```
+### UI (@cv-generator/ui)
 
-### Component Tests
-- Use Vue Test Utils for component testing
-- Tests SHOULD verify rendering, events, and validation
-- Components SHOULD have tests for all conditional rendering paths
-- All event handlers SHOULD be tested
+- Composants Vue.js et composables
+- Gestion d'état avec Pinia
+- Styles avec Tailwind CSS
+- Tests unitaires co-localisés
 
-```typescript
-// Component test structure
-describe('ComponentName', () => {
-  describe('rendering', () => {
-    it('should render all required fields', () => {
-      // Test rendering logic
-    })
-  })
+### Infrastructure (@cv-generator/infrastructure)
 
-  describe('validation', () => {
-    it('should validate inputs correctly', () => {
-      // Test validation logic
-    })
-  })
+- Implémentation des repositories
+- Services externes et adapters
+- Persistence des données (LocalStorage)
 
-  describe('events', () => {
-    it('should emit events on user interaction', () => {
-      // Test event emission
-    })
-  })
-})
-```
+### Shared (@cv-generator/shared)
 
-### Composable Tests
-- Tests SHOULD verify all public methods and properties
-- Tests SHOULD cover error handling
-- Tests SHOULD test all edge cases
-- Mocking SHOULD be used to isolate composables from external dependencies
+- Types et utilitaires partagés
+- Schémas de validation
+- Interfaces communes
 
-## Principes SOLID
-
-Les principes SOLID sont fondamentaux dans l'architecture et le développement du CV Generator :
-
-### Single Responsibility Principle (SRP)
-- Chaque classe/composant/fonction a une responsabilité unique
-- Les composables sont spécialisés (validation, mise à jour, etc.)
-- Séparation des préoccupations entre UI, logique métier et validation
-
-```typescript
-// ✅ Bon exemple - SRP appliqué aux composables
-export function useZodFieldValidation<T>(schema: z.ZodType<T>) {
-  // Responsabilité unique : validation d'un champ avec Zod
-}
-
-export function useModelUpdate<T>() {
-  // Responsabilité unique : mise à jour du modèle
-}
-```
-
-### Open/Closed Principle (OCP)
-- Le code est ouvert à l'extension mais fermé à la modification
-- Utilisation de l'héritage et de la composition plutôt que la modification
-- Schémas de validation extensibles
-
-```typescript
-// ✅ Bon exemple - Extensions sans modification
-// Schéma de base
-export const basePersonSchema = z.object({
-  name: z.string().min(1, "Le nom est requis"),
-  email: z.string().email("Format email invalide")
-});
-
-// Extension sans modifier le schéma de base
-export const extendedPersonSchema = basePersonSchema.extend({
-  phone: z.string().optional(),
-  address: z.string().optional()
-});
-```
-
-### Liskov Substitution Principle (LSP)
-- Les sous-types doivent être substituables à leur type de base
-- Les interfaces sont respectées par toutes les implémentations
-- Les composants réutilisables maintiennent leur contrat
-
-```typescript
-// ✅ Bon exemple - Interface et implémentations substituables
-export interface ValidationProviderInterface {
-  validate(data: unknown): boolean;
-  getErrors(): Record<string, string>;
-}
-
-// Les deux implémentations respectent le contrat
-export class ZodValidationProvider implements ValidationProviderInterface {
-  validate(data: unknown): boolean { /* ... */ }
-  getErrors(): Record<string, string> { /* ... */ }
-}
-
-export class YupValidationProvider implements ValidationProviderInterface {
-  validate(data: unknown): boolean { /* ... */ }
-  getErrors(): Record<string, string> { /* ... */ }
-}
-```
-
-### Interface Segregation Principle (ISP)
-- Interfaces spécifiques plutôt que génériques
-- Les clients ne dépendent pas de méthodes qu'ils n'utilisent pas
-- Composition de fonctionnalités via des composables spécialisés
-
-```typescript
-// ✅ Bon exemple - Interfaces spécifiques
-// Au lieu d'une interface monolithique
-export interface FieldValidationInterface {
-  validate(value: unknown): boolean;
-  getFieldError(field: string): string | undefined;
-  resetErrors(): void;
-}
-
-export interface FormValidationInterface {
-  validateForm(data: Record<string, unknown>): boolean;
-  getFormErrors(): Record<string, string>;
-  resetFormErrors(): void;
-}
-```
-
-### Dependency Inversion Principle (DIP)
-- Les modules de haut niveau ne dépendent pas des modules de bas niveau
-- Tous dépendent d'abstractions
-- Injection de dépendances pour découpler les composants
-
-```typescript
-// ✅ Bon exemple - Dépendance vers les abstractions
-export interface StorageServiceInterface {
-  save(key: string, data: unknown): Promise<void>;
-  load(key: string): Promise<unknown>;
-}
-
-// La classe de haut niveau dépend de l'abstraction, pas de l'implémentation
-export class ResumeRepository {
-  constructor(private storage: StorageServiceInterface) {}
-  
-  async saveResume(resume: ResumeInterface): Promise<void> {
-    await this.storage.save('resume', resume);
-  }
-  
-  async loadResume(): Promise<ResumeInterface | null> {
-    return await this.storage.load('resume') as ResumeInterface | null;
-  }
-}
-```
-
-## Naming Conventions
-
-### TypeScript
-- Interfaces MUST be suffixed with `Interface`
-  ```typescript
-  // ✅ Good
-  export interface ResumeInterface {
-    basics: BasicsInterface;
-    work?: WorkInterface[];
-  }
-  
-  // ❌ Bad
-  export interface Resume {
-    basics: Basics;
-    work?: Work[];
-  }
-  ```
-
-- Types MUST be suffixed with `Type`
-  ```typescript
-  // ✅ Good
-  export type ValidationResultType = {
-    isValid: boolean;
-    errors?: string[];
-  }
-  
-  // ❌ Bad
-  export type ValidationResult = {
-    isValid: boolean;
-    errors?: string[];
-  }
-  ```
-
-- Classes MUST use PascalCase without suffix
-  ```typescript
-  // ✅ Good
-  export class Resume {
-    static create(data: ResumeInterface): ValidationResultType
-  }
-  
-  // ❌ Bad
-  export class resumeClass {
-    static create(data: Resume): ValidationResult
-  }
-  ```
-
-### File Organization
-- Entity files: `PascalCase.ts`
-- Interface files: `PascalCase.interface.ts`
-- Type files: `pascalCase.type.ts`
-- Test files: `*.spec.ts` or `*.test.ts`
-- Vue components: `PascalCase.vue`
-- Composables: `use{Feature}.ts`
-
-<critical>
-- NEVER use barrel files (index.ts) for re-exporting
-  ```typescript
-  // ❌ Bad - index.ts
-  export * from './resume.interface'
-  export * from './resume.type'
-  
-  // ✅ Good - Import directly from source files
-  import type { ResumeInterface } from './resume.interface'
-  import type { ValidationResultType } from './resume.type'
-  ```
-</critical>
-
-### Import Conventions
-- ALWAYS import directly from source files
-- NEVER use barrel imports
-- PREFER typed imports with the `type` keyword for type-only imports
-- Use alias imports as configured in tsconfig.json
-- Group imports by type (external, internal, types)
-  ```typescript
-  // External dependencies
-  import { z } from 'zod'
-  import { ref, computed } from 'vue'
-  
-  // Internal dependencies with aliases
-  import { Resume } from '@core/domain/entities/Resume'
-  import ValidationFeedback from '@ui/components/form/ValidationFeedback.vue'
-  
-  // Types
-  import type { ResumeInterface } from '@shared/types/resume.interface'
-  import type { ValidationResultType } from '@shared/types/validation.type'
-  ```
-
-## Architecture Principles
-
-### Clean Architecture & DDD
-- Séparation stricte des couches
-- Dépendances orientées vers l'intérieur
-- Interfaces clairement définies
-- Entités immutables
-- Value Objects pour les types complexes
-
-### Domain Layer
-```typescript
-// Entity example with proper naming
-export class Resume {
-  private constructor(private readonly data: ResumeInterface) {}
-
-  static create(data: ResumeInterface): ValidationResultType & { resume?: Resume } {
-    const validation = resumeSchema.safeParse(data)
-    // ... validation logic
-  }
-
-  toJSON(): ResumeInterface {
-    return { ...this.data }
-  }
-}
-```
-
-### Validation Layer
-```typescript
-// Zod schema with proper naming
-export const resumeSchema = z.object({
-  basics: basicsSchema,
-  work: z.array(workSchema).optional(),
-  education: z.array(educationSchema).optional(),
-  skills: z.array(skillSchema).optional()
-}) satisfies z.ZodType<ResumeInterface>
-
-export type ResumeSchemaType = z.infer<typeof resumeSchema>
-```
-
-### Presentation Layer
-```typescript
-// Composable example with proper naming
-export function useBasicsFormValidation() {
-  const errors = ref<Record<string, string>>({})
-  
-  const validate = (data: BasicsInterface): boolean => {
-    errors.value = {} // Reset errors
-    const validation = basicsSchema.safeParse(data)
-    
-    if (!validation.success) {
-      // Process validation errors
-      validation.error.errors.forEach(err => {
-        const field = err.path[0] as string
-        errors.value[field] = err.message
-      })
-      return false
-    }
-    
-    return true
-  }
-  
-  return {
-    errors,
-    validate
-  }
-}
-```
-
-## Development Standards
+## Coding Standards
 
 ### TypeScript & Type Safety
-<critical>
+
 - NEVER use any type without explicit justification
 - NEVER use non-suffixed interfaces or types
 - NEVER mutate entity state directly
@@ -408,9 +190,9 @@ export function useBasicsFormValidation() {
 - ALWAYS use immutable patterns
 - ALWAYS document public APIs
 - ALWAYS import directly from source files
-</critical>
 
 ### Testing Strategy
+
 - TDD as primary approach
 - Tests MUST be co-located with the code they test
 - Each public method or component MUST have tests
@@ -418,69 +200,13 @@ export function useBasicsFormValidation() {
 - Mock external dependencies
 - Test files MUST follow the naming pattern `*.spec.ts` or `*.test.ts`
 
-## Examples
+## Visualisation de l'architecture
 
-<example>
-// Good Practice - Direct imports and proper naming
-import type { PersonInterface } from './person.interface'
-import type { ValidationResultType } from './validation.type'
+Pour visualiser l'architecture complète du projet, y compris les diagrammes détaillés sur:
 
-export class Person {
-  private constructor(private readonly data: PersonInterface) {}
+- L'architecture système
+- Les bounded contexts
+- Le flux de données
+- Le flux de validation
 
-  static create(data: PersonInterface): ValidationResultType & { person?: Person } {
-    // Validation and creation logic
-  }
-
-  toJSON(): PersonInterface {
-    return { ...this.data }
-  }
-}
-</example>
-
-<example>
-// Component Test Example
-import { describe, it, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
-import BasicsForm from '../BasicsForm.vue'
-import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
-
-describe('BasicsForm', () => {
-  describe('validation', () => {
-    it('should show error for empty required fields', async () => {
-      const wrapper = mount(BasicsForm, {
-        props: {
-          modelValue: {
-            name: '',
-            email: '',
-            label: 'Software Engineer'
-          }
-        }
-      })
-
-      await wrapper.find('form').trigger('submit.prevent')
-      
-      const nameError = wrapper.find('[data-test="name-error"]')
-      expect(nameError.exists()).toBe(true)
-      expect(nameError.text()).toBe('Le nom est requis')
-    })
-  })
-})
-</example>
-
-<example type="invalid">
-// Poor Practice - Barrel imports and incorrect naming
-import { Person, Validation } from './types'  // Using barrel import
-
-export class PersonClass {  // Unnecessary Class suffix
-  constructor(public data: Person) {}  // Mutable public property
-}
-
-// Poor Test Organization - Not co-located with component
-// src/tests/components/Person.spec.ts
-import { Person } from '../../components/Person'
-
-describe('Person', () => {
-  // Tests far from the actual component
-})
-</example>
+Veuillez consulter le document complet [ARCHITECTURE.md](mdc:ARCHITECTURE.md) qui contient des diagrammes détaillés et des explications approfondies.

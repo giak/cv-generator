@@ -1,14 +1,15 @@
-// Export des entités
-export { Resume } from './modules/cv/domain/entities/Resume'
+// CV Bounded Context
+export * from './cv';
 
-// Export des value objects
-export { Email } from './modules/cv/domain/value-objects/Email'
-export { Phone } from './modules/cv/domain/value-objects/Phone'
+// Export Bounded Context
+export * from './export';
 
-// Export des use cases
-export { ManageResume } from './modules/cv/application/use-cases/ManageResume'
-export type { ResumeRepository } from './modules/cv/application/use-cases/ManageResume'
+// User Bounded Context
+export * from './user';
 
-// Export des types
-export type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface'
-export type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type' 
+// Shared
+export * from './shared';
+
+// Types from shared package
+export type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface';
+export type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type';

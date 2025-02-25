@@ -4,7 +4,14 @@ import { resolve } from 'path'
 export default defineConfig({
   resolve: {
     alias: {
-      '@cv': resolve(__dirname, './src/modules/cv')
+      '@core': resolve(__dirname, './src'),
+      '@core/cv': resolve(__dirname, './src/cv'),
+      '@core/cv/domain': resolve(__dirname, './src/cv/domain'),
+      '@core/cv/application': resolve(__dirname, './src/cv/application'),
+      '@core/cv/ports': resolve(__dirname, './src/cv/ports'),
+      '@core/export': resolve(__dirname, './src/export'),
+      '@core/user': resolve(__dirname, './src/user'),
+      '@core/shared': resolve(__dirname, './src/shared')
     }
   },
   test: {

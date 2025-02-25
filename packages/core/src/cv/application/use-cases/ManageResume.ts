@@ -1,19 +1,7 @@
 import type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { Resume } from '../../domain/entities/Resume'
-
-export interface ResumeRepository {
-  load(): Promise<Resume>
-  save(resume: Resume): Promise<void>
-  export(format: 'json' | 'pdf' | 'html'): Promise<Blob>
-  import(file: Blob): Promise<Resume>
-}
-
-export class ValidationError extends Error {
-  constructor(public readonly errors: string[], message: string = 'Validation failed') {
-    super(message)
-    this.name = 'ValidationError'
-  }
-}
+import { ResumeRepository } from '../../ports/repositories/ResumeRepository'
+import { ValidationError } from '../../../shared/domain/errors/ValidationError'
 
 export class ManageResume {
   constructor(private readonly repository: ResumeRepository) {}

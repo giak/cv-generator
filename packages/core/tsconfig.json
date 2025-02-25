@@ -9,7 +9,14 @@
     "module": "ES2022",
     "moduleResolution": "bundler",
     "paths": {
-      "@cv/*": ["modules/cv/*"]
+      "@core/*": ["*"],
+      "@core/cv/*": ["cv/*"],
+      "@core/cv/domain/*": ["cv/domain/*"],
+      "@core/cv/application/*": ["cv/application/*"],
+      "@core/cv/ports/*": ["cv/ports/*"],
+      "@core/export/*": ["export/*"],
+      "@core/user/*": ["user/*"],
+      "@core/shared/*": ["shared/*"]
     },
     "types": ["vitest/globals"]
   },

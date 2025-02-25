@@ -12,10 +12,12 @@ version: 1.2.0
 
 # Product Requirements Document (PRD) for CV Generator
 
-## Status: Draft
+## Status: Approved
+
+> 📝 Ce document définit les exigences fonctionnelles et techniques du projet CV Generator. Pour une documentation détaillée de l'architecture technique, veuillez consulter le fichier @docs/ARCHITECTURE.md.
 
 ## 1. Introduction
-Le CV Generator est une application web moderne dédiée à la création, la gestion et la génération de CV professionnels. L'application permet aux utilisateurs de créer et maintenir leurs CV au format JSON Resume, avec export en HTML et PDF. Construite sur une architecture modulaire et moderne, elle offre une expérience utilisateur fluide et professionnelle.
+Le CV Generator est une application web moderne dédiée à la création, la gestion et la génération de CV professionnels. L'application permet aux utilisateurs de créer et maintenir leurs CV au format JSON Resume, avec export en HTML et PDF. Construite sur une architecture Clean Architecture et Domain-Driven Design (DDD), elle offre une expérience utilisateur fluide et professionnelle.
 
 ### Business Context
 - Besoin croissant de CV standardisés et professionnels
@@ -23,24 +25,24 @@ Le CV Generator est une application web moderne dédiée à la création, la ges
 - Nécessité d'une solution moderne et accessible
 
 ### Target Users
-- Professionnels en recherche d'emploi
-- Recruteurs et RH
-- Étudiants et jeunes diplômés
-- Freelances et consultants
+- 👨‍💼 Professionnels en recherche d'emploi
+- 🔍 Recruteurs et RH
+- 🎓 Étudiants et jeunes diplômés
+- 🚀 Freelances et consultants
 
 ## 2. Goals
 
 ### Primary Objectives
-- Créer une plateforme intuitive de gestion de CV
-- Assurer une haute qualité et standardisation des CV
-- Faciliter la maintenance et la mise à jour des CV
-- Permettre l'export dans différents formats standards
+- 🎯 Créer une plateforme intuitive de gestion de CV
+- ✨ Assurer une haute qualité et standardisation des CV
+- 🔄 Faciliter la maintenance et la mise à jour des CV
+- 📤 Permettre l'export dans différents formats standards
 
 ### Success Criteria
-- Temps moyen de création d'un CV < 30 minutes
-- Taux de satisfaction utilisateur > 90%
-- Taux de conversion visiteur/utilisateur > 40%
-- Score Lighthouse > 95 sur tous les critères
+- ⏱️ Temps moyen de création d'un CV < 30 minutes
+- 😊 Taux de satisfaction utilisateur > 90%
+- 📈 Taux de conversion visiteur/utilisateur > 40%
+- 🚀 Score Lighthouse > 95 sur tous les critères
 
 ### Key Performance Indicators (KPIs)
 - Nombre d'utilisateurs actifs mensuels
@@ -108,20 +110,20 @@ Le CV Generator est une application web moderne dédiée à la création, la ges
 ```
 
 #### Core Features
-- Création et édition de CV au format JSON Resume
+- 📝 Création et édition de CV au format JSON Resume
   - Import de fichiers JSON existants
   - Validation du schéma JSON Resume avec Zod
   - Édition structurée par sections
   - Support des champs principaux du schéma
-- Validation des données
+- ✅ Validation des données
   - Validation en temps réel des champs
   - Messages d'erreur contextuels et localisés
   - Validation complète avant sauvegarde
-- Sauvegarde et gestion des données
+- 💾 Sauvegarde et gestion des données
   - Sauvegarde automatique locale
   - Persistance entre les sessions
   - Interface de gestion des versions
-- Export multi-format (future)
+- 📤 Export multi-format (future)
   - JSON (format source)
   - PDF haute qualité
   - HTML responsive
@@ -129,21 +131,21 @@ Le CV Generator est une application web moderne dédiée à la création, la ges
 ### Non-Functional Requirements
 
 #### Performance
-- Temps de chargement initial < 2s
-- Réactivité de l'interface < 100ms
-- Support de sauvegarde locale efficace
-- Application optimisée pour les appareils mobiles
+- ⚡ Temps de chargement initial < 2s
+- 🔄 Réactivité de l'interface < 100ms
+- 💾 Support de sauvegarde locale efficace
+- 📱 Application optimisée pour les appareils mobiles
 
 #### Security
-- Validation côté client et serveur
-- Protection des données personnelles
-- Conformité RGPD
+- 🔒 Validation côté client et serveur
+- 🛡️ Protection des données personnelles
+- 📜 Conformité RGPD
 
 #### Technical Requirements
-- Architecture Clean/DDD
-- Structure monorepo multi-packages
-- Tests automatisés > 90%
-- Documentation technique complète
+- 🏗️ Architecture Clean/DDD (voir @ARCHITECTURE.md)
+- 📦 Structure monorepo multi-packages
+- 🧪 Tests automatisés > 90%
+- 📖 Documentation technique complète
 
 ## 4. Epic Structure
 
@@ -192,11 +194,11 @@ Le CV Generator est une application web moderne dédiée à la création, la ges
 
 ## 5. Story List
 
-### Epic-1: Core CV Management (Current)
+### Epic-1: Core CV Management (Complete)
 
 #### Story-1: Project Setup (Complete)
 - Configuration du monorepo avec pnpm
-- Structure des packages Core, UI, Shared
+- Structure des packages Core, UI, Shared, Infrastructure
 - Configuration TypeScript, ESLint, Prettier
 - Setup des tests avec Vitest
 - Mise en place de Tailwind CSS
@@ -213,23 +215,23 @@ Le CV Generator est une application web moderne dédiée à la création, la ges
 - Validation en temps réel des champs
 - Tests des composants
 
-#### Story-4: Data Management (In Progress)
+#### Story-4: Data Management (Complete)
 - Store Pinia pour la gestion d'état
 - Implémentation du use case ManageResume
 - Repository pour la persistence locale
 - Tests d'intégration
 
-#### Story-5: User Experience Improvements (Planned)
-- Feedback visuel sur les actions
-- Gestion des erreurs utilisateur
-- Accessibilité (ARIA, contraste, navigation clavier)
-- Support mobile responsive
+#### Story-5: Validation Strategy (Complete)
+- Implémentation de la validation avec Zod
+- Création du Result pattern pour la validation
+- Validation en temps réel avec feedback utilisateur
+- Tests unitaires et d'intégration
 
-### Epic-2: Sections Avancées (Future)
-- Story-6: Work Experience Form
-- Story-7: Education Form
-- Story-8: Skills Interface
-- Story-9: Navigation Between Sections
+### Epic-2: Sections Avancées (In Progress)
+- Story-6: Work Experience Form (In Progress)
+- Story-7: Education Form (Planned)
+- Story-8: Skills Interface (Planned)
+- Story-9: Navigation Between Sections (Planned)
 
 ## 6. Future Enhancements
 
@@ -247,42 +249,22 @@ Le CV Generator est une application web moderne dédiée à la création, la ges
 
 ## 7. Technical Architecture
 
+> 📋 Cette section présente une vue d'ensemble de l'architecture technique. Pour une documentation détaillée, incluant les diagrammes d'architecture Clean Architecture et DDD, veuillez consulter @ARCHITECTURE.md.
+
 ### Architecture Overview
-```mermaid
-graph TD
-    subgraph UI["UI Layer (Vue.js)"]
-        C1[Components]
-        S1[Stores]
-        COM[Composables]
-    end
+L'application est construite selon les principes de Clean Architecture et Domain-Driven Design:
 
-    subgraph APP["Application Layer"]
-        UC[Use Cases]
-        SVC[Services]
-    end
+- 🏗️ **Architecture en couches**:
+  - UI Layer (Vue.js, Composables, Stores)
+  - Application Layer (Use Cases)
+  - Domain Layer (Entities, Value Objects, Ports)
+  - Infrastructure Layer (LocalStorage, Export Services)
 
-    subgraph DOM["Domain Layer"]
-        E[Entities]
-        VO[Value Objects]
-        R[Repository Interfaces]
-    end
-
-    subgraph INF["Infrastructure Layer"]
-        LS[LocalStorage]
-        EXP[Export Services]
-        REP[Repository Implementations]
-    end
-
-    C1 --> S1
-    S1 --> UC
-    COM --> UC
-    UC --> E
-    UC --> R
-    E --> VO
-    REP --> R
-    REP --> LS
-    EXP --> UC
-```
+- 📦 **Bounded Contexts**:
+  - CV Context (gestion du CV)
+  - Export Context (export en différents formats)
+  - User Context (gestion des préférences utilisateur)
+  - Shared Context (éléments partagés entre contextes)
 
 ### Technical Stack
 - Vue 3 avec Composition API
@@ -297,27 +279,27 @@ graph TD
 - Vite pour le bundling
 - ESLint et Prettier pour le linting
 - Vitest pour les tests unitaires
-- Playwright pour les tests E2E
+- Playwright pour les tests E2E (planifié)
 - GitHub Actions pour CI/CD
 
 ## 8. Timeline & Milestones
 
-### Phase 1: Q3 2024
+### Phase 1: Q2 2024 (Complété)
 - Implémentation de l'Epic-1
 - Tests de base
 - Premier prototype fonctionnel
 
-### Phase 2: Q4 2024
+### Phase 2: Q3 2024 (En cours)
 - Implémentation de l'Epic-2
 - Complétion des formulaires pour toutes les sections
 - Tests d'utilisabilité
 
-### Phase 3: Q1 2025
+### Phase 3: Q4 2024 (Planifié)
 - Epic-3: Système d'import/export
 - Intégration avec services externes
 - Optimisation des performances
 
-### Phase 4: Q2 2025
+### Phase 4: Q1 2025 (Planifié)
 - Epic-4 et Epic-5
 - Lancement beta public
-- Feedback des premiers utilisateurs
+- Feedback des premiers utilisateurs 

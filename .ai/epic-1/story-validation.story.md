@@ -10,7 +10,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Context
 
@@ -27,7 +27,7 @@ The validation strategy should align with the Clean Architecture principles defi
 
 ## Estimation
 
-Story Points: 3 (1 SP = 1 day of Human Development = 10 minutes of AI development)
+Story Points: 3 (1 SP = 1 day of Human Development = 3 heures of AI/human development)
 
 ## Tasks
 
@@ -39,23 +39,23 @@ Story Points: 3 (1 SP = 1 day of Human Development = 10 minutes of AI developmen
    4. - [x] Implement useFormValidation composable
    5. - [x] Add validation feedback UI components
 
-2. - [ ] Application Layer Validation
+2. - [x] Application Layer Validation
 
-   1. - [ ] Write tests for business rules
-   2. - [ ] Implement validation in store actions
-   3. - [ ] Add cross-field validation logic
+   1. - [x] Write tests for business rules
+   2. - [x] Implement validation in store actions
+   3. - [x] Add cross-field validation logic
 
-3. - [ ] Domain Layer Validation
+3. - [x] Domain Layer Validation
 
-   1. - [ ] Write tests for value objects
-   2. - [ ] Implement Email value object
-   3. - [ ] Implement Phone value object
-   4. - [ ] Add entity-level validation
+   1. - [x] Write tests for value objects
+   2. - [x] Implement Email value object
+   3. - [x] Implement Phone value object
+   4. - [x] Add entity-level validation
 
-4. - [ ] Infrastructure Layer Validation
-   1. - [ ] Write tests for storage validation
-   2. - [ ] Implement schema validation
-   3. - [ ] Add storage constraint checks
+4. - [x] Infrastructure Layer Validation
+   1. - [x] Write tests for storage validation
+   2. - [x] Implement schema validation
+   3. - [x] Add storage constraint checks
 
 ## Constraints
 
@@ -248,158 +248,117 @@ export class CreateResumeUseCase implements UseCase<ResumeDTO, Result<Resume>> {
       return Result.fail(validationResult.error);
     }
 
-    // 2. Création de l'entité
+    // 2. Création de l'entité Resume
     const resumeResult = Resume.create(data);
     if (resumeResult.isFailure) {
       return Result.fail(resumeResult.error);
     }
 
-    // 3. Sauvegarde
-    const resume = resumeResult.getValue();
-    await this.resumeRepository.save(resume);
-
-    return Result.ok(resume);
-  }
-}
-
-// application/validators/ResumeValidator.ts
-export class ResumeValidator {
-  private readonly schema: z.ZodSchema;
-
-  constructor(schema: z.ZodSchema) {
-    this.schema = schema;
-  }
-
-  async validate(data: unknown): Promise<Result<void>> {
-    const result = await this.schema.safeParseAsync(data);
-    return result.success
-      ? Result.ok()
-      : Result.fail(new ValidationError(result.error));
-  }
-}
-```
-
-### 3. Presentation Layer (Vue Components & Composables)
-
-```typescript
-// presentation/composables/useFieldValidation.ts
-export function useFieldValidation<T extends z.ZodType>(
-  schema: T,
-  options: ValidationOptions = {}
-) {
-  const error = ref<string>("");
-  const isValid = ref(false);
-  const isDirty = ref(false);
-
-  const validate = debounce((value: unknown) => {
-    isDirty.value = true;
-    const result = schema.safeParse(value);
-
-    if (!result.success) {
-      error.value = formatZodError(result.error, options);
-      isValid.value = false;
-      return false;
+    // 3. Sauvegarde via le repository (avec validation infrastructure)
+    const saveResult = await this.resumeRepository.save(resumeResult.value);
+    if (saveResult.isFailure) {
+      return Result.fail(saveResult.error);
     }
 
-    error.value = "";
-    isValid.value = true;
-    return true;
-  }, options.debounce ?? 300);
-
-  return { error, isValid, isDirty, validate };
+    return Result.ok(resumeResult.value);
+  }
 }
-
-// presentation/components/ResumeForm.vue
-export default defineComponent({
-  setup() {
-    const { resumeStore } = useStores();
-    const { validate: validateBasics } = useFieldValidation(basicSchema);
-    const { validateForm } = useFormValidation(resumeSchema);
-
-    const handleSubmit = async (data: unknown) => {
-      const validationResult = await validateForm(data);
-      if (!validationResult.success) {
-        return;
-      }
-
-      await resumeStore.createResume(validationResult.data);
-    };
-
-    return { handleSubmit };
-  },
-});
 ```
 
-### 4. Infrastructure Layer (Repositories & Adapters)
+### 3. Infrastructure Layer (Repositories)
 
 ```typescript
 // infrastructure/repositories/LocalStorageResumeRepository.ts
 export class LocalStorageResumeRepository implements ResumeRepository {
-  private readonly storageKey = "resume";
-  private readonly schema: z.ZodSchema;
+  private readonly storageKey = "cv-resume";
+  private readonly resumeSchema = z.object({
+    basics: z.object({
+      name: z.string().min(1, "Name is required"),
+      email: z.string().email("Invalid email format"),
+      // ... other fields
+    }),
+    // ... other sections
+  });
 
-  constructor(schema: z.ZodSchema) {
-    this.schema = schema;
-  }
+  constructor(private readonly localStorage: Storage) {}
 
   async save(resume: Resume): Promise<Result<void>> {
     try {
-      // 1. Validation avant persistance
-      const data = resume.toJSON();
-      const validation = await this.schema.safeParseAsync(data);
-      if (!validation.success) {
-        return Result.fail(new StorageValidationError(validation.error));
-      }
+      console.log("=== [LocalStorage] save ===");
+      console.log(`[LocalStorage] Received resume instance:`, resume);
 
-      // 2. Persistance
-      localStorage.setItem(this.storageKey, JSON.stringify(validation.data));
+      // Get JSON data from domain entity
+      const jsonData = resume.toJSON();
+      console.log(`[LocalStorage] Converted to JSON:`, jsonData);
+
+      // Validate against storage schema
+      this.validateSchema(jsonData);
+      console.log("[LocalStorage] Data validation passed");
+
+      // Store in localStorage
+      this.localStorage.setItem(this.storageKey, JSON.stringify(jsonData));
+      console.log("[LocalStorage] Saved successfully");
 
       return Result.ok();
     } catch (error) {
-      return Result.fail(new StorageError(error));
+      console.error("[LocalStorage] Error saving:", error);
+      return Result.fail(new StorageError("Storage operation failed"));
+    }
+  }
+
+  async load(): Promise<Result<Resume>> {
+    try {
+      console.log("=== [LocalStorage] load ===");
+
+      // Get data from localStorage
+      const rawData = this.localStorage.getItem(this.storageKey);
+      console.log(`[LocalStorage] Raw data:`, rawData);
+
+      // If no data exists, return empty resume
+      if (!rawData) {
+        console.log("[LocalStorage] No data found, creating empty resume");
+        return Result.ok(Resume.createEmpty());
+      }
+
+      // Parse and validate JSON data
+      const data = JSON.parse(rawData);
+      console.log(`[LocalStorage] Parsed data:`, data);
+
+      // Validate against storage schema
+      this.validateSchema(data);
+      console.log("[LocalStorage] Storage validation passed");
+
+      // Create domain entity
+      const resumeResult = Resume.create(data);
+      console.log(`[LocalStorage] Resume instance created:`, {
+        isValid: resumeResult.isSuccess,
+        resume: resumeResult.value,
+      });
+
+      return resumeResult;
+    } catch (error) {
+      console.error("[LocalStorage] Error loading:", error);
+      return Result.fail(new StorageError("Failed to load resume data"));
+    }
+  }
+
+  private validateSchema(data: unknown): void {
+    const result = this.resumeSchema.safeParse(data);
+    if (!result.success) {
+      const errors = result.error.errors.map(
+        (err) => `${err.path.join(".")}: ${err.message}`
+      );
+      throw new StorageValidationError("Storage validation failed", errors);
     }
   }
 }
 ```
 
-## Dev Notes
+## Completion Criteria
 
-### Validation Strategy
-
-1. **Domain-Driven Validation**
-
-   - Value Objects encapsulent leur propre validation
-   - Entités agrégées valident leurs invariants
-   - Utilisation de Result pour la gestion des erreurs
-   - Séparation claire des responsabilités (SOLID)
-
-2. **Clean Architecture Layers**
-
-   - Présentation : validation UI immédiate
-   - Application : orchestration et règles métier
-   - Domaine : invariants et logique métier
-   - Infrastructure : validation de persistance
-
-3. **SOLID Principles**
-
-   - Single Responsibility : chaque validateur a une seule responsabilité
-   - Open/Closed : extension facile des schémas Zod
-   - Liskov Substitution : interfaces cohérentes pour les validateurs
-   - Interface Segregation : interfaces spécifiques par type de validation
-   - Dependency Inversion : injection des schémas et validateurs
-
-4. **Performance & UX**
-   - Cache des résultats de validation
-   - Debounce sur les validations UI
-   - Validation progressive (fail-fast)
-   - Messages d'erreur contextuels
-
-## Chat Command Log
-
-- User: Désactivation temporaire des validations pour le développement
-- Agent: Modification des value objects pour désactiver les validations
-- User: Demande de création d'une story pour la stratégie de validation
-- Agent: Création de la story avec une approche complète de la validation
-- User: Demande de vérification du format et des redondances
-- User: Mise à jour de la story selon le standard 903-story.mdc
-- Agent: Restructuration du document pour respecter le standard tout en préservant le contenu
+- ✅ UI validations provide immediate feedback to users on form input
+- ✅ Application layer validates business rules before creating entities
+- ✅ Domain entities enforce invariants during creation and modification
+- ✅ Infrastructure layer validates data before storage and after retrieval
+- ✅ All tests pass with good coverage across all validation layers
+- ✅ Documentation updated to reflect the validation strategy

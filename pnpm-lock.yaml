@@ -54,6 +54,9 @@ importers:
       '@cv-generator/shared':
         specifier: workspace:*
         version: link:../shared
+      zod:
+        specifier: ^3.22.4
+        version: 3.24.2
     devDependencies:
       typescript:
         specifier: ~5.3.3

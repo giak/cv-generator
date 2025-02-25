@@ -16,9 +16,11 @@ Le CV Generator est une application web moderne pour la création et la gestion 
 
 2. **Domain-Driven Design**
 
+   - Organisation par bounded contexts (CV, Export, User)
    - Entités riches avec logique métier encapsulée
    - Value Objects pour les types complexes (Email, Phone)
    - Agrégats pour maintenir la cohérence (Resume)
+   - Interfaces de ports explicites dans chaque bounded context
 
 3. **Monorepo Structure**
 
@@ -57,43 +59,272 @@ Le CV Generator est une application web moderne pour la création et la gestion 
 title: CV Generator System Architecture
 ---
 graph TD
-    subgraph UI["UI Layer (Vue.js)"]
-        C1[Components]
-        S1[Stores]
+    %% Légende en haut
+    subgraph LEGEND["🔍 Légende"]
+        direction LR
+        L1["➡️ : Dépend de"]
+        L2["--➡️ : Implémente"]
+        L3["💎 Domain Layer: Règles métier"]
+        L4["⚙️ Application Layer: Orchestration"]
+        L5["🔄 Interface Adapters: Conversion"]
+        L6["🖥️ Frameworks & Drivers: UI et systèmes externes"]
+    end
+
+    %% Les couches de Clean Architecture
+    subgraph UI["🖥️ Frameworks & Drivers Layer (External)"]
+        direction TB
+        C1[UI Components]
         COM[Composables]
+        RT[Routes]
+        style UI fill:#e6ffec,stroke:#333,stroke-width:2px
+
+        %% Sous-groupe pour les composants UI par bounded context
+        subgraph UI_COMPONENTS["UI Components by Context"]
+            CV_COMP["CV Editor Components"]
+            EXP_COMP["Export Components"]
+            USR_COMP["User Profile Components"]
+        end
     end
 
-    subgraph APP["Application Layer"]
-        UC[Use Cases]
-        SVC[Services]
+    subgraph ADAPT["🔄 Interface Adapters Layer"]
+        direction TB
+        STORE[Pinia Stores]
+        PRES[Presenters]
+        CONT[Controllers]
+        style ADAPT fill:#e6e6ff,stroke:#333,stroke-width:2px
+
+        %% Sous-groupe pour les stores par bounded context
+        subgraph STORES["Stores by Context"]
+            CV_STORE["CV Store"]
+            EXP_STORE["Export Store"]
+            USR_STORE["User Store"]
+        end
     end
 
-    subgraph DOM["Domain Layer"]
-        E[Entities]
-        VO[Value Objects]
-        R[Repository Interfaces]
+    subgraph APP["⚙️ Application Layer (Use Cases)"]
+        direction TB
+        style APP fill:#fff0e6,stroke:#333,stroke-width:2px
+
+        subgraph CV_APP["CV Bounded Context"]
+            CV_UC["Use Cases:
+            - CreateResume
+            - UpdateResume
+            - ValidateResume"]
+        end
+
+        subgraph EXP_APP["Export Bounded Context"]
+            EXP_UC["Use Cases:
+            - ExportResume
+            - ChooseFormat
+            - PreviewExport"]
+        end
+
+        subgraph USR_APP["User Bounded Context"]
+            USR_UC["Use Cases:
+            - ManagePreferences
+            - StoreUserData"]
+        end
+
+        subgraph SHR_APP["Shared Application"]
+            SHR_SVC["Services:
+            - ValidationService
+            - NotificationService"]
+        end
     end
 
-    subgraph INF["Infrastructure Layer"]
-        LS[LocalStorage]
-        EXP[Export Services]
-        REP[Repository Implementations]
+    subgraph DOMAIN["💎 Domain Layer (Entities)"]
+        direction TB
+        style DOMAIN fill:#f5e6ff,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
+
+        subgraph CV_DOM["CV Domain"]
+            CV_ENT["Entities:
+            - Resume
+            - WorkExperience
+            - Education"]
+            CV_VO["Value Objects:
+            - Email
+            - Phone
+            - Date"]
+            CV_PORTS["Repository Ports:
+            - ResumeRepository
+            - TemplateRepository"]
+        end
+
+        subgraph EXP_DOM["Export Domain"]
+            EXP_ENT["Entities:
+            - ExportFormat
+            - ExportTemplate"]
+            EXP_PORTS["Service Ports:
+            - ExportService
+            - FormatConverter"]
+        end
+
+        subgraph USR_DOM["User Domain"]
+            USR_ENT["Entities:
+            - User
+            - UserPreferences"]
+            USR_PORTS["Repository Ports:
+            - UserRepository
+            - PreferencesRepository"]
+        end
+
+        subgraph SHR_DOM["Shared Domain"]
+            SHR_ERR["Errors:
+            - ValidationError
+            - ApplicationError"]
+            SHR_VO["Value Objects:
+            - Result
+            - Identifier"]
+        end
     end
 
-    C1 --> S1
-    S1 --> UC
-    COM --> UC
-    UC --> E
-    UC --> R
-    E --> VO
-    REP --> R
-    REP --> LS
-    EXP --> UC
+    subgraph INFRA["🔧 Infrastructure Layer (Implementations)"]
+        direction TB
+        style INFRA fill:#fff8e6,stroke:#333,stroke-width:2px
 
-    style UI fill:#f9f,stroke:#333
-    style APP fill:#bbf,stroke:#333
-    style DOM fill:#bfb,stroke:#333
-    style INF fill:#fbb,stroke:#333
+        LS["LocalStorage Implementation"]
+        EXS["Export Services Implementation"]
+        REP["Repository Implementations:
+        - LocalStorageResumeRepository
+        - LocalStorageUserRepository"]
+        API["API Clients"]
+    end
+
+    %% Relations entre les couches (Les flèches vont de l'extérieur vers l'intérieur selon Clean Architecture)
+
+    %% UI dépend des Interface Adapters
+    C1 -->|"uses"| PRES
+    C1 -->|"interacts with"| STORE
+    COM -->|"calls"| CONT
+    CV_COMP -->|"bound to"| CV_STORE
+    EXP_COMP -->|"bound to"| EXP_STORE
+    USR_COMP -->|"bound to"| USR_STORE
+
+    %% Interface Adapters dépendent des Use Cases
+    STORE -->|"executes"| CV_UC
+    STORE -->|"executes"| EXP_UC
+    STORE -->|"executes"| USR_UC
+    CONT -->|"calls"| CV_UC
+    CONT -->|"calls"| EXP_UC
+    PRES -->|"formats data from"| CV_UC
+    PRES -->|"formats data from"| SHR_SVC
+
+    %% Application Use Cases dépendent du Domain
+    CV_UC -->|"uses"| CV_ENT
+    CV_UC -->|"interacts via"| CV_PORTS
+    EXP_UC -->|"uses"| EXP_ENT
+    EXP_UC -->|"interacts via"| EXP_PORTS
+    USR_UC -->|"uses"| USR_ENT
+    USR_UC -->|"interacts via"| USR_PORTS
+    SHR_SVC -->|"uses"| SHR_ERR
+    SHR_SVC -->|"uses"| SHR_VO
+
+    %% Domain shared dependencies
+    CV_ENT -->|"uses"| SHR_VO
+    EXP_ENT -->|"uses"| SHR_VO
+    USR_ENT -->|"uses"| SHR_VO
+    CV_UC -->|"throws"| SHR_ERR
+
+    %% Infrastructure implements domain ports (Inversion de dépendance)
+    REP -.->|"implements"| CV_PORTS
+    REP -.->|"implements"| USR_PORTS
+    EXS -.->|"implements"| EXP_PORTS
+
+    %% Infrastructure details
+    REP -->|"uses"| LS
+    REP -->|"uses"| API
+    EXS -->|"uses"| API
+```
+
+### Bounded Contexts Structure
+
+```mermaid
+---
+title: DDD Bounded Contexts
+---
+graph TD
+    %% Légende en haut
+    subgraph LEGEND["🔍 Légende des Bounded Contexts"]
+        direction LR
+        L1["➡️ : Dépend de"]
+        L2["📦 Bounded Context: domaine métier isolé"]
+        L3["🔄 Application: orchestration des cas d'usage"]
+        L4["💎 Domain: entités, value objects, règles métier"]
+        L5["🔌 Ports: interfaces pour l'infrastructure"]
+    end
+
+    subgraph CV["📄 CV Bounded Context"]
+        direction TB
+        CVD["💎 Domain:
+        - Resume
+        - WorkExperience
+        - Education
+        - Email (Value Object)"]
+        CVA["🔄 Application:
+        - CreateResume
+        - UpdateResume
+        - ValidateResume"]
+        CVP["🔌 Ports:
+        - ResumeRepository
+        - TemplateRepository"]
+        style CV fill:#e6ffec,stroke:#333,stroke-width:2px
+    end
+
+    subgraph EXP["📤 Export Bounded Context"]
+        direction TB
+        EXPD["💎 Domain:
+        - ExportFormat
+        - ExportTemplate"]
+        EXPA["🔄 Application:
+        - ExportResume
+        - ChooseFormat"]
+        EXPP["🔌 Ports:
+        - ExportService
+        - FormatConverter"]
+        style EXP fill:#e6e6ff,stroke:#333,stroke-width:2px
+    end
+
+    subgraph USR["👤 User Bounded Context"]
+        direction TB
+        USRD["💎 Domain:
+        - User
+        - UserPreferences"]
+        USRA["🔄 Application:
+        - ManagePreferences
+        - StoreUserData"]
+        USRP["🔌 Ports:
+        - UserRepository
+        - PreferencesRepository"]
+        style USR fill:#fff0e6,stroke:#333,stroke-width:2px
+    end
+
+    subgraph SHR["🔄 Shared"]
+        direction TB
+        SHRD["💎 Domain:
+        - ValidationError
+        - Result
+        - Identifier"]
+        SHRA["🔄 Application:
+        - ValidationService
+        - NotificationService"]
+        style SHR fill:#f5e6ff,stroke:#333,stroke-width:2px
+    end
+
+    %% Relations internes dans chaque context
+    CVA -->|"utilise"| CVD
+    CVA -->|"dépend de"| CVP
+    EXPA -->|"utilise"| EXPD
+    EXPA -->|"dépend de"| EXPP
+    USRA -->|"utilise"| USRD
+    USRA -->|"dépend de"| USRP
+
+    %% Relations avec le contexte partagé
+    CVD -->|"utilise"| SHRD
+    EXPD -->|"utilise"| SHRD
+    USRD -->|"utilise"| SHRD
+    CVA -->|"utilise"| SHRA
+    EXPA -->|"utilise"| SHRA
+    USRA -->|"utilise"| SHRA
 ```
 
 ### Data Flow
@@ -129,23 +360,52 @@ sequenceDiagram
 title: Validation Architecture
 ---
 graph TD
-    subgraph UI["UI Layer"]
-        FF[Form Field]
-        CF[Composable: useFieldValidation]
+    %% Légende en haut
+    subgraph LEGEND["🔍 Légende du flux de validation"]
+        direction LR
+        L1["➡️ : Flux de données"]
+        L2["🖼️ UI Layer: Interface utilisateur"]
+        L3["💎 Domain Layer: Règles métier"]
+        L4["✅ Validation: Vérification des données"]
     end
 
-    subgraph DOM["Domain Layer"]
-        VO[Value Object: Email, Phone]
-        ZS[Zod Schema]
+    subgraph UI["🖼️ UI Layer"]
+        direction TB
+        FF["📝 Form Field:
+        - Input text
+        - Select
+        - Checkbox"]
+
+        CF["🔄 Composable:
+        useFieldValidation
+        - validate()
+        - error
+        - isValid"]
+
+        style UI fill:#e6ffec,stroke:#333,stroke-width:2px
     end
 
-    FF -->|Input| CF
-    CF -->|Validate| ZS
-    ZS -->|Create| VO
-    CF -->|Display Error| FF
+    subgraph DOM["💎 Domain Layer"]
+        direction TB
+        VO["💠 Value Objects:
+        - Email
+        - Phone
+        - Date"]
 
-    style UI fill:#f9f,stroke:#333
-    style DOM fill:#bfb,stroke:#333
+        ZS["✅ Zod Schema:
+        - Type validation
+        - Business rules
+        - Error messages"]
+
+        style DOM fill:#f5e6ff,stroke:#333,stroke-width:2px
+    end
+
+    %% Flux de validation
+    FF -->|"1. Saisie utilisateur"| CF
+    CF -->|"2. Validation avec schéma"| ZS
+    ZS -->|"3. Création si valide"| VO
+    ZS -->|"4. Erreurs si invalide"| CF
+    CF -->|"5. Affichage feedback"| FF
 ```
 
 ## Data Models
@@ -236,18 +496,47 @@ export function useCVFieldValidation() {
 ├── packages/                    # Monorepo workspace
 │   ├── core/                   # Domain & Application layers
 │   │   └── src/
-│   │       └── modules/
-│   │           └── cv/
-│   │               ├── domain/     # Domain layer
-│   │               │   ├── entities/   # Domain entities
-│   │               │   │   └── Resume.ts # Entité principale
-│   │               │   ├── value-objects/ # Value Objects
-│   │               │   │   ├── Email.ts
-│   │               │   │   └── Phone.ts
-│   │               │   └── shared/     # Shared domain logic
-│   │               └── application/ # Application layer
-│   │                   └── use-cases/  # Business use cases
-│   │                       └── ManageResume.ts # Cas d'utilisation principal
+│   │       ├── cv/              # CV Bounded Context
+│   │       │   ├── domain/      # Domain layer
+│   │       │   │   ├── entities/   # Domain entities
+│   │       │   │   │   └── Resume.ts
+│   │       │   │   │   └── value-objects/ # Value Objects
+│   │       │   │       ├── Email.ts
+│   │       │   │       └── Phone.ts
+│   │       │   ├── application/ # Application layer
+│   │       │   │   └── use-cases/  # Business use cases
+│   │       │   │       └── ManageResume.ts
+│   │       │   └── ports/       # Interface ports
+│   │       │   │       └── repositories/
+│   │       │   │           └── ResumeRepository.ts
+│   │       │   ├── export/          # Export Bounded Context
+│   │       │   │   ├── domain/
+│   │       │   │   │   └── entities/
+│   │       │   │   │       └── ExportFormat.ts
+│   │       │   │   ├── application/
+│   │       │   │   │   └── use-cases/
+│   │       │   │   │       └── ExportResume.ts
+│   │       │   │   └── ports/
+│   │       │   │   │       └── services/
+│   │       │   │   │           └── ExportService.ts
+│   │       │   ├── user/            # User Bounded Context
+│   │       │   │   ├── domain/
+│   │       │   │   │   └── entities/
+│   │       │   │   │       └── User.ts
+│   │       │   │   ├── application/
+│   │       │   │   │   └── use-cases/
+│   │       │   │   │       └── ManageUserPreferences.ts
+│   │       │   │   └── ports/
+│   │       │   │   │       └── repositories/
+│   │       │   │   │           └── UserRepository.ts
+│   │       │   └── shared/          # Shared domain elements
+│   │       │   │   ├── domain/
+│   │       │   │   │   ├── errors/
+│   │       │   │   │   │   └── ValidationError.ts
+│   │       │   │   │   └── value-objects/
+│   │       │   │   │       └── Result.ts
+│   │       │   │   └── application/
+│   │       │   │   │   └── interfaces/
 │   ├── ui/                    # Presentation layer
 │   │   └── src/
 │   │       ├── components/    # Vue components
@@ -286,9 +575,13 @@ export function useCVFieldValidation() {
 
 #### Core (@cv-generator/core)
 
-- Entités du domaine et logique métier
-- Validation des données
-- Use cases et interfaces des repositories
+- Organisation en bounded contexts DDD:
+  - **CV Context**: Entités de CV, logique métier, validation
+  - **Export Context**: Formats d'export, gestion des conversions
+  - **User Context**: Gestion utilisateur, préférences
+  - **Shared**: Utilities partagées (Result, ValidationError)
+- Interfaces de ports explicites pour l'inversion de dépendance
+- Alias TypeScript par contexte métier (@core/cv/_, @core/export/_, etc.)
 
 #### UI (@cv-generator/ui)
 
@@ -323,6 +616,10 @@ export function useCVFieldValidation() {
 | CV Store Implementation      | story-4  | Added Pinia store for CV state management                   |
 | Test Co-location             | story-4  | Moved tests next to their respective components/composables |
 | Use Case Implementation      | story-4  | ManageResume use case for persistence                       |
+| DDD Bounded Contexts         | story-5  | Reorganized core into CV, Export and User bounded contexts  |
+| TypeScript Path Aliases      | story-5  | Updated path aliases to follow bounded context structure    |
+| Validation Result Object     | story-5  | Added shared Result object for validation operations        |
+| Port Interfaces Extraction   | story-5  | Explicit repository and service interfaces in ports folders |
 
 ## Future Considerations
 

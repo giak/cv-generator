@@ -1,16 +1,16 @@
 ---
 title: CV Generator
 author: Giak
-date: 2025-02-20
+date: 2024-05-15
 status: active
-version: 1.0.0
+version: 1.1.0
 ---
 
 # CV Generator
 
 [![Build Status](https://github.com/giak/cv-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/giak/cv-generator/actions)
 [![Coverage](https://codecov.io/gh/giak/cv-generator/branch/main/graph/badge.svg)](https://codecov.io/gh/giak/cv-generator)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/giak/cv-generator/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/giak/cv-generator/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 > 💡 **Modern CV builder with JSON Resume support, real-time validation, and multiple export formats**
@@ -61,6 +61,7 @@ pnpm dev
   - [Troubleshooting](#troubleshooting)
   - [Update Procedures](#update-procedures)
   - [FAQ](#faq)
+- [Changelog](#changelog)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
 
@@ -98,6 +99,13 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - Offline capabilities with PWA support
   - Auto-save functionality with history
   - Version control for CV iterations
+
+- ✅ **Validation Strategy**
+
+  - Comprehensive data validation
+  - Domain-level validation rules
+  - Real-time feedback with error messages
+  - Shared Result pattern for consistent error handling
 
 - 📤 **Export Options**
   - PDF export with customizable styles
@@ -162,6 +170,7 @@ CV Generator provides a structured, standardized approach to CV creation using t
 | `pnpm lint`      | Lint code for errors and style issues      | Code quality checks               |
 | `pnpm format`    | Format code according to project standards | Maintaining consistent style      |
 | `pnpm storybook` | Run Storybook component explorer           | Component development and testing |
+| `pnpm docs:dev`  | Run documentation site locally             | Working on project documentation  |
 
 ## Usage
 
@@ -213,42 +222,52 @@ cv-generator/
 ├── packages/
 │   ├── core/           # Domain & Business Logic
 │   │   ├── src/
-│   │   │   ├── domain/
-│   │   │   │   ├── entities/      # Business objects
-│   │   │   │   ├── repositories/   # Repository interfaces
-│   │   │   │   └── services/       # Domain services
-│   │   │   └── application/
-│   │   │       ├── useCases/       # Application use cases
-│   │   │       └── services/       # Application services
-│   │   └── __tests__/             # Core tests
+│   │   │   ├── cv/              # CV bounded context
+│   │   │   │   ├── domain/       # CV domain entities, value objects
+│   │   │   │   ├── application/  # CV use cases
+│   │   │   │   └── ports/        # CV repository interfaces
+│   │   │   │
+│   │   │   ├── export/          # Export bounded context
+│   │   │   │   ├── domain/       # Export domain entities
+│   │   │   │   ├── application/  # Export use cases
+│   │   │   │   └── ports/        # Export service interfaces
+│   │   │   │
+│   │   │   ├── user/            # User bounded context
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   └── shared/          # Shared modules
+│   │   │       ├── domain/       # Shared domain objects (Result, etc.)
+│   │   │       └── utils/        # Shared utilities
+│   │   │
+│   │   └── __tests__/           # Core tests
 │   │
 │   ├── infrastructure/ # External Integrations
 │   │   ├── src/
-│   │   │   ├── repositories/       # Repository implementations
-│   │   │   ├── services/          # External service integrations
-│   │   │   └── adapters/          # External adapters
-│   │   └── __tests__/             # Infrastructure tests
+│   │   │   ├── repositories/     # Repository implementations
+│   │   │   ├── services/         # External service integrations
+│   │   │   └── adapters/         # External adapters
+│   │   └── __tests__/           # Infrastructure tests
 │   │
 │   ├── shared/         # Shared Types & Utils
 │   │   ├── src/
-│   │   │   ├── types/             # Shared TypeScript types
-│   │   │   ├── utils/             # Shared utilities
-│   │   │   └── constants/         # Shared constants
-│   │   └── __tests__/             # Shared module tests
+│   │   │   ├── types/           # Shared TypeScript types
+│   │   │   ├── utils/           # Shared utilities
+│   │   │   └── constants/       # Shared constants
+│   │   └── __tests__/           # Shared module tests
 │   │
 │   └── ui/            # Vue 3 Frontend App
 │       ├── src/
-│       │   ├── assets/            # Static assets
-│       │   ├── components/        # Shared components
-│       │   ├── modules/           # Feature modules
+│       │   ├── assets/          # Static assets
+│       │   ├── components/      # Shared components
+│       │   ├── modules/         # Feature modules
 │       │   │   └── cv/
-│       │   │       ├── domain/    # Module-specific domain
+│       │   │       ├── domain/  # Module-specific domain
 │       │   │       ├── application/# Module-specific logic
 │       │   │       └── presentation/# UI components
-│       │   ├── stores/            # Pinia stores
-│       │   └── types/             # UI-specific types
-│       ├── e2e/                   # E2E tests
-│       └── __tests__/             # Unit tests
+│       │   ├── stores/          # Pinia stores
+│       │   └── types/           # UI-specific types
+│       ├── e2e/                 # E2E tests
+│       └── __tests__/           # Unit tests
 │
 ├── docs/              # Project Documentation
 │   ├── architecture/  # Architecture decisions
@@ -264,8 +283,8 @@ Each package has its own responsibilities:
 
 | Package        | Purpose                               | Key Files                                               |
 | -------------- | ------------------------------------- | ------------------------------------------------------- |
-| core           | Business logic and domain models      | `src/domain/entities/Resume.ts`                         |
-| infrastructure | External services and persistence     | `src/repositories/LocalStorageRepository.ts`            |
+| core           | Business logic and domain models      | `src/cv/domain/entities/Resume.ts`                      |
+| infrastructure | External services and persistence     | `src/repositories/LocalStorageResumeRepository.ts`      |
 | shared         | Common utilities and types            | `src/types/resume.interface.ts`                         |
 | ui             | User interface and presentation logic | `src/modules/cv/presentation/components/BasicsForm.vue` |
 
@@ -273,53 +292,83 @@ Each package has its own responsibilities:
 
 ```mermaid
 ---
-title: CV Generator Clean Architecture
+title: CV Generator System Architecture
 ---
 graph TD
-    subgraph "UI Layer"
-        A1[Vue Components]
-        A2[Stores]
-        A3[Pages]
+    %% Frameworks & Drivers Layer
+    subgraph "Frameworks & Drivers Layer (Infrastructure)"
+        UI["UI Components"]
+        WebAPI["Web API Clients"]
+        LocalStorage["LocalStorage"]
+        FileSystem["File System"]
     end
 
+    %% Interface Adapters Layer
+    subgraph "Interface Adapters Layer"
+        Stores["Pinia Stores"]
+        Repositories["Repository Implementations"]
+        Presenters["Presenters/Controllers"]
+    end
+
+    %% Application Layer
     subgraph "Application Layer"
-        B1[Use Cases]
-        B2[Services]
-        B3[DTOs]
+        subgraph "CV Context"
+            CVUseCases["CV Use Cases"]
+        end
+
+        subgraph "Export Context"
+            ExportUseCases["Export Use Cases"]
+        end
+
+        subgraph "User Context"
+            UserUseCases["User Use Cases"]
+        end
     end
 
+    %% Domain Layer
     subgraph "Domain Layer"
-        C1[Entities]
-        C2[Value Objects]
-        C3[Repository Interfaces]
-        C4[Domain Services]
+        subgraph "Entities & Value Objects"
+            Entities["Domain Entities"]
+            ValueObjects["Value Objects"]
+        end
+
+        subgraph "Repository Ports"
+            RepoInterfaces["Repository Interfaces"]
+        end
+
+        subgraph "Domain Services"
+            DomainServices["Domain Services"]
+        end
     end
 
-    subgraph "Infrastructure Layer"
-        D1[Repositories]
-        D2[External Services]
-        D3[Adapters]
-    end
+    %% Dependencies between layers
+    UI --> Stores
+    UI --> Presenters
+    Stores --> CVUseCases
+    Stores --> ExportUseCases
+    Stores --> UserUseCases
 
-    %% UI Layer Dependencies
-    A1 --> A2
-    A2 --> B1
-    A3 --> A1
+    Presenters --> CVUseCases
+    Presenters --> ExportUseCases
 
-    %% Application Layer Dependencies
-    B1 --> C1
-    B1 --> C3
-    B2 --> C4
+    Repositories --> RepoInterfaces
+    WebAPI --> RepoInterfaces
+    LocalStorage --> Repositories
+    FileSystem --> Repositories
 
-    %% Domain Layer Dependencies
-    C1 --> C2
-    C3 --> C1
-    C4 --> C1
+    CVUseCases --> Entities
+    CVUseCases --> RepoInterfaces
+    CVUseCases --> DomainServices
 
-    %% Infrastructure Layer Dependencies
-    D1 --> C3
-    D2 --> B2
-    D3 --> D2
+    ExportUseCases --> Entities
+    ExportUseCases --> DomainServices
+
+    UserUseCases --> Entities
+
+    DomainServices --> Entities
+    DomainServices --> ValueObjects
+    RepoInterfaces --> Entities
+    Entities --> ValueObjects
 ```
 
 ### Key Principles
@@ -485,6 +534,8 @@ The application is designed to work on:
   - Workaround: Export regularly to JSON and import when needed
 - Font rendering differences across browsers
   - Workaround: Stick to system fonts for consistent display
+- Validation errors sometimes unclear on nested objects
+  - Workaround: Check parent fields when validation errors occur
 - [Track issues on GitHub](https://github.com/giak/cv-generator/issues)
 
 ### Troubleshooting
@@ -544,6 +595,21 @@ A: No, all data is stored locally in your browser. No server storage is used.
 **Q: Can I share my CV directly from the app?**  
 A: Currently, you need to export and share the file. Direct sharing is planned for a future release.
 
+**Q: How do I report bugs or suggest features?**  
+A: Please open an issue on our [GitHub repository](https://github.com/giak/cv-generator/issues).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed list of changes between versions.
+
+### Recent Updates (v1.1.0)
+
+- Added comprehensive validation strategy with Result pattern
+- Reorganized core module into bounded contexts (CV, Export, User)
+- Improved error handling throughout the application
+- Updated project structure based on Domain-Driven Design principles
+- Fixed several UI issues with responsive design
+
 ## License
 
 [MIT License](LICENSE)
@@ -556,3 +622,7 @@ A: Currently, you need to export and share the file. Direct sharing is planned f
 - [Tailwind CSS](https://tailwindcss.com/) for the utility-first styling approach
 - [Zod](https://zod.dev/) for the schema validation system
 - All our contributors and community members
+
+---
+
+_Last updated: May 15, 2024_

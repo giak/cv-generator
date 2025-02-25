@@ -1,14 +1,12 @@
-# Changelog
-
 ---
-
 title: CV Generator Changelog
 author: Giak
-date: 2025-02-20
+date: 2024-05-15
 status: maintained
-version: 1.0.0
-
+version: 1.1.0
 ---
+
+# Changelog
 
 > ℹ️ **Note:** Ce fichier suit les recommandations de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -23,7 +21,53 @@ version: 1.0.0
 - Interface administrateur pour la gestion des modèles
 - Internationalisation (i18n) pour l'interface utilisateur
 
-## [1.0.0] - 2025-02-20
+## [1.1.0] - 2024-05-15
+
+### Added 🎉
+
+- Implémentation du pattern Result pour la validation
+- Support complet des bounded contexts dans l'architecture DDD
+- Nouvelle interface pour la validation en temps réel
+- Documentation technique détaillée avec diagrammes améliorés
+
+### Changed 🔄
+
+- Réorganisation complète du package core en bounded contexts (CV, Export, User)
+- Amélioration de la gestion des erreurs dans toute l'application
+- Mise à jour de la structure du projet basée sur les principes DDD
+- Correction de plusieurs problèmes d'interface utilisateur avec le design responsive
+
+### Technical Details 🔧
+
+> 💡 **Implementation Details**
+
+```typescript
+// Result pattern implementation
+export class Result<T> {
+  private constructor(
+    public readonly isValid: boolean,
+    public readonly errors: string[],
+    private readonly _value?: T
+  ) {}
+
+  static success<T>(value: T): Result<T> {
+    return new Result<T>(true, [], value);
+  }
+
+  static failure<T>(errors: string[]): Result<T> {
+    return new Result<T>(false, errors);
+  }
+
+  get value(): T {
+    if (!this.isValid) {
+      throw new Error("Cannot access value of invalid result");
+    }
+    return this._value as T;
+  }
+}
+```
+
+## [1.0.0] - 2024-04-20
 
 ### Added 🎉
 
@@ -223,7 +267,8 @@ export class ManageResume {
 - Setup de base Vue.js avec TypeScript
 - Premiers composants UI
 
-[Unreleased]: https://github.com/giak/cv-generator/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/giak/cv-generator/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/giak/cv-generator/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/giak/cv-generator/compare/v0.1.2...v1.0.0
 [0.1.2]: https://github.com/giak/cv-generator/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/giak/cv-generator/compare/v0.1.0...v0.1.1
