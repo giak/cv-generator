@@ -1,0 +1,37 @@
+FROM node:22-alpine
+
+# Activer et préparer pnpm
+RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers de configuration pour optimiser le cache Docker
+COPY .npmrc pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json ./
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/core/package.json ./packages/core/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/infrastructure/package.json ./packages/infrastructure/
+
+# Installer les dépendances avec une configuration optimisée
+RUN pnpm install --no-frozen-lockfile
+
+# Installer explicitement les dépendances problématiques dans le package UI
+RUN cd packages/ui && pnpm add -D autoprefixer@10.4.17 tailwindcss@4.0.0-alpha.7 @tailwindcss/forms@0.5.7 @tailwindcss/typography@0.5.10 @tailwindcss/aspect-ratio@0.4.2 @tailwindcss/vite@4.0.0-alpha.7 @vue/tsconfig@0.5.1
+
+# Installer @vue/tsconfig explicitement au niveau racine et vérifier l'installation
+RUN pnpm add -D @vue/tsconfig@0.5.1 && \
+    ls -la node_modules/@vue/tsconfig && \
+    echo "Vérification des fichiers de config:" && \
+    ls -la node_modules/@vue/tsconfig/tsconfig*
+
+# Copier le reste des fichiers
+COPY . .
+
+# Exposer le port pour le développement
+EXPOSE 5173
+
+# Commande par défaut pour démarrer le serveur de développement de l'UI
+# Le host 0.0.0.0 permet d'accéder à l'application depuis l'extérieur du conteneur
+CMD ["pnpm", "--filter", "@cv-generator/ui", "dev", "--host", "0.0.0.0"]

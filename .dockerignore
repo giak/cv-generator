@@ -1,0 +1,52 @@
+# Fichiers système
+.git
+.github
+.gitignore
+.DS_Store
+.idea
+.vscode
+.cursor
+*.logs
+*.log
+
+# Dossiers de dépendances
+node_modules
+**/node_modules
+dist
+**/dist
+coverage
+**/.pnpm-store
+
+# Fichiers de build
+packages/*/dist
+packages/*/*.tsbuildinfo
+
+# Fichiers Docker
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+# nginx.conf - Ce fichier est nécessaire pour la configuration de Nginx dans le conteneur
+start.sh
+
+# Fichiers d'environnement
+.env
+.env.*
+!.env.example
+
+# Fichiers de documentation et autres
+README.md
+*.md
+LICENSE
+docs
+.husky
+xnotes
+.ai
+e2e
+
+# Cache et fichiers temporaires
+.npm
+.pnpm-debug.log
+.pnpm-store
+.cache
+**/coverage 

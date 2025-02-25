@@ -1,0 +1,128 @@
+name: Docker CI/CD
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    name: Test with Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Make test script executable
+        run: chmod +x ./test-docker.sh
+
+      - name: Run unit tests
+        run: ./test-docker.sh unit
+
+      - name: Run e2e tests
+        run: ./test-docker.sh e2e
+        
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage
+          path: coverage/
+          retention-days: 7
+
+  build-and-push:
+    name: Build and push Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    # Only run on main branch push or tag push
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=long
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-preview:
+    name: Deploy preview environment
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+    # Note: Dans un environnement réel, vous devriez configurer un environnement GitHub Actions 
+    # avec la configuration suivante:
+    # environment:
+    #   name: preview
+    #   url: ${{ steps.deploy.outputs.preview_url }}
+    
+    steps:
+      - name: Deploy to preview environment
+        id: deploy
+        run: |
+          # Ici, vous intégreriez la commande pour déployer vers votre environnement de prévisualisation
+          # Par exemple avec Vercel, Netlify, ou votre propre infrastructure
+          PREVIEW_URL="https://preview-${{ github.event.pull_request.number }}.example.com"
+          echo "L'application serait déployée sur $PREVIEW_URL"
+          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "Déploiement vers l'environnement de prévisualisation terminé"
+
+  deploy-production:
+    name: Deploy to production
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    # Note: Dans un environnement réel, vous devriez configurer un environnement GitHub Actions
+    # avec la configuration suivante:
+    # environment:
+    #   name: production
+    #   url: https://cv-generator.example.com
+    
+    steps:
+      - name: Deploy to production
+        run: |
+          # Ici, vous intégreriez la commande pour déployer vers votre environnement de production
+          # Par exemple avec un script de déploiement Kubernetes ou SSH vers un serveur
+          echo "L'application serait déployée sur https://cv-generator.example.com"
+          echo "Déploiement vers l'environnement de production terminé" 

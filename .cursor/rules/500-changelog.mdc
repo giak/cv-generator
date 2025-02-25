@@ -1,0 +1,208 @@
+---
+description: ENFORCE standardized changelog format and maintenance practices to ensure clear communication of project evolution
+globs: ["CHANGELOG.md"]
+alwaysApply: false
+---
+
+---
+description: ENFORCE standardized changelog format and maintenance practices to ensure clear communication of project evolution
+globs: ["CHANGELOG.md"]
+tags: [documentation, changelog, versioning, semantic-versioning]
+priority: 2
+version: 1.0.0
+---
+
+# Changelog Standards
+
+## Context
+- Apply when updating the CHANGELOG.md file after implementing changes
+- Ensures consistent documentation of project evolution
+- Follows Keep a Changelog and Semantic Versioning principles
+- Provides clear communication to users and developers
+- Makes version history traceable and understandable
+
+## Requirements
+
+### 1. Structure & Organization
+
+- **Frontmatter**: Include metadata at the top of the file
+  ```markdown
+  ---
+  title: CV Generator Changelog
+  author: Name
+  date: YYYY-MM-DD
+  status: maintained
+  version: X.Y.Z
+  ---
+  ```
+
+- **Introduction**: Include a brief introduction with reference to standards
+  ```markdown
+  # Changelog
+
+  > ℹ️ **Note:** Ce fichier suit les recommandations de [Keep a Changelog](mdc:https:/keepachangelog.com/fr/1.1.0) et respecte [Semantic Versioning](mdc:https:/semver.org/spec/v2.0.0.html).
+  ```
+
+- **Unreleased Section**: Maintain an Unreleased section at the top
+  ```markdown
+  ## [Unreleased]
+
+  ### Planned Features 🔮
+  
+  - Feature A
+  - Feature B
+  ```
+
+- **Version Sections**: List versions in reverse chronological order with date
+  ```markdown
+  ## [1.1.0] - YYYY-MM-DD
+  ```
+
+- **Change Categories**: Group changes by category with appropriate emoji
+  ```markdown
+  ### Added 🎉
+  ### Changed 🔄
+  ### Deprecated ⚠️
+  ### Removed 🗑️
+  ### Fixed 🐛
+  ### Security 🔒
+  ### Technical Details 🔧
+  ```
+
+- **Navigation Links**: Include reference links at the bottom
+  ```markdown
+  [Unreleased]: https://github.com/username/project/compare/vX.Y.Z...HEAD
+  [X.Y.Z]: https://github.com/username/project/compare/vX.Y.Z-1...vX.Y.Z
+  ```
+
+### 2. Versioning Guidelines
+
+- **Follow Semantic Versioning (SemVer)**:
+  - **Major (X)**: Breaking changes, incompatible API modifications
+  - **Minor (Y)**: New features in a backward-compatible manner
+  - **Patch (Z)**: Backward-compatible bug fixes
+
+- **Version Format**: Always use [X.Y.Z] format
+
+- **Date Format**: Use ISO 8601 format (YYYY-MM-DD)
+
+### 3. Content Guidelines
+
+- **Write for Humans**: Use clear, concise language
+  
+- **Be Specific**: Each entry should describe what changed and why
+
+- **Use Active Voice**: "Add feature" instead of "Feature added"
+  
+- **Use Bullet Points**: One change per bullet point
+  
+- **Reference Issues/PRs**: Include ticket/PR numbers when applicable
+  ```markdown
+  - Add export to PDF feature (#123)
+  ```
+
+- **Credit Contributors**: Mention contributors when appropriate
+  ```markdown
+  - Add French translation (thanks to @username)
+  ```
+
+- **Consistent Tense**: Use present tense for all entries
+
+### 4. Visual Enhancements
+
+- **Use Emojis**: Add relevant emojis to section headers
+  ```markdown
+  ### Added 🎉
+  ### Fixed 🐛
+  ```
+
+- **Include Technical Details**: Use code blocks for implementation examples
+  ```markdown
+  > 💡 **Implementation Details**
+
+  ```typescript
+  // Example code
+  ```
+  ```
+
+- **Use Tables**: Include tables for structured information
+  ```markdown
+  | Component   | Status | Description |
+  | :---------- | :----: | :---------- |
+  | Feature A   |   ✅   | Description |
+  ```
+
+- **Use Mermaid Diagrams**: Include diagrams for complex changes
+  ```markdown
+  ```mermaid
+  graph TD
+      A[Start] --> B[Process]
+  ```
+  ```
+
+### 5. Maintenance Practices
+
+- **Update with Every Release**: Update CHANGELOG.md before creating a release
+
+- **Review for Accuracy**: Ensure all significant changes are documented
+
+- **Include All Contributors**: Credit all contributors to changes
+
+- **Keep Consistent Style**: Maintain consistent formatting and style throughout
+
+- **Link Versions**: Add links to compare views between versions
+
+## Examples
+
+<example>
+## [1.1.0] - 2024-05-15
+
+### Added 🎉
+
+- Implémentation du pattern Result pour la validation
+- Support complet des bounded contexts dans l'architecture DDD
+- Nouvelle interface pour la validation en temps réel
+
+### Changed 🔄
+
+- Réorganisation complète du package core en bounded contexts
+- Amélioration de la gestion des erreurs
+- Mise à jour de la structure du projet basée sur les principes DDD
+
+### Technical Details 🔧
+
+> 💡 **Implementation Details**
+
+```typescript
+// Result pattern implementation
+export class Result<T> {
+  private constructor(
+    public readonly isValid: boolean,
+    public readonly errors: string[],
+    private readonly _value?: T
+  ) {}
+
+  static success<T>(value: T): Result<T> {
+    return new Result<T>(true, [], value);
+  }
+
+  static failure<T>(errors: string[]): Result<T> {
+    return new Result<T>(false, errors);
+  }
+}
+```
+</example>
+
+<example type="invalid">
+## 1.1.0 (5/15/24)
+
+- Added Result pattern implementation
+- Added bounded contexts
+- Fixed several bugs
+- Updated packages
+- Project restructuring
+- Made some UI improvements
+- And other changes
+
+Note: Project now has bounded contexts in DDD architecture.
+</example> 

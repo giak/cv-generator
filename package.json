@@ -37,13 +37,35 @@
     "format": "biome format .",
     "format:fix": "biome format --write .",
     "clean": "pnpm -r clean",
-    "typecheck": "pnpm -r exec tsc --noEmit"
+    "typecheck": "pnpm -r exec tsc --noEmit",
+    "prepare": "husky",
+    "check-changelog": "node scripts/check-changelog.js",
+    "update-changelog": "scripts/update-changelog.sh",
+    "open-changelog": "node scripts/open-changelog.js",
+    "manual-update-changelog": "node scripts/manual-changelog-update.js",
+    "test-pre-commit": "node scripts/test-pre-commit.js",
+    "docker:start": "./start.sh",
+    "docker:start:dev": "./start.sh development",
+    "docker:test": "./test-docker.sh unit",
+    "docker:test:e2e": "./test-docker.sh e2e",
+    "docker:test:all": "./test-docker.sh all true",
+    "docker:clean": "./docker-cleanup.sh",
+    "docker:clean:full": "./docker-cleanup.sh full",
+    "docker:setup": "chmod +x dev-environment.sh && ./dev-environment.sh",
+    "docker:build": "docker-compose build",
+    "docker:logs": "docker-compose logs -f",
+    "docker:ps": "docker-compose ps",
+    "docker:stop": "docker-compose down",
+    "docker:restart": "docker-compose restart",
+    "docker:health": "./docker-healthcheck.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@commitlint/types": "^19.5.0",
     "@types/node": "^22.13.4",
     "@types/uuid": "^10.0.0",
+    "@vue/tsconfig": "^0.5.1",
+    "husky": "^9.1.7",
     "typescript": "~5.7.3",
     "vite": "^6.1.0"
   },
@@ -61,10 +83,12 @@
     "*.{js,ts,vue}": [
       "biome check --apply",
       "biome format --write",
-      "vitest related --run"
+      "vitest related --run",
+      "pnpm check-changelog"
     ]
   },
   "dependencies": {
     "uuid": "^11.1.0"
-  }
+  },
+  "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b"
 }

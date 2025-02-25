@@ -56,6 +56,7 @@ pnpm dev
   - [Build](#build)
   - [Configuration](#configuration)
   - [Supported Platforms](#supported-platforms)
+  - [Docker](#docker)
 - [Maintenance](#maintenance)
   - [Known Issues](#known-issues)
   - [Troubleshooting](#troubleshooting)
@@ -172,6 +173,43 @@ CV Generator provides a structured, standardized approach to CV creation using t
 | `pnpm storybook` | Run Storybook component explorer           | Component development and testing |
 | `pnpm docs:dev`  | Run documentation site locally             | Working on project documentation  |
 
+### Docker Deployment
+
+You can also run the application using Docker, which provides an isolated, consistent environment across different platforms.
+
+#### Prerequisites for Docker
+
+- Docker 24.x+
+- Docker Compose 2.x+
+
+#### Quick Start with Docker
+
+```bash
+# Start in production mode (default port: 8080)
+./start.sh
+# or
+pnpm docker:start
+
+# Start in development mode with hot-reload
+./start.sh development
+# or
+pnpm docker:start:dev
+```
+
+#### Docker Commands
+
+| Command                 | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| `pnpm docker:start`     | Start production environment                  |
+| `pnpm docker:start:dev` | Start development environment with hot-reload |
+| `pnpm docker:setup`     | Setup complete development environment        |
+| `pnpm docker:test`      | Run tests in Docker environment               |
+| `pnpm docker:clean`     | Clean Docker resources                        |
+| `pnpm docker:logs`      | View container logs                           |
+| `pnpm docker:health`    | Check health of Docker containers             |
+
+For detailed information about Docker deployment, see [README.docker.md](README.docker.md) or the [Docker Deployment Guide](docs/guides/docker-deployment.md).
+
 ## Usage
 
 ### Creating a New CV
@@ -238,6 +276,7 @@ cv-generator/
 │   │   │   └── shared/          # Shared modules
 │   │   │       ├── domain/       # Shared domain objects (Result, etc.)
 │   │   │       └── utils/        # Shared utilities
+│   │   │
 │   │   │
 │   │   └── __tests__/           # Core tests
 │   │
@@ -483,46 +522,76 @@ We enforce strict code quality standards:
 
 ### Build
 
-```bash
-# Production build
-pnpm build
+To build the application for production:
 
-# Preview build
-pnpm preview
+```bash
+pnpm build
 ```
 
-The production build creates optimized assets in the `dist/` directory.
+This creates optimized files in the `dist` folder, ready for deployment.
 
 ### Configuration
 
-Environment-specific configuration can be set up using:
+Configure the application using environment variables:
 
-- `.env` files for different environments
-- Environment variables for sensitive information
-- Runtime configuration via JSON files
-
-Required environment variables:
-
-- `VITE_API_URL`: API endpoint (if applicable)
-- `VITE_STORAGE_PREFIX`: Prefix for localStorage keys
-- `VITE_ENABLE_ANALYTICS`: Enable/disable analytics
+```
+# .env.production
+NODE_ENV=production
+APP_TITLE=CV Generator
+APP_DESCRIPTION=Modern CV builder with JSON Resume support
+API_URL=https://your-api-endpoint.com/api
+```
 
 ### Supported Platforms
 
-The application is designed to work on:
+The application can be deployed to any platform that supports static hosting:
 
-- **Deployment Platforms**:
+- Netlify
+- Vercel
+- GitHub Pages
+- AWS S3 + CloudFront
+- Any web server (Nginx, Apache, etc.)
 
-  - Vercel
-  - Netlify
-  - GitHub Pages
-  - Any static hosting service
+### Docker
 
-- **Browsers**:
-  - Chrome (latest 2 versions)
-  - Firefox (latest 2 versions)
-  - Safari (latest 2 versions)
-  - Edge (latest 2 versions)
+The application can be easily deployed using Docker:
+
+```bash
+# Quick start with default settings
+./start.sh
+
+# Development mode on port 3000
+./start.sh development 3000
+
+# Production mode on port 8080
+./start.sh production 8080
+```
+
+#### Docker Benefits
+
+- Consistent environment across different machines
+- Easy deployment with a single command
+- Isolated environment for testing and development
+- No need to install Node.js or PNPM locally
+
+#### Docker Documentation
+
+For detailed instructions on Docker deployment, see [README.docker.md](README.docker.md).
+
+#### Running Tests in Docker
+
+You can run tests in a Docker environment to ensure consistent results:
+
+```bash
+# Run unit tests
+./test-docker.sh unit
+
+# Run end-to-end tests
+./test-docker.sh e2e
+
+# Run all tests with coverage
+./test-docker.sh all true
+```
 
 ## Maintenance
 

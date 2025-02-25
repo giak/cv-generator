@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Service pour l'application CV Generator
+  cv-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cv-generator
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  # Service pour le développement (optionnel)
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: cv-generator-dev
+    ports:
+      - "8080:5173"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+volumes:
+  node_modules: 

@@ -87,3 +87,6 @@ tsconfig.tsbuildinfo
 .netlify/
 
 docs/tailwindcss4/
+
+
+env-changelog/
