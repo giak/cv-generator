@@ -1,173 +1,284 @@
-# Configuration Docker pour CV Generator
+# Docker Guide for CV Generator
 
-Ce document présente l'ensemble de la configuration Docker mise en place pour le projet CV Generator, offrant un environnement de développement et de déploiement standardisé et reproductible.
+> This document provides a comprehensive guide to Docker usage in the CV Generator application. It serves as a reference for developers working with Docker containerization in this project.
 
-## Fonctionnalités principales
+## Table of Contents
 
-- **Environnement de développement** : Configuration complète pour le développement local
-- **Tests automatisés** : Exécution des tests unitaires et e2e dans un environnement isolé
-- **Optimisation production** : Build multi-étapes avec Nginx optimisé pour les SPA
-- **Scripts utilitaires** : Outils pour faciliter le déploiement, les tests et la maintenance
-- **Intégration CI/CD** : Support pour l'intégration continue et le déploiement continu
+- [Overview](#overview)
+- [Docker Architecture](#docker-architecture)
+- [Development Environment](#development-environment)
+- [Production Deployment](#production-deployment)
+- [Testing with Docker](#testing-with-docker)
+- [Utility Scripts](#utility-scripts)
+- [Common Commands](#common-commands)
+- [Troubleshooting](#troubleshooting)
 
-## Scripts disponibles
+## Overview
 
-Tous les scripts sont accessibles via `npm`/`pnpm` ou directement en ligne de commande :
+The CV Generator application uses Docker for containerized development, testing, and deployment. This ensures a consistent environment across all stages of development and provides an easy way to deploy the application in various environments.
 
-### Configuration et déploiement
+### Core Components
 
-| Script               | Description                                               | Commande npm                                   |
-| -------------------- | --------------------------------------------------------- | ---------------------------------------------- |
-| `start.sh`           | Démarre l'application en mode production ou développement | `pnpm docker:start` ou `pnpm docker:start:dev` |
-| `dev-environment.sh` | Configure un environnement de développement complet       | `pnpm docker:setup`                            |
-| `update-docker.sh`   | Met à jour l'application vers la dernière version         | -                                              |
+- **Dockerfile**: Multi-stage build for production deployment
+- **Dockerfile.dev**: Development environment configuration
+- **docker-compose.yml**: Service definitions for the application
+- **Utility Scripts**: Shell scripts for common Docker operations
 
-### Tests et qualité
+## Docker Architecture
 
-| Script           | Description                                    | Commande npm                                                         |
-| ---------------- | ---------------------------------------------- | -------------------------------------------------------------------- |
-| `test-docker.sh` | Exécute les tests dans un environnement Docker | `pnpm docker:test`, `pnpm docker:test:e2e` ou `pnpm docker:test:all` |
+The Docker setup follows a clean architecture approach with:
 
-### Maintenance
+1. **Multi-stage builds** in production Dockerfile to minimize image size
+2. **Separation of concerns** between development and production environments
+3. **Consistent script patterns** for all Docker operations
+4. **Volume management** for persistent data and efficient development
 
-| Script              | Description                               | Commande npm                                    |
-| ------------------- | ----------------------------------------- | ----------------------------------------------- |
-| `docker-cleanup.sh` | Nettoie les ressources Docker inutilisées | `pnpm docker:clean` ou `pnpm docker:clean:full` |
+### File Structure
 
-## Commandes npm disponibles
-
-```bash
-# Démarrage et déploiement
-pnpm docker:start          # Démarre l'application en mode production
-pnpm docker:start:dev      # Démarre l'application en mode développement
-pnpm docker:build          # Construit les images Docker sans démarrer les conteneurs
-
-# Tests
-pnpm docker:test           # Exécute les tests unitaires
-pnpm docker:test:e2e       # Exécute les tests end-to-end
-pnpm docker:test:all       # Exécute tous les tests
-
-# Utilitaires
-pnpm docker:setup          # Configure l'environnement de développement
-pnpm docker:clean          # Nettoie les ressources Docker du projet
-pnpm docker:clean:full     # Nettoie toutes les ressources Docker inutilisées
-pnpm docker:logs           # Affiche les logs des conteneurs en temps réel
-pnpm docker:ps             # Affiche l'état des conteneurs
-pnpm docker:stop           # Arrête les conteneurs
-pnpm docker:restart        # Redémarre les conteneurs
+```
+/
+├── .docker/
+│   ├── config/                 # Docker configuration files
+│   ├── scripts/                # Implementation scripts (legacy)
+│   ├── Dockerfile              # Production Dockerfile
+│   ├── Dockerfile.dev          # Development Dockerfile
+│   └── docker-compose.yml      # Docker Compose configuration
+├── docker-cleanup.sh           # Script to clean Docker resources
+├── docker-healthcheck.sh       # Script to check container health
+├── start.sh                    # Script to start Docker containers
+├── test-docker.sh              # Script to run tests in Docker
+├── update-docker.sh            # Script to update Docker images
+├── dev-environment.sh          # Script to set up dev environment
+└── .dockerignore               # Files to exclude from Docker context
 ```
 
-## Démarrage rapide
+### Image Specifications
 
-### Installation et configuration
+#### Production Image
+
+- **Base**: nginx:alpine
+- **Exposed Ports**: 80
+- **Artifacts**: Built Vue.js application
+
+#### Development Image
+
+- **Base**: node:22-alpine
+- **Exposed Ports**: 5173
+- **Volume Mounts**: App code and node_modules
+
+## Development Environment
+
+### Prerequisites
+
+- Docker Engine (latest version)
+- Docker Compose (latest version)
+
+### Setup Development Environment
+
+Run the following command to set up your development environment:
 
 ```bash
-# Cloner le dépôt
-git clone https://github.com/giak/cv-generator.git
-cd cv-generator
-
-# Configuration rapide
-pnpm docker:setup
-# ou
 ./dev-environment.sh
 ```
 
-### Démarrer l'application
+This script will:
+
+- Check for required tools (Docker, Docker Compose)
+- Set up necessary permissions
+- Copy environment variables if needed
+- Offer to build Docker images
+- Offer to run tests
+- Offer to start the development environment
+
+### Starting Development Server
 
 ```bash
-# Mode production
-pnpm docker:start
-# ou
-./start.sh
-
-# Mode développement avec hot-reload
-pnpm docker:start:dev
-# ou
+# Using the script directly
 ./start.sh development
+
+# Or using npm script
+pnpm docker:start:dev
 ```
 
-### Mise à jour de l'application
+This will:
+
+1. Build the development Docker image if needed
+2. Start the container with appropriate volume mounts
+3. Expose the development server on port 8080
+
+### Development Workflow
+
+1. Code changes in the host are immediately reflected in the container due to volume mounting
+2. The development server in the container auto-reloads on changes
+3. Run tests inside Docker to ensure consistent test environment
+
+## Production Deployment
+
+### Building for Production
 
 ```bash
-# Mise à jour vers la dernière version de la branche principale
-./update-docker.sh
-
-# Mise à jour vers une branche spécifique
-./update-docker.sh develop
-
-# Mise à jour et démarrage en mode développement
-./update-docker.sh main development
+# Build the production image
+docker-compose build cv-generator
 ```
 
-## Architecture Docker
-
-### Structure des images
-
-Notre configuration utilise un build multi-étapes :
-
-1. **Base** : Node.js + PNPM
-2. **Dependencies** : Installation des dépendances
-3. **Build** : Compilation de l'application
-4. **Production** : Nginx optimisé pour SPA
-
-### Volumes et persistance
-
-Les données sont persistées dans les volumes Docker suivants :
-
-- `cv-generator_data` : Données utilisateur
-- `cv-generator_node_modules` : Dépendances Node.js (mode développement)
-
-## Optimisations de performance
-
-- Caching optimisé des dépendances PNPM
-- Construction multi-étapes pour minimiser la taille de l'image
-- Configuration Nginx avec compression gzip et cache efficace
-- Support des headers d'API modernes
-
-## Sécurité
-
-- Exécution en tant qu'utilisateur non-root dans les conteneurs
-- Images réduites au minimum nécessaire
-- Headers de sécurité configurés dans Nginx
-- Isolation des environnements de développement et production
-
-## Déploiement en production
-
-Pour un déploiement en production, consultez notre [Guide de déploiement Docker](docs/guides/docker-deployment.md) qui fournit des instructions détaillées pour :
-
-- Déploiement sur serveur Linux
-- Configuration avec proxy inverse
-- Mise en place de SSL/TLS
-- Déploiement avec Kubernetes
-- Stratégies de mise à l'échelle
-
-## Intégration continue
-
-Notre configuration s'intègre facilement avec les plates-formes CI/CD comme GitHub Actions et GitLab CI. Voir `.github/workflows/docker.yml` pour un exemple d'implémentation.
-
-## Dépannage
-
-En cas de problème avec Docker, utilisez les commandes suivantes :
+### Deploying to Production
 
 ```bash
-# Voir les logs
-pnpm docker:logs
-
-# Nettoyer et reconstruire
-pnpm docker:clean
-pnpm docker:build
+# Start production container
+./start.sh
+# or
 pnpm docker:start
-
-# Réinitialiser complètement l'environnement
-pnpm docker:clean:full
-pnpm docker:setup
 ```
 
-Pour plus d'informations sur le dépannage, consultez la section "Dépannage" du [Guide de déploiement Docker](docs/guides/docker-deployment.md).
+This will:
 
-## Ressources additionnelles
+1. Stop any running containers
+2. Build the production image if needed
+3. Start the container in detached mode
+4. Expose the application on port 8080 (configurable)
 
-- [Guide de déploiement Docker](docs/guides/docker-deployment.md)
-- [Documentation Docker officielle](https://docs.docker.com/)
-- [Documentation Nginx](https://nginx.org/en/docs/)
-- [Documentation Kubernetes](https://kubernetes.io/docs/home/)
+### Environment Variables
+
+The production deployment can be configured using environment variables:
+
+| Variable | Default | Description               |
+| -------- | ------- | ------------------------- |
+| PORT     | 8080    | Port to expose the app on |
+
+## Testing with Docker
+
+### Running Tests
+
+```bash
+# Run unit tests
+./test-docker.sh unit
+# or
+pnpm docker:test
+
+# Run e2e tests
+./test-docker.sh e2e
+# or
+pnpm docker:test:e2e
+
+# Run all tests
+./test-docker.sh all
+# or
+pnpm docker:test:all
+```
+
+### Test Options
+
+| Option     | Description                                |
+| ---------- | ------------------------------------------ |
+| unit       | Run unit tests only                        |
+| e2e        | Run end-to-end tests only                  |
+| all        | Run all tests                              |
+| true/false | Enable/disable watch mode (default: false) |
+
+## Utility Scripts
+
+### Health Check
+
+```bash
+./docker-healthcheck.sh
+# or
+pnpm docker:health
+```
+
+This script verifies:
+
+- If Docker containers are running
+- Resource usage (CPU and memory)
+- Application accessibility
+- Errors in logs
+
+### Cleanup
+
+```bash
+# Basic cleanup (project-specific resources)
+./docker-cleanup.sh
+# or
+pnpm docker:clean
+
+# Full cleanup (including system-wide resources)
+./docker-cleanup.sh full
+# or
+pnpm docker:clean:full
+```
+
+### Update
+
+```bash
+./update-docker.sh
+```
+
+This script:
+
+- Backs up current environment
+- Pulls latest Docker images
+- Updates base images
+- Rebuilds containers if needed
+- Restarts running containers
+- Cleans up old images
+
+## Common Commands
+
+Here are some common Docker commands used in the project:
+
+```bash
+# View running containers
+docker-compose ps
+
+# View container logs
+docker-compose logs
+
+# Stop all containers
+docker-compose down
+
+# Rebuild and restart containers
+docker-compose up -d --build
+
+# Execute command in container
+docker-compose exec service_name command
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Port conflicts**: If port 8080 is already in use, specify a different port:
+
+   ```bash
+   ./start.sh production 8081
+   ```
+
+2. **Container not starting**: Check logs for errors:
+
+   ```bash
+   docker-compose logs
+   ```
+
+3. **Performance issues**: Check resource usage:
+
+   ```bash
+   ./docker-healthcheck.sh
+   ```
+
+4. **Build errors**: Clean Docker resources and try again:
+   ```bash
+   ./docker-cleanup.sh
+   docker-compose build --no-cache
+   ```
+
+### Getting Help
+
+If you encounter issues not covered here, please:
+
+1. Check the Docker logs for specific error messages
+2. Run the health check script for diagnostics
+3. Consult the Docker documentation for specific Docker errors
+4. Open an issue in the repository with detailed error information
+
+---
+
+This documentation is maintained as part of the CV Generator project. For updates or improvements, please submit a pull request.
