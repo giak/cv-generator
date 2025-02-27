@@ -1,6 +1,6 @@
 /**
  * Variables pour l'application CV Generator
- * Migration vers Tailwind CSS v4
+ * Migration vers Tailwind CSS v3
  * 
  * IMPORTANT: Ces variables sont désormais déclarées dans le fichier tailwind.config.ts
  * Ce fichier est conservé uniquement pour référence et compatibilité avec les anciens fichiers SCSS
@@ -98,8 +98,8 @@
 // Conservé pour compatibilité avec les fichiers non migrés
 :root {
   // Variables de base migrant progressivement vers Tailwind
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --font-sans: 'InterTight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'FiraCode', 'SF Mono', Menlo, Consolas, monospace;
   
   // Couleurs pour compatibilité
   --color-bg-body: #121212;
@@ -130,10 +130,10 @@
 // Font definitions
 :root {
   // Main font family
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-sans: 'InterTight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   
   // Monospace font for data, code, and technical values
-  --font-mono: 'JetBrains Mono', 'SF Mono', 'Roboto Mono', Menlo, Consolas, Monaco, 'Liberation Mono', 'Courier New', monospace;
+  --font-mono: 'FiraCode', 'SF Mono', 'Roboto Mono', Menlo, Consolas, Monaco, 'Liberation Mono', 'Courier New', monospace;
   
   // Font sizes scale - technical dashboard uses smaller text
   --font-size-xs:   0.6875rem;   // 11px - tiny labels

@@ -26,6 +26,10 @@ version: 1.1.0
 - Migration de Tailwind CSS v4.0.0 vers v3.4.0
 - Harmonisation des styles SCSS avec Tailwind classes
 - Optimisation des composants d'interface utilisateur
+- Migration des polices web Google Fonts vers des polices locales (InterTight, FiraCode)
+- Amélioration des performances de chargement des pages grâce aux polices auto-hébergées
+- Correction des références de polices dans les variables CSS pour une cohérence globale
+- Mise à jour complète des fallback fonts pour une meilleure accessibilité
 
 ## [1.1.0] - 2024-05-15
 
