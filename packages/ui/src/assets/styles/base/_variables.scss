@@ -1,0 +1,342 @@
+/**
+ * Variables pour l'application CV Generator
+ * Migration vers Tailwind CSS v4
+ * 
+ * IMPORTANT: Ces variables sont désormais déclarées dans le fichier tailwind.config.ts
+ * Ce fichier est conservé uniquement pour référence et compatibilité avec les anciens fichiers SCSS
+ * qui n'ont pas encore été migrés vers Tailwind.
+ * 
+ * Pour utiliser ces styles dans de nouveaux composants, préférez utiliser les classes utilitaires Tailwind.
+ */
+
+// =========================================================
+// Comment migrer de ces variables vers Tailwind CSS v4
+// =========================================================
+
+/**
+ * Mappings entre les anciennes variables CSS et les classes Tailwind:
+ * 
+ * Font families:
+ * --font-sans -> font-sans
+ * --font-mono -> font-mono
+ * 
+ * Font sizes:
+ * --font-size-xs   -> text-xs
+ * --font-size-sm   -> text-sm
+ * --font-size-md   -> text-base
+ * --font-size-base -> text-base
+ * --font-size-lg   -> text-lg
+ * --font-size-xl   -> text-xl
+ * --font-size-2xl  -> text-2xl
+ * --font-size-3xl  -> text-3xl
+ * 
+ * Font weights:
+ * --font-weight-light    -> font-light
+ * --font-weight-normal   -> font-normal
+ * --font-weight-medium   -> font-medium
+ * --font-weight-semibold -> font-semibold
+ * --font-weight-bold     -> font-bold
+ * 
+ * Line heights:
+ * --line-height-tight  -> leading-tight
+ * --line-height-normal -> leading-normal
+ * --line-height-loose  -> leading-relaxed
+ * 
+ * Letter spacing:
+ * --letter-spacing-tight  -> tracking-tight
+ * --letter-spacing-normal -> tracking-normal
+ * --letter-spacing-wide   -> tracking-wide
+ * --letter-spacing-wider  -> tracking-wider
+ * 
+ * Border radius:
+ * --radius-xs   -> rounded-sm
+ * --radius-sm   -> rounded
+ * --radius-md   -> rounded-md
+ * --radius-lg   -> rounded-lg
+ * --radius-xl   -> rounded-xl
+ * --radius-full -> rounded-full
+ * 
+ * Spacing:
+ * --space-1  -> p-1, m-1, gap-1, etc.
+ * --space-2  -> p-2, m-2, gap-2, etc.
+ * --space-3  -> p-3, m-3, gap-3, etc.
+ * --space-4  -> p-4, m-4, gap-4, etc.
+ * ... etc ...
+ * 
+ * Shadows:
+ * --shadow-sm -> shadow-sm
+ * --shadow-md -> shadow-md
+ * --shadow-lg -> shadow-lg
+ * --shadow-xl -> shadow-xl
+ * 
+ * Colors background:
+ * --color-bg-body    -> bg-neutral-900
+ * --color-bg-surface -> bg-neutral-850
+ * --color-bg-dark    -> bg-neutral-800
+ * --color-bg-darker  -> bg-neutral-900
+ * --color-bg-light   -> bg-neutral-750
+ * --color-bg-lighter -> bg-neutral-700
+ * 
+ * Border colors:
+ * --color-border-base  -> border-neutral-700
+ * --color-border-light -> border-neutral-600
+ * 
+ * Text colors:
+ * --color-text-primary   -> text-white
+ * --color-text-secondary -> text-neutral-300
+ * --color-text-muted     -> text-neutral-400
+ * 
+ * Z-index:
+ * --z-index-dropdown -> z-10
+ * --z-index-sticky   -> z-20
+ * --z-index-fixed    -> z-30
+ * --z-index-modal    -> z-40
+ * --z-index-popover  -> z-50
+ * --z-index-tooltip  -> z-100
+ */
+
+// Conservé pour compatibilité avec les fichiers non migrés
+:root {
+  // Variables de base migrant progressivement vers Tailwind
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  
+  // Couleurs pour compatibilité
+  --color-bg-body: #121212;
+  --color-bg-dark: #1e1e1e;
+  --color-bg-darker: #171717;
+  
+  // Bordures
+  --color-border-base: rgba(64, 64, 64, 0.8);
+  --color-border-hover: rgba(82, 82, 82, 0.8);
+  
+  // Rayons de bordure
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  
+  // Ombres
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  
+  // Transitions
+  --transition-fast: 150ms;
+  --transition-base: 250ms;
+}
+
+// =========================================================
+// Global Variables - Technical Dashboard Style
+// =========================================================
+
+// Font definitions
+:root {
+  // Main font family
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  
+  // Monospace font for data, code, and technical values
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Roboto Mono', Menlo, Consolas, Monaco, 'Liberation Mono', 'Courier New', monospace;
+  
+  // Font sizes scale - technical dashboard uses smaller text
+  --font-size-xs:   0.6875rem;   // 11px - tiny labels
+  --font-size-sm:   0.75rem;     // 12px - small text
+  --font-size-md:   0.875rem;    // 14px - body text
+  --font-size-base: 1rem;        // 16px - standard 
+  --font-size-lg:   1.125rem;    // 18px - larger text
+  --font-size-xl:   1.25rem;     // 20px - section headers
+  --font-size-2xl:  1.5rem;      // 24px - page titles
+  --font-size-3xl:  1.75rem;     // 28px - large values
+  
+  // Font weights
+  --font-weight-light:    300;
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+  
+  // Line heights
+  --line-height-tight:    1.2;
+  --line-height-normal:   1.5;
+  --line-height-loose:    1.75;
+  
+  // Letter spacing
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide:   0.025em;
+  --letter-spacing-wider:  0.05em;
+  
+  // Border radius
+  --radius-xs:   0.125rem;  // 2px
+  --radius-md:   0.375rem;  // 6px
+  --radius-lg:   0.5rem;    // 8px
+  --radius-xl:   0.75rem;   // 12px
+  --radius-full: 9999px;    // Full rounded
+  
+  // Spacing scale
+  --space-1:  0.25rem;   // 4px
+  --space-2:  0.5rem;    // 8px
+  --space-3:  0.75rem;   // 12px
+  --space-4:  1rem;      // 16px
+  --space-5:  1.25rem;   // 20px
+  --space-6:  1.5rem;    // 24px
+  --space-8:  2rem;      // 32px
+  --space-10: 2.5rem;    // 40px
+  --space-12: 3rem;      // 48px
+  --space-16: 4rem;      // 64px
+  --space-20: 5rem;      // 80px
+  --space-24: 6rem;      // 96px
+  
+  // Shadow definitions
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  // Overlay background for modals and dialogs
+  --overlay-background: rgba(0, 0, 0, 0.75);
+  
+  // Z-index levels
+  --z-index-dropdown: 1000;
+  --z-index-sticky:   1100;
+  --z-index-fixed:    1200;
+  --z-index-modal:    1300;
+  --z-index-popover:  1400;
+  --z-index-tooltip:  1500;
+  
+  // Transition durations
+  --transition-slow:  350ms;
+  
+  // Dark theme layout colors
+  --color-bg-surface:   #1a232c;
+  --color-bg-light:     #22303d;
+  --color-bg-lighter:   #2a394a;
+  
+  // Border colors
+  --color-border-dark:  #212936;
+  
+  // Text colors
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-text-muted:     rgba(255, 255, 255, 0.5);
+  --color-text-disabled:  rgba(255, 255, 255, 0.38);
+  
+  // Semantic colors (RGB format for opacity manipulation)
+  // Will use the colors defined in _colors.scss
+  
+  // Grid breakpoints (consistent with Tailwind defaults)
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  // Container max widths
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+  
+  // Component sizes
+  --header-height: 60px;
+  --sidebar-width: 250px;
+  --sidebar-collapsed-width: 64px;
+  --card-border-width: 1px;
+  --input-height: 40px;
+  --input-padding-x: 12px;
+  --button-padding-y: 8px;
+  --button-padding-x: 16px;
+}
+
+// SCSS Variables for Legacy Support and Mixins
+// Breakpoints
+$breakpoint-xs: 320px;
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+// Media query mixins
+@mixin screen-xs {
+  @media (min-width: $breakpoint-xs) {
+    @content;
+  }
+}
+
+@mixin screen-sm {
+  @media (min-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+@mixin screen-md {
+  @media (min-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+@mixin screen-lg {
+  @media (min-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+@mixin screen-xl {
+  @media (min-width: $breakpoint-xl) {
+    @content;
+  }
+}
+
+@mixin screen-2xl {
+  @media (min-width: $breakpoint-2xl) {
+    @content;
+  }
+}
+
+// Espacement
+$spacing-1: 0.25rem;
+$spacing-2: 0.5rem;
+$spacing-3: 0.75rem;
+$spacing-4: 1rem;
+$spacing-6: 1.5rem;
+$spacing-8: 2rem;
+$spacing-12: 3rem;
+$spacing-16: 4rem;
+
+// Bordures
+$border-radius-sm: 0.125rem;
+$border-radius-md: 0.25rem;
+$border-radius-lg: 0.5rem;
+$border-radius-xl: 1rem;
+
+// Typographie
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-2xl: 1.5rem;
+$font-size-3xl: 1.875rem;
+$font-size-4xl: 2.25rem;
+
+// Hauteurs de ligne
+$line-height-none: 1;
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-loose: 2;
+
+// Transition
+$transition-fast: 150ms;
+$transition-normal: 300ms;
+$transition-slow: 500ms;
+
+// Z-index
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// Grille
+$grid-columns: 12;
+$grid-columns-dashboard: 6; 

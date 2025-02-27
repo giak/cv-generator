@@ -1,5 +1,7 @@
-// Configuration PostCSS pour Tailwind CSS v4
-// Avec Tailwind CSS v4, nous n'avons pas besoin de PostCSS plugins
+// Configuration PostCSS pour Tailwind CSS v3
 export default {
-  plugins: {}
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  }
 }; 

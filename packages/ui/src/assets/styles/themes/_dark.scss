@@ -1,0 +1,64 @@
+/**
+ * Thème sombre pour l'application CV Generator
+ * Définit les couleurs et styles spécifiques au mode sombre
+ */
+
+:root.dark-theme {
+  // Couleurs primaires
+  --color-primary-50: 236, 254, 255;  // cyan-50
+  --color-primary-100: 207, 250, 254; // cyan-100
+  --color-primary-200: 165, 243, 252; // cyan-200
+  --color-primary-300: 103, 232, 249; // cyan-300
+  --color-primary-400: 34, 211, 238;  // cyan-400
+  --color-primary-500: 6, 182, 212;   // cyan-500
+  --color-primary-600: 8, 145, 178;   // cyan-600
+  --color-primary-700: 14, 116, 144;  // cyan-700
+  --color-primary-800: 21, 94, 117;   // cyan-800
+  --color-primary-900: 22, 78, 99;    // cyan-900
+  --color-primary-950: 8, 51, 68;     // cyan-950
+
+  // Couleurs neutres
+  --color-neutral-50: 249, 250, 251;  // gray-50
+  --color-neutral-100: 243, 244, 246; // gray-100
+  --color-neutral-200: 229, 231, 235; // gray-200
+  --color-neutral-300: 209, 213, 219; // gray-300
+  --color-neutral-400: 156, 163, 175; // gray-400
+  --color-neutral-500: 107, 114, 128; // gray-500
+  --color-neutral-600: 75, 85, 99;    // gray-600
+  --color-neutral-700: 55, 65, 81;    // gray-700
+  --color-neutral-800: 31, 41, 55;    // gray-800
+  --color-neutral-900: 17, 24, 39;    // gray-900
+  --color-neutral-950: 3, 7, 18;      // gray-950
+
+  // États
+  --color-success-light: 134, 239, 172; // green-300
+  --color-success: 34, 197, 94;         // green-500
+  --color-success-dark: 22, 101, 52;    // green-800
+  
+  --color-error-light: 252, 165, 165;   // red-300
+  --color-error: 239, 68, 68;           // red-500
+  --color-error-dark: 153, 27, 27;      // red-800
+  
+  --color-warning-light: 253, 224, 71;  // yellow-300
+  --color-warning: 234, 179, 8;         // yellow-500
+  --color-warning-dark: 133, 77, 14;    // yellow-800
+  
+  --color-info-light: 147, 197, 253;    // blue-300
+  --color-info: 59, 130, 246;           // blue-500
+  --color-info-dark: 30, 58, 138;       // blue-800
+
+  // Couleurs de fond
+  --color-bg-primary: 15, 23, 42;       // slate-900
+  --color-bg-secondary: 30, 41, 59;     // slate-800
+  --color-bg-tertiary: 51, 65, 85;      // slate-700
+  
+  // Couleurs du texte
+  --color-text-primary: 241, 245, 249;  // slate-100
+  --color-text-secondary: 203, 213, 225; // slate-300
+  --color-text-tertiary: 148, 163, 184; // slate-400
+  
+  // Bordures
+  --color-border-light: 71, 85, 105;    // slate-600
+  --color-border: 51, 65, 85;           // slate-700
+  --color-border-dark: 30, 41, 59;      // slate-800
+} 

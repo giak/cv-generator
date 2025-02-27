@@ -1,34 +1,35 @@
 ---
-description: ENFORCE Tailwind CSS v4 standards and best practices in Vue 3 components to ensure consistent, maintainable, and performant UI
-globs: src/**/*.{vue,ts,js}
+description: ENFORCE Tailwind CSS v3 standards and best practices in Vue 3 components to ensure consistent, maintainable, and performant UI
+globs: ["packages/ui/**/*.vue", "packages/ui/**/*.css", "packages/ui/**/*.scss"]
 alwaysApply: false
 ---
 ---
-description: ENFORCE Tailwind CSS v4 standards and best practices in Vue 3 components to ensure consistent, maintainable, and performant UI
-globs: ["packages/ui/**/*.vue", "packages/ui/**/*.css"]
-tags: ["vue", "tailwind", "ui", "css"]
+description: ENFORCE Tailwind CSS v3 standards and best practices in Vue 3 components to ensure consistent, maintainable, and performant UI
+globs: ["packages/ui/**/*.vue", "packages/ui/**/*.css", "packages/ui/**/*.scss"]
+tags: ["vue", "tailwind", "ui", "css", "scss"]
 priority: 1
-version: 1.2.0
+version: 2.0.0
 ---
 
-# Tailwind CSS v4 with Vue 3 Standards
+# Tailwind CSS v3 with Vue 3 Standards
 
 ## Context
 - Applied when creating or modifying Vue 3 components in the UI package
-- Ensures consistent design implementation using Tailwind CSS v4
+- Ensures consistent design implementation using Tailwind CSS v3
 - Enforces component-based architecture with Tailwind utility classes
 - Maintains design system compliance through custom Tailwind configuration
 - Optimizes for production with proper build setup
+- Ensures compatibility between SCSS and Tailwind CSS
 
 ## Project Setup
 
 ### Installation and Configuration
 ```bash
 # Install dependencies in the UI package
-pnpm add -w tailwindcss @tailwindcss/vite
+pnpm add -w tailwindcss@^3.4.0 postcss autoprefixer
 
 # Install recommended plugins
-pnpm add -w @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio
+pnpm add -w @tailwindcss/forms@^0.5.7 @tailwindcss/typography@^0.5.10 @tailwindcss/aspect-ratio@^0.4.2
 ```
 
 ### Monorepo Structure
@@ -38,128 +39,189 @@ packages/
 │   ├── src/
 │   │   ├── assets/
 │   │   │   └── styles/
-│   │   │       ├── main.css    # Main CSS with Tailwind
-│   │   │       └── themes/     # Theme configurations
+│   │   │       ├── main.scss          # Main SCSS with Tailwind imports
+│   │   │       ├── base/              # Base styles
+│   │   │       │   ├── _reset.scss    # Basic resets with Tailwind
+│   │   │       │   └── _typography.scss # Typography styles
+│   │   │       ├── components/        # Component styles
+│   │   │       ├── layouts/           # Layout styles
+│   │   │       │   └── _dashboard.scss # Dashboard layout 
+│   │   │       └── themes/            # Theme configurations
+│   │   │           └── _colors.scss   # Color variables
 │   │   ├── modules/
 │   │   │   └── cv/
 │   │   │       └── presentation/
-│   │   │           └── components/  # Module-specific components
+│   │   │           └── components/    # Module-specific components
 │   │   └── components/
-│   │       └── shared/         # Shared UI components
-│   ├── vite.config.ts         # Vite configuration
-│   └── tailwind.config.ts     # Tailwind configuration
-└── shared/                    # Shared package
+│   │       └── shared/               # Shared UI components
+│   ├── vite.config.ts                # Vite configuration
+│   └── tailwind.config.ts           # Tailwind configuration
+└── shared/                          # Shared package
     └── src/
-        └── types/             # Shared TypeScript types
+        └── types/                   # Shared TypeScript types
 ```
 
 ## Configuration Files
 
-### Vite Configuration (packages/ui/vite.config.ts)
+### Tailwind Configuration (packages/ui/tailwind.config.ts)
 ```typescript
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import tailwindcss from '@tailwindcss/vite'
+import type { Config } from 'tailwindcss'
+import { resolve } from 'path'
+import plugin from 'tailwindcss/plugin'
 
-export default defineConfig({
+export default {
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        // Primary colors (cyan)
+        primary: {
+          50: 'rgb(236, 254, 255)',
+          100: 'rgb(207, 250, 254)',
+          200: 'rgb(165, 243, 252)',
+          300: 'rgb(103, 232, 249)',
+          400: 'rgb(34, 211, 238)',
+          500: 'rgb(6, 182, 212)',
+          600: 'rgb(8, 145, 178)',
+          700: 'rgb(14, 116, 144)',
+          800: 'rgb(21, 94, 117)',
+          900: 'rgb(22, 78, 99)',
+          950: 'rgb(8, 51, 68)',
+        },
+        // Extended neutral colors
+        neutral: {
+          750: 'rgb(38, 38, 38)',
+          850: 'rgb(26, 26, 26)',
+        },
+        // Other color states...
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+      },
+      // Additional theme extensions...
+    }
+  },
   plugins: [
-    vue(),
-    tailwindcss()
-  ],
-  resolve: {
-    alias: {
-      '@cv': resolve(__dirname, './src/modules/cv'),
-      '@shared': resolve(__dirname, './src/components/shared')
+    require('@tailwindcss/forms')({
+      strategy: 'class',
+    }),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
+    // Custom plugins...
+  ]
+}
+```
+
+### Main SCSS File (packages/ui/src/assets/styles/main.scss)
+```scss
+/* Tailwind CSS Base */
+@import 'tailwindcss/base';
+
+/* Base Styles */
+@import 'base/reset';
+@import 'base/typography';
+@import 'base/variables';
+
+/* Tailwind Components and Utilities */
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Custom Components */
+@import 'components/buttons';
+@import 'components/forms';
+@import 'components/data-panels';
+@import 'components/modals';
+
+/* Layouts */
+@import 'layouts/dashboard';
+
+/* Responsive styles */
+@import 'responsive/mobile';
+```
+
+## SCSS to Tailwind Migration Guidelines
+
+### Using @apply with Tailwind Classes
+- ALWAYS use `@apply` in SCSS files to apply Tailwind classes
+- ALWAYS organize Tailwind classes by category (layout, spacing, typography, etc.)
+- NEVER use `@apply` with color utilities when CSS variables are an option
+- CORRECT handling of responsive modifiers with `@screen` directive
+
+```scss
+// ✅ Correct Usage in SCSS Files
+.dashboard-sidebar {
+  @apply fixed md:static inset-y-0 left-0 z-30 w-64 bg-neutral-850 border-r border-neutral-700 
+    flex flex-col transition-transform duration-300 ease-in-out overflow-y-auto;
+  
+  @screen sm {
+    @apply transform -translate-x-full;
+    
+    &.is-open {
+      @apply translate-x-0 shadow-lg;
     }
   }
-})
-```
-
-### Main CSS File (packages/ui/src/assets/styles/main.css)
-```css
-@import "tailwindcss";
-
-/* Custom base styles */
-@layer base {
-  :root {
-    /* Use oklch for better color science */
-    --color-primary-500: oklch(65% 0.2 142);
-    --color-primary-400: oklch(70% 0.19 142);
-    /* ... other shades */
-  }
 }
 
-/* Custom components */
-@layer components {
-  .btn-primary {
-    /* CORRECT: Use @apply only for non-color utilities */
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md;
-    /* CORRECT: Use CSS variables for colors */
-    background-color: var(--color-primary-500);
-    color: white;
-  }
-  .btn-primary:hover {
-    background-color: var(--color-primary-400);
-  }
+// ❌ Incorrect Usage - Avoid mixing non-Tailwind properties without good reason
+.dashboard-sidebar {
+  @apply fixed md:static inset-y-0 left-0;
+  width: 16rem; // INCORRECT: Use w-64 instead
+  background-color: #1a1a1a; // INCORRECT: Use bg-neutral-850 instead
 }
 ```
 
-## CSS Variables Usage
+### CSS Variables for Theming
+- Use RGB format CSS variables in the `:root` selector
+- Reference these variables with `rgb(var(--color-name))` syntax
+- Organize variables logically by category
 
-### Correct Syntax
-- ALWAYS use `var()` function when referencing CSS variables in Tailwind classes
-- Format: `class="bg-[var(--color-name)]"`
-- Apply to all color utilities (bg, text, border, ring, etc.)
-
-```vue
-<!-- ✅ Correct Usage -->
-<div class="bg-[var(--color-primary-500)] text-[var(--color-neutral-900)]">
-  <p class="border-[var(--color-neutral-200)]">Content</p>
-</div>
-
-<!-- ❌ Incorrect Usage -->
-<div class="bg-[--color-primary-500] text-[--color-neutral-900]">
-  <p class="border-[--color-neutral-200]">Content</p>
-</div>
-```
-
-### Variable Definition
-```css
-/* Custom base styles */
-@layer base {
-  :root {
-    /* Use oklch for better color science */
-    --color-primary-500: oklch(65% 0.2 142);
-    --color-primary-400: oklch(70% 0.19 142);
-  }
+```scss
+// Theme Variables (_colors.scss)
+:root {
+  // Primary color - Cyan
+  --color-primary-50: 236, 254, 255;
+  --color-primary-100: 207, 250, 254;
+  // ... more color variables
+  
+  // Semantic colors (dark theme)
+  --color-bg-base: rgb(17, 23, 35);
+  --color-bg-dark: rgb(24, 33, 47);
+  --color-text-primary: rgb(229, 231, 235);
+  --color-text-secondary: rgb(156, 163, 175);
 }
 ```
 
 ## Critical Rules
 <critical>
-- NEVER use CSS variables without var() function in Tailwind classes
-- NEVER use direct color values, use CSS custom properties with var()
-- NEVER use @apply with color utilities
-- ALWAYS use var() syntax when referencing CSS variables
-- ALWAYS format as bg-[var(--color-name)]
-- ALWAYS use CSS variables for theming
-- ALWAYS use modern color formats (oklch)
-- ALWAYS test color contrast with var() syntax
-- ALWAYS follow consistent var() syntax across components
+- NEVER use vendor prefixes - rely on Autoprefixer
+- NEVER use direct hex colors in components - use Tailwind color classes or CSS variables 
+- NEVER use px units directly - use Tailwind's spacing scale
+- ALWAYS use @apply directive for consistent SCSS application of Tailwind
+- ALWAYS organize Tailwind classes in a logical sequence (layout → spacing → typography → colors)
+- ALWAYS use RGB format for CSS color variables to allow opacity manipulation
+- ALWAYS use semantic CSS variable names in theme definitions
+- ALWAYS use responsive modifiers (@screen media queries or sm:, md:, lg: prefixes)
+- ALWAYS prefer Tailwind classes over custom CSS when possible
+- ALWAYS maintain the transition-all class (for transitioning width) instead of non-existent transition-width
 </critical>
 
 ## Examples
 
 <example>
-// Good Implementation with var() syntax
+// Good Vue Component Implementation
 <template>
-  <div class="rounded-lg bg-[var(--color-neutral-50)] p-6">
-    <h2 class="text-2xl font-semibold text-[var(--color-primary-500)]">
-      Title
+  <div class="rounded-lg bg-neutral-800 border border-neutral-700 p-6">
+    <h2 class="text-2xl font-semibold text-white mb-4">
+      Dashboard Overview
     </h2>
-    <button class="bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-400)]">
-      Action
-    </button>
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="flex-1 bg-neutral-850 p-4 rounded-md">
+        <div class="text-sm text-neutral-400 mb-1">Total Users</div>
+        <div class="text-3xl font-medium text-primary-400">3,721</div>
+      </div>
+    </div>
   </div>
 </template>
 </example>
@@ -167,17 +229,73 @@ export default defineConfig({
 <example type="invalid">
 // Poor Implementation - Avoid
 <template>
-  <div class="rounded-lg bg-[--color-neutral-50] p-6">
-    <!-- INCORRECT: Missing var() syntax -->
-    <h2 class="text-2xl font-semibold text-[--color-primary-500]">
-      Title
-    </h2>
-    <button class="bg-[--color-primary-500] hover:bg-[--color-primary-400]">
-      Action
-    </button>
+  <div style="border-radius: 0.5rem; background-color: #1f1f1f; padding: 1.5rem;">
+    <!-- INCORRECT: Using direct styles instead of Tailwind classes -->
+    <h2 style="font-size: 24px; margin-bottom: 1rem;">Dashboard Overview</h2>
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <div class="stat-title">Total Users</div>
+        <div class="stat-value">3,721</div>
+      </div>
+    </div>
   </div>
 </template>
+
+<style>
+/* INCORRECT: Using custom classes that duplicate Tailwind functionality */
+.dashboard-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .dashboard-stats {
+    flex-direction: row;
+  }
+}
+.stat-card {
+  flex: 1;
+  background-color: #141414;
+  padding: 1rem;
+  border-radius: 0.375rem;
+}
+.stat-title {
+  color: #a3a3a3;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+.stat-value {
+  color: #06b6d4;
+  font-size: 1.875rem;
+  font-weight: 500;
+}
+</style>
 </example>
+
+## Converting SCSS to Tailwind
+
+### Approach for Dashboard Layout
+```scss
+// Before - Traditional SCSS
+.dashboard {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  min-height: 100vh;
+  background-color: #121212;
+}
+
+// After - Tailwind with @apply
+.dashboard {
+  @apply flex flex-col md:flex-row min-h-screen w-full bg-neutral-900 text-white relative;
+}
+```
+
+### Conversion Patterns
+1. Replace CSS properties with Tailwind utility classes
+2. Use responsive modifiers for different breakpoints
+3. Apply appropriate display and layout utilities
+4. Maintain responsive design patterns
+5. Use flexbox or grid based on the layout needs
 
 ## Component Requirements
 
@@ -185,37 +303,35 @@ export default defineConfig({
 - Use `<script setup lang="ts">` for composition API
 - Define proper TypeScript interfaces for props
 - Implement proper event handling with typed emits
-- Use Tailwind utility classes with proper var() syntax
+- Use Tailwind utility classes directly in templates
 - Follow atomic design principles
 - Import types from shared package
 
 ### Styling Guidelines
 - Use Tailwind utility classes as primary styling method
-- Use `var()` syntax for all CSS variable references
 - Group utility classes in logical order:
   1. Layout (display, position)
   2. Box Model (margin, padding)
   3. Typography
-  4. Visual (colors with var() syntax)
+  4. Visual (colors)
   5. Interactive States
 
 ## Theme System
-- Use CSS custom properties with var() syntax
-- Implement color schemes with proper var() references
+- Use CSS variables for theme colors in RGB format
+- Implement dark/light mode with Tailwind's darkMode: 'class'
 - Support high contrast mode
-- Use modern color formats (oklch, color-mix)
+- Use color descriptions in comments for clarity
 
 ## Performance Optimization
-- Use modern CSS features
-- Implement proper view transitions
-- Use container queries for modularity
-- Optimize for Core Web Vitals
-- Use CSS variables with var() syntax for dynamic values
+- Use modern CSS features compatible with Tailwind v3
+- Implement proper transitions for interactive elements
+- Optimize responsive layouts for various screen sizes
+- Use CSS variables for dynamic values
 
 ## Accessibility Requirements
-- Maintain WCAG 2.2 AAA compliance
+- Maintain WCAG 2.1 AA compliance
 - Support reduced-motion preferences
-- Test color contrasts with var() syntax
+- Test color contrasts
 - Support forced-colors mode
 - Test with screen readers
 - Support keyboard navigation

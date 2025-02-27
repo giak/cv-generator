@@ -1,0 +1,85 @@
+/**
+ * Reset CSS et styles de base pour l'application
+ * Établit les fondations de styles pour l'ensemble du projet
+ * Optimisé pour Tailwind CSS v3+
+ */
+
+@layer base {
+  /* Box sizing pour tous les éléments - géré par Tailwind preflight */
+  
+  /* Reset des marges et paddings - géré par Tailwind preflight */
+  
+  /* Suppression des styles par défaut des listes - géré par Tailwind preflight */
+  
+  /* Styles de base du document */
+  html {
+    @apply scroll-smooth h-full;
+  }
+
+  body {
+    @apply leading-normal min-h-screen antialiased bg-neutral-900 text-white font-sans;
+  }
+
+  /* Images responsives - géré par Tailwind preflight */
+  
+  /* Typographie de base */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold leading-tight;
+  }
+
+  h1 {
+    @apply text-4xl mb-6;
+  }
+
+  h2 {
+    @apply text-3xl mb-5;
+  }
+
+  h3 {
+    @apply text-2xl mb-4;
+  }
+
+  h4 {
+    @apply text-xl mb-3;
+  }
+
+  p {
+    @apply mb-4;
+  }
+
+  a {
+    @apply text-primary-400 no-underline transition-colors duration-200 hover:text-primary-300;
+  }
+
+  /* Accessibilité et focus */
+  :focus-visible {
+    @apply outline outline-2 outline-primary-400 outline-offset-2;
+  }
+
+  /* Séparateurs */
+  hr {
+    @apply border-0 h-px bg-neutral-700 my-6;
+  }
+
+  /* Mode sombre global */
+  :root {
+    color-scheme: dark;
+  }
+
+  /* Scrollbar personnalisée via plugin Tailwind */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-neutral-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-700 rounded-sm;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-600;
+  }
+} 

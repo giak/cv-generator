@@ -1,0 +1,301 @@
+// =========================================================
+// Technical Dashboard Data Panels & Monitoring Components
+// Optimisé pour Tailwind CSS v3+
+// =========================================================
+
+// Data Card - Simple stat card
+.data-card {
+  @apply relative p-4 bg-neutral-800 border border-neutral-700 rounded overflow-hidden;
+  
+  // Card header with title and indicator
+  .data-card-header {
+    @apply flex items-center justify-between mb-2.5;
+    
+    .data-card-title {
+      @apply text-xs font-semibold uppercase tracking-wider text-neutral-400;
+    }
+    
+    .data-card-indicator {
+      @apply inline-flex items-center justify-center text-[0.6875rem] font-medium py-0.5 px-1.5 rounded;
+      
+      &.indicator-success {
+        @apply bg-success-500/15 text-success-400;
+      }
+      
+      &.indicator-warning {
+        @apply bg-warning-500/15 text-warning-400;
+      }
+      
+      &.indicator-danger {
+        @apply bg-error-500/15 text-error-400;
+      }
+      
+      &.indicator-info {
+        @apply bg-info-500/15 text-info-400;
+      }
+      
+      &.indicator-up {
+        &::before {
+          content: "+";
+          @apply mr-0.5;
+        }
+      }
+      
+      &.indicator-down {
+        &::before {
+          content: "-";
+          @apply mr-0.5;
+        }
+      }
+    }
+  }
+  
+  // Card value section
+  .data-card-value {
+    @apply flex items-baseline;
+    
+    .value {
+      @apply text-[1.75rem] font-bold font-mono leading-tight text-white;
+    }
+    
+    .unit {
+      @apply text-sm text-neutral-500 ml-1;
+    }
+  }
+  
+  // Card metadata
+  .data-card-meta {
+    @apply mt-2 text-xs text-neutral-500;
+    
+    .meta-item {
+      @apply flex justify-between;
+      
+      .meta-value {
+        @apply font-mono;
+      }
+    }
+  }
+  
+  // Progress bar
+  .data-card-progress {
+    @apply mt-3 h-1 bg-neutral-900 rounded-sm overflow-hidden;
+    
+    .progress-bar {
+      @apply h-full rounded-sm transition-all duration-300;
+      
+      &.progress-primary {
+        @apply bg-gradient-to-r from-primary-600 to-primary-400;
+      }
+      
+      &.progress-success {
+        @apply bg-gradient-to-r from-success-600 to-success-400;
+      }
+      
+      &.progress-warning {
+        @apply bg-gradient-to-r from-warning-600 to-warning-400;
+      }
+      
+      &.progress-danger {
+        @apply bg-gradient-to-r from-error-600 to-error-400;
+      }
+      
+      &.progress-info {
+        @apply bg-gradient-to-r from-info-600 to-info-400;
+      }
+    }
+  }
+}
+
+// Monitoring Panel - More complex data panel with rows
+.monitoring-panel {
+  @apply bg-neutral-800 border border-neutral-700 rounded overflow-hidden;
+  
+  // Panel header
+  .monitoring-header {
+    @apply flex items-center justify-between py-2.5 px-3.5 bg-neutral-900 border-b border-neutral-700;
+    
+    .monitoring-title {
+      @apply text-xs font-semibold uppercase tracking-wider text-white;
+    }
+    
+    .monitoring-actions {
+      @apply flex gap-2;
+      
+      button {
+        @apply bg-neutral-700/50 text-neutral-400 border-none rounded py-1 px-2 text-[0.6875rem] cursor-pointer hover:bg-neutral-600/50 hover:text-white;
+      }
+    }
+    
+    .monitoring-status {
+      @apply flex items-center gap-1 text-[0.6875rem] text-neutral-500;
+      
+      .status-dot {
+        @apply w-2 h-2 rounded-full bg-neutral-500;
+        
+        &.status-active {
+          @apply bg-success-500;
+        }
+        
+        &.status-warning {
+          @apply bg-warning-500;
+        }
+        
+        &.status-error {
+          @apply bg-error-500;
+        }
+      }
+    }
+  }
+  
+  // Panel content - grid of data cells
+  .monitoring-grid {
+    @apply grid grid-cols-2 gap-[1px] bg-neutral-700;
+    
+    &.grid-1-col {
+      @apply grid-cols-1;
+    }
+    
+    &.grid-3-cols {
+      @apply grid-cols-3;
+    }
+    
+    &.grid-4-cols {
+      @apply grid-cols-4;
+    }
+    
+    .data-cell {
+      @apply p-3 bg-neutral-800;
+      
+      .cell-label {
+        @apply text-xs font-medium text-neutral-400 mb-1;
+      }
+      
+      .cell-value {
+        @apply font-mono text-base font-semibold text-white;
+        
+        &.value-success {
+          @apply text-success-400;
+        }
+        
+        &.value-warning {
+          @apply text-warning-400;
+        }
+        
+        &.value-danger {
+          @apply text-error-400;
+        }
+        
+        &.value-info {
+          @apply text-info-400;
+        }
+      }
+      
+      .cell-meta {
+        @apply text-[0.6875rem] text-neutral-500 mt-1;
+      }
+      
+      .cell-progress {
+        @apply mt-2 h-1 bg-neutral-900 rounded-sm overflow-hidden;
+        
+        .progress-bar {
+          @apply h-full bg-primary-500;
+        }
+      }
+    }
+  }
+}
+
+// Technical Chart Container
+.chart-container {
+  @apply bg-neutral-800 border border-neutral-700 rounded overflow-hidden;
+  
+  .chart-header {
+    @apply flex items-center justify-between py-3 px-4 bg-neutral-900 border-b border-neutral-700;
+    
+    .chart-title {
+      @apply text-sm font-semibold text-white;
+    }
+    
+    .chart-controls {
+      @apply flex gap-2;
+    }
+  }
+  
+  .chart-body {
+    @apply p-4 min-h-[200px];
+    
+    // Placeholder for charts that would be rendered with JS
+    .chart-placeholder {
+      @apply w-full h-[200px] bg-neutral-900 flex items-center justify-center text-neutral-500 text-sm rounded;
+    }
+  }
+  
+  .chart-legend {
+    @apply flex flex-wrap gap-4 py-3 px-4 border-t border-neutral-700;
+    
+    .legend-item {
+      @apply flex items-center gap-1.5 text-xs text-neutral-400;
+      
+      .legend-color {
+        @apply w-3 h-3 rounded-sm;
+        
+        &.color-primary {
+          @apply bg-primary-500;
+        }
+        
+        &.color-secondary {
+          @apply bg-info-500;
+        }
+        
+        &.color-success {
+          @apply bg-success-500;
+        }
+        
+        &.color-warning {
+          @apply bg-warning-500;
+        }
+        
+        &.color-danger {
+          @apply bg-error-500;
+        }
+      }
+    }
+  }
+}
+
+// System Status Indicators
+.status-indicators {
+  @apply flex flex-wrap gap-2;
+  
+  .status-indicator {
+    @apply inline-flex items-center gap-1.5 py-1 px-2 bg-neutral-900 border border-neutral-700 rounded text-xs;
+    
+    .indicator-label {
+      @apply font-medium text-neutral-400;
+    }
+    
+    .indicator-value {
+      @apply font-mono font-semibold text-white;
+    }
+    
+    .indicator-status {
+      @apply w-2 h-2 rounded-full;
+      
+      &.status-online {
+        @apply bg-success-500 shadow-[0_0_0_2px_rgba(34,197,94,0.25)];
+      }
+      
+      &.status-warning {
+        @apply bg-warning-500 shadow-[0_0_0_2px_rgba(234,179,8,0.25)];
+      }
+      
+      &.status-offline {
+        @apply bg-error-500 shadow-[0_0_0_2px_rgba(239,68,68,0.25)];
+      }
+      
+      &.status-maintenance {
+        @apply bg-info-500 shadow-[0_0_0_2px_rgba(59,130,246,0.25)];
+      }
+    }
+  }
+}

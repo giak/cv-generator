@@ -1,0 +1,275 @@
+/**
+ * Styles des boutons
+ * Optimisé pour l'utilisation avec Tailwind CSS v4
+ * Design inspiré par le style dashboard technique
+ * 
+ * NOTE: Ce fichier utilise déjà l'approche recommandée avec @apply
+ * La prochaine étape est de migrer vers un composant Vue avec les classes 
+ * Tailwind directement dans le HTML. Voir le composant TechButton.vue
+ * comme exemple de migration complète.
+ */
+
+// =========================================================
+// Technical Dashboard Button Styles
+// =========================================================
+
+/**
+ * Stratégie d'utilisation avec Tailwind CSS v4:
+ * 1. Utiliser @apply pour les styles complexes qui se répètent (phase transitoire)
+ * 2. Migrer progressivement vers des composants Vue avec classes utilitaires directes
+ * 3. Utiliser le composant TechButton.vue pour les nouveaux boutons
+ * 
+ * Exemple d'utilisation du composant TechButton (recommandé):
+ * <TechButton variant="primary" size="md">Mon bouton</TechButton>
+ */
+
+// Base button style
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium 
+         rounded transition-colors duration-200 select-none;
+  
+  // Disabled state
+  &:disabled,
+  &.disabled {
+    @apply opacity-60 cursor-not-allowed pointer-events-none;
+  }
+  
+  // Icon in button
+  .btn-icon {
+    @apply w-4 h-4 flex-shrink-0;
+    
+    + .btn-text {
+      @apply ml-2;
+    }
+  }
+  
+  // When icon is after text
+  .btn-text + .btn-icon {
+    @apply ml-2;
+  }
+}
+
+// Primary button
+.btn-primary {
+  @apply bg-primary-600 text-white border border-primary-600 hover:bg-primary-700 
+         hover:border-primary-700 focus:bg-primary-700 focus:outline-none 
+         focus:ring-2 focus:ring-primary-500/50 active:bg-primary-800;
+}
+
+// Secondary button
+.btn-secondary {
+  @apply bg-neutral-700 text-white border border-neutral-600 hover:bg-neutral-600 
+         hover:border-neutral-500 focus:bg-neutral-600 focus:outline-none 
+         focus:ring-2 focus:ring-neutral-500/50 active:bg-neutral-800;
+}
+
+// Success button
+.btn-success {
+  @apply bg-success-600 text-white border border-success-600 hover:bg-success-700 
+         hover:border-success-700 focus:bg-success-700 focus:outline-none 
+         focus:ring-2 focus:ring-success-500/50 active:bg-success-800;
+}
+
+// Danger button
+.btn-danger {
+  @apply bg-error-600 text-white border border-error-600 hover:bg-error-700 
+         hover:border-error-700 focus:bg-error-700 focus:outline-none 
+         focus:ring-2 focus:ring-error-500/50 active:bg-error-800;
+}
+
+// Warning button
+.btn-warning {
+  @apply bg-warning-600 text-white border border-warning-600 hover:bg-warning-700 
+         hover:border-warning-700 focus:bg-warning-700 focus:outline-none 
+         focus:ring-2 focus:ring-warning-500/50 active:bg-warning-800;
+}
+
+// Info button
+.btn-info {
+  @apply bg-info-600 text-white border border-info-600 hover:bg-info-700 
+         hover:border-info-700 focus:bg-info-700 focus:outline-none 
+         focus:ring-2 focus:ring-info-500/50 active:bg-info-800;
+}
+
+// Ghost button
+.btn-ghost {
+  @apply bg-transparent text-neutral-300 border border-transparent hover:bg-neutral-800 
+         hover:text-white focus:bg-neutral-800 focus:text-white focus:outline-none 
+         focus:ring-2 focus:ring-neutral-700/50 active:bg-neutral-900;
+}
+
+// Outline button
+.btn-outline {
+  @apply bg-transparent text-neutral-300 border border-neutral-600 hover:border-neutral-500 
+         hover:text-white focus:text-white focus:border-neutral-500 
+         focus:outline-none focus:ring-2 focus:ring-neutral-700/50 active:bg-neutral-700;
+  
+  &.btn-primary {
+    @apply text-primary-400 border-primary-600 hover:bg-primary-600/10 
+           hover:text-primary-300 hover:border-primary-500;
+  }
+  
+  &.btn-success {
+    @apply text-success-400 border-success-600 hover:bg-success-600/10 
+           hover:text-success-300 hover:border-success-500;
+  }
+  
+  &.btn-danger {
+    @apply text-error-400 border-error-600 hover:bg-error-600/10 
+           hover:text-error-300 hover:border-error-500;
+  }
+  
+  &.btn-warning {
+    @apply text-warning-400 border-warning-600 hover:bg-warning-600/10 
+           hover:text-warning-300 hover:border-warning-500;
+  }
+  
+  &.btn-info {
+    @apply text-info-400 border-info-600 hover:bg-info-600/10 
+           hover:text-info-300 hover:border-info-500;
+  }
+}
+
+// Button sizes
+.btn-sm {
+  @apply px-2.5 py-1 text-xs;
+  
+  .btn-icon {
+    @apply w-3.5 h-3.5;
+  }
+}
+
+.btn-lg {
+  @apply px-5 py-2.5 text-base;
+  
+  .btn-icon {
+    @apply w-5 h-5;
+  }
+}
+
+// Block button (full width)
+.btn-block {
+  @apply w-full flex justify-center;
+}
+
+// Icon only button
+.btn-icon-only {
+  @apply p-2 flex items-center justify-center;
+  
+  .btn-icon {
+    @apply w-5 h-5 m-0;
+  }
+  
+  &.btn-sm {
+    @apply p-1.5;
+    
+    .btn-icon {
+      @apply w-4 h-4;
+    }
+  }
+  
+  &.btn-lg {
+    @apply p-3;
+    
+    .btn-icon {
+      @apply w-6 h-6;
+    }
+  }
+}
+
+// Button group
+.btn-group {
+  @apply inline-flex rounded-md shadow-sm;
+  
+  .btn {
+    @apply rounded-none border-r-0;
+    
+    &:first-child {
+      @apply rounded-l;
+    }
+    
+    &:last-child {
+      @apply rounded-r border-r;
+    }
+    
+    &:focus {
+      @apply z-10;
+    }
+  }
+}
+
+// Technical style button
+.btn-tech {
+  @apply bg-neutral-900 text-neutral-300 border border-neutral-700 border-b-2 
+         border-b-primary-600 hover:bg-neutral-800 hover:text-white focus:outline-none 
+         focus:ring-1 focus:ring-primary-500 active:bg-neutral-850 shadow-md;
+  
+  &.btn-primary {
+    @apply border-b-primary-600 hover:border-b-primary-500 focus:border-b-primary-500;
+  }
+  
+  &.btn-success {
+    @apply border-b-success-600 hover:border-b-success-500 focus:border-b-success-500;
+  }
+  
+  &.btn-danger {
+    @apply border-b-error-600 hover:border-b-error-500 focus:border-b-error-500;
+  }
+  
+  &.btn-warning {
+    @apply border-b-warning-600 hover:border-b-warning-500 focus:border-b-warning-500;
+  }
+  
+  &.btn-info {
+    @apply border-b-info-600 hover:border-b-info-500 focus:border-b-info-500;
+  }
+}
+
+// Status indicator badges for technical dashboard
+.status-badge {
+  @apply inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full;
+}
+
+.status-badge-success {
+  @apply bg-success-500/20 text-success-400 border border-success-500/20;
+}
+
+.status-badge-warning {
+  @apply bg-warning-500/20 text-warning-400 border border-warning-500/20;
+}
+
+.status-badge-danger {
+  @apply bg-error-500/20 text-error-400 border border-error-500/20;
+}
+
+.status-badge-info {
+  @apply bg-info-500/20 text-info-400 border border-info-500/20;
+}
+
+.status-badge-neutral {
+  @apply bg-neutral-500/20 text-neutral-400 border border-neutral-500/20;
+}
+
+// Action button (clean, icon-based button for dashboard actions)
+.action-btn {
+  @apply inline-flex items-center justify-center rounded p-1.5 text-neutral-400 
+         hover:text-white hover:bg-neutral-800 transition-colors duration-150;
+  
+  &:focus {
+    @apply outline-none ring-2 ring-primary-500/40;
+  }
+  
+  &.action-primary {
+    @apply text-primary-400 hover:text-primary-300 hover:bg-primary-600/10;
+  }
+  
+  &.action-danger {
+    @apply text-error-400 hover:text-error-300 hover:bg-error-600/10;
+  }
+}
+
+/**
+ * Note: Pour les composants de boutons, il est recommandé de créer des composants Vue
+ * réutilisables avec des props pour les différentes variantes, tailles et états.
+ * Cela permettra une meilleure maintenabilité et consistance dans l'application.
+ */ 

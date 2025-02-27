@@ -1,0 +1,58 @@
+/**
+ * Styles de typographie
+ * Définition des polices et styles de texte
+ * Optimisé pour Tailwind CSS v3+
+ */
+
+/* Importation de la police Inter via Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* 
+ * Note: Les variables de typographie suivantes sont déplacées vers tailwind.config.ts:
+ * - font-family (fontFamily)
+ * - font-weight (fontWeight)
+ * - line-height (lineHeight)
+ */
+
+/* Styles de typographie spécifiques complémentaires au reset.scss */
+@layer base {
+  /* Styles de base déjà gérés dans reset.scss */
+  
+  /* Styles de monospace et code */
+  code, pre {
+    @apply font-mono text-sm;
+  }
+  
+  code {
+    @apply py-0.5 px-1.5 rounded bg-neutral-700/50 text-white;
+  }
+  
+  pre {
+    @apply p-4 rounded-md bg-neutral-800 overflow-x-auto text-white;
+    
+    code {
+      @apply p-0 bg-transparent;
+    }
+  }
+  
+  /* Éléments textuels */
+  strong, b {
+    @apply font-semibold;
+  }
+  
+  small {
+    @apply text-sm;
+  }
+}
+
+/* Utilitaires de texte */
+@layer utilities {
+  /* Classes de taille de texte déjà disponibles dans Tailwind:
+   * text-xs, text-sm, text-base, text-lg, text-xl, etc.
+   */
+  
+  /* Classes de poids de fonte déjà disponibles dans Tailwind:
+   * font-light, font-normal, font-medium, font-semibold, font-bold
+   */
+} 

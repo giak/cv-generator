@@ -1,0 +1,553 @@
+/**
+ * Styles pour les alertes et notifications
+ * Composants pour afficher des messages importants à l'utilisateur
+ * Optimisé pour Tailwind CSS v3+
+ */
+
+/* Alerte de base */
+.alert {
+  @apply relative p-4 mb-4 border border-transparent rounded-md flex items-start;
+  
+  .alert-icon {
+    @apply mr-3 w-5 h-5 flex-shrink-0;
+  }
+  
+  .alert-content {
+    @apply flex-1;
+  }
+  
+  .alert-title {
+    @apply font-semibold mb-1 text-sm;
+  }
+  
+  .alert-message {
+    @apply text-sm mb-0;
+  }
+  
+  .alert-close {
+    @apply ml-3 p-1 bg-transparent border-none cursor-pointer opacity-50 transition-opacity duration-200;
+    
+    &:hover {
+      @apply opacity-100;
+    }
+    
+    svg {
+      @apply w-4 h-4;
+    }
+  }
+}
+
+/* Variantes d'alertes */
+.alert-primary {
+  @apply bg-primary-500/10 border-primary-500/20 text-primary-300;
+  
+  .alert-icon {
+    @apply text-primary-400;
+  }
+}
+
+.alert-success {
+  @apply bg-success-500/10 border-success-500/20 text-success-300;
+  
+  .alert-icon {
+    @apply text-success-500;
+  }
+}
+
+.alert-danger {
+  @apply bg-error-500/10 border-error-500/20 text-error-300;
+  
+  .alert-icon {
+    @apply text-error-500;
+  }
+}
+
+.alert-warning {
+  @apply bg-warning-500/10 border-warning-500/20 text-warning-300;
+  
+  .alert-icon {
+    @apply text-warning-500;
+  }
+}
+
+.alert-info {
+  @apply bg-info-500/10 border-info-500/20 text-info-300;
+  
+  .alert-icon {
+    @apply text-info-500;
+  }
+}
+
+/* Alerte avec actions */
+.alert-actions {
+  @apply flex gap-3 mt-3;
+}
+
+/* Toast notifications */
+.toast-container {
+  @apply fixed z-50 p-4 flex flex-col gap-3 max-w-[350px] w-full;
+  
+  &.top-right {
+    @apply top-0 right-0;
+  }
+  
+  &.top-left {
+    @apply top-0 left-0;
+  }
+  
+  &.bottom-right {
+    @apply bottom-0 right-0;
+  }
+  
+  &.bottom-left {
+    @apply bottom-0 left-0;
+  }
+  
+  &.top-center {
+    @apply top-0 left-1/2 -translate-x-1/2;
+  }
+  
+  &.bottom-center {
+    @apply bottom-0 left-1/2 -translate-x-1/2;
+  }
+}
+
+.toast {
+  @apply relative p-4 rounded-md shadow-lg flex items-start w-full bg-neutral-800 border-l-4 border-neutral-600;
+  animation: slideIn 0.3s ease forwards;
+  
+  &.toast-success {
+    @apply border-l-success-500;
+    
+    .toast-icon {
+      @apply text-success-500;
+    }
+  }
+  
+  &.toast-error {
+    @apply border-l-error-500;
+    
+    .toast-icon {
+      @apply text-error-500;
+    }
+  }
+  
+  &.toast-warning {
+    @apply border-l-warning-500;
+    
+    .toast-icon {
+      @apply text-warning-500;
+    }
+  }
+  
+  &.toast-info {
+    @apply border-l-info-500;
+    
+    .toast-icon {
+      @apply text-info-500;
+    }
+  }
+  
+  .toast-icon {
+    @apply mr-3 w-5 h-5 flex-shrink-0 text-neutral-400;
+  }
+  
+  .toast-content {
+    @apply flex-1;
+  }
+  
+  .toast-title {
+    @apply font-semibold mb-1 text-sm text-white;
+  }
+  
+  .toast-message {
+    @apply text-xs text-neutral-300 mb-0;
+  }
+  
+  .toast-close {
+    @apply ml-3 p-1 bg-transparent border-none cursor-pointer text-neutral-400 opacity-70 transition-opacity duration-200;
+    
+    &:hover {
+      @apply opacity-100;
+    }
+    
+    svg {
+      @apply w-4 h-4;
+    }
+  }
+  
+  &.toast-dismissible {
+    &.dismissing {
+      animation: slideOut 0.3s ease forwards;
+    }
+  }
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Badge */
+.badge {
+  @apply inline-flex items-center px-2 py-1 text-xs font-medium leading-none text-center whitespace-nowrap align-baseline rounded-full;
+  
+  &.badge-primary {
+    @apply bg-primary-500/20 text-primary-300;
+  }
+  
+  &.badge-success {
+    @apply bg-success-500/20 text-success-500;
+  }
+  
+  &.badge-danger {
+    @apply bg-error-500/20 text-error-500;
+  }
+  
+  &.badge-warning {
+    @apply bg-warning-500/20 text-warning-500;
+  }
+  
+  &.badge-info {
+    @apply bg-info-500/20 text-info-500;
+  }
+  
+  &.badge-secondary {
+    @apply bg-neutral-600/20 text-neutral-300;
+  }
+}
+
+// =========================================================
+// Technical Dashboard Alert Styles - Tailwind CSS v3 Optimized
+// =========================================================
+
+// Technical Alert Component
+.alert-panel {
+  @apply relative p-4 border border-neutral-700 rounded bg-neutral-800 mb-4;
+  
+  // Alert header with icon and title
+  .alert-header {
+    @apply flex items-center justify-between mb-3;
+    
+    .alert-title-wrapper {
+      @apply flex items-center gap-2;
+      
+      .alert-icon {
+        @apply flex items-center justify-center w-5 h-5;
+      }
+      
+      .alert-title {
+        @apply text-sm font-semibold tracking-wider uppercase;
+      }
+    }
+    
+    .alert-close {
+      @apply bg-transparent border-none text-current opacity-60 cursor-pointer p-1 hover:opacity-100;
+    }
+  }
+  
+  // Alert content with rows of information
+  .alert-content {
+    .alert-row {
+      @apply flex justify-between items-baseline mb-2 text-sm;
+      
+      .alert-label {
+        @apply text-neutral-400;
+      }
+      
+      .alert-value {
+        @apply font-mono font-medium;
+      }
+    }
+    
+    .alert-message {
+      @apply mt-3 pt-3 border-t border-neutral-700/50 text-sm text-neutral-400;
+    }
+  }
+  
+  // Alert actions
+  .alert-actions {
+    @apply flex justify-end gap-2 mt-4;
+    
+    .alert-btn {
+      @apply text-xs font-medium uppercase py-1.5 px-3 rounded bg-neutral-800/50 text-white border-none cursor-pointer hover:bg-neutral-700/50;
+      
+      &.alert-btn-primary {
+        @apply bg-primary-600 text-white hover:bg-primary-700;
+      }
+    }
+  }
+  
+  // Alert variants
+  &.alert-critical {
+    @apply border-error-700 bg-error-950/30;
+    
+    .alert-header {
+      .alert-title-wrapper {
+        .alert-icon {
+          @apply text-error-500;
+        }
+        
+        .alert-title {
+          @apply text-error-200;
+        }
+      }
+    }
+    
+    .alert-content {
+      .alert-value {
+        @apply text-error-200;
+      }
+    }
+  }
+  
+  &.alert-warning {
+    @apply border-warning-700 bg-warning-950/30;
+    
+    .alert-header {
+      .alert-title-wrapper {
+        .alert-icon {
+          @apply text-warning-500;
+        }
+        
+        .alert-title {
+          @apply text-warning-200;
+        }
+      }
+    }
+    
+    .alert-content {
+      .alert-value {
+        @apply text-warning-200;
+      }
+    }
+  }
+  
+  &.alert-info {
+    @apply border-info-700 bg-info-950/30;
+    
+    .alert-header {
+      .alert-title-wrapper {
+        .alert-icon {
+          @apply text-info-500;
+        }
+        
+        .alert-title {
+          @apply text-info-200;
+        }
+      }
+    }
+    
+    .alert-content {
+      .alert-value {
+        @apply text-info-200;
+      }
+    }
+  }
+  
+  &.alert-success {
+    @apply border-success-700 bg-success-950/30;
+    
+    .alert-header {
+      .alert-title-wrapper {
+        .alert-icon {
+          @apply text-success-500;
+        }
+        
+        .alert-title {
+          @apply text-success-200;
+        }
+      }
+    }
+    
+    .alert-content {
+      .alert-value {
+        @apply text-success-200;
+      }
+    }
+  }
+}
+
+// Technical Notification Panel (Notifications List)
+.notifications-panel {
+  @apply max-w-[400px];
+  
+  .notifications-header {
+    @apply flex items-center justify-between p-3 border-b border-neutral-700 bg-neutral-900;
+    
+    .notifications-title {
+      @apply text-sm font-semibold uppercase tracking-wider;
+    }
+    
+    .notifications-actions {
+      @apply flex gap-2;
+    }
+  }
+  
+  .notifications-list {
+    @apply max-h-[400px] overflow-y-auto;
+    
+    .notification-item {
+      @apply p-3 border-b border-neutral-700 last:border-b-0 hover:bg-neutral-800;
+      
+      .notification-content {
+        @apply flex gap-3;
+        
+        .notification-icon {
+          @apply flex-shrink-0 flex items-start w-5 h-5 text-neutral-400;
+          
+          &.severity-critical {
+            @apply text-error-500;
+          }
+          
+          &.severity-warning {
+            @apply text-warning-500;
+          }
+          
+          &.severity-info {
+            @apply text-info-500;
+          }
+          
+          &.severity-success {
+            @apply text-success-500;
+          }
+        }
+        
+        .notification-body {
+          @apply flex-1;
+          
+          .notification-title {
+            @apply text-sm font-medium leading-snug mb-1;
+          }
+          
+          .notification-text {
+            @apply text-sm text-neutral-400;
+          }
+          
+          .notification-meta {
+            @apply flex justify-between mt-2 text-xs text-neutral-500;
+            
+            .notification-time {
+              @apply font-mono;
+            }
+            
+            .notification-source {
+              @apply uppercase tracking-wider;
+            }
+          }
+        }
+      }
+      
+      .notification-actions {
+        @apply flex justify-end gap-2 mt-2;
+      }
+    }
+  }
+  
+  .notifications-footer {
+    @apply p-3 border-t border-neutral-700 bg-neutral-900 text-center;
+    
+    a {
+      @apply text-sm text-primary-400 no-underline hover:underline;
+    }
+  }
+}
+
+// Toast Notifications (pop-up)
+.toast-container {
+  @apply fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-[350px];
+  
+  .toast {
+    @apply relative p-3 rounded bg-neutral-900 border border-neutral-700 shadow-md;
+    animation: toast-in 0.3s ease;
+    
+    &.toast-critical {
+      @apply border-l-4 border-l-error-500;
+    }
+    
+    &.toast-warning {
+      @apply border-l-4 border-l-warning-500;
+    }
+    
+    &.toast-info {
+      @apply border-l-4 border-l-info-500;
+    }
+    
+    &.toast-success {
+      @apply border-l-4 border-l-success-500;
+    }
+    
+    .toast-header {
+      @apply flex items-start justify-between mb-2;
+      
+      .toast-title {
+        @apply text-sm font-semibold;
+      }
+      
+      .toast-close {
+        @apply bg-transparent border-none text-neutral-500 text-base leading-none cursor-pointer p-1 -m-1 hover:text-white;
+      }
+    }
+    
+    .toast-body {
+      @apply text-sm text-neutral-400;
+    }
+    
+    .toast-progress {
+      @apply absolute left-0 bottom-0 h-[3px] bg-neutral-500/50 rounded-br;
+      animation: toast-progress 5s linear forwards;
+      
+      &.progress-critical {
+        @apply bg-error-500;
+      }
+      
+      &.progress-warning {
+        @apply bg-warning-500;
+      }
+      
+      &.progress-info {
+        @apply bg-info-500;
+      }
+      
+      &.progress-success {
+        @apply bg-success-500;
+      }
+    }
+  }
+}
+
+@keyframes toast-in {
+  from {
+    @apply translate-x-full opacity-0;
+  }
+  to {
+    @apply translate-x-0 opacity-100;
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0;
+  }
+}

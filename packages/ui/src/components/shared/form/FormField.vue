@@ -13,6 +13,9 @@ interface Props {
   required?: boolean
   fieldPath?: string
   useErrorStore?: boolean
+  placeholder?: string
+  helpText?: string
+  icon?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,7 +23,10 @@ const props = withDefaults(defineProps<Props>(), {
   error: '',
   required: false,
   fieldPath: '',
-  useErrorStore: false
+  useErrorStore: false,
+  placeholder: '',
+  helpText: '',
+  icon: ''
 });
 
 const emit = defineEmits<{
@@ -42,38 +48,74 @@ try {
 } catch (e) {
   console.warn('Error store not available in testing environment');
 }
+
+// Variables pour suivre l'état du focus
+const isFocused = ref(false);
+const toggleFocus = (focusState: boolean) => {
+  isFocused.value = focusState;
+};
+
+// Classes calculées pour l'input
+const inputClasses = computed(() => {
+  return {
+    'form-control': true,
+    'is-invalid': !!props.error || hasFieldError.value,
+    'is-focused': isFocused.value
+  };
+});
 </script>
 
 <template>
-  <label :for="name" class="block">
-    <span class="text-[var(--color-neutral-700)] font-medium flex items-center gap-1">
+  <div class="form-group">
+    <label :for="name" class="form-label">
       {{ label }}
-      <span v-if="required" class="text-[var(--color-error-500)]">*</span>
-    </span>
+      <span v-if="required" class="text-error ml-1">*</span>
+    </label>
     
-    <input
-      :id="name"
-      :value="modelValue"
-      :type="type"
-      :name="name"
-      :required="required"
-      :aria-required="required ? 'true' : 'false'"
-      :aria-invalid="(!!error || hasFieldError) ? 'true' : 'false'"
-      :aria-describedby="(!!error || hasFieldError) ? `${name}-error` : undefined"
-      :data-test="`${name}-input`"
-      class="mt-1 block w-full rounded-md border-[var(--color-neutral-300)] 
-             focus:border-[var(--color-primary-500)] focus:ring focus:ring-[var(--color-primary-200)]
-             disabled:bg-[var(--color-neutral-100)] disabled:cursor-not-allowed
-             aria-invalid:border-[var(--color-error-500)]"
-      @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-      @blur="emit('blur', ($event.target as HTMLInputElement).value)"
-    />
+    <div class="relative">
+      <!-- Icône à gauche (si fournie) -->
+      <div v-if="icon" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400">
+        <span v-html="icon"></span>
+      </div>
+      
+      <input
+        :id="name"
+        :value="modelValue"
+        :type="type"
+        :name="name"
+        :required="required"
+        :placeholder="placeholder"
+        :class="inputClasses"
+        :style="icon ? 'padding-left: 2.5rem' : ''"
+        :aria-required="required ? 'true' : 'false'"
+        :aria-invalid="(!!error || hasFieldError) ? 'true' : 'false'"
+        :aria-describedby="(!!error || hasFieldError || helpText) ? `${name}-description` : undefined"
+        :data-test="`${name}-input`"
+        @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+        @blur="emit('blur', ($event.target as HTMLInputElement).value); toggleFocus(false)"
+        @focus="toggleFocus(true)"
+      />
+    </div>
     
-    <ValidationFeedback
-      :error="error"
-      :field-path="fieldPath"
-      :use-error-store="props.useErrorStore"
-      :name="name"
-    />
-  </label>
-</template> 
+    <!-- Message d'aide ou erreur -->
+    <div :id="`${name}-description`">
+      <ValidationFeedback
+        :error="error"
+        :field-path="fieldPath"
+        :use-error-store="props.useErrorStore"
+        :name="name"
+      />
+      
+      <div v-if="helpText && !error && !hasFieldError" class="form-text mt-1">
+        {{ helpText }}
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.is-focused {
+  border-color: rgb(var(--color-primary-400));
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-400), 0.15);
+}
+</style> 

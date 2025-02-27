@@ -21,6 +21,12 @@ version: 1.1.0
 - Interface administrateur pour la gestion des modèles
 - Internationalisation (i18n) pour l'interface utilisateur
 
+### Technical Improvements 🔧
+
+- Migration de Tailwind CSS v4.0.0 vers v3.4.0
+- Harmonisation des styles SCSS avec Tailwind classes
+- Optimisation des composants d'interface utilisateur
+
 ## [1.1.0] - 2024-05-15
 
 ### Added 🎉
@@ -187,7 +193,7 @@ pie
 | zod         | ^3.22.4 |   ✅   |
 | vitest      | ^1.6.1  |   ✅   |
 | pinia       | ^2.1.7  |   ✅   |
-| tailwindcss | ^4.0.0  |   ✅   |
+| tailwindcss | ^3.4.0  |   ✅   |
 
 ### Story Progress 📋
 

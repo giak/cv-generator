@@ -1,0 +1,149 @@
+// =========================================================
+// Technical Dashboard Color Theme Variables
+// =========================================================
+// Harmonisé avec tailwind.config.ts pour cohérence des couleurs
+
+// Common colors as variables
+:root {
+  // Primary color - Cyan (harmonisé avec tailwind.config.ts)
+  --color-primary-50: 236, 254, 255;
+  --color-primary-100: 207, 250, 254;
+  --color-primary-200: 165, 243, 252;
+  --color-primary-300: 103, 232, 249;
+  --color-primary-400: 34, 211, 238;
+  --color-primary-500: 6, 182, 212;
+  --color-primary-600: 8, 145, 178;
+  --color-primary-700: 14, 116, 144;
+  --color-primary-800: 21, 94, 117;
+  --color-primary-900: 22, 78, 99;
+  --color-primary-950: 8, 51, 68;
+  --color-primary-rgb: var(--color-primary-500);
+  
+  // Neutral colors - Gray
+  --color-neutral-50: 249, 250, 251;
+  --color-neutral-100: 243, 244, 246;
+  --color-neutral-200: 229, 231, 235;
+  --color-neutral-300: 209, 213, 219;
+  --color-neutral-400: 156, 163, 175;
+  --color-neutral-500: 107, 114, 128;
+  --color-neutral-600: 75, 85, 99;
+  --color-neutral-700: 55, 65, 81;
+  --color-neutral-800: 31, 41, 55;
+  --color-neutral-900: 17, 24, 39;
+  --color-neutral-950: 8, 12, 24;
+  --color-neutral-rgb: var(--color-neutral-500);
+  
+  // Success colors - Green
+  --color-success-50: 240, 253, 244;
+  --color-success-100: 220, 252, 231;
+  --color-success-200: 187, 247, 208;
+  --color-success-300: 134, 239, 172;
+  --color-success-400: 74, 222, 128;
+  --color-success-500: 34, 197, 94;
+  --color-success-600: 22, 163, 74;
+  --color-success-700: 21, 128, 61;
+  --color-success-800: 22, 101, 52;
+  --color-success-900: 20, 83, 45;
+  --color-success-950: 5, 46, 22;
+  --color-success-rgb: var(--color-success-500);
+  
+  // Warning colors - Yellow (harmonisé avec tailwind.config.ts)
+  --color-warning-50: 254, 252, 232;
+  --color-warning-100: 254, 249, 195;
+  --color-warning-200: 254, 240, 138;
+  --color-warning-300: 253, 224, 71;
+  --color-warning-400: 250, 204, 21;
+  --color-warning-500: 234, 179, 8;
+  --color-warning-600: 202, 138, 4;
+  --color-warning-700: 161, 98, 7;
+  --color-warning-800: 133, 77, 14;
+  --color-warning-900: 113, 63, 18;
+  --color-warning-950: 54, 29, 10;
+  --color-warning-rgb: var(--color-warning-500);
+  
+  // Error colors - Red
+  --color-error-50: 254, 242, 242;
+  --color-error-100: 254, 226, 226;
+  --color-error-200: 254, 202, 202;
+  --color-error-300: 252, 165, 165;
+  --color-error-400: 248, 113, 113;
+  --color-error-500: 239, 68, 68;
+  --color-error-600: 220, 38, 38;
+  --color-error-700: 185, 28, 28;
+  --color-error-800: 153, 27, 27;
+  --color-error-900: 127, 29, 29;
+  --color-error-950: 69, 10, 10;
+  --color-error-rgb: var(--color-error-500);
+  
+  // Info colors - Blue
+  --color-info-50: 239, 246, 255;
+  --color-info-100: 219, 234, 254;
+  --color-info-200: 191, 219, 254;
+  --color-info-300: 147, 197, 253;
+  --color-info-400: 96, 165, 250;
+  --color-info-500: 59, 130, 246;
+  --color-info-600: 37, 99, 235;
+  --color-info-700: 29, 78, 216;
+  --color-info-800: 30, 64, 175;
+  --color-info-900: 30, 58, 138;
+  --color-info-950: 23, 37, 84;
+  --color-info-rgb: var(--color-info-500);
+  
+  // Common colors
+  --color-white: 255, 255, 255;
+  --color-black: 0, 0, 0;
+}
+
+// Dark theme (default)
+:root, .dark {
+  // Semantic colors (dark theme)
+  --color-bg-base: rgb(17, 23, 35);
+  --color-bg-dark: rgb(24, 33, 47);
+  --color-bg-darker: rgb(30, 41, 59);
+  --color-bg-hover: rgba(255, 255, 255, 0.05);
+  --color-bg-active: rgba(255, 255, 255, 0.1);
+  
+  --color-text-primary: rgb(229, 231, 235);
+  --color-text-secondary: rgb(156, 163, 175);
+  --color-text-muted: rgb(107, 114, 128);
+  --color-text-disabled: rgb(75, 85, 99);
+  
+  --color-border-base: rgb(55, 65, 81);
+  --color-border-hover: rgb(75, 85, 99);
+  --color-border-focus: rgb(var(--color-primary-500));
+  
+  // Component specific
+  --color-success: rgb(var(--color-success-500));
+  --color-warning: rgb(var(--color-warning-500));
+  --color-error: rgb(var(--color-error-500));
+  --color-info: rgb(var(--color-info-500));
+  
+  // Font variables
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+// Light theme (optional)
+.light {
+  // Semantic colors (light theme)
+  --color-bg-base: rgb(249, 250, 251);
+  --color-bg-dark: rgb(243, 244, 246);
+  --color-bg-darker: rgb(229, 231, 235);
+  --color-bg-hover: rgba(0, 0, 0, 0.05);
+  --color-bg-active: rgba(0, 0, 0, 0.1);
+  
+  --color-text-primary: rgb(17, 24, 39);
+  --color-text-secondary: rgb(55, 65, 81);
+  --color-text-muted: rgb(107, 114, 128);
+  --color-text-disabled: rgb(156, 163, 175);
+  
+  --color-border-base: rgb(209, 213, 219);
+  --color-border-hover: rgb(156, 163, 175);
+  --color-border-focus: rgb(var(--color-primary-500));
+  
+  // Component specific
+  --color-success: rgb(var(--color-success-600));
+  --color-warning: rgb(var(--color-warning-600));
+  --color-error: rgb(var(--color-error-600));
+  --color-info: rgb(var(--color-info-600));
+} 
