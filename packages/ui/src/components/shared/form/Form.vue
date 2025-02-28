@@ -34,7 +34,7 @@ const handleSubmit = (e: Event) => {
     <div class="flex justify-end mt-8">
       <button
         type="button"
-        class="btn btn-outline btn-secondary mr-3"
+        class="px-4 py-2 mr-3 border border-neutral-600 rounded-md text-neutral-200 bg-transparent hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="loading"
       >
         Annuler
@@ -43,7 +43,7 @@ const handleSubmit = (e: Event) => {
       <button
         type="submit"
         :disabled="loading"
-        class="btn btn-primary"
+        class="px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
       >
         <span v-if="loading" class="mr-2">
           <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

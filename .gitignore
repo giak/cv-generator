@@ -25,6 +25,9 @@ dist-ssr
 
 # Private individual user cursor rules
 .cursor/rules/_*.mdc
+.cursorrules
+.cursorignore
+.specstory
 
 xnotes
 
@@ -85,8 +88,6 @@ tsconfig.tsbuildinfo
 .history/
 .vercel/
 .netlify/
-
-docs/tailwindcss4/
 
 
 env-changelog/

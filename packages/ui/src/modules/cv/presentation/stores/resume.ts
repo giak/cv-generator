@@ -2,7 +2,7 @@ import type { Resume, ResumeInterface } from "@cv-generator/core"
 import { ManageResume, Resume as ResumeEntity } from "@cv-generator/core"
 import { LocalStorageResumeRepository } from "@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository"
 import { defineStore } from "pinia"
-import { ref, inject } from "vue"
+import { ref } from "vue"
 import { useErrorStore } from "../../../../core/stores/error"
 
 interface ResumeStoreState {

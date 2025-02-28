@@ -9,7 +9,9 @@ export class Phone {
     }
 
     const cleanedPhone = phone.replace(/[\s.-]/g, '')
-    const phoneRegex = /^(?:\+\d{2}|0)\d{9}$/
+    // Expression régulière plus souple qui accepte plus de formats internationaux
+    // et ne requiert pas exactement 10 chiffres
+    const phoneRegex = /^(?:\+\d{1,3})?(?:\d{5,15})$/
     if (!phoneRegex.test(cleanedPhone)) {
       return Result.fail('Format de téléphone invalide')
     }

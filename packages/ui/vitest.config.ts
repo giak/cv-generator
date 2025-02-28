@@ -21,6 +21,7 @@ export default defineConfig({
       'node_modules/**/*',
       'dist/**/*'
     ],
+    threads: false,
     coverage: {
       provider: 'istanbul',
       reporter: ['text', 'json', 'html'],

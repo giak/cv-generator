@@ -2,13 +2,30 @@ import type { Config } from 'tailwindcss'
 import { resolve } from 'path'
 import plugin from 'tailwindcss/plugin'
 
+/**
+ * Configuration Tailwind CSS optimisée pour CV Generator
+ * 
+ * Cette configuration centralise toutes les valeurs personnalisées du design system
+ * et prépare la migration vers Tailwind v4.
+ * 
+ * Principales caractéristiques:
+ * - Format RGB pour les couleurs (pour manipulation d'opacité)
+ * - Extensions complètes pour typographie, espacement, ombres, etc.
+ * - Plugins personnalisés pour composants techniques
+ * - Optimisations pour JIT Compiler
+ */
 export default {
-  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+  content: [
+    './index.html', 
+    './src/**/*.{vue,js,ts,jsx,tsx}',
+    // Ajout des composants partagés potentiellement utilisés
+    '../shared/src/**/*.{vue,js,ts,jsx,tsx}'
+  ],
   darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // Couleurs primaires (cyan)
+        // Couleurs primaires (cyan) - Format RGB pour opacité cohérente
         primary: {
           50: 'rgb(236, 254, 255)',
           100: 'rgb(207, 250, 254)',
@@ -24,10 +41,10 @@ export default {
         },
         // Couleurs neutres étendues pour le thème sombre
         neutral: {
-          750: 'rgb(38, 38, 38)', // Entre 700 et 800
-          850: 'rgb(26, 26, 26)', // Entre 800 et 900
+          750: 'rgb(38, 38, 38)',
+          850: 'rgb(26, 26, 26)',
         },
-        // États
+        // États sémantiques - Format RGB cohérent
         success: {
           100: 'rgb(220, 252, 231)',
           200: 'rgb(187, 247, 208)',
@@ -72,7 +89,30 @@ export default {
           800: 'rgb(30, 64, 175)',
           950: 'rgb(23, 37, 84)',
         },
+        // Couleurs de fond et bordures pour thème sombre
+        background: {
+          // Harmonisation des noms avec variables CSS existantes
+          body: 'rgb(18, 18, 18)',      // --color-bg-body
+          surface: 'rgb(26, 35, 44)',   // --color-bg-surface
+          card: 'rgb(34, 48, 61)',      // --color-bg-light
+          input: 'rgb(23, 23, 23)',     // Fond des inputs techniques
+        },
+        // Couleurs de texte
+        text: {
+          primary: 'rgb(255, 255, 255)',         // Texte principal
+          secondary: 'rgba(255, 255, 255, 0.7)', // Texte secondaire
+          muted: 'rgba(255, 255, 255, 0.5)',     // Texte atténué
+          disabled: 'rgba(255, 255, 255, 0.38)', // Texte désactivé
+        },
+        // Couleurs de bordure
+        border: {
+          base: 'rgba(64, 64, 64, 0.8)',    // --color-border-base
+          hover: 'rgba(82, 82, 82, 0.8)',   // --color-border-hover
+          focused: 'rgb(34, 211, 238)',     // Bordure au focus (primary-400)
+          dark: 'rgb(33, 41, 54)',          // --color-border-dark
+        },
       },
+      // Configuration de conteneur responsive
       container: {
         center: true,
         padding: {
@@ -81,22 +121,30 @@ export default {
           lg: '4rem',
           xl: '5rem',
         },
+        screens: {
+          sm: '640px',
+          md: '768px',
+          lg: '1024px',
+          xl: '1280px',
+          '2xl': '1536px',
+        },
       },
+      // Typographie
       fontFamily: {
         sans: ['InterTight', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', 'sans-serif'],
         mono: ['FiraCode', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
       },
       fontSize: {
-        'xs': '0.75rem',
-        'sm': '0.875rem',
-        'md': '0.9375rem',
-        'base': '1rem',
-        'lg': '1.125rem',
-        'xl': '1.25rem',
-        '2xl': '1.5rem',
-        '3xl': '1.875rem',
-        '4xl': '2.25rem',
-        '5xl': '3rem',
+        'xs': '0.75rem',    // 12px
+        'sm': '0.875rem',   // 14px
+        'md': '0.9375rem',  // 15px
+        'base': '1rem',     // 16px
+        'lg': '1.125rem',   // 18px
+        'xl': '1.25rem',    // 20px
+        '2xl': '1.5rem',    // 24px
+        '3xl': '1.875rem',  // 30px
+        '4xl': '2.25rem',   // 36px
+        '5xl': '3rem',      // 48px
       },
       fontWeight: {
         light: '300',
@@ -112,34 +160,43 @@ export default {
         relaxed: '1.625',
         loose: '2',
       },
+      letterSpacing: {
+        tight: '-0.025em',
+        normal: '0',
+        wide: '0.025em',
+        wider: '0.05em',
+      },
+      // Espacement
       spacing: {
-        '1': '0.25rem',
-        '2': '0.5rem',
-        '3': '0.75rem',
-        '4': '1rem',
-        '5': '1.25rem',
-        '6': '1.5rem',
-        '8': '2rem',
-        '10': '2.5rem',
-        '12': '3rem',
-        '16': '4rem',
-        '20': '5rem',
-        '24': '6rem',
-        '32': '8rem',
-        '40': '10rem',
-        '48': '12rem',
-        '56': '14rem',
-        '64': '16rem',
+        '1': '0.25rem',   // 4px
+        '2': '0.5rem',    // 8px
+        '3': '0.75rem',   // 12px
+        '4': '1rem',      // 16px
+        '5': '1.25rem',   // 20px
+        '6': '1.5rem',    // 24px
+        '8': '2rem',      // 32px
+        '10': '2.5rem',   // 40px
+        '12': '3rem',     // 48px
+        '16': '4rem',     // 64px
+        '20': '5rem',     // 80px
+        '24': '6rem',     // 96px
+        '32': '8rem',     // 128px
+        '40': '10rem',    // 160px
+        '48': '12rem',    // 192px
+        '56': '14rem',    // 224px
+        '64': '16rem',    // 256px
       },
+      // Rayons de bordure
       borderRadius: {
-        'sm': '0.125rem',
-        'DEFAULT': '0.25rem',
-        'md': '0.375rem',
-        'lg': '0.5rem',
-        'xl': '0.75rem',
-        '2xl': '1rem',
-        'full': '9999px',
+        'sm': '0.125rem',    // 2px
+        'DEFAULT': '0.25rem', // 4px
+        'md': '0.375rem',    // 6px
+        'lg': '0.5rem',      // 8px
+        'xl': '0.75rem',     // 12px
+        '2xl': '1rem',       // 16px
+        'full': '9999px',    // Cercle
       },
+      // Ombres
       boxShadow: {
         'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         'DEFAULT': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
@@ -153,6 +210,7 @@ export default {
         'glow-success': '0 0 5px 1px rgba(34, 197, 94, 0.3)',
         'glow-error': '0 0 5px 1px rgba(239, 68, 68, 0.3)',
       },
+      // Z-index
       zIndex: {
         '0': '0',
         '10': '10',
@@ -163,16 +221,25 @@ export default {
         '100': '100',
         'auto': 'auto',
       },
+      // Transitions
       transitionProperty: {
         'height': 'height',
         'spacing': 'margin, padding',
         'colors': 'color, background-color, border-color, text-decoration-color, fill, stroke',
       },
+      transitionDuration: {
+        'fast': '150ms',
+        'normal': '250ms',
+        'slow': '350ms',
+      },
+      // Animations
       animation: {
         'spin': 'spin 1s linear infinite',
         'ping': 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite',
         'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'bounce': 'bounce 1s infinite',
+        'fade-in': 'fadeIn 0.3s ease-in',
+        'slide-in': 'slideIn 0.2s ease-out',
       },
       keyframes: {
         spin: {
@@ -194,23 +261,37 @@ export default {
             animationTimingFunction: 'cubic-bezier(0,0,0.2,1)',
           },
         },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideIn: {
+          '0%': { transform: 'translateY(-10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
       },
+      // Échelle
       scale: {
         '120': '1.2',
       },
     },
   },
+  // Configuration des plugins
   plugins: [
+    // Plugin formulaires - utilise la stratégie de classe pour ne pas écraser les styles Tailwind
     require('@tailwindcss/forms')({
       strategy: 'class',
     }),
+    // Plugin typographie
     require('@tailwindcss/typography'),
+    // Plugin ratio d'aspect
     require('@tailwindcss/aspect-ratio'),
     
-    // Plugin personnalisé pour dashboard technique
+    // Plugin personnalisé pour dashboard technique et formulaires spécifiques
     plugin(function ({ addComponents, addUtilities, theme }) {
       // Composants personnalisés pour formulaires techniques
       addComponents({
+        // Input technique avec bordure d'accent
         '.tech-form-control': {
           position: 'relative',
           backgroundColor: 'rgba(23, 23, 23, 0.4)',
@@ -230,6 +311,7 @@ export default {
             fontStyle: 'italic',
           },
         },
+        // Input pour données techniques avec police monospace
         '.monitor-input': {
           fontFamily: theme('fontFamily.mono'),
           letterSpacing: '0.05em',
@@ -253,7 +335,7 @@ export default {
           padding: '0.625rem 0.75rem',
           fontSize: '0.875rem',
           lineHeight: '1.5',
-          color: theme('colors.white'),
+          color: theme('colors.text.primary'),
           backgroundColor: theme('colors.neutral.800'),
           border: '1px solid',
           borderColor: theme('colors.neutral.700'),
@@ -276,16 +358,67 @@ export default {
             color: theme('colors.neutral.400'),
           },
         },
+        // Nouvelles classes pour composants de formulaire standardisés
+        '.form-control-standard': {
+          display: 'block',
+          width: '100%',
+          padding: '0.625rem 0.75rem',
+          fontSize: '0.875rem',
+          lineHeight: '1.5',
+          color: theme('colors.text.primary'),
+          backgroundColor: theme('colors.background.input'),
+          border: '1px solid',
+          borderColor: theme('colors.border.base'),
+          borderRadius: '0.25rem',
+          transition: 'all 0.2s ease-in-out',
+          '&:focus': {
+            borderColor: theme('colors.primary.500'),
+            outline: 'none',
+            boxShadow: theme('boxShadow.glow-primary'),
+          },
+          '&:hover:not(:disabled):not(:focus)': {
+            borderColor: theme('colors.border.hover'),
+          },
+          '&:disabled': {
+            backgroundColor: 'rgba(23, 23, 23, 0.8)',
+            opacity: '0.7',
+            cursor: 'not-allowed',
+            color: theme('colors.text.disabled'),
+          },
+        },
+        // Classe de label standardisée
+        '.form-label-standard': {
+          display: 'block',
+          marginBottom: '0.5rem',
+          fontSize: '0.875rem',
+          fontWeight: '500',
+          color: theme('colors.text.secondary'),
+        },
+        // Groupe de formulaire
+        '.form-group-standard': {
+          marginBottom: '1.5rem',
+        },
+        // Messages d'erreur de validation
+        '.form-error-message': {
+          fontSize: '0.75rem',
+          color: theme('colors.error.500'),
+          marginTop: '0.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.25rem',
+        },
       });
       
       // Utilitaires personnalisés pour le dashboard technique
       addUtilities({
+        // Ombres de texte
         '.text-shadow-sm': {
           textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
         },
         '.text-shadow-md': {
           textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
         },
+        // Bordures d'accent
         '.border-left-accent': {
           borderLeftWidth: '3px',
           borderLeftStyle: 'solid',
@@ -296,6 +429,7 @@ export default {
           borderBottomStyle: 'solid',
           borderBottomColor: theme('colors.primary.500'),
         },
+        // Scrollbars personnalisées pour thème sombre
         '.scrollbar-dark': {
           scrollbarWidth: 'thin',
           scrollbarColor: `${theme('colors.neutral.700')} ${theme('colors.neutral.900')}`,
@@ -314,7 +448,27 @@ export default {
             },
           },
         },
+        // Utilitaires pour typographie tech
+        '.tech-mono': {
+          fontFamily: theme('fontFamily.mono'),
+          letterSpacing: '0.05em',
+          fontSize: '0.875rem',
+        },
+        // Utilitaires de focus
+        '.focus-ring': {
+          '&:focus': {
+            outline: 'none',
+            boxShadow: `0 0 0 3px ${theme('colors.primary.500')}40`,
+          }
+        },
       });
     }),
   ],
+  future: {
+    // Activer les fonctionnalités à venir pour préparer la migration vers v4
+    hoverOnlyWhenSupported: true,
+    respectDefaultRingColorOpacity: true,
+    disableColorOpacityUtilitiesByDefault: false,
+    removeDeprecatedGapUtilities: true,
+  },
 } as Config 

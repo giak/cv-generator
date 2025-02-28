@@ -3,7 +3,7 @@
     v-if="errorMessage"
     role="alert"
     aria-live="polite"
-    class="mt-1 text-sm text-red-500"
+    class="mt-1 text-sm text-red-500 font-medium"
     :class="$attrs.class"
     :data-test="getTestId()"
   >

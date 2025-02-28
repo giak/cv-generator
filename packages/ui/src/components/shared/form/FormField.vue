@@ -57,19 +57,28 @@ const toggleFocus = (focusState: boolean) => {
 
 // Classes calculées pour l'input
 const inputClasses = computed(() => {
+  const isInvalid = !!props.error || hasFieldError.value;
+  
   return {
-    'form-control': true,
-    'is-invalid': !!props.error || hasFieldError.value,
-    'is-focused': isFocused.value
+    'block w-full py-2.5 px-3 text-sm leading-6 text-white bg-neutral-800 border rounded transition-all duration-200': true,
+    'border-neutral-700 hover:border-neutral-600 hover:bg-neutral-750': !isInvalid && !isFocused.value,
+    'border-primary-500 bg-neutral-800 outline-none ring-1 ring-primary-500/40': isFocused.value && !isInvalid,
+    'border-error-500/70 ring-1 ring-error-500/30': isInvalid,
+    'pl-10': !!props.icon,
+    'opacity-70 cursor-not-allowed': false // pour disabled state, ajouté pour complétude
   };
+});
+
+const hasError = computed(() => {
+  return !!props.error || hasFieldError.value;
 });
 </script>
 
 <template>
-  <div class="form-group">
-    <label :for="name" class="form-label">
+  <div class="mb-5 last:mb-0">
+    <label :for="name" class="block mb-1.5 text-xs font-medium text-neutral-300 tracking-wide">
       {{ label }}
-      <span v-if="required" class="text-error ml-1">*</span>
+      <span v-if="required" class="text-error-400 ml-1">*</span>
     </label>
     
     <div class="relative">
@@ -86,10 +95,9 @@ const inputClasses = computed(() => {
         :required="required"
         :placeholder="placeholder"
         :class="inputClasses"
-        :style="icon ? 'padding-left: 2.5rem' : ''"
         :aria-required="required ? 'true' : 'false'"
-        :aria-invalid="(!!error || hasFieldError) ? 'true' : 'false'"
-        :aria-describedby="(!!error || hasFieldError || helpText) ? `${name}-description` : undefined"
+        :aria-invalid="hasError ? 'true' : 'false'"
+        :aria-describedby="(hasError || helpText) ? `${name}-description` : undefined"
         :data-test="`${name}-input`"
         @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
         @blur="emit('blur', ($event.target as HTMLInputElement).value); toggleFocus(false)"
@@ -106,16 +114,9 @@ const inputClasses = computed(() => {
         :name="name"
       />
       
-      <div v-if="helpText && !error && !hasFieldError" class="form-text mt-1">
+      <div v-if="helpText && !error && !hasFieldError" class="mt-1 text-xs text-neutral-400">
         {{ helpText }}
       </div>
     </div>
   </div>
-</template>
-
-<style scoped>
-.is-focused {
-  border-color: rgb(var(--color-primary-400));
-  box-shadow: 0 0 0 3px rgba(var(--color-primary-400), 0.15);
-}
-</style> 
+</template> 

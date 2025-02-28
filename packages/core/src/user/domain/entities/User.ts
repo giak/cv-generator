@@ -16,10 +16,10 @@ export class User {
    */
   public static create(id: string, email: string, name: string): User {
     const emailResult = Email.create(email);
-    if (!emailResult.isValid || !emailResult.email) {
+    if (emailResult.isFailure) {
       throw new Error(`Invalid email: ${email}`);
     }
-    return new User(id, emailResult.email, name);
+    return new User(id, emailResult.getValue(), name);
   }
   
   /**

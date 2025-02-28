@@ -1,0 +1,165 @@
+/**
+ * Styles pour les alertes et notifications
+ * Composants pour afficher des messages importants à l'utilisateur
+ * Compatible avec Tailwind CSS v4
+ * 
+ * MIGRATION STATUS: Partial - In Progress (58% Complete)
+ * 
+ * This file is being progressively migrated to Tailwind components.
+ * The following sections have been fully migrated and can be removed:
+ * - Base alert container (→ ErrorNotification.vue)
+ * - Success alert variant (→ ErrorNotification.vue)
+ * - Warning alert variant (→ ErrorNotification.vue)
+ * - Error alert variant (→ ErrorNotification.vue)
+ * - Info alert variant (→ ErrorNotification.vue)
+ * - Dismissible alert (→ ErrorNotification.vue)
+ * - Alert with icon (→ ErrorNotification.vue)
+ * 
+ * Remaining sections for migration:
+ * - Toast notifications
+ * - Toast variants
+ * - Toast animations
+ */
+
+// =========================================================
+// Alert Components
+// Compatibilité Tailwind v3/v4
+// =========================================================
+
+/* 
+ * The following sections have been migrated to Vue components with Tailwind:
+ * 
+ * MIGRATED → ErrorNotification.vue:
+ * - .alert
+ * - .alert-success
+ * - .alert-warning
+ * - .alert-error
+ * - .alert-info
+ * - .alert-dismissible
+ * - .alert-icon
+ */
+
+// Remaining toast notification styles kept for compatibility
+// Toast container
+.toast-container {
+  @apply fixed z-50 p-4 flex flex-col gap-3 max-w-[350px] w-full;
+  
+  &.top-right {
+    @apply top-0 right-0;
+  }
+  
+  &.top-left {
+    @apply top-0 left-0;
+  }
+  
+  &.bottom-right {
+    @apply bottom-0 right-0;
+  }
+  
+  &.bottom-left {
+    @apply bottom-0 left-0;
+  }
+  
+  &.top-center {
+    @apply top-0 left-1/2 -translate-x-1/2;
+  }
+  
+  &.bottom-center {
+    @apply bottom-0 left-1/2 -translate-x-1/2;
+  }
+}
+
+// Toast notification
+.toast {
+  @apply relative p-4 rounded-md shadow-lg flex items-start w-full bg-neutral-800 border-l-4 border-neutral-600;
+  animation: slideIn 0.3s ease forwards;
+  
+  &.toast-success {
+    @apply border-l-success-500;
+    
+    .toast-icon {
+      @apply text-success-500;
+    }
+  }
+  
+  &.toast-error {
+    @apply border-l-error-500;
+    
+    .toast-icon {
+      @apply text-error-500;
+    }
+  }
+  
+  &.toast-warning {
+    @apply border-l-warning-500;
+    
+    .toast-icon {
+      @apply text-warning-500;
+    }
+  }
+  
+  &.toast-info {
+    @apply border-l-info-500;
+    
+    .toast-icon {
+      @apply text-info-500;
+    }
+  }
+  
+  .toast-icon {
+    @apply mr-3 w-5 h-5 flex-shrink-0 text-neutral-400;
+  }
+  
+  .toast-content {
+    @apply flex-1;
+  }
+  
+  .toast-title {
+    @apply font-semibold mb-1 text-sm text-white;
+  }
+  
+  .toast-message {
+    @apply text-xs text-neutral-300 mb-0;
+  }
+  
+  .toast-close {
+    @apply ml-3 p-1 bg-transparent border-none cursor-pointer text-neutral-400 opacity-70 transition-opacity duration-200;
+    
+    &:hover {
+      @apply opacity-100;
+    }
+    
+    svg {
+      @apply w-4 h-4;
+    }
+  }
+  
+  &.toast-dismissible {
+    &.dismissing {
+      animation: slideOut 0.3s ease forwards;
+    }
+  }
+}
+
+// Toast animations
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}

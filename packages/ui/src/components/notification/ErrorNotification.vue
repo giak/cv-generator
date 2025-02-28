@@ -4,7 +4,7 @@
       v-for="error in visibleErrors" 
       :key="error.id"
       :id="`error-${error.id}`"
-      class="flex w-full max-w-md rounded-md shadow-md transition-all" 
+      class="flex w-full max-w-md rounded-md shadow-md transition-all duration-300" 
       :class="[
         getSeverityClass(error.severity),
         error.dismissed ? 'opacity-0 translate-y-[-1rem]' : 'opacity-100'

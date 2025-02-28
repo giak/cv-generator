@@ -1,0 +1,185 @@
+/**
+ * Fichier principal SCSS pour l'application CV Generator
+ * Organisation modulaire des styles avec compatibilité TailwindCSS v4
+ * Style: Dashboard technique moderne en mode sombre
+ * Architecture: Organisation modulaire avec séparation claire des responsabilités
+ */
+
+/* Importation des variables et fondations */
+@use './base/variables' as vars;
+@use './base/reset';
+@use './base/typography';
+
+/* Importation des thèmes */
+@use './themes/colors';
+@use './themes/dark';
+
+/* Importation des layouts */
+@use './layouts/dashboard';
+
+/* Importation des composants */
+@use './components/navigation';
+@use './components/buttons';
+@use './components/forms';
+@use './components/cards';
+@use './components/alerts';
+@use './components/data-panels';
+
+/* Directives Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Styles personnalisés globaux
+ * Note: Les couleurs principales sont maintenant définies dans ./themes/colors.scss
+ * Les variables CSS sont utilisées pour faciliter les transitions de thème
+ */
+
+/* Styles de base globaux */
+@layer base {
+  html, body {
+    @apply bg-neutral-900 text-white;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: var(--line-height-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    background-color: var(--color-bg-body);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+  }
+
+  /* Styles d'accessibilité pour le focus */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2 ring-offset-neutral-900;
+  }
+  
+  /* Styles pour les liens globaux */
+  a {
+    color: rgb(var(--color-primary-400));
+    text-decoration: none;
+    transition: color var(--transition-fast) ease-in-out;
+    
+    &:hover {
+      color: rgb(var(--color-primary-300));
+    }
+  }
+  
+  /* Scrollbar personnalisée pour le thème sombre */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-bg-darker);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-border-base);
+    border-radius: var(--radius-full);
+    
+    &:hover {
+      background-color: var(--color-border-hover);
+    }
+  }
+}
+
+/* Composants personnalisés */
+@layer components {
+  /* Boutons dashboard */
+  .btn-dashboard {
+    @apply px-4 py-2 rounded-md flex items-center gap-2 transition-colors;
+    background-color: var(--color-bg-darker);
+    border: 1px solid var(--color-border-base);
+    color: var(--color-text-primary);
+    
+    &:hover {
+      background-color: var(--color-bg-light);
+      border-color: var(--color-border-hover);
+    }
+    
+    &:focus {
+      @apply outline-none ring-2 ring-primary-500/50;
+    }
+    
+    svg {
+      @apply w-4 h-4;
+      color: rgb(var(--color-primary-400));
+    }
+  }
+  
+  /* Input search personnalisé */
+  .search-input-container {
+    position: relative;
+    
+    svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      @apply w-4 h-4;
+      color: var(--color-text-muted);
+    }
+    
+    .search-input {
+      background-color: var(--color-bg-darker);
+      border: 1px solid var(--color-border-base);
+      border-radius: var(--radius-md);
+      padding: 8px 12px 8px 36px;
+      width: 100%;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-sm);
+      
+      &::placeholder {
+        color: var(--color-text-muted);
+      }
+      
+      &:focus {
+        @apply outline-none ring-2 ring-primary-500/50;
+        border-color: transparent;
+      }
+    }
+  }
+  
+  /* Container principal */
+  .main-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+    
+    @apply md:px-6;
+  }
+}
+
+/* Utilitaires personnalisés */
+@layer utilities {
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .transition-base {
+    transition: all var(--transition-base) ease-in-out;
+  }
+  
+  .divider-h {
+    height: 1px;
+    background-color: var(--color-border-base);
+    margin: var(--space-4) 0;
+  }
+  
+  .divider-v {
+    width: 1px;
+    background-color: var(--color-border-base);
+    margin: 0 var(--space-4);
+  }
+  
+  /* Classes personnalisées pour résoudre les erreurs */
+  .text-md {
+    font-size: 0.9375rem; /* Même valeur que celle définie dans tailwind.config.ts */
+  }
+} 
