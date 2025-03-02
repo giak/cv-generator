@@ -3,7 +3,7 @@ import type { BasicsInterface, LocationInterface, ProfileInterface } from '@cv-g
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import { useFieldValidation as useCVFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, onMounted } from 'vue'
 
 interface Props {
   modelValue: BasicsInterface
@@ -16,71 +16,115 @@ const emit = defineEmits<{
   (e: 'validate'): void
 }>()
 
-// Watch any updates to modelValue for debugging
-watch(() => props.modelValue, (newValue) => {
-  console.log('Props model updated in BasicsForm:', JSON.parse(JSON.stringify(newValue)))
-}, { deep: true })
-
-// Create a reactive model for form fields
-const formModel = computed(() => ({
-  name: props.modelValue.name || '',
-  email: props.modelValue.email || '',
-  label: props.modelValue.label || '',
-  phone: props.modelValue.phone || '',
-  url: props.modelValue.url || '',
-  image: props.modelValue.image || '',
-  summary: props.modelValue.summary || '',
-  location: props.modelValue.location ? { ...props.modelValue.location } : {
+// Créer une copie locale réactive du modèle pour plus de stabilité
+const localModel = reactive<BasicsInterface>({
+  name: '',
+  email: '',
+  label: '',
+  phone: '',
+  url: '',
+  image: '',
+  summary: '',
+  location: {
     address: '',
     postalCode: '',
     city: '',
     countryCode: '',
     region: ''
   },
-  profiles: [...(props.modelValue.profiles || [])]
-}))
+  profiles: []
+})
 
-const { errors, validateField, validateForm } = useCVFieldValidation()
+// Initialiser le modèle local avec les valeurs props au montage
+onMounted(() => {
+  updateLocalModel(props.modelValue)
+  console.log('Initial localModel setup:', JSON.stringify(localModel))
+})
 
-// Update field handler - basic fields
+// Watch pour les changements des props et mettre à jour le modèle local
+watch(() => props.modelValue, (newValue) => {
+  console.log('Props model changed, updating local model:', JSON.stringify(newValue))
+  updateLocalModel(newValue)
+}, { deep: true })
+
+// Met à jour le modèle local à partir des props
+function updateLocalModel(source: BasicsInterface) {
+  // Mise à jour des champs de premier niveau
+  localModel.name = source.name || ''
+  localModel.email = source.email || ''
+  localModel.label = source.label || ''
+  localModel.phone = source.phone || ''
+  localModel.url = source.url || ''
+  localModel.image = source.image || ''
+  localModel.summary = source.summary || ''
+  
+  // Mise à jour explicite de la location
+  const loc = source.location || {}
+  localModel.location = {
+    address: loc.address || '',
+    postalCode: loc.postalCode || '',
+    city: loc.city || '',
+    region: loc.region || '',
+    countryCode: loc.countryCode || ''
+  }
+  
+  // Mise à jour explicite des profils
+  localModel.profiles = source.profiles ? [...source.profiles] : []
+}
+
+// Fonction unifiée pour mettre à jour n'importe quelle partie du modèle et émettre l'événement
+function updateAndEmit() {
+  console.log('Emitting updated model to parent:', JSON.stringify(localModel))
+  emit('update:modelValue', { ...localModel } as BasicsInterface)
+}
+
+// Gestionnaire pour les champs de premier niveau
 const handleFieldUpdate = (field: keyof BasicsInterface, value: string) => {
   console.log(`Updating field ${field} with value:`, value)
   
-  // Create a complete copy of current data with the updated field
-  const updatedData: BasicsInterface = {
-    ...props.modelValue,
-    [field]: value
+  if (field === 'image') {
+    console.log('Updating image URL specific field:', value)
   }
   
-  console.log('Emitting update with data:', JSON.stringify(updatedData))
-  emit('update:modelValue', updatedData)
+  // Mise à jour du modèle local - avec vérification de type
+  if (field === 'name' || field === 'email' || field === 'label' || 
+      field === 'phone' || field === 'url' || field === 'image' ||
+      field === 'summary') {
+    // Seulement mettre à jour les champs de type string
+    localModel[field] = value
+  }
+  
+  // Émettre les changements
+  updateAndEmit()
 }
 
-// Handle location field updates
+// Gestionnaire pour les champs de location
 const handleLocationUpdate = (field: keyof LocationInterface, value: string) => {
   console.log(`Updating location.${field} with value:`, value)
   
-  // Ensure location object exists and create a new copy
-  const currentLocation = props.modelValue.location || {}
-  
-  const updatedLocation = {
-    ...currentLocation,
-    [field]: value
+  if (field === 'countryCode') {
+    console.log('Updating countryCode specific field:', value)
   }
   
-  console.log('Updated location object:', JSON.stringify(updatedLocation))
-  
-  // Create a complete copy of the model with updated location
-  const updatedData: BasicsInterface = {
-    ...props.modelValue,
-    location: updatedLocation
+  // S'assurer que l'objet location existe
+  if (!localModel.location) {
+    localModel.location = {
+      address: '',
+      postalCode: '',
+      city: '',
+      countryCode: '',
+      region: ''
+    }
   }
   
-  console.log('Emitting update with full data:', JSON.stringify(updatedData))
-  emit('update:modelValue', updatedData)
+  // Mise à jour directe sur le modèle local
+  localModel.location[field] = value
+  
+  // Émettre les changements
+  updateAndEmit()
 }
 
-// Handle profile operations
+// Gestionnaire des profils
 const newProfile = ref<ProfileInterface>({
   network: '',
   username: '',
@@ -92,7 +136,7 @@ const isAddingProfile = ref(false)
 const toggleProfileForm = () => {
   isAddingProfile.value = !isAddingProfile.value
   
-  // Reset form if closing
+  // Reset du formulaire à la fermeture
   if (!isAddingProfile.value) {
     newProfile.value = {
       network: '',
@@ -103,31 +147,25 @@ const toggleProfileForm = () => {
 }
 
 const addProfile = () => {
-  // Validate profile fields
+  // Valider les champs du profil
   if (!newProfile.value.network || !newProfile.value.username) {
-    return // Don't add incomplete profiles
+    return // Ne pas ajouter de profils incomplets
   }
   
-  // Create a copy of the new profile
+  // Créer une copie du nouveau profil
   const profileToAdd = { ...newProfile.value }
   console.log('Adding profile:', JSON.stringify(profileToAdd))
   
-  // Create a new array with all existing profiles + new one
-  const updatedProfiles = [
-    ...(props.modelValue.profiles || []),
-    profileToAdd
-  ]
-  
-  // Create a complete copy of the model with updated profiles
-  const updatedData: BasicsInterface = {
-    ...props.modelValue,
-    profiles: updatedProfiles
+  // Ajouter le profil au modèle local
+  if (!localModel.profiles) {
+    localModel.profiles = []
   }
+  localModel.profiles.push(profileToAdd)
   
-  console.log('Emitting update with profiles:', JSON.stringify(updatedData))
-  emit('update:modelValue', updatedData)
+  // Émettre les changements
+  updateAndEmit()
   
-  // Reset and close form
+  // Reset et fermer le formulaire
   newProfile.value = {
     network: '',
     username: '',
@@ -137,32 +175,37 @@ const addProfile = () => {
 }
 
 const removeProfile = (index: number) => {
-  const updatedProfiles = [...(props.modelValue.profiles || [])]
-  updatedProfiles.splice(index, 1)
+  console.log(`Removing profile at index ${index}`)
   
-  const updatedData: BasicsInterface = {
-    ...props.modelValue,
-    profiles: updatedProfiles
+  // S'assurer que profiles existe
+  if (!localModel.profiles) {
+    localModel.profiles = []
+    return
   }
   
-  console.log('Removing profile, emitting update with data:', JSON.stringify(updatedData))
-  emit('update:modelValue', updatedData)
+  // Suppression du profil
+  localModel.profiles.splice(index, 1)
+  
+  // Émettre les changements
+  updateAndEmit()
 }
 
-// Validate form before emitting validate event
+// Valider le formulaire avant d'émettre l'événement de validation
+const { errors, validateField, validateForm } = useCVFieldValidation()
+
 const handleSubmit = async () => {
-  console.log('Form submission - Current model:', JSON.parse(JSON.stringify(props.modelValue)))
+  console.log('Form submission - Current model:', JSON.stringify(localModel))
   
-  // Validate all fields
-  const formIsValid = validateForm(props.modelValue)
+  // Valider tous les champs
+  const formIsValid = validateForm(localModel)
   console.log('Form validation result:', formIsValid)
   
   if (formIsValid) {
-    // Ensure all required fields are present
-    if (!props.modelValue.name || !props.modelValue.email) {
+    // Vérifier que les champs obligatoires sont présents
+    if (!localModel.name || !localModel.email) {
       console.error('Required fields missing:', {
-        name: !props.modelValue.name,
-        email: !props.modelValue.email
+        name: !localModel.name,
+        email: !localModel.email
       })
       return
     }
@@ -196,47 +239,47 @@ const icons = {
       <FormField
         name="name"
         label="Nom complet"
-        :model-value="formModel.name"
+        :model-value="localModel.name || ''"
         :error="errors.name"
         :icon="icons.name"
         placeholder="Ex: Jean Dupont"
         help-text="Votre nom et prénom comme ils apparaîtront sur votre CV."
         required
         @update:model-value="handleFieldUpdate('name', $event)"
-        @blur="validateField('name', formModel.name)"
+        @blur="validateField('name', localModel.name || '')"
       />
 
       <FormField
         name="email"
         type="email"
         label="Adresse email"
-        :model-value="formModel.email"
+        :model-value="localModel.email || ''"
         :error="errors.email"
         :icon="icons.email"
         placeholder="Ex: jean.dupont@example.com"
         help-text="Email professionnel pour les employeurs potentiels."
         required
         @update:model-value="handleFieldUpdate('email', $event)"
-        @blur="validateField('email', formModel.email)"
+        @blur="validateField('email', localModel.email || '')"
       />
 
       <FormField
         name="phone"
         type="tel"
         label="Téléphone"
-        :model-value="formModel.phone"
+        :model-value="localModel.phone || ''"
         :error="errors.phone"
         :icon="icons.phone"
         placeholder="Ex: 0612345678"
         help-text="Numéro de téléphone où vous êtes joignable."
         @update:model-value="handleFieldUpdate('phone', $event)"
-        @blur="validateField('phone', formModel.phone)"
+        @blur="validateField('phone', localModel.phone || '')"
       />
 
       <FormField
         name="label"
         label="Titre professionnel"
-        :model-value="formModel.label"
+        :model-value="localModel.label || ''"
         :icon="icons.label"
         placeholder="Ex: Développeur Web Senior"
         help-text="Votre position ou titre actuel."
@@ -248,13 +291,13 @@ const icons = {
           name="url"
           type="url"
           label="Site Web"
-          :model-value="formModel.url"
+          :model-value="localModel.url || ''"
           :error="errors.url"
           :icon="icons.url"
           placeholder="Ex: https://monportfolio.com"
           help-text="URL de votre portfolio ou site personnel (optionnel)."
           @update:model-value="handleFieldUpdate('url', $event)"
-          @blur="validateField('url', formModel.url)"
+          @blur="validateField('url', localModel.url || '')"
         />
       </div>
 
@@ -263,13 +306,13 @@ const icons = {
           name="image"
           type="url"
           label="Photo (URL)"
-          :model-value="formModel.image"
+          :model-value="localModel.image || ''"
           :error="errors.image"
           :icon="icons.image"
           placeholder="Ex: https://example.com/photo.jpg"
           help-text="URL de votre photo professionnelle (optionnel)."
           @update:model-value="handleFieldUpdate('image', $event)"
-          @blur="validateField('image', formModel.image)"
+          @blur="validateField('image', localModel.image || '')"
         />
       </div>
 
@@ -278,7 +321,7 @@ const icons = {
           name="summary"
           type="text"
           label="Résumé professionnel"
-          :model-value="formModel.summary"
+          :model-value="localModel.summary || ''"
           :error="errors.summary"
           :icon="icons.summary"
           placeholder="Ex: Développeur Web passionné avec 5 ans d'expérience..."
@@ -296,7 +339,7 @@ const icons = {
         <FormField
           name="address"
           label="Adresse"
-          :model-value="formModel.location.address || ''"
+          :model-value="localModel.location?.address || ''"
           :icon="icons.location"
           placeholder="Ex: 15 rue de Paris"
           help-text="Votre adresse postale."
@@ -306,7 +349,7 @@ const icons = {
         <FormField
           name="postalCode"
           label="Code Postal"
-          :model-value="formModel.location.postalCode || ''"
+          :model-value="localModel.location?.postalCode || ''"
           placeholder="Ex: 75001"
           help-text="Code postal de votre localité."
           @update:model-value="handleLocationUpdate('postalCode', $event)"
@@ -315,7 +358,7 @@ const icons = {
         <FormField
           name="city"
           label="Ville"
-          :model-value="formModel.location.city || ''"
+          :model-value="localModel.location?.city || ''"
           placeholder="Ex: Paris"
           help-text="Nom de votre ville."
           @update:model-value="handleLocationUpdate('city', $event)"
@@ -324,7 +367,7 @@ const icons = {
         <FormField
           name="region"
           label="Région"
-          :model-value="formModel.location.region || ''"
+          :model-value="localModel.location?.region || ''"
           placeholder="Ex: Île-de-France"
           help-text="Votre région ou département."
           @update:model-value="handleLocationUpdate('region', $event)"
@@ -333,7 +376,7 @@ const icons = {
         <FormField
           name="countryCode"
           label="Code Pays"
-          :model-value="formModel.location.countryCode || ''"
+          :model-value="localModel.location?.countryCode || ''"
           placeholder="Ex: FR"
           help-text="Code pays ISO (ex: FR, US, CA)."
           @update:model-value="handleLocationUpdate('countryCode', $event)"
@@ -399,9 +442,9 @@ const icons = {
       </div>
       
       <!-- Liste des profils existants -->
-      <div v-if="formModel.profiles && formModel.profiles.length > 0" class="space-y-3">
+      <div v-if="localModel.profiles && localModel.profiles.length > 0" class="space-y-3">
         <div 
-          v-for="(profile, index) in formModel.profiles" 
+          v-for="(profile, index) in localModel.profiles" 
           :key="`profile-${index}`"
           class="bg-neutral-900 p-3 rounded-lg flex justify-between items-center"
         >

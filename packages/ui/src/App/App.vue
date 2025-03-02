@@ -30,11 +30,13 @@ const basics = reactive<BasicsInterface>({
   label: '',
   phone: '',
   url: '',
+  image: '',
   summary: '',
   location: {
     address: '',
     postalCode: '',
     city: '',
+    countryCode: '',
     region: ''
   },
   profiles: []
@@ -53,11 +55,13 @@ onMounted(async () => {
       label: storeBasics.label ?? '',
       phone: storeBasics.phone ?? '',
       url: storeBasics.url ?? '',
+      image: storeBasics.image ?? '',
       summary: storeBasics.summary ?? '',
       location: storeBasics.location ?? {
         address: '',
         postalCode: '',
         city: '',
+        countryCode: '',
         region: ''
       },
       profiles: storeBasics.profiles ?? []
@@ -69,7 +73,7 @@ onMounted(async () => {
 // Gérer la mise à jour du formulaire
 const handleBasicsUpdate = (value: BasicsInterface) => {
   console.log('=== UI Layer - Basics Update ===')
-  console.log('Received update:', value)
+  console.log('Received update:', JSON.stringify(value))
   
   // Mettre à jour le modèle directement
   basics.name = value.name || ''
@@ -77,20 +81,26 @@ const handleBasicsUpdate = (value: BasicsInterface) => {
   basics.label = value.label || ''
   basics.phone = value.phone || ''
   basics.url = value.url || ''
+  basics.image = value.image || ''
   basics.summary = value.summary || ''
   
-  // Mettre à jour location
+  // Mettre à jour location avec focus particulier sur countryCode
   if (value.location && basics.location) {
     basics.location.address = value.location.address || ''
     basics.location.postalCode = value.location.postalCode || ''
     basics.location.city = value.location.city || ''
+    basics.location.countryCode = value.location.countryCode || ''
     basics.location.region = value.location.region || ''
+    
+    // Ajout d'un log spécifique pour le countryCode
+    console.log(`Updated countryCode: '${value.location.countryCode}'`)
   } else if (value.location) {
     // Si basics.location est undefined mais value.location existe
     basics.location = {
       address: value.location.address || '',
       postalCode: value.location.postalCode || '',
       city: value.location.city || '',
+      countryCode: value.location.countryCode || '',
       region: value.location.region || ''
     }
   }
@@ -98,7 +108,15 @@ const handleBasicsUpdate = (value: BasicsInterface) => {
   // Mettre à jour profiles
   basics.profiles = [...(value.profiles || [])]
   
-  console.log('Updated basics:', JSON.parse(JSON.stringify(basics)))
+  // Log complet des données, y compris les champs problématiques
+  console.log('Updated basics with ALL fields:', JSON.stringify({
+    ...basics,
+    image: basics.image,
+    location: basics.location ? {
+      ...basics.location,
+      countryCode: basics.location.countryCode
+    } : null
+  }))
 }
 
 // Gérer la sauvegarde du formulaire

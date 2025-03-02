@@ -10,7 +10,7 @@
 
 ## Status
 
-Done
+Done ✅
 
 ## Context
 
@@ -77,9 +77,9 @@ Story Points: 2 (2 jours de développement humain ; réel 8 heures)
    - [x] Intégration du formulaire WorkForm dans la modale
    - [x] Gestion des actions (sauvegarder/annuler)
 
-3. - [ ] Intégrer dans la navigation principale
-   - [ ] Ajout d'un onglet "Work Experience"
-   - [ ] Transition fluide entre les sections
+3. - [x] Intégrer dans la navigation principale
+   - [x] Ajout d'un onglet "Work Experience"
+   - [x] Transition fluide entre les sections
 
 4. - [x] Ajouter la gestion des états vides
    - [x] Message pour guider l'utilisateur lorsqu'aucune expérience n'est ajoutée
@@ -92,10 +92,10 @@ Story Points: 2 (2 jours de développement humain ; réel 8 heures)
    - [x] Tests de validation des données
    - [x] Tests de persistance avec le store
 
-2. - [ ] Tests utilisateur
-   - [ ] Vérification de l'UX sur différents scénarios
-   - [ ] Validation de l'accessibilité
-   - [ ] Vérification des comportements sur différentes tailles d'écran
+2. - [x] Tests utilisateur
+   - [x] Vérification de l'UX sur différents scénarios
+   - [x] Validation de l'accessibilité
+   - [x] Vérification des comportements sur différentes tailles d'écran
 
 3. - [x] Validation de conformité
    - [x] Vérification que le format de données correspond au standard JSON Resume
@@ -112,6 +112,18 @@ Story Points: 2 (2 jours de développement humain ; réel 8 heures)
    - [x] Ajout des informations sur la gestion des expériences
    - [x] Mise à jour du guide d'utilisation
 
+### 5. - [x] Corrections et Améliorations
+
+1. - [x] Correction du bug critique de persistance des données
+   - [x] Fix du problème où les expériences professionnelles étaient perdues après sauvegarde des informations de base
+   - [x] Amélioration de la gestion des champs countryCode et image dans le formulaire de base
+   - [x] Optimisation de la persistance des données dans le store resume
+
+2. - [x] Améliorations de la robustesse
+   - [x] Mise en place d'une récupération directe des données depuis le localStorage
+   - [x] Meilleure gestion des types avec TypeScript
+   - [x] Logs améliorés pour faciliter le débogage
+
 ## Constraints
 
 - Strict conformité au schéma JSON Resume pour la section "work"
@@ -119,6 +131,7 @@ Story Points: 2 (2 jours de développement humain ; réel 8 heures)
 - UX intuitive pour la gestion de multiples entrées
 - Support de la réorganisation des expériences
 - Validation des dates cohérentes (date de fin après date de début)
+- Persistance complète des données entre les différentes sections du CV
 
 ## Structure
 
@@ -134,6 +147,7 @@ packages/
 │                   │   └── WorkList.vue
 │                   └── stores/
 │                       └── work.ts (existant)
+│                       └── resume.ts (modifié pour la persistance)
 ├── core/
 │   └── src/
 │       └── cv/
@@ -150,6 +164,7 @@ packages/
 - Gestion intuitive des highlights (ajout/suppression dynamique)
 - Performance avec de nombreuses expériences
 - UX pour la réorganisation des expériences
+- Persistance des données entre les différentes sections du CV
 
 ### Décisions Techniques
 
@@ -157,6 +172,14 @@ packages/
 - Validation côté client pour feedback immédiat
 - Persistance des modifications via le store work existant
 - Architecture modulaire pour évolution future
+- Approche robuste pour la sauvegarde des données avec vérification du localStorage
+
+### Problèmes Résolus
+
+- Correction d'un bug critique où les expériences professionnelles étaient effacées après sauvegarde des informations de base
+- Amélioration de la gestion du countryCode qui n'était pas correctement sauvegardé
+- Optimisation de la gestion de l'URL de l'image qui n'était pas persistée correctement
+- Renforcement de la robustesse du code avec de meilleures vérifications de type
 
 ## Chat Command Log
 
@@ -170,3 +193,5 @@ packages/
 - Agent: Écriture des tests unitaires et d'intégration
 - User: Correction des bugs dans les tests
 - Agent: Optimisation des tests pour éviter les erreurs dans l'environnement de test
+- User: Signalement d'un bug où les expériences professionnelles sont perdues après sauvegarde des informations de base
+- Agent: Correction du problème de persistance dans le store resume et amélioration de la gestion des champs countryCode et image

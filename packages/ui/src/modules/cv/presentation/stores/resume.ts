@@ -55,18 +55,44 @@ export const useResumeStore = defineStore("cv.resume", () => {
 
     async saveResume(data: ResumeInterface) {
       console.log('=== [Store] saveResume ===')
-      console.log('[Store] Received data:', data)
+      console.log('[Store] Received data to update:', JSON.stringify(data))
       loading.value = true
       
       try {
-        // Nettoyer les données avant de créer l'instance
-        const cleanData = {
+        // Création d'un repository temporaire pour charger les données actuelles
+        // Ceci garantit qu'on a toujours les données les plus récentes
+        const repository = new LocalStorageResumeRepository()
+        
+        // Obtention du CV actuel directement du localStorage
+        let currentData = {}
+        try {
+          const rawResult = await repository.load()
+          // Le type retourné doit être vérifié dynamiquement
+          if (rawResult && typeof rawResult === 'object' && 'isValid' in rawResult && rawResult.isValid && 'resume' in rawResult && rawResult.resume) {
+            // Utiliser une assertion de type pour indiquer à TypeScript que resume a une méthode toJSON
+            const resumeWithMethods = rawResult.resume as { toJSON: () => Record<string, any> };
+            currentData = resumeWithMethods.toJSON()
+            console.log('[Store] Loaded current resume from storage:', JSON.stringify(currentData))
+          } else {
+            console.log('[Store] No valid resume found in storage, creating new')
+          }
+        } catch (error) {
+          console.error('[Store] Error loading resume from storage:', error)
+          console.log('[Store] Will proceed with empty resume')
+        }
+        
+        // Fusion des données existantes avec les nouvelles
+        const completeData = {
+          // Conserver toutes les sections existantes
+          ...currentData,
+          // Mise à jour uniquement de la section basics
           basics: {
             name: data.basics.name || '',
             email: data.basics.email || '',
             label: data.basics.label || '',
             phone: data.basics.phone || '',
             url: data.basics.url || '',
+            image: data.basics.image || '', // Inclusion explicite du champ image
             summary: data.basics.summary || '',
             location: data.basics.location ? {
               address: data.basics.location.address || '',
@@ -80,22 +106,20 @@ export const useResumeStore = defineStore("cv.resume", () => {
               username: profile.username || '',
               url: profile.url || ''
             }))
-          },
-          work: [],
-          education: [],
-          skills: []
+          }
         }
         
-        console.log('[Store] Cleaned data:', cleanData)
+        console.log('[Store] Merged complete data for saving:', JSON.stringify(completeData))
         
         await errorStore.executeWithErrorHandling(async () => {
-          // Créer une instance de Resume avec les données nettoyées
-          const resumeInstance = ResumeEntity.create(cleanData)
-          console.log('[Store] Created Resume instance:', resumeInstance)
+          // Créer une instance de Resume avec les données fusionnées
+          const resumeInstance = ResumeEntity.create(completeData)
+          console.log('[Store] Created Resume instance with ALL sections:', resumeInstance)
 
           if (resumeInstance.resume) {
+            // Sauvegarde du CV complet
             await useCase.createResume(resumeInstance.resume.toJSON())
-            console.log('[Store] Resume saved successfully')
+            console.log('[Store] Resume saved successfully with all sections preserved')
             resume.value = resumeInstance.resume
           } else {
             throw new Error('Failed to create Resume instance')
