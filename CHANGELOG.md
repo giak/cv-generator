@@ -1,7 +1,7 @@
 ---
 title: CV Generator Changelog
 author: Giak
-date: 2024-05-15
+date: 2025-03-02
 status: maintained
 version: 1.1.0
 ---
@@ -11,6 +11,77 @@ version: 1.1.0
 > ℹ️ **Note:** Ce fichier suit les recommandations de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added 🎉
+
+- Intégration complète de la section "Work Experience" (Expérience Professionnelle)
+  - Création du formulaire d'édition avec validation en temps réel
+  - Gestion des points forts (highlights) avec ajout/suppression dynamique
+  - Tri automatique des expériences par ordre chronologique inverse
+  - Navigation entre les sections "Basic Information" et "Work Experience"
+  - Implémentation complète selon le standard JSON Resume
+
+### Progress 📊
+
+- Epic-2 "Édition de CV" complété à 60%
+  - ✅ Formulaires pour les informations de base (basics)
+  - ✅ Formulaires pour l'expérience professionnelle (work)
+  - 🔄 Implémentation des formulaires pour l'éducation (education)
+  - ⏳ Formulaires pour les compétences (skills) et autres sections
+  - ⏳ Support des sections optionnelles du standard JSON Resume
+
+### Technical Details 🔧
+
+> 💡 **Work Experience Implementation**
+
+```typescript
+// WorkStore with Result pattern integration
+export const useWorkStore = defineStore('work', () => {
+  // State using reactive for proper typing
+  const works = ref<WorkWithId[]>([]);
+  const loading = ref(false);
+  const error = ref<Error | null>(null);
+
+  // Load works with Result pattern for error handling
+  async function loadWorks(): Promise<Result<WorkWithId[]>> {
+    loading.value = true;
+    try {
+      const resumeStore = useResumeStore();
+      const resume = await resumeStore.loadResume();
+
+      if (resume.isValid && resume.value.work) {
+        works.value = resume.value.work.map((work, index) => ({
+          ...work,
+          id: `work-${index}`
+        }));
+        return Result.success(works.value);
+      }
+      return Result.success([]);
+    } catch (e) {
+      error.value = e as Error;
+      return Result.failure([(e as Error).message]);
+    } finally {
+      loading.value = false;
+    }
+  }
+}
+```
+
+```mermaid
+---
+title: Work Experience Data Flow
+---
+graph TD
+    A[WorkList Component] -->|Displays| B[Work Items]
+    A -->|Opens| C[WorkForm]
+    C -->|Updates| D[Work Store]
+    D -->|Validates| E[Domain Entity]
+    E -->|Result Pattern| F[Valid/Invalid]
+    F -->|If Valid| G[Save to Repository]
+    G -->|Updates| H[LocalStorage]
+    F -->|If Invalid| I[Error Feedback]
+    I -->|Displayed in| C
+```
 
 ### Planned Features 🔮
 
@@ -278,8 +349,6 @@ export class ManageResume {
 - Premiers composants UI
 
 [Unreleased]: https://github.com/giak/cv-generator/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/giak/cv-generator/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/giak/cv-generator/compare/v0.1.2...v1.0.0
-[0.1.2]: https://github.com/giak/cv-generator/compare/v0.1.1...v0.1.2
+[1.1.0]: https://github.com/giak/cv-generator/compare/v0.1.1...v1.1.0
 [0.1.1]: https://github.com/giak/cv-generator/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/giak/cv-generator/releases/tag/v0.1.0

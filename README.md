@@ -1,7 +1,7 @@
 ---
 title: CV Generator
 author: Giak
-date: 2024-05-15
+date: 2025-03-02
 status: active
 version: 1.1.0
 ---
@@ -12,8 +12,9 @@ version: 1.1.0
 [![Coverage](https://codecov.io/gh/giak/cv-generator/branch/main/graph/badge.svg)](https://codecov.io/gh/giak/cv-generator)
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/giak/cv-generator/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![JSON Resume](https://img.shields.io/badge/JSON%20Resume-Compatible-orange.svg)](https://jsonresume.org/)
 
-> 💡 **Modern CV builder with JSON Resume support, real-time validation, and multiple export formats**
+> 💡 **Modern CV builder with full [JSON Resume](https://jsonresume.org/) standard support, real-time validation, and multiple export formats**
 
 ![CV Generator Preview](docs/assets/preview.png)
 
@@ -41,6 +42,8 @@ pnpm dev
 - [Usage](#usage)
   - [Creating a New CV](#creating-a-new-cv)
   - [Editing CV Sections](#editing-cv-sections)
+    - [Basic Information](#basic-information)
+    - [Work Experience](#work-experience)
   - [Exporting Your CV](#exporting-your-cv)
   - [Importing Existing Data](#importing-existing-data)
 - [Project Structure](#project-structure)
@@ -68,7 +71,7 @@ pnpm dev
 
 ## Overview
 
-CV Generator is a modern web application that helps you create professional CVs using the JSON Resume standard. Built with Vue 3, TypeScript, and following Clean Architecture principles, it offers a seamless experience for creating, editing, and exporting CVs in multiple formats.
+CV Generator is a modern web application that helps you create professional CVs using the [JSON Resume](https://jsonresume.org/) standard. Built with Vue 3, TypeScript, and following Clean Architecture principles, it offers a seamless experience for creating, editing, and exporting CVs in multiple formats.
 
 ### Problem Statement
 
@@ -76,16 +79,17 @@ Managing and updating CVs in various formats can be challenging and time-consumi
 
 ### Solution
 
-CV Generator provides a structured, standardized approach to CV creation using the JSON Resume format, combined with a modern, intuitive interface and real-time preview capabilities.
+CV Generator provides a structured, standardized approach to CV creation using the JSON Resume format ([https://jsonresume.org/schema/](https://jsonresume.org/schema/)), combined with a modern, intuitive interface and real-time preview capabilities. The application ensures your CV data is always compliant with the standard, enabling interoperability with other tools in the JSON Resume ecosystem.
 
 ## Features
 
-- 📝 **JSON Resume Format**
+- 📝 **JSON Resume Standard Support**
 
-  - Standard-compliant schema validation
-  - Real-time error detection and formatting
-  - Complete schema implementation
-  - Import/Export support for interoperability
+  - 100% compliant with the official [JSON Resume schema](https://jsonresume.org/schema/)
+  - Real-time schema validation and error detection
+  - Complete implementation of all schema sections and properties
+  - Seamless import/export for interoperability with JSON Resume ecosystem
+  - Compatibility with existing JSON Resume themes and tools
 
 - 🎨 **Modern UI/UX**
 
@@ -120,214 +124,84 @@ CV Generator provides a structured, standardized approach to CV creation using t
 | ------------ | ------- | ----------------------------------------------- | --------------------------------------------------- |
 | Vue.js       | 3.4+    | Frontend framework and component architecture   | Reactivity, composition API, TypeScript support     |
 | TypeScript   | 5.7+    | Type safety and enhanced developer experience   | Strong typing, better IDE support, error prevention |
-| Vite         | 5.0+    | Build tool and development server               | Fast HMR, efficient bundling, plugins               |
-| Tailwind CSS | 4.0     | Utility-first styling framework                 | Responsive design, minimal CSS, customizability     |
-| Vitest       | 1.6+    | Testing framework integrated with Vite          | Fast test execution, Vue component testing          |
+| Vite         | 6.0+    | Build tool and development server               | Fast HMR, efficient bundling, plugins               |
+| Tailwind CSS | 3.x     | Utility-first styling framework                 | Responsive design, minimal CSS, customizability     |
+| Vitest       | 3.x+    | Testing framework integrated with Vite          | Fast test execution, Vue component testing          |
 | Pinia        | 2.1+    | State management with TypeScript support        | DevTools, modular stores, composition API           |
 | Zod          | 3.22+   | Schema validation and runtime type checking     | Type inference, custom validations                  |
 | pnpm         | 10+     | Package manager with monorepo workspace support | Efficient disk usage, workspaces, speed             |
 
-## Getting Started
+## Current Status
 
-### Prerequisites
+### Implementation Progress
 
-- Node.js 22+ (LTS recommended)
-- pnpm 10+
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Git (for development)
+- **Epic-1: Fondation du système** ✅ 100% Complété
+  - Architecture Clean Architecture mise en place
+  - Structure en packages établie
+  - Modèles de données JSON Resume implémentés
+- **Epic-2: Édition de CV** 🔄 60% Complété
+  - ✅ Formulaires pour les informations de base (basics)
+  - ✅ Formulaires pour l'expérience professionnelle (work)
+  - 🔄 Formulaires pour l'éducation (education) en cours
+  - ⏳ Formulaires pour les compétences (skills) et autres sections planifiés
+- **Epic-3: Prévisualisation et exportation** ⏳ Planifié
 
-### Installation
+- **Epic-4: Optimisation ATS** ⏳ Planifié
 
-1. Clone the repository:
+### Latest Feature: Work Experience
 
-   ```bash
-   git clone https://github.com/giak/cv-generator.git
-   cd cv-generator
-   ```
+![Work Experience Editor](docs/assets/work-experience.png)
 
-2. Install dependencies:
+The Work Experience section has been fully integrated with:
 
-   ```bash
-   pnpm install
-   ```
-
-3. Start development server:
-   ```bash
-   pnpm dev
-   ```
-4. Open your browser:
-   ```
-   http://localhost:3000
-   ```
-
-### Development Commands
-
-| Command          | Description                                | When to Use                       |
-| ---------------- | ------------------------------------------ | --------------------------------- |
-| `pnpm dev`       | Start development server                   | Local development                 |
-| `pnpm build`     | Build for production                       | Preparing for deployment          |
-| `pnpm test`      | Run unit tests                             | Verifying component functionality |
-| `pnpm test:e2e`  | Run end-to-end tests                       | Testing user flows                |
-| `pnpm lint`      | Lint code for errors and style issues      | Code quality checks               |
-| `pnpm format`    | Format code according to project standards | Maintaining consistent style      |
-| `pnpm storybook` | Run Storybook component explorer           | Component development and testing |
-| `pnpm docs:dev`  | Run documentation site locally             | Working on project documentation  |
-
-### Docker Deployment
-
-You can also run the application using Docker, which provides an isolated, consistent environment across different platforms.
-
-#### Prerequisites for Docker
-
-- Docker 24.x+
-- Docker Compose 2.x+
-
-#### Quick Start with Docker
-
-```bash
-# Start in production mode (default port: 8080)
-./start.sh
-# or
-pnpm docker:start
-
-# Start in development mode with hot-reload
-./start.sh development
-# or
-pnpm docker:start:dev
-```
-
-#### Docker Commands
-
-| Command                 | Description                                   |
-| ----------------------- | --------------------------------------------- |
-| `pnpm docker:start`     | Start production environment                  |
-| `pnpm docker:start:dev` | Start development environment with hot-reload |
-| `pnpm docker:setup`     | Setup complete development environment        |
-| `pnpm docker:test`      | Run tests in Docker environment               |
-| `pnpm docker:clean`     | Clean Docker resources                        |
-| `pnpm docker:logs`      | View container logs                           |
-| `pnpm docker:health`    | Check health of Docker containers             |
-
-For detailed information about Docker deployment, see [README.docker.md](README.docker.md) or the [Docker Deployment Guide](docs/guides/docker-deployment.md).
-
-## Usage
-
-### Creating a New CV
-
-1. Click on "Create New CV" from the home screen
-2. Choose a template for your CV
-3. Fill in your basic information in the form
-4. Navigate through sections using the sidebar
-5. Save your progress at any time with the "Save" button
-
-![Creating a New CV](docs/assets/create-new.gif)
-
-### Editing CV Sections
-
-Each section of your CV can be edited independently:
-
-- **Basics**: Personal information and contact details
-- **Work Experience**: Your professional history
-- **Education**: Academic background
-- **Skills**: Technical and soft skills
-- **Projects**: Significant projects you've worked on
-- **Publications**: Papers, articles, or books
-- **References**: Professional recommendations
-
-All fields have real-time validation with helpful error messages.
-
-### Exporting Your CV
-
-1. Click the "Export" button in the top menu
-2. Select your desired format:
-   - PDF (for printing or sharing)
-   - HTML (for web portfolios)
-   - JSON (for data backup)
-3. Choose a theme for your export
-4. Download your completed CV
-
-### Importing Existing Data
-
-1. Click "Import" in the main menu
-2. Select a JSON Resume file from your computer
-3. Review and confirm the imported data
-4. Make any necessary adjustments
-
-## Project Structure
-
-```
-cv-generator/
-├── packages/
-│   ├── core/           # Domain & Business Logic
-│   │   ├── src/
-│   │   │   ├── cv/              # CV bounded context
-│   │   │   │   ├── domain/       # CV domain entities, value objects
-│   │   │   │   ├── application/  # CV use cases
-│   │   │   │   └── ports/        # CV repository interfaces
-│   │   │   │
-│   │   │   ├── export/          # Export bounded context
-│   │   │   │   ├── domain/       # Export domain entities
-│   │   │   │   ├── application/  # Export use cases
-│   │   │   │   └── ports/        # Export service interfaces
-│   │   │   │
-│   │   │   ├── user/            # User bounded context
-│   │   │   │   └── ...
-│   │   │   │
-│   │   │   └── shared/          # Shared modules
-│   │   │       ├── domain/       # Shared domain objects (Result, etc.)
-│   │   │       └── utils/        # Shared utilities
-│   │   │
-│   │   │
-│   │   └── __tests__/           # Core tests
-│   │
-│   ├── infrastructure/ # External Integrations
-│   │   ├── src/
-│   │   │   ├── repositories/     # Repository implementations
-│   │   │   ├── services/         # External service integrations
-│   │   │   └── adapters/         # External adapters
-│   │   └── __tests__/           # Infrastructure tests
-│   │
-│   ├── shared/         # Shared Types & Utils
-│   │   ├── src/
-│   │   │   ├── types/           # Shared TypeScript types
-│   │   │   ├── utils/           # Shared utilities
-│   │   │   └── constants/       # Shared constants
-│   │   └── __tests__/           # Shared module tests
-│   │
-│   └── ui/            # Vue 3 Frontend App
-│       ├── src/
-│       │   ├── assets/          # Static assets
-│       │   ├── components/      # Shared components
-│       │   ├── modules/         # Feature modules
-│       │   │   └── cv/
-│       │   │       ├── domain/  # Module-specific domain
-│       │   │       ├── application/# Module-specific logic
-│       │   │       └── presentation/# UI components
-│       │   ├── stores/          # Pinia stores
-│       │   └── types/           # UI-specific types
-│       ├── e2e/                 # E2E tests
-│       └── __tests__/           # Unit tests
-│
-├── docs/              # Project Documentation
-│   ├── architecture/  # Architecture decisions
-│   ├── api/          # API documentation
-│   └── guides/       # Development guides
-│
-└── .github/          # GitHub Actions & Config
-    ├── workflows/    # CI/CD pipelines
-    └── environments/ # Environment configs
-```
-
-Each package has its own responsibilities:
-
-| Package        | Purpose                               | Key Files                                               |
-| -------------- | ------------------------------------- | ------------------------------------------------------- |
-| core           | Business logic and domain models      | `src/cv/domain/entities/Resume.ts`                      |
-| infrastructure | External services and persistence     | `src/repositories/LocalStorageResumeRepository.ts`      |
-| shared         | Common utilities and types            | `src/types/resume.interface.ts`                         |
-| ui             | User interface and presentation logic | `src/modules/cv/presentation/components/BasicsForm.vue` |
+- Real-time validation against JSON Resume schema
+- Highlights management with drag-and-drop reordering
+- Complete implementation of the Result pattern for error handling
+- Value Objects pattern for domain validation
 
 ## Architecture
+
+The application follows a Clean Architecture approach with Domain-Driven Design principles:
+
+### Key Patterns
+
+- **Result Pattern**: Functional approach to error handling returning success/failure objects
+
+  ```typescript
+  // Example of Result pattern implementation
+  export class Result<T> {
+    private constructor(
+      public readonly isValid: boolean,
+      public readonly errors: string[],
+      private readonly _value?: T
+    ) {}
+
+    static success<T>(value: T): Result<T> { ... }
+    static failure<T>(errors: string[]): Result<T> { ... }
+  }
+  ```
+
+- **Value Objects Pattern**: Encapsulation of validation and behavior in immutable objects
+
+  ```typescript
+  // Example of Email Value Object
+  export class Email {
+    private constructor(private readonly value: string) {}
+
+    static create(email: string): Result<Email> {
+      // Validation logic here
+      return Result.success(new Email(email));
+    }
+
+    getValue(): string {
+      return this.value;
+    }
+  }
+  ```
+
+- **Repository Pattern**: Abstraction layer for data persistence
+- **Clean Architecture**: Separation of concerns with domain, application, and infrastructure layers
+- **Domain-Driven Design**: Rich domain model with entities and value objects
 
 ```mermaid
 ---
@@ -440,6 +314,261 @@ graph TD
    - Integration tests for repositories
    - E2E tests for critical paths
    - Component tests for UI
+
+### JSON Resume Interoperability
+
+The application is fully compatible with the [JSON Resume](https://jsonresume.org/) ecosystem:
+
+- Complete implementation of the JSON Resume schema
+- Validation against the official schema specification
+- Import/export support for seamless integration with other tools
+- Support for all required and optional fields defined in the standard
+
+### ATS Optimization
+
+The application includes features to optimize your CV for Applicant Tracking Systems:
+
+- Real-time analysis of CV content for ATS compatibility
+- Keyword suggestions based on job market trends
+- Readability score calculation
+- Format optimization for parsing by recruitment software
+- Best practices recommendations
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 22+ (LTS recommended)
+- pnpm 10+
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Git (for development)
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/giak/cv-generator.git
+   cd cv-generator
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   pnpm install
+   ```
+
+3. Start development server:
+   ```bash
+   pnpm dev
+   ```
+4. Open your browser:
+   ```
+   http://localhost:3000
+   ```
+
+### Development Commands
+
+| Command          | Description                                | When to Use                       |
+| ---------------- | ------------------------------------------ | --------------------------------- |
+| `pnpm dev`       | Start development server                   | Local development                 |
+| `pnpm build`     | Build for production                       | Preparing for deployment          |
+| `pnpm test`      | Run unit tests                             | Verifying component functionality |
+| `pnpm test:e2e`  | Run end-to-end tests                       | Testing user flows                |
+| `pnpm lint`      | Lint code for errors and style issues      | Code quality checks               |
+| `pnpm format`    | Format code according to project standards | Maintaining consistent style      |
+| `pnpm storybook` | Run Storybook component explorer           | Component development and testing |
+| `pnpm docs:dev`  | Run documentation site locally             | Working on project documentation  |
+
+### Docker Deployment
+
+You can also run the application using Docker, which provides an isolated, consistent environment across different platforms.
+
+#### Prerequisites for Docker
+
+- Docker 24.x+
+- Docker Compose 2.x+
+
+#### Quick Start with Docker
+
+```bash
+# Start in production mode (default port: 8080)
+./start.sh
+# or
+pnpm docker:start
+
+# Start in development mode with hot-reload
+./start.sh development
+# or
+pnpm docker:start:dev
+```
+
+#### Docker Commands
+
+| Command                 | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| `pnpm docker:start`     | Start production environment                  |
+| `pnpm docker:start:dev` | Start development environment with hot-reload |
+| `pnpm docker:setup`     | Setup complete development environment        |
+| `pnpm docker:test`      | Run tests in Docker environment               |
+| `pnpm docker:clean`     | Clean Docker resources                        |
+| `pnpm docker:logs`      | View container logs                           |
+| `pnpm docker:health`    | Check health of Docker containers             |
+
+For detailed information about Docker deployment, see [README.docker.md](README.docker.md) or the [Docker Deployment Guide](docs/guides/docker-deployment.md).
+
+## Usage
+
+### Creating a New CV
+
+1. Click on "Create New CV" from the home screen
+2. Choose a template for your CV
+3. Fill in your basic information in the form
+4. Navigate through sections using the sidebar
+5. Save your progress at any time with the "Save" button
+
+![Creating a New CV](docs/assets/create-new.gif)
+
+### Editing CV Sections
+
+Each section of your CV can be edited independently:
+
+- **Basics**: Personal information and contact details
+- **Work Experience**: Your professional history
+- **Education**: Academic background
+- **Skills**: Technical and soft skills
+- **Projects**: Significant projects you've worked on
+- **Publications**: Papers, articles, or books
+- **References**: Professional recommendations
+
+All fields have real-time validation with helpful error messages.
+
+#### Basic Information
+
+The Basic Information section allows you to manage your personal and contact details:
+
+1. Complete the form with your personal information:
+   - Name, email, and phone number
+   - Professional title/label
+   - Website URL
+   - Professional summary
+2. Add your location details:
+   - Address, city, postal code, and region
+3. Link your professional profiles:
+   - Add multiple social/professional network profiles
+   - Specify the network name and your profile URL
+
+The form provides real-time validation to ensure all required fields are properly filled.
+
+#### Work Experience
+
+The Work Experience section allows you to showcase your professional history:
+
+1. Click "Add Work Experience" to create a new entry
+2. Complete the form with your work details:
+   - Company name and position
+   - Start and end dates (leave end date empty for current positions)
+   - Company website URL (optional)
+   - Job description summary
+3. Add key highlights for each position:
+   - Click "Add Highlight" to add accomplishments or responsibilities
+   - Highlights can be reordered by dragging
+   - Remove unwanted highlights with the delete button
+4. Edit existing work experiences by clicking on the edit button
+5. Change the order of work experiences using the arrow buttons
+
+The section automatically organizes entries in reverse chronological order (most recent first).
+
+### Exporting Your CV
+
+1. Click the "Export" button in the top menu
+2. Select your desired format:
+   - PDF (for printing or sharing)
+   - HTML (for web portfolios)
+   - JSON (for data backup)
+3. Choose a theme for your export
+4. Download your completed CV
+
+### Importing Existing Data
+
+1. Click "Import" in the main menu
+2. Select a JSON Resume file from your computer
+3. Review and confirm the imported data
+4. Make any necessary adjustments
+
+## Project Structure
+
+```
+cv-generator/
+├── packages/
+│   ├── core/           # Domain & Business Logic
+│   │   ├── src/
+│   │   │   ├── cv/              # CV bounded context
+│   │   │   │   ├── domain/       # CV domain entities, value objects
+│   │   │   │   ├── application/  # CV use cases
+│   │   │   │   └── ports/        # CV repository interfaces
+│   │   │   │
+│   │   │   ├── export/          # Export bounded context
+│   │   │   │   ├── domain/       # Export domain entities
+│   │   │   │   ├── application/  # Export use cases
+│   │   │   │   └── ports/        # Export service interfaces
+│   │   │   │
+│   │   │   ├── user/            # User bounded context
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   └── shared/          # Shared modules
+│   │   │       ├── domain/       # Shared domain objects (Result, etc.)
+│   │   │       └── utils/        # Shared utilities
+│   │   │
+│   │   │
+│   │   └── __tests__/           # Core tests
+│   │
+│   ├── infrastructure/ # External Integrations
+│   │   ├── src/
+│   │   │   ├── repositories/     # Repository implementations
+│   │   │   ├── services/         # External service integrations
+│   │   │   └── adapters/         # External adapters
+│   │   └── __tests__/           # Infrastructure tests
+│   │
+│   ├── shared/         # Shared Types & Utils
+│   │   ├── src/
+│   │   │   ├── types/           # Shared TypeScript types
+│   │   │   ├── utils/           # Shared utilities
+│   │   │   └── constants/       # Shared constants
+│   │   └── __tests__/           # Shared module tests
+│   │
+│   └── ui/            # Vue 3 Frontend App
+│       ├── src/
+│       │   ├── assets/          # Static assets
+│       │   ├── components/      # Shared components
+│       │   ├── modules/         # Feature modules
+│       │   │   └── cv/
+│       │   │       ├── domain/  # Module-specific domain
+│       │   │       ├── application/# Module-specific logic
+│       │   │       └── presentation/# UI components
+│       │   ├── stores/          # Pinia stores
+│       │   └── types/           # UI-specific types
+│       ├── e2e/                 # E2E tests
+│       └── __tests__/           # Unit tests
+│
+├── docs/              # Project Documentation
+│   ├── architecture/  # Architecture decisions
+│   ├── api/          # API documentation
+│   └── guides/       # Development guides
+│
+└── .github/          # GitHub Actions & Config
+    ├── workflows/    # CI/CD pipelines
+    └── environments/ # Environment configs
+```
+
+Each package has its own responsibilities:
+
+| Package        | Purpose                               | Key Files                                               |
+| -------------- | ------------------------------------- | ------------------------------------------------------- |
+| core           | Business logic and domain models      | `src/cv/domain/entities/Resume.ts`                      |
+| infrastructure | External services and persistence     | `src/repositories/LocalStorageResumeRepository.ts`      |
+| shared         | Common utilities and types            | `src/types/resume.interface.ts`                         |
+| ui             | User interface and presentation logic | `src/modules/cv/presentation/components/BasicsForm.vue` |
 
 ## Development
 
