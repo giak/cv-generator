@@ -823,4 +823,4 @@ See [CHANGELOG.md](CHANGELOG.md) for a detailed list of changes between versions
 
 ---
 
-_Last updated: May 15, 2024_
+_Last updated: March 02, 2025_

@@ -10,16 +10,18 @@ describe("App.vue", () => {
         plugins: [createTestingPinia()],
       },
     })
-    expect(screen.getByText("CV Generator")).toBeInTheDocument()
+    const titleElements = screen.getAllByText("CV Generator")
+    expect(titleElements.length).toBeGreaterThan(0)
+    expect(titleElements[0]).toBeInTheDocument()
   })
 
-  it("should render the subtitle", () => {
+  it("should render the dashboard layout", () => {
     render(App, {
       global: {
         plugins: [createTestingPinia()],
       },
     })
-    expect(screen.getByText("Build your professional CV")).toBeInTheDocument()
+    expect(document.querySelector(".dashboard")).toBeInTheDocument()
   })
 
   it("should render the ResumeForm component", () => {

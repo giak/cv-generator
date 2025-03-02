@@ -25,9 +25,9 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@vitest/coverage-istanbul": "^1.4.0",
+    "@vitest/coverage-istanbul": "^3.0.7",
     "rimraf": "^5.0.5",
     "typescript": "~5.7.3",
-    "vitest": "^1.4.0"
+    "vitest": "^3.0.7"
   }
 }

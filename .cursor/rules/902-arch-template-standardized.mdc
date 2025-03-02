@@ -1,10 +1,7 @@
 ---
-title: "Architecture Documentation Standards"
-version: "2.0.0"
 description: "ALWAYS use when CREATING or UPDATING an Architecture document to ENSURE consistent documentation of architectural decisions"
 globs: "**/arch*.md"
-lastUpdated: "2024-02-28"
-tags: ["architecture", "design", "technical", "documentation"]
+alwaysApply: false
 ---
 
 # 📐 Règles de Documentation d'Architecture
@@ -168,7 +165,7 @@ Cette section est trop vague, ne contient pas de diagramme réel, n'explique pas
 
 ## 🔗 Références
 - [Template d'Architecture](mdc:xnotes/template-arch-standardized.md)
-- [C4 Model pour la visualisation d'architecture](https://c4model.com/)
-- [Architectural Decision Records (ADR)](https://adr.github.io/)
+- [C4 Model pour la visualisation d'architecture](mdc:https:/c4model.com)
+- [Architectural Decision Records (ADR)](mdc:https:/adr.github.io)
 
 <version>2.0.0</version> 

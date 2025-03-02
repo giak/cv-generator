@@ -1,182 +1,193 @@
 ---
-description: DEFINE core project architecture, technical stack, and development principles for the CV Generator application
+description: "DEFINE core project architecture, technical stack, and development principles for the CV Generator application"
 globs: ["packages/**/*"]
 alwaysApply: false
 ---
 ---
-title: CV Generator - Project Overview & Technical Standards
-date: 2024-06-01
-version: 2.1.0
-status: approved
+title: "CV Generator - Project Architecture & Technical Standards"
+version: "2.3.0"
+description: "DEFINE core project architecture, technical stack, and development principles for the CV Generator application"
+globs: ["packages/**/*"]
+lastUpdated: "2024-07-01"
+tags: ["architecture", "standards", "monorepo", "ddd", "solid"]
 ---
 
-# CV Generator - Project Overview & Technical Standards
+# CV Generator - Project Architecture & Technical Standards
 
-> Ce document fournit une vue d'ensemble du projet. Pour une documentation détaillée, y compris les diagrammes et explications complètes, veuillez consulter le fichier [ARCHITECTURE.md](mdc:ARCHITECTURE.md).
+## Context
+- This rule defines the architectural principles, technical stack, and development standards for the CV Generator application
+- It serves as the central reference for understanding code organization and project structure
+- All development work should align with these architectural decisions and coding standards
+- This document references other critical standards including [naming conventions](mdc:.cursor/rules/002-naming-conventions.mdc) and [code generation standards](mdc:.cursor/rules/802-code-generation-standardized.mdc)
+
+## Requirements
+- The application MUST follow Clean Architecture principles with clear separation of concerns
+- The codebase MUST be organized as a monorepo with well-defined package boundaries
+- Domain logic MUST be implemented following Domain-Driven Design patterns
+- All code MUST adhere to the SOLID principles and TypeScript standards defined in this document
+- Validation MUST follow the multi-layer strategy described in this document
+- All code MUST conform to the project's [naming conventions](mdc:.cursor/rules/002-naming-conventions.mdc)
+- Code generation and modification MUST follow the [code generation standards](mdc:.cursor/rules/802-code-generation-standardized.mdc)
 
 ## Project Identity
 
-Le CV Generator est une application web moderne pour la création et la gestion de CV au format JSON Resume. L'architecture suit les principes de Clean Architecture et Domain-Driven Design (DDD) pour assurer une séparation claire des responsabilités, une maintenance facilitée et une évolution flexible du système.
+The CV Generator is a modern web application for creating and managing resumes using the JSON Resume format. The architecture follows Clean Architecture and Domain-Driven Design principles to ensure clear separation of responsibilities, easy maintenance, and flexible system evolution.
 
 ## Technical Stack
 
 | Technology   | Version | Description                             | Status      |
 | ------------ | ------- | --------------------------------------- | ----------- |
-| TypeScript   | 5.7+    | Langage principal avec typage strict    | ✅ Utilisé  |
-| Vue.js       | 3.4+    | Framework UI avec Composition API       | ✅ Utilisé  |
-| Vite         | 5.0+    | Build tool et dev server                | ✅ Utilisé  |
-| Pinia        | 2.1+    | State management                        | ✅ Utilisé  |
-| Tailwind CSS | 4.0     | Utility-first CSS framework             | ✅ Utilisé  |
-| Zod          | 3.22+   | Validation de schéma et typage runtime  | ✅ Utilisé  |
-| Vitest       | 1.6+    | Framework de test                       | ✅ Utilisé  |
-| Playwright   | Latest  | Tests end-to-end                        | 🚧 Planifié |
-| pnpm         | 10+     | Package manager avec support workspaces | ✅ Utilisé  |
-| ESLint       | Latest  | Linting du code                         | ✅ Utilisé  |
-| Prettier     | Latest  | Formatting du code                      | ✅ Utilisé  |
+| TypeScript   | 5.7+    | Primary language with strict typing     | ✅ In use   |
+| Vue.js       | 3.4+    | UI framework with Composition API       | ✅ In use   |
+| Vite         | 6.0+    | Build tool and dev server               | ✅ In use   |
+| Pinia        | 2.1+    | State management                        | ✅ In use   |
+| Tailwind CSS | 3.x     | Utility-first CSS framework             | ✅ In use   |
+| Zod          | 3.22+   | Schema validation and runtime typing    | ✅ In use   |
+| Vitest       | 3.0+    | Testing framework                       | ✅ In use   |
+| Playwright   | Latest  | End-to-end testing                      | 🚧 Planned  |
+| pnpm         | 10+     | Package manager with workspace support  | ✅ In use   |
+| Biome        | 1.9+    | Linting and formatting                  | ✅ In use   |
 
 ## Key Architectural Decisions
 
 ### 1. Clean Architecture
 
-- 🔄 Séparation stricte des couches (UI, Application, Domain, Infrastructure)
-- 🔄 Dépendances orientées vers l'intérieur
-- 🔄 Inversion de dépendance pour les repositories
+- 🔄 Strict separation of layers (UI, Application, Domain, Infrastructure)
+- 🔄 Dependencies pointing inward
+- 🔄 Dependency inversion for repositories and services
 
 ### 2. Domain-Driven Design
 
-- 📦 Organisation par bounded contexts (CV, Export, User)
-- 💎 Entités riches avec logique métier encapsulée
-- 💠 Value Objects pour les types complexes (Email, Phone)
-- 📋 Agrégats pour maintenir la cohérence (Resume)
-- 🔌 Interfaces de ports explicites dans chaque bounded context
+- 📦 Organization by bounded contexts (CV, Export, User)
+- 💎 Rich entities with encapsulated business logic
+- 💠 Value Objects for complex types (Email, Phone)
+- 📋 Aggregates for maintaining consistency (Resume)
+- 🔌 Explicit port interfaces in each bounded context
 
 ### 3. Monorepo Structure
 
-- 📂 Packages indépendants avec responsabilités claires
-- 🔄 Shared utilities pour la réutilisation
-- 🧪 Tests co-localisés avec le code
+- 📂 Independent packages with clear responsibilities
+- 🔄 Shared utilities for reuse
+- 🧪 Co-located tests with implementation code
 
 ### 4. Validation Strategy
 
-- ✅ Validation de schéma avec Zod
-- 🔄 Composables spécialisés pour la validation des formulaires
-- 📝 Validation en temps réel avec feedback utilisateur
-- 🔀 Séparation entre validation UI et validation domaine
+- ✅ Schema validation with Zod
+- 🔄 Specialized composables for form validation
+- 📝 Real-time validation with user feedback
+- 🔀 Separation between UI validation and domain validation
 
 ## Project Structure
 
 ```
 /
 ├── packages/                    # Monorepo workspace
-│   ├── core/                   # Domain & Application layers
+│   ├── core/                    # Domain & Application layers
 │   │   └── src/
 │   │       ├── cv/              # CV Bounded Context
 │   │       │   ├── domain/      # Domain layer
 │   │       │   │   ├── entities/   # Domain entities
-│   │       │   │   │   └── Resume.ts
 │   │       │   │   └── value-objects/ # Value Objects
-│   │       │   │       ├── Email.ts
-│   │       │   │       └── Phone.ts
 │   │       │   ├── application/ # Application layer
 │   │       │   │   └── use-cases/  # Business use cases
-│   │       │   │       └── ManageResume.ts
 │   │       │   └── ports/       # Interface ports
-│   │       │       └── repositories/
-│   │       │           └── ResumeRepository.ts
+│   │       │       └── repositories/ # Repository interfaces
 │   │       ├── export/          # Export Bounded Context
-│   │       │   ├── domain/
-│   │       │   │   └── entities/
-│   │       │   │       └── ExportFormat.ts
-│   │       │   ├── application/
-│   │       │   │   └── use-cases/
-│   │       │   │       └── ExportResume.ts
-│   │       │   └── ports/
-│   │       │       └── services/
-│   │       │           └── ExportService.ts
+│   │       │   ├── domain/      # Domain entities and logic
+│   │       │   ├── application/ # Application services
+│   │       │   └── ports/       # Interface ports
 │   │       ├── user/            # User Bounded Context
-│   │       │   ├── domain/
-│   │       │   │   └── entities/
-│   │       │   │       └── User.ts
-│   │       │   ├── application/
-│   │       │   │   └── use-cases/
-│   │       │   │       └── ManageUserPreferences.ts
-│   │       │   └── ports/
-│   │       │       └── repositories/
-│   │       │           └── UserRepository.ts
-│   │       └── shared/          # Shared domain elements
-│   │           ├── domain/
-│   │           │   ├── errors/
-│   │           │   │   └── ValidationError.ts
-│   │           │   └── value-objects/
-│   │           │       └── Result.ts
-│   │           └── application/
-│   │               └── interfaces/
-│   ├── ui/                    # Presentation layer
+│   │       │   ├── domain/      # User domain model
+│   │       │   ├── application/ # User application services
+│   │       │   └── ports/       # User interfaces
+│   │       ├── shared/          # Shared domain elements
+│   │       │   ├── domain/      # Shared domain concepts
+│   │       │   └── application/ # Shared application logic
+│   │       └── modules/         # Legacy/alternative organization
+│   │
+│   ├── ui/                      # Presentation layer
 │   │   └── src/
-│   │       ├── components/    # Vue components
-│   │       │   └── shared/    # Shared components
-│   │       │       └── form/  # Form components
-│   │       │           ├── Form.vue    # Composant formulaire
-│   │       │           └── FormField.vue # Champ de formulaire
-│   │       ├── modules/       # Feature modules
-│   │       │   └── cv/       # CV module
-│   │       │       └── presentation/
-│   │       │           ├── components/   # Composants de présentation
-│   │       │           │   ├── BasicsForm.vue # Formulaire informations de base
-│   │       │           │   └── __tests__/   # Tests co-localisés
-│   │       │           ├── composables/   # Logique réutilisable
-│   │       │           │   ├── useCVFieldValidation.ts # Validation spécifique CV
-│   │       │           │   ├── useModelUpdate.ts # Gestion des modèles
-│   │       │           │   └── __tests__/  # Tests des composables
-│   │       │           └── stores/      # Stores Pinia
-│   │       │               └── resume.ts  # Store principal
-│   │       └── App/       # Application root
-│   │           └── App.vue  # Composant principal
-│   ├── infrastructure/        # Infrastructure layer
+│   │       ├── components/      # Vue components
+│   │       │   └── shared/      # Shared components
+│   │       ├── modules/         # Feature modules
+│   │       │   └── cv/          # CV module
+│   │       │       ├── presentation/ # Presentation components
+│   │       │       └── stores/  # State management
+│   │       ├── App/             # Application root
+│   │       ├── plugins/         # Vue plugins
+│   │       ├── assets/          # Static assets
+│   │       └── core/            # Core UI logic
+│   │
+│   ├── infrastructure/          # Infrastructure layer
 │   │   └── src/
-│   │       ├── repositories/  # Data persistence
-│   │       │   └── LocalStorageResumeRepository.ts # Stockage local
-│   │       └── services/     # External services
-│   └── shared/               # Shared utilities
+│   │       ├── repositories/    # Data persistence implementations
+│   │       ├── services/        # External service implementations
+│   │       └── errors/          # Infrastructure-specific errors
+│   │
+│   └── shared/                  # Shared utilities
 │       └── src/
-│           ├── types/        # Shared TypeScript types
-│           │   └── resume.interface.ts # Interfaces partagées
-│           └── validators/   # Shared validation schemas
-│               └── resumeSchema.ts # Schémas Zod
+│           ├── types/           # Shared TypeScript types
+│           ├── validators/      # Shared validation logic
+│           ├── schemas/         # Shared schema definitions
+│           └── __tests__/       # Tests for shared code
 ```
 
 ## Package Responsibilities
 
 ### Core (@cv-generator/core)
 
-- Organisation en bounded contexts DDD:
-  - **CV Context**: Entités de CV, logique métier, validation
-  - **Export Context**: Formats d'export, gestion des conversions
-  - **User Context**: Gestion utilisateur, préférences
-  - **Shared**: Utilities partagées (Result, ValidationError)
-- Interfaces de ports explicites pour l'inversion de dépendance
-- Alias TypeScript par contexte métier (@core/cv/_, @core/export/_, etc.)
+- DDD bounded contexts organization:
+  - **CV Context**: Resume entities, business logic, validation
+  - **Export Context**: Export formats, conversion management
+  - **User Context**: User management, preferences
+  - **Shared**: Shared utilities (Result, ValidationError)
+- Explicit port interfaces for dependency inversion
+- TypeScript aliases by business context
 
 ### UI (@cv-generator/ui)
 
-- Composants Vue.js et composables
-- Gestion d'état avec Pinia
-- Styles avec Tailwind CSS
-- Tests unitaires co-localisés
+- Vue.js components and composables
+- State management with Pinia
+- Styling with Tailwind CSS
+- Co-located unit tests
 
 ### Infrastructure (@cv-generator/infrastructure)
 
-- Implémentation des repositories
-- Services externes et adapters
-- Persistence des données (LocalStorage)
+- Repository implementations
+- External services and adapters
+- Data persistence (LocalStorage)
+- Error handling
 
 ### Shared (@cv-generator/shared)
 
-- Types et utilitaires partagés
-- Schémas de validation
-- Interfaces communes
+- Shared types and utilities
+- Validation schemas
+- Common interfaces
+- Test utilities
 
 ## Coding Standards
+
+### SOLID Principles
+
+- **S - Single Responsibility**: Each class, module, and function should have one responsibility
+  - Example: A service class should either handle business logic OR data access, not both
+  - Services, repositories, entities should have focused responsibilities
+
+- **O - Open/Closed**: Software entities should be open for extension, closed for modification
+  - Example: Use inheritance and interfaces to extend functionality without modifying existing code
+  - Prefer composition over inheritance when appropriate
+
+- **L - Liskov Substitution**: Subtypes must be substitutable for their base types
+  - Example: Child classes must maintain all behaviors of parent classes
+  - Interface implementations must honor the contract of the interface
+
+- **I - Interface Segregation**: Many specific interfaces are better than one general-purpose interface
+  - Example: Define focused repository interfaces rather than one large repository interface
+  - Break large interfaces into smaller, more focused ones
+
+- **D - Dependency Inversion**: Depend on abstractions, not concretions
+  - Example: Core domain code should depend on port interfaces, not implementations
+  - Use dependency injection to provide implementations at runtime
 
 ### TypeScript & Type Safety
 
@@ -200,13 +211,79 @@ Le CV Generator est une application web moderne pour la création et la gestion 
 - Mock external dependencies
 - Test files MUST follow the naming pattern `*.spec.ts` or `*.test.ts`
 
-## Visualisation de l'architecture
+### Code Generation Standards
 
-Pour visualiser l'architecture complète du projet, y compris les diagrammes détaillés sur:
+The project follows standards for efficient, maintainable code generation as defined in the [code generation standards](mdc:.cursor/rules/802-code-generation-standardized.mdc). Key principles include:
 
-- L'architecture système
-- Les bounded contexts
-- Le flux de données
-- Le flux de validation
+- Follow KISS (Keep It Simple, Stupid), YAGNI (You Aren't Gonna Need It), and DRY (Don't Repeat Yourself)
+- Generate only the code necessary for implementing the current task
+- Maintain consistency with existing code patterns and architecture
+- Avoid over-engineering and premature optimization
+- Ensure all generated code follows project naming conventions
 
-Veuillez consulter le document complet [ARCHITECTURE.md](mdc:ARCHITECTURE.md) qui contient des diagrammes détaillés et des explications approfondies.
+### Naming Conventions
+
+The project enforces consistent naming conventions as defined in the [naming conventions rule](mdc:.cursor/rules/002-naming-conventions.mdc). These conventions ensure readability, maintainability, and searchability of the codebase.
+
+## Examples
+
+<example>
+// Good: Properly structured domain entity with encapsulated logic
+// packages/core/src/cv/domain/entities/Resume.ts
+export class Resume {
+  private readonly id: string;
+  private basics: Basics;
+  private skills: Skill[];
+  
+  constructor(params: ResumeParams) {
+    this.id = params.id ?? uuidv4();
+    this.basics = new Basics(params.basics);
+    this.skills = params.skills.map(skill => new Skill(skill));
+  }
+  
+  public getId(): string {
+    return this.id;
+  }
+  
+  public updateBasics(basics: BasicsParams): Result<Basics, ValidationError> {
+    const validatedBasics = BasicsSchema.safeParse(basics);
+    
+    if (!validatedBasics.success) {
+      return Result.failure(new ValidationError(validatedBasics.error));
+    }
+    
+    this.basics = new Basics(validatedBasics.data);
+    return Result.success(this.basics);
+  }
+  
+  public toDTO(): ResumeDTO {
+    return {
+      id: this.id,
+      basics: this.basics.toDTO(),
+      skills: this.skills.map(skill => skill.toDTO())
+    };
+  }
+}
+</example>
+
+<example type="invalid">
+// Bad: Anemic model with no encapsulation, direct mutation, and no validation
+// Avoid this approach:
+export class Resume {
+  public id: string;
+  public basics: any;
+  public skills: any[];
+  
+  constructor(data: any) {
+    this.id = data.id;
+    this.basics = data.basics;
+    this.skills = data.skills;
+  }
+}
+
+// Direct mutation from outside
+const resume = new Resume(data);
+resume.basics.name = "New Name"; // Bad: Direct mutation of internal state
+</example>
+
+<version>2.3.0</version>

@@ -35,15 +35,40 @@ export const basicsSchema = z.object({
   profiles: z.array(profileSchema).optional()
 }).strict() as z.ZodType<BasicsInterface>
 
+// Schéma ISO date amélioré
+const isoDateSchema = z.string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
+  .refine((date) => {
+    const parsed = new Date(date);
+    return !isNaN(parsed.getTime());
+  }, 'Invalid date value');
+
+// Schéma URL amélioré avec vérification de protocole
+const urlSchema = z.string()
+  .url('Invalid URL format')
+  .regex(/^https?:\/\//, 'URL must start with http:// or https://');
+
 export const workSchema = z.object({
-  name: z.string(),
-  position: z.string(),
-  url: z.string().url().optional(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format').optional(),
+  name: z.string().min(1, 'Company name is required'),
+  position: z.string().min(1, 'Position is required'),
+  url: urlSchema.optional(),
+  startDate: isoDateSchema,
+  endDate: isoDateSchema.optional(),
   summary: z.string().optional(),
   highlights: z.array(z.string()).optional()
-}).strict() as z.ZodType<WorkInterface>
+}).strict()
+  .refine(
+    (data) => {
+      if (data.endDate && data.startDate) {
+        return new Date(data.endDate) >= new Date(data.startDate);
+      }
+      return true;
+    },
+    {
+      message: 'End date must be after or equal to start date',
+      path: ['endDate'],
+    }
+  ) as z.ZodType<WorkInterface>
 
 export const educationSchema = z.object({
   institution: z.string(),

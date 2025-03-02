@@ -40,13 +40,13 @@
     "@cv-generator/shared": "workspace:*",
     "@heroicons/vue": "^2.2.0",
     "lodash-es": "^4.17.21",
-    "pinia": "^2.1.7",
+    "pinia": "^2.3.1",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@pinia/testing": "^1.0.0",
+    "@pinia/testing": "0.1.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.10",
@@ -55,7 +55,7 @@
     "@testing-library/vue": "^8.0.2",
     "@types/lodash-es": "^4.17.12",
     "@vitejs/plugin-vue": "^5.0.3",
-    "@vitest/coverage-istanbul": "^1.2.2",
+    "@vitest/coverage-istanbul": "^3.0.7",
     "@vue/test-utils": "^2.4.4",
     "autoprefixer": "^10.4.19",
     "cssnano": "^6.1.0",
@@ -64,8 +64,8 @@
     "postcss-preset-env": "^9.5.2",
     "sass-embedded": "^1.85.1",
     "tailwindcss": "^3.4.1",
-    "typescript": "~5.3.3",
-    "vite": "^5.0.12",
+    "typescript": "~5.7.3",
+    "vite": "^6.2.0",
     "vitest": "^3.0.7",
     "vue-tsc": "^1.8.27"
   }

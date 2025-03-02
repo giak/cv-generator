@@ -102,7 +102,7 @@ graph TD
 - Correction des références de polices dans les variables CSS pour une cohérence globale
 - Mise à jour complète des fallback fonts pour une meilleure accessibilité
 
-## [1.1.0] - 2024-05-15
+## [1.1.0] - 2025-03-01
 
 ### Added 🎉
 
@@ -148,7 +148,7 @@ export class Result<T> {
 }
 ```
 
-## [1.0.0] - 2024-04-20
+## [1.0.0] - 2025-03-01
 
 ### Added 🎉
 
@@ -266,7 +266,7 @@ pie
 | vue         | ^3.4.15 |   ✅   |
 | typescript  | ~5.7.3  |   ✅   |
 | zod         | ^3.22.4 |   ✅   |
-| vitest      | ^1.6.1  |   ✅   |
+| vitest      | ^3.0.0  |   ✅   |
 | pinia       | ^2.1.7  |   ✅   |
 | tailwindcss | ^3.4.0  |   ✅   |
 
@@ -295,7 +295,7 @@ pie
 - Support complet du format JSON Resume
 - Implementation DDD avec agrégats, entités et value objects
 
-## [0.1.2] - 2024-02-20
+## [0.1.2] - 2025-02-28
 
 ### Added 🎉
 
@@ -327,7 +327,7 @@ export class ManageResume {
 }
 ```
 
-## [0.1.1] - 2024-02-15
+## [0.1.1] - 2025-02-28
 
 ### Added 🎉
 
@@ -340,7 +340,7 @@ export class ManageResume {
 - Refactoring de la structure du projet
 - Amélioration des tests unitaires
 
-## [0.1.0] - 2024-02-10
+## [0.1.0] - 2025-02-28
 
 ### Added 🎉
 

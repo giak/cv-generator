@@ -31,22 +31,54 @@ describe('Phone', () => {
       expect(phoneResult.error).toBe('Format de téléphone invalide')
     })
     
-    it('should fail with invalid phone format', () => {
+    it('should fail with alpha characters', () => {
       // Arrange & Act
-      const invalidPhones = [
-        'abc',
-        '123',
-        '+336',
-        '061234567', // manque un chiffre
-        '0612345678901' // trop long
-      ]
+      const phone = 'abc'
+      const phoneResult = Phone.create(phone)
       
       // Assert
-      invalidPhones.forEach(phone => {
-        const phoneResult = Phone.create(phone)
-        expect(phoneResult.isFailure).toBe(true)
-        expect(phoneResult.error).toBe('Format de téléphone invalide')
-      })
+      expect(phoneResult.isFailure).toBe(true)
+      expect(phoneResult.error).toBe('Format de téléphone invalide')
+    })
+    
+    it('should fail with very short number', () => {
+      // Arrange & Act
+      const phone = '123'
+      const phoneResult = Phone.create(phone)
+      
+      // Assert
+      expect(phoneResult.isFailure).toBe(true)
+      expect(phoneResult.error).toBe('Format de téléphone invalide')
+    })
+    
+    it('should fail with short international prefix', () => {
+      // Arrange & Act
+      const phone = '+336'
+      const phoneResult = Phone.create(phone)
+      
+      // Assert
+      expect(phoneResult.isFailure).toBe(true)
+      expect(phoneResult.error).toBe('Format de téléphone invalide')
+    })
+    
+    it('should fail with too short local number', () => {
+      // Arrange & Act
+      const phone = '061234567' // manque un chiffre
+      const phoneResult = Phone.create(phone)
+      
+      // Assert
+      expect(phoneResult.isFailure).toBe(true)
+      expect(phoneResult.error).toBe('Format de téléphone invalide')
+    })
+    
+    it('should fail with too long number', () => {
+      // Arrange & Act
+      const phone = '0612345678901' // trop long
+      const phoneResult = Phone.create(phone)
+      
+      // Assert
+      expect(phoneResult.isFailure).toBe(true)
+      expect(phoneResult.error).toBe('Format de téléphone invalide')
     })
   })
   

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useResumeStore } from '@ui/modules/cv/presentation/stores/resume'
 import BasicsForm from '@ui/modules/cv/presentation/components/BasicsForm.vue'
+import WorkList from '@ui/modules/cv/presentation/components/WorkList.vue'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { Resume } from '@cv-generator/core'
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
@@ -289,6 +290,11 @@ const handleNavigation = (path: string) => {
       id: 'basics',
       label: 'Informations de base'
     });
+  } else if (viewId === 'experience') {
+    breadcrumbItems.splice(1, 1, {
+      id: 'experience',
+      label: 'Expérience professionnelle'
+    });
   } else if (viewId === 'notifications') {
     breadcrumbItems.splice(1, 1, {
       id: 'notifications',
@@ -365,10 +371,14 @@ onMounted(() => {
         </button>
       </template>
       
-      <!-- Page Header -->
+      <!-- Page Header - dynamically change based on active view -->
       <PageHeader
-        title="Informations de base"
-        description="Renseignez vos informations personnelles et de contact pour votre CV"
+        :title="activeView === 'basics' ? 'Informations de base' : 
+               activeView === 'experience' ? 'Expérience professionnelle' : 
+               activeView.charAt(0).toUpperCase() + activeView.slice(1)"
+        :description="activeView === 'basics' ? 'Renseignez vos informations personnelles et de contact pour votre CV' :
+                    activeView === 'experience' ? 'Gérez vos expériences professionnelles pour votre CV' :
+                    'Gérez les paramètres de votre CV'"
       />
       
       <!-- Main Content -->
@@ -393,6 +403,26 @@ onMounted(() => {
             @update:modelValue="handleBasicsUpdate"
             @validate="handleValidate"
           />
+        </div>
+      </div>
+
+      <!-- Work Experience View -->
+      <div v-if="activeView === 'experience'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Expérience professionnelle</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <WorkList />
         </div>
       </div>
 
