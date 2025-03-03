@@ -39,6 +39,12 @@ const resumeStorageSchema = z.object({
     startDate: z.string(),
     endDate: z.string().optional()
   })).optional().default([]),
+  awards: z.array(z.object({
+    title: z.string(),
+    date: z.string(),
+    awarder: z.string(),
+    summary: z.string().optional()
+  })).optional().default([]),
   skills: z.array(z.object({
     name: z.string(),
     level: z.string().optional(),
@@ -78,6 +84,7 @@ const EMPTY_RESUME = {
   },
   work: [],
   education: [],
+  awards: [],
   skills: [],
 }
 
@@ -180,6 +187,7 @@ export class LocalStorageResumeRepository implements ResumeRepository {
           },
           work: [],
           education: [],
+          awards: [],
           skills: []
         });
       }

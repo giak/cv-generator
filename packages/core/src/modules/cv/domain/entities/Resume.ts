@@ -1,4 +1,4 @@
-import type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface'
+import type { ResumeInterface, AwardInterface } from '@cv-generator/shared/src/types/resume.interface'
 import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type'
 import { Email } from '../value-objects/Email'
 import { Phone } from '../value-objects/Phone'
@@ -123,14 +123,20 @@ export class Resume {
     return this.data.skills ? [...this.data.skills] : []
   }
 
+  get awards(): AwardInterface[] {
+    return this.data.awards || [];
+  }
+
   toJSON(): ResumeInterface {
     console.log('=== Domain Layer - Resume.toJSON ===')
     const json = {
+      ...this.data,
       basics: this.basics,
-      ...(this.work.length > 0 && { work: this.work }),
-      ...(this.volunteer.length > 0 && { volunteer: this.volunteer }),
-      ...(this.education.length > 0 && { education: this.education }),
-      ...(this.skills.length > 0 && { skills: this.skills })
+      work: this.work,
+      volunteer: this.volunteer,
+      education: this.education,
+      awards: this.awards,
+      skills: this.skills
     }
     console.log('Generated JSON:', json)
     return json

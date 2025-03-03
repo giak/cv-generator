@@ -207,7 +207,7 @@ export class Resume {
       ...(this.work.length > 0 && { work: this.work }),
       ...(this.volunteer.length > 0 && { volunteer: this.volunteer }),
       ...(this.education.length > 0 && { education: this.education }),
-      ...(this.awards.length > 0 && { awards: this.awards }),
+      awards: this.awards,
       ...(this.certificates.length > 0 && { certificates: this.certificates }),
       ...(this.publications.length > 0 && { publications: this.publications }),
       ...(this.skills.length > 0 && { skills: this.skills }),
