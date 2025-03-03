@@ -6,6 +6,7 @@ import { ref } from "vue"
 import { useErrorStore } from "../../../../core/stores/error"
 import { useWorkStore } from "./work"
 import { useVolunteerStore } from "./volunteer"
+import { useEducationStore } from "./education"
 
 interface ResumeStoreState {
   resume: Resume | null
@@ -104,6 +105,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
         // (they might have been modified but not yet saved)
         let workData = currentData.work || []
         let volunteerData = currentData.volunteer || []
+        let educationData = currentData.education || []
         
         // Get the work store instance and ensure it's loaded
         const workStore = useWorkStore()
@@ -145,6 +147,32 @@ export const useResumeStore = defineStore("cv.resume", () => {
           }
         }
         
+        // Get the education store instance and ensure it's loaded
+        const educationStore = useEducationStore()
+        if (educationStore) {
+          try {
+            if (!educationStore.educations || educationStore.educations.length === 0) {
+              console.log('[Store] Loading education data from education store')
+              await educationStore.loadEducation()
+            }
+            
+            if (educationStore.educations && educationStore.educations.length > 0) {
+              console.log('[Store] Using data from education store:', educationStore.educations.length, 'entries')
+              console.log('[Store] Education data BEFORE mapping:', JSON.stringify(educationStore.educations))
+              educationData = educationStore.educations.map(education => {
+                const mapped = education.toJSON()
+                console.log('[Store] Mapped education entry:', JSON.stringify(mapped))
+                return mapped
+              })
+              console.log('[Store] Final education data AFTER mapping:', JSON.stringify(educationData))
+            } else {
+              console.log('[Store] Education store has no data, using current data from storage')
+            }
+          } catch (e) {
+            console.error('[Store] Error loading education data:', e)
+          }
+        }
+        
         // Step 3: Create complete resume data by merging everything
         const completeData: ResumeInterface = {
           // Start with any existing data
@@ -169,12 +197,12 @@ export const useResumeStore = defineStore("cv.resume", () => {
             profiles: []
           },
           
-          // Explicitly include work and volunteer data from their respective stores
+          // Explicitly include work, volunteer, and education data from their respective stores
           work: workData,
           volunteer: volunteerData,
+          education: educationData,
           
           // Preserve other sections if they exist
-          education: currentData.education || [],
           awards: currentData.awards || [],
           certificates: currentData.certificates || [],
           publications: currentData.publications || [],
