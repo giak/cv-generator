@@ -5,6 +5,7 @@ import WorkList from '@ui/modules/cv/presentation/components/WorkList.vue'
 import VolunteerList from '@ui/modules/cv/presentation/components/VolunteerList.vue'
 import EducationList from '@ui/modules/cv/presentation/components/EducationList.vue'
 import AwardList from '@ui/modules/cv/presentation/components/AwardList.vue'
+import CertificateList from '@ui/modules/cv/presentation/components/CertificateList.vue'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { Resume } from '@cv-generator/core'
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
@@ -25,12 +26,14 @@ import {
 import { useVolunteerStore } from '@ui/modules/cv/presentation/stores/volunteer'
 import { useEducationStore } from '@ui/modules/cv/presentation/stores/education'
 import { useAwardStore } from '@ui/modules/cv/presentation/stores/award'
+import { useCertificateStore } from '@ui/modules/cv/presentation/stores/certificate'
 
 const store = useResumeStore()
 const errorStore = useErrorStore()
 const volunteerStore = useVolunteerStore()
 const educationStore = useEducationStore()
 const awardStore = useAwardStore()
+const certificateStore = useCertificateStore()
 
 // Créer un CV vide par défaut avec reactive pour une meilleure gestion de l'état
 const basics = reactive<BasicsInterface>({
@@ -266,6 +269,15 @@ const navigationGroups: NavGroup[] = [
               </svg>`
       },
       {
+        id: 'certificates',
+        label: 'Certifications',
+        path: '#certificates',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path>
+                <path d="M9 12l2 2 4-4"></path>
+              </svg>`
+      },
+      {
         id: 'skills',
         label: 'Compétences',
         path: '#skills',
@@ -336,6 +348,9 @@ watch(activeView, async (newView) => {
   } else if (newView === 'awards') {
     console.log('Loading awards data due to navigation...')
     await awardStore.loadAwards()
+  } else if (newView === 'certificates') {
+    console.log('Loading certificates data due to navigation...')
+    await certificateStore.loadCertificates()
   }
 })
 
@@ -371,6 +386,11 @@ const handleNavigation = (path: string) => {
     breadcrumbItems.splice(1, 1, {
       id: 'awards',
       label: 'Prix et Distinctions'
+    });
+  } else if (viewId === 'certificates') {
+    breadcrumbItems.splice(1, 1, {
+      id: 'certificates',
+      label: 'Certifications'
     });
   } else if (viewId === 'notifications') {
     breadcrumbItems.splice(1, 1, {
@@ -455,12 +475,14 @@ onMounted(() => {
                activeView === 'volunteer' ? 'Expérience de bénévolat' :
                activeView === 'education' ? 'Formation' :
                activeView === 'awards' ? 'Prix et Distinctions' :
+               activeView === 'certificates' ? 'Certifications' :
                activeView.charAt(0).toUpperCase() + activeView.slice(1)"
         :description="activeView === 'basics' ? 'Renseignez vos informations personnelles et de contact pour votre CV' :
                     activeView === 'experience' ? 'Gérez vos expériences professionnelles pour votre CV' :
                     activeView === 'volunteer' ? 'Ajoutez vos activités de bénévolat pour enrichir votre CV' :
                     activeView === 'education' ? 'Gérez votre parcours académique et vos diplômes' :
                     activeView === 'awards' ? 'Présentez vos prix, récompenses et reconnaissances professionnelles' :
+                    activeView === 'certificates' ? 'Ajoutez vos certifications professionnelles et diplômes' :
                     'Gérez les paramètres de votre CV'"
       />
       
@@ -566,6 +588,26 @@ onMounted(() => {
         
         <div class="p-6">
           <AwardList />
+        </div>
+      </div>
+
+      <!-- Certificate View -->
+      <div v-if="activeView === 'certificates'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Certifications</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <CertificateList />
         </div>
       </div>
 
