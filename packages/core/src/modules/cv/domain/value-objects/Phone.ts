@@ -9,8 +9,15 @@ export class Phone {
     }
 
     const cleanedPhone = phone.replace(/[\s.-]/g, '')
-    const phoneRegex = /^(?:\+\d{2}|0)\d{9}$/
+    
+    // More flexible regex to handle different phone formats
+    // Allows:
+    // 1. International format: +XX followed by 7-15 digits
+    // 2. French format: 0 followed by 5-10 digits
+    const phoneRegex = /^(?:\+\d{2}\d{7,15}|0\d{5,10})$/
+    
     if (!phoneRegex.test(cleanedPhone)) {
+      console.log(`[Phone] Validation failed for: "${cleanedPhone}"`)
       return Result.fail('Format de téléphone invalide')
     }
 
@@ -28,9 +35,14 @@ export class Phone {
       return `${match[1]} ${match[2]} ${match[3]} ${match[4]} ${match[5]} ${match[6]}`
     } else {
       // Format français XX XX XX XX XX
-      const match = cleaned.match(/^(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/)
-      if (!match) return this.value
-      return match.slice(1).join(' ')
+      // Try standard 10-digit format first
+      const match10Digit = cleaned.match(/^(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/)
+      if (match10Digit) {
+        return match10Digit.slice(1).join(' ')
+      }
+      
+      // Handle shorter phone numbers (preserving them as-is)
+      return cleaned
     }
   }
 

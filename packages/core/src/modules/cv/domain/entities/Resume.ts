@@ -64,6 +64,19 @@ export class Resume {
       })
     }
     
+    // 7. Validation des dates dans les expériences de bénévolat
+    if (data.volunteer && data.volunteer.length > 0) {
+      data.volunteer.forEach((vol, index) => {
+        if (!this.isValidDate(vol.startDate)) {
+          errors.push(`Format de date invalide pour le bénévolat ${index + 1}`)
+        }
+        
+        if (vol.endDate && !this.isValidDate(vol.endDate)) {
+          errors.push(`Format de date de fin invalide pour le bénévolat ${index + 1}`)
+        }
+      })
+    }
+    
     // Si des erreurs sont présentes, retourne le résultat d'échec
     if (errors.length > 0) {
       console.log('Validation errors:', errors)
@@ -98,6 +111,10 @@ export class Resume {
     return this.data.work ? [...this.data.work] : []
   }
 
+  get volunteer() {
+    return this.data.volunteer ? [...this.data.volunteer] : []
+  }
+
   get education() {
     return this.data.education ? [...this.data.education] : []
   }
@@ -111,6 +128,7 @@ export class Resume {
     const json = {
       basics: this.basics,
       ...(this.work.length > 0 && { work: this.work }),
+      ...(this.volunteer.length > 0 && { volunteer: this.volunteer }),
       ...(this.education.length > 0 && { education: this.education }),
       ...(this.skills.length > 0 && { skills: this.skills })
     }

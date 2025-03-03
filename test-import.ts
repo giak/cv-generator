@@ -1,0 +1,1 @@
+import type { VolunteerInterface } from '@cv-generator/shared/src/types/resume.interface'; const test: VolunteerInterface = { organization: 'Test', position: 'Test', startDate: '2023-01-01' }; console.log(test);

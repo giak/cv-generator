@@ -2,6 +2,7 @@
 import { useResumeStore } from '@ui/modules/cv/presentation/stores/resume'
 import BasicsForm from '@ui/modules/cv/presentation/components/BasicsForm.vue'
 import WorkList from '@ui/modules/cv/presentation/components/WorkList.vue'
+import VolunteerList from '@ui/modules/cv/presentation/components/VolunteerList.vue'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { Resume } from '@cv-generator/core'
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
@@ -19,9 +20,11 @@ import {
   type NavGroup,
   type BreadcrumbItem
 } from '../components/layouts'
+import { useVolunteerStore } from '@ui/modules/cv/presentation/stores/volunteer'
 
 const store = useResumeStore()
 const errorStore = useErrorStore()
+const volunteerStore = useVolunteerStore()
 
 // Créer un CV vide par défaut avec reactive pour une meilleure gestion de l'état
 const basics = reactive<BasicsInterface>({
@@ -125,7 +128,7 @@ const handleValidate = async () => {
     console.log('=== UI Layer - Form Submission ===')
     console.log('Current basics state:', JSON.parse(JSON.stringify(basics)))
     
-    // Créer les données du CV
+    // Créer les données du CV à sauvegarder - le store s'occupera de l'agrégation avec les autres sections
     const resumeData = {
       basics: {
         ...basics,
@@ -133,9 +136,10 @@ const handleValidate = async () => {
         profiles: [...(basics.profiles || [])]
       }
     }
-    console.log('Complete resume data to save:', resumeData)
+    
+    console.log('Basics data to save:', resumeData)
 
-    // Sauvegarder les données du CV
+    // Sauvegarder les données du CV - le store s'occupera de récupérer les autres sections
     await store.saveResume(resumeData)
     console.log('CV sauvegardé avec succès dans App.vue')
   } catch (error) {
@@ -228,6 +232,17 @@ const navigationGroups: NavGroup[] = [
               </svg>`
       },
       {
+        id: 'volunteer',
+        label: 'Bénévolat',
+        path: '#volunteer',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="8.5" cy="7" r="4"></circle>
+                <line x1="20" y1="8" x2="20" y2="14"></line>
+                <line x1="23" y1="11" x2="17" y2="11"></line>
+              </svg>`
+      },
+      {
         id: 'education',
         label: 'Formation',
         path: '#education',
@@ -295,6 +310,14 @@ const breadcrumbItems: BreadcrumbItem[] = [
 // Ajout de la vue active
 const activeView = ref('basics');
 
+// Load section data when activeView changes
+watch(activeView, async (newView) => {
+  if (newView === 'volunteer') {
+    console.log('Loading volunteer data due to navigation...')
+    await volunteerStore.loadVolunteers()
+  }
+})
+
 // Handle navigation
 const handleNavigation = (path: string) => {
   console.log('Navigate to:', path);
@@ -312,6 +335,11 @@ const handleNavigation = (path: string) => {
     breadcrumbItems.splice(1, 1, {
       id: 'experience',
       label: 'Expérience professionnelle'
+    });
+  } else if (viewId === 'volunteer') {
+    breadcrumbItems.splice(1, 1, {
+      id: 'volunteer',
+      label: 'Bénévolat'
     });
   } else if (viewId === 'notifications') {
     breadcrumbItems.splice(1, 1, {
@@ -392,10 +420,12 @@ onMounted(() => {
       <!-- Page Header - dynamically change based on active view -->
       <PageHeader
         :title="activeView === 'basics' ? 'Informations de base' : 
-               activeView === 'experience' ? 'Expérience professionnelle' : 
+               activeView === 'experience' ? 'Expérience professionnelle' :
+               activeView === 'volunteer' ? 'Expérience de bénévolat' :
                activeView.charAt(0).toUpperCase() + activeView.slice(1)"
         :description="activeView === 'basics' ? 'Renseignez vos informations personnelles et de contact pour votre CV' :
                     activeView === 'experience' ? 'Gérez vos expériences professionnelles pour votre CV' :
+                    activeView === 'volunteer' ? 'Ajoutez vos activités de bénévolat pour enrichir votre CV' :
                     'Gérez les paramètres de votre CV'"
       />
       
@@ -441,6 +471,26 @@ onMounted(() => {
         
         <div class="p-6">
           <WorkList />
+        </div>
+      </div>
+
+      <!-- Volunteer Experience View -->
+      <div v-if="activeView === 'volunteer'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Expérience de bénévolat</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <VolunteerList />
         </div>
       </div>
 

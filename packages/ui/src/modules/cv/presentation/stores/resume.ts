@@ -4,6 +4,8 @@ import { LocalStorageResumeRepository } from "@cv-generator/infrastructure/src/r
 import { defineStore } from "pinia"
 import { ref } from "vue"
 import { useErrorStore } from "../../../../core/stores/error"
+import { useWorkStore } from "./work"
+import { useVolunteerStore } from "./volunteer"
 
 interface ResumeStoreState {
   resume: Resume | null
@@ -55,23 +57,39 @@ export const useResumeStore = defineStore("cv.resume", () => {
 
     async saveResume(data: ResumeInterface) {
       console.log('=== [Store] saveResume ===')
-      console.log('[Store] Received data to update:', JSON.stringify(data))
+      console.log('[Store] Received data to save:', JSON.stringify(data))
       loading.value = true
       
       try {
-        // Création d'un repository temporaire pour charger les données actuelles
-        // Ceci garantit qu'on a toujours les données les plus récentes
+        // Step 1: Load current data using a temporary repository
+        // This ensures we have the most recent data
         const repository = new LocalStorageResumeRepository()
+        // Initialize with empty object that has the required basics property
+        let currentData: ResumeInterface = {
+          basics: {
+            name: '',
+            email: '',
+            label: '',
+            phone: '',
+            url: '',
+            image: '',
+            summary: '',
+            location: {
+              address: '',
+              postalCode: '',
+              city: '',
+              countryCode: '',
+              region: ''
+            },
+            profiles: []
+          }
+        }
         
-        // Obtention du CV actuel directement du localStorage
-        let currentData = {}
         try {
           const rawResult = await repository.load()
-          // Le type retourné doit être vérifié dynamiquement
-          if (rawResult && typeof rawResult === 'object' && 'isValid' in rawResult && rawResult.isValid && 'resume' in rawResult && rawResult.resume) {
-            // Utiliser une assertion de type pour indiquer à TypeScript que resume a une méthode toJSON
-            const resumeWithMethods = rawResult.resume as { toJSON: () => Record<string, any> };
-            currentData = resumeWithMethods.toJSON()
+          if (rawResult) {
+            // Convert resume instance to JSON
+            currentData = rawResult.toJSON()
             console.log('[Store] Loaded current resume from storage:', JSON.stringify(currentData))
           } else {
             console.log('[Store] No valid resume found in storage, creating new')
@@ -81,43 +99,102 @@ export const useResumeStore = defineStore("cv.resume", () => {
           console.log('[Store] Will proceed with empty resume')
         }
         
-        // Fusion des données existantes avec les nouvelles
-        const completeData = {
-          // Conserver toutes les sections existantes
-          ...currentData,
-          // Mise à jour uniquement de la section basics
-          basics: {
-            name: data.basics.name || '',
-            email: data.basics.email || '',
-            label: data.basics.label || '',
-            phone: data.basics.phone || '',
-            url: data.basics.url || '',
-            image: data.basics.image || '', // Inclusion explicite du champ image
-            summary: data.basics.summary || '',
-            location: data.basics.location ? {
-              address: data.basics.location.address || '',
-              postalCode: data.basics.location.postalCode || '',
-              city: data.basics.location.city || '',
-              countryCode: data.basics.location.countryCode || '',
-              region: data.basics.location.region || ''
-            } : undefined,
-            profiles: (data.basics.profiles || []).map(profile => ({
-              network: profile.network || '',
-              username: profile.username || '',
-              url: profile.url || ''
-            }))
+        // Step 2: Load data from other stores if they're initialized
+        // This ensures we have the most recent data from all sections
+        // (they might have been modified but not yet saved)
+        let workData = currentData.work || []
+        let volunteerData = currentData.volunteer || []
+        
+        // Get the work store instance and ensure it's loaded
+        const workStore = useWorkStore()
+        if (workStore) {
+          try {
+            if (!workStore.works || workStore.works.length === 0) {
+              console.log('[Store] Loading work data from work store')
+              await workStore.loadWorks()
+            }
+            
+            if (workStore.works && workStore.works.length > 0) {
+              console.log('[Store] Using data from work store:', workStore.works.length, 'entries')
+              workData = workStore.works.map(work => work.toJSON())
+            } else {
+              console.log('[Store] Work store has no data, using current data from storage')
+            }
+          } catch (e) {
+            console.error('[Store] Error loading work data:', e)
           }
         }
         
-        console.log('[Store] Merged complete data for saving:', JSON.stringify(completeData))
+        // Get the volunteer store instance and ensure it's loaded
+        const volunteerStore = useVolunteerStore()
+        if (volunteerStore) {
+          try {
+            if (!volunteerStore.volunteers || volunteerStore.volunteers.length === 0) {
+              console.log('[Store] Loading volunteer data from volunteer store')
+              await volunteerStore.loadVolunteers()
+            }
+            
+            if (volunteerStore.volunteers && volunteerStore.volunteers.length > 0) {
+              console.log('[Store] Using data from volunteer store:', volunteerStore.volunteers.length, 'entries')
+              volunteerData = volunteerStore.volunteers.map(volunteer => volunteer.toJSON())
+            } else {
+              console.log('[Store] Volunteer store has no data, using current data from storage')
+            }
+          } catch (e) {
+            console.error('[Store] Error loading volunteer data:', e)
+          }
+        }
         
+        // Step 3: Create complete resume data by merging everything
+        const completeData: ResumeInterface = {
+          // Start with any existing data
+          ...currentData,
+          
+          // Update with new data provided to this method (typically basics)
+          basics: data.basics || currentData.basics || {
+            name: '',
+            email: '',
+            label: '',
+            phone: '',
+            url: '',
+            image: '',
+            summary: '',
+            location: {
+              address: '',
+              postalCode: '',
+              city: '',
+              countryCode: '',
+              region: ''
+            },
+            profiles: []
+          },
+          
+          // Explicitly include work and volunteer data from their respective stores
+          work: workData,
+          volunteer: volunteerData,
+          
+          // Preserve other sections if they exist
+          education: currentData.education || [],
+          awards: currentData.awards || [],
+          certificates: currentData.certificates || [],
+          publications: currentData.publications || [],
+          skills: currentData.skills || [],
+          languages: currentData.languages || [],
+          interests: currentData.interests || [],
+          references: currentData.references || [],
+          projects: currentData.projects || []
+        }
+        
+        console.log('[Store] Complete aggregate data for saving:', JSON.stringify(completeData))
+        
+        // Step 4: Save the complete resume
         await errorStore.executeWithErrorHandling(async () => {
-          // Créer une instance de Resume avec les données fusionnées
+          // Create a Resume instance with the complete data
           const resumeInstance = ResumeEntity.create(completeData)
           console.log('[Store] Created Resume instance with ALL sections:', resumeInstance)
 
           if (resumeInstance.resume) {
-            // Sauvegarde du CV complet
+            // Save the complete CV
             await useCase.createResume(resumeInstance.resume.toJSON())
             console.log('[Store] Resume saved successfully with all sections preserved')
             resume.value = resumeInstance.resume
