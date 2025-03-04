@@ -34,6 +34,8 @@ import SkillList from '@ui/modules/cv/presentation/components/SkillList.vue'
 import { useLanguageStore } from '@ui/modules/cv/presentation/stores/language'
 import LanguageList from '@ui/modules/cv/presentation/components/LanguageList.vue'
 import { useWorkStore } from '@ui/modules/cv/presentation/stores/work'
+import { useInterestStore } from '@ui/modules/cv/presentation/stores/interest'
+import InterestList from '@ui/modules/cv/presentation/components/InterestList.vue'
 
 const store = useResumeStore()
 const errorStore = useErrorStore()
@@ -45,6 +47,7 @@ const certificateStore = useCertificateStore()
 const publicationStore = usePublicationStore()
 const skillStore = useSkillStore()
 const languageStore = useLanguageStore()
+const interestStore = useInterestStore()
 
 // Variable pour le composant actif à afficher en fonction de la vue
 const activeComponent = ref()
@@ -319,6 +322,16 @@ const navigationGroups: NavGroup[] = [
                 <path d="M9 13h6"></path>
                 <path d="M9 17h4"></path>
               </svg>`
+      },
+      {
+        id: 'interests',
+        label: 'Intérêts',
+        path: '#interests',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 8v4"></path>
+                <path d="M12 16h.01"></path>
+              </svg>`
       }
     ]
   },
@@ -411,6 +424,10 @@ watch(activeView, async (newView) => {
       console.log('Loading languages data due to navigation...')
       await languageStore.loadLanguages();
       activeComponent.value = LanguageList;
+    } else if (newView === 'interests') {
+      console.log('Loading interests data due to navigation...')
+      await interestStore.loadInterests();
+      activeComponent.value = InterestList;
     } else if (newView === 'notifications') {
       console.log('Loading notifications data due to navigation...')
       // Implement notifications data loading logic
@@ -486,6 +503,12 @@ const handleNavigation = (path: string) => {
       label: 'Langues'
     });
   }
+  else if (viewId === 'interests') {
+    breadcrumbItems.splice(1, 1, {
+      id: 'interests',
+      label: 'Intérêts'
+    });
+  }
   else if (viewId === 'notifications') {
     breadcrumbItems.splice(1, 1, {
       id: 'notifications',
@@ -521,6 +544,8 @@ watch(activeView, (viewId) => {
     activeComponent.value = SkillList
   } else if (viewId === 'languages') {
     activeComponent.value = LanguageList
+  } else if (viewId === 'interests') {
+    activeComponent.value = InterestList
   } else {
     // Fallback à basics si la vue n'est pas reconnue
     activeComponent.value = BasicsForm
@@ -600,6 +625,7 @@ onMounted(() => {
                activeView === 'publications' ? 'Publications' :
                activeView === 'skills' ? 'Compétences' :
                activeView === 'languages' ? 'Langues' :
+               activeView === 'interests' ? 'Intérêts' :
                activeView.charAt(0).toUpperCase() + activeView.slice(1)"
         :description="activeView === 'basics' ? 'Renseignez vos informations personnelles et de contact pour votre CV' :
                     activeView === 'experience' ? 'Gérez vos expériences professionnelles pour votre CV' :
@@ -610,6 +636,7 @@ onMounted(() => {
                     activeView === 'publications' ? 'Présentez vos livres, articles et travaux publiés' :
                     activeView === 'skills' ? 'Ajoutez vos compétences techniques et professionnelles' :
                     activeView === 'languages' ? 'Ajoutez les langues que vous maîtrisez et leur niveau' :
+                    activeView === 'interests' ? 'Ajoutez les intérêts que vous partagez et les domaines d\'activité' :
                     'Gérez les paramètres de votre CV'"
       />
       
@@ -795,6 +822,26 @@ onMounted(() => {
         
         <div class="p-6">
           <LanguageList />
+        </div>
+      </div>
+
+      <!-- Interests View -->
+      <div v-if="activeView === 'interests'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Intérêts</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <InterestList />
         </div>
       </div>
 

@@ -32,7 +32,7 @@ Cette story s'inscrit dans la continuité des développements précédents et su
 
 ## Estimation
 
-Story Points: 3
+Story Points: 3 
 
 ## Critères d'Acceptation
 
