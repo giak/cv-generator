@@ -36,7 +36,7 @@ Cette story fait suite à la Story-5 qui a mis en place les formations académiq
 
 ## Estimation
 
-Story Points: 2 (1.5 jours de développement humain estimés)
+Story Points: 2 (1.5 jours de développement humain estimés ; 4 heures réelles)
 
 ## Tasks
 

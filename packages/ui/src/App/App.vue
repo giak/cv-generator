@@ -27,6 +27,10 @@ import { useVolunteerStore } from '@ui/modules/cv/presentation/stores/volunteer'
 import { useEducationStore } from '@ui/modules/cv/presentation/stores/education'
 import { useAwardStore } from '@ui/modules/cv/presentation/stores/award'
 import { useCertificateStore } from '@ui/modules/cv/presentation/stores/certificate'
+import { usePublicationStore } from '@ui/modules/cv/presentation/stores/publication'
+import PublicationList from '@ui/modules/cv/presentation/components/PublicationList.vue'
+import { useSkillStore } from '@ui/modules/cv/presentation/stores/skill'
+import SkillList from '@ui/modules/cv/presentation/components/SkillList.vue'
 
 const store = useResumeStore()
 const errorStore = useErrorStore()
@@ -34,6 +38,11 @@ const volunteerStore = useVolunteerStore()
 const educationStore = useEducationStore()
 const awardStore = useAwardStore()
 const certificateStore = useCertificateStore()
+const publicationStore = usePublicationStore()
+const skillStore = useSkillStore()
+
+// Variable pour le composant actif à afficher en fonction de la vue
+const activeComponent = ref()
 
 // Créer un CV vide par défaut avec reactive pour une meilleure gestion de l'état
 const basics = reactive<BasicsInterface>({
@@ -278,6 +287,15 @@ const navigationGroups: NavGroup[] = [
               </svg>`
       },
       {
+        id: 'publications',
+        label: 'Publications',
+        path: '#publications',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>`
+      },
+      {
         id: 'skills',
         label: 'Compétences',
         path: '#skills',
@@ -351,53 +369,85 @@ watch(activeView, async (newView) => {
   } else if (newView === 'certificates') {
     console.log('Loading certificates data due to navigation...')
     await certificateStore.loadCertificates()
+  } else if (newView === 'publications') {
+    console.log('Loading publications data due to navigation...')
+    await publicationStore.loadPublications()
+  } else if (newView === 'skills') {
+    console.log('Loading skills data due to navigation...')
+    await skillStore.loadSkills()
+  } else if (newView === 'notifications') {
+    console.log('Loading notifications data due to navigation...')
+    // Implement notifications data loading logic
   }
 })
 
-// Handle navigation
+// Gestion de la navigation
 const handleNavigation = (path: string) => {
-  console.log('Navigate to:', path);
-  // Extraire l'ID de la vue à partir du chemin
-  const viewId = path.substring(1); // Enlever le '#'
+  console.log('Navigation to:', path);
+  
+  const pathWithoutHash = path.startsWith('#') ? path.substring(1) : path;
+  const segments = pathWithoutHash.split('/');
+  const viewId = segments[0] || 'basics';
+  
+  console.log('Setting active view to:', viewId);
   activeView.value = viewId;
   
-  // Mise à jour des breadcrumbs
+  // Mise à jour des breadcrumbs en fonction de la vue active
   if (viewId === 'basics') {
     breadcrumbItems.splice(1, 1, {
       id: 'basics',
       label: 'Informations de base'
     });
-  } else if (viewId === 'experience') {
+  }
+  else if (viewId === 'experience') {
     breadcrumbItems.splice(1, 1, {
       id: 'experience',
       label: 'Expérience professionnelle'
     });
-  } else if (viewId === 'volunteer') {
+  }
+  else if (viewId === 'volunteer') {
     breadcrumbItems.splice(1, 1, {
       id: 'volunteer',
       label: 'Bénévolat'
     });
-  } else if (viewId === 'education') {
+  }
+  else if (viewId === 'education') {
     breadcrumbItems.splice(1, 1, {
       id: 'education',
       label: 'Formation'
     });
-  } else if (viewId === 'awards') {
+  }
+  else if (viewId === 'awards') {
     breadcrumbItems.splice(1, 1, {
       id: 'awards',
-      label: 'Prix et Distinctions'
+      label: 'Prix et distinctions'
     });
-  } else if (viewId === 'certificates') {
+  }
+  else if (viewId === 'certificates') {
     breadcrumbItems.splice(1, 1, {
       id: 'certificates',
       label: 'Certifications'
     });
-  } else if (viewId === 'notifications') {
+  }
+  else if (viewId === 'publications') {
+    breadcrumbItems.splice(1, 1, {
+      id: 'publications',
+      label: 'Publications'
+    });
+  }
+  else if (viewId === 'skills') {
+    breadcrumbItems.splice(1, 1, {
+      id: 'skills',
+      label: 'Compétences'
+    });
+  }
+  else if (viewId === 'notifications') {
     breadcrumbItems.splice(1, 1, {
       id: 'notifications',
       label: 'Notifications'
     });
-  } else {
+  }
+  else {
     // Autres vues
     breadcrumbItems.splice(1, 1, {
       id: viewId,
@@ -405,6 +455,30 @@ const handleNavigation = (path: string) => {
     });
   }
 };
+
+// Watch activeView pour mettre à jour le composant actif
+watch(activeView, (viewId) => {
+  if (viewId === 'basics') {
+    activeComponent.value = BasicsForm
+  } else if (viewId === 'work') {
+    activeComponent.value = WorkList
+  } else if (viewId === 'volunteer') {
+    activeComponent.value = VolunteerList
+  } else if (viewId === 'education') {
+    activeComponent.value = EducationList
+  } else if (viewId === 'awards') {
+    activeComponent.value = AwardList
+  } else if (viewId === 'certificates') {
+    activeComponent.value = CertificateList
+  } else if (viewId === 'publications') {
+    activeComponent.value = PublicationList
+  } else if (viewId === 'skills') {
+    activeComponent.value = SkillList
+  } else {
+    // Fallback à basics si la vue n'est pas reconnue
+    activeComponent.value = BasicsForm
+  }
+})
 
 // Fermer la sidebar quand la largeur de la fenêtre change (responsive)
 onMounted(() => {
@@ -476,6 +550,7 @@ onMounted(() => {
                activeView === 'education' ? 'Formation' :
                activeView === 'awards' ? 'Prix et Distinctions' :
                activeView === 'certificates' ? 'Certifications' :
+               activeView === 'publications' ? 'Publications' :
                activeView.charAt(0).toUpperCase() + activeView.slice(1)"
         :description="activeView === 'basics' ? 'Renseignez vos informations personnelles et de contact pour votre CV' :
                     activeView === 'experience' ? 'Gérez vos expériences professionnelles pour votre CV' :
@@ -483,6 +558,7 @@ onMounted(() => {
                     activeView === 'education' ? 'Gérez votre parcours académique et vos diplômes' :
                     activeView === 'awards' ? 'Présentez vos prix, récompenses et reconnaissances professionnelles' :
                     activeView === 'certificates' ? 'Ajoutez vos certifications professionnelles et diplômes' :
+                    activeView === 'publications' ? 'Présentez vos livres, articles et travaux publiés' :
                     'Gérez les paramètres de votre CV'"
       />
       
@@ -608,6 +684,46 @@ onMounted(() => {
         
         <div class="p-6">
           <CertificateList />
+        </div>
+      </div>
+
+      <!-- Publications View -->
+      <div v-if="activeView === 'publications'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Publications</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <PublicationList />
+        </div>
+      </div>
+
+      <!-- Skills View -->
+      <div v-if="activeView === 'skills'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Compétences</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <SkillList />
         </div>
       </div>
 

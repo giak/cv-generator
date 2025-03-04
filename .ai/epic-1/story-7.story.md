@@ -37,7 +37,7 @@ Cette story fait suite à la Story-6 qui a mis en place les prix et distinctions
 
 ## Estimation
 
-Story Points: 2 (1.5 jours de développement humain estimés)
+Story Points: 2 (1.5 jours de développement humain estimés ; 2 heures réelles)
 
 ## Critères d'Acceptation
 

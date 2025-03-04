@@ -210,7 +210,7 @@ export class Resume {
       awards: this.awards,
       ...(this.certificates.length > 0 && { certificates: this.certificates }),
       ...(this.publications.length > 0 && { publications: this.publications }),
-      ...(this.skills.length > 0 && { skills: this.skills }),
+      skills: this.skills,
       ...(this.languages.length > 0 && { languages: this.languages }),
       ...(this.interests.length > 0 && { interests: this.interests }),
       ...(this.references.length > 0 && { references: this.references }),
