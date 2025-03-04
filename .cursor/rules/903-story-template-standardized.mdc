@@ -1,5 +1,5 @@
 ---
-description: "ALWAYS use when  la sory  or UPDATING story files to ENSURE proper tracking and implementation. This rule enforces consistent story structure with tasks, context, and progress tracking."
+description: "ALWAYS use when  la story  or UPDATING story files to ENSURE proper tracking and implementation. This rule enforces consistent story structure with tasks, context, and progress tracking."
 globs: "**/*.story.md"
 alwaysApply: false
 ---

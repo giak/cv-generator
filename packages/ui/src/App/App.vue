@@ -36,6 +36,8 @@ import LanguageList from '@ui/modules/cv/presentation/components/LanguageList.vu
 import { useWorkStore } from '@ui/modules/cv/presentation/stores/work'
 import { useInterestStore } from '@ui/modules/cv/presentation/stores/interest'
 import InterestList from '@ui/modules/cv/presentation/components/InterestList.vue'
+import { useReferenceStore } from '@ui/modules/cv/presentation/stores/reference'
+import ReferenceList from '@ui/modules/cv/presentation/components/ReferenceList.vue'
 
 const store = useResumeStore()
 const errorStore = useErrorStore()
@@ -48,6 +50,7 @@ const publicationStore = usePublicationStore()
 const skillStore = useSkillStore()
 const languageStore = useLanguageStore()
 const interestStore = useInterestStore()
+const referenceStore = useReferenceStore()
 
 // Variable pour le composant actif à afficher en fonction de la vue
 const activeComponent = ref()
@@ -332,6 +335,14 @@ const navigationGroups: NavGroup[] = [
                 <path d="M12 8v4"></path>
                 <path d="M12 16h.01"></path>
               </svg>`
+      },
+      {
+        id: 'references',
+        label: 'Références',
+        path: '#references',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+                <path d="M17 6.1H3M21 12.5H3M21 18.9H3M16 18.9L14.8 3"/>
+              </svg>`
       }
     ]
   },
@@ -428,6 +439,10 @@ watch(activeView, async (newView) => {
       console.log('Loading interests data due to navigation...')
       await interestStore.loadInterests();
       activeComponent.value = InterestList;
+    } else if (newView === 'references') {
+      console.log('Loading references data due to navigation...')
+      await referenceStore.loadReferences();
+      activeComponent.value = ReferenceList;
     } else if (newView === 'notifications') {
       console.log('Loading notifications data due to navigation...')
       // Implement notifications data loading logic
@@ -509,6 +524,12 @@ const handleNavigation = (path: string) => {
       label: 'Intérêts'
     });
   }
+  else if (viewId === 'references') {
+    breadcrumbItems.splice(1, 1, {
+      id: 'references',
+      label: 'Références'
+    });
+  }
   else if (viewId === 'notifications') {
     breadcrumbItems.splice(1, 1, {
       id: 'notifications',
@@ -546,6 +567,8 @@ watch(activeView, (viewId) => {
     activeComponent.value = LanguageList
   } else if (viewId === 'interests') {
     activeComponent.value = InterestList
+  } else if (viewId === 'references') {
+    activeComponent.value = ReferenceList
   } else {
     // Fallback à basics si la vue n'est pas reconnue
     activeComponent.value = BasicsForm
@@ -626,6 +649,7 @@ onMounted(() => {
                activeView === 'skills' ? 'Compétences' :
                activeView === 'languages' ? 'Langues' :
                activeView === 'interests' ? 'Intérêts' :
+               activeView === 'references' ? 'Références' :
                activeView.charAt(0).toUpperCase() + activeView.slice(1)"
         :description="activeView === 'basics' ? 'Renseignez vos informations personnelles et de contact pour votre CV' :
                     activeView === 'experience' ? 'Gérez vos expériences professionnelles pour votre CV' :
@@ -637,6 +661,7 @@ onMounted(() => {
                     activeView === 'skills' ? 'Ajoutez vos compétences techniques et professionnelles' :
                     activeView === 'languages' ? 'Ajoutez les langues que vous maîtrisez et leur niveau' :
                     activeView === 'interests' ? 'Ajoutez les intérêts que vous partagez et les domaines d\'activité' :
+                    activeView === 'references' ? 'Ajoutez les références que vous avez rencontrées' :
                     'Gérez les paramètres de votre CV'"
       />
       
@@ -842,6 +867,26 @@ onMounted(() => {
         
         <div class="p-6">
           <InterestList />
+        </div>
+      </div>
+
+      <!-- References View -->
+      <div v-if="activeView === 'references'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Références</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <ReferenceList />
         </div>
       </div>
 
