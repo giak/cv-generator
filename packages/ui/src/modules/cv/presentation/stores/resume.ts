@@ -7,6 +7,7 @@ import { useErrorStore } from "../../../../core/stores/error"
 import { useWorkStore } from "./work"
 import { useVolunteerStore } from "./volunteer"
 import { useEducationStore } from "./education"
+import { useProjectStore } from "./project"
 
 interface ResumeStoreState {
   resume: Resume | null
@@ -106,6 +107,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
         let workData = currentData.work || []
         let volunteerData = currentData.volunteer || []
         let educationData = currentData.education || []
+        let projectData = currentData.projects || []
         
         // Get the work store instance and ensure it's loaded
         const workStore = useWorkStore()
@@ -173,6 +175,26 @@ export const useResumeStore = defineStore("cv.resume", () => {
           }
         }
         
+        // Get the project store instance and ensure it's loaded
+        const projectStore = useProjectStore()
+        if (projectStore) {
+          try {
+            if (!projectStore.projects || projectStore.projects.length === 0) {
+              console.log('[Store] Loading project data from project store')
+              await projectStore.loadProjects()
+            }
+            
+            if (projectStore.projects && projectStore.projects.length > 0) {
+              console.log('[Store] Using data from project store:', projectStore.projects.length, 'entries')
+              projectData = projectStore.projects
+            } else {
+              console.log('[Store] Project store has no data, using current data from storage')
+            }
+          } catch (e) {
+            console.error('[Store] Error loading project data:', e)
+          }
+        }
+        
         // Step 3: Create complete resume data by merging everything
         const completeData: ResumeInterface = {
           // Start with any existing data
@@ -197,10 +219,11 @@ export const useResumeStore = defineStore("cv.resume", () => {
             profiles: []
           },
           
-          // Explicitly include work, volunteer, and education data from their respective stores
+          // Explicitly include work, volunteer, education and project data from their respective stores
           work: workData,
           volunteer: volunteerData,
           education: educationData,
+          projects: projectData,
           
           // Preserve other sections if they exist
           awards: currentData.awards || [],
@@ -209,8 +232,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
           skills: currentData.skills || [],
           languages: currentData.languages || [],
           interests: currentData.interests || [],
-          references: currentData.references || [],
-          projects: currentData.projects || []
+          references: currentData.references || []
         }
         
         console.log('[Store] Complete aggregate data for saving:', JSON.stringify(completeData))
@@ -293,3 +315,26 @@ export const useResumeStore = defineStore("cv.resume", () => {
     }
   }
 }); 
+
+async function saveProjects() {
+  try {
+    // Get resume data from store
+    const resume = await useResumeStore().getResume()
+    const projectStore = useProjectStore()
+
+    if (resume) {
+      // Create a new resume object with updated projects
+      const updatedResume = {
+        ...resume,
+        projects: projectStore.projects.map(({ id, ...project }) => project)
+      }
+      
+      // Sauvegarder le CV complet
+      await errorStore.executeWithErrorHandling(async () => {
+        await useResumeStore().saveResume(updatedResume)
+      })
+    }
+  } catch (error) {
+    console.error('Error saving projects:', error)
+  }
+} 

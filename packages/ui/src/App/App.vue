@@ -38,6 +38,8 @@ import { useInterestStore } from '@ui/modules/cv/presentation/stores/interest'
 import InterestList from '@ui/modules/cv/presentation/components/InterestList.vue'
 import { useReferenceStore } from '@ui/modules/cv/presentation/stores/reference'
 import ReferenceList from '@ui/modules/cv/presentation/components/ReferenceList.vue'
+import { useProjectStore } from '@ui/modules/cv/presentation/stores/project'
+import ProjectList from '@ui/modules/cv/presentation/components/ProjectList.vue'
 
 const store = useResumeStore()
 const errorStore = useErrorStore()
@@ -51,6 +53,7 @@ const skillStore = useSkillStore()
 const languageStore = useLanguageStore()
 const interestStore = useInterestStore()
 const referenceStore = useReferenceStore()
+const projectStore = useProjectStore()
 
 // Variable pour le composant actif à afficher en fonction de la vue
 const activeComponent = ref()
@@ -337,6 +340,16 @@ const navigationGroups: NavGroup[] = [
               </svg>`
       },
       {
+        id: 'projects',
+        label: 'Projets',
+        path: '#projects',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="9" y1="21" x2="9" y2="9"></line>
+              </svg>`
+      },
+      {
         id: 'references',
         label: 'Références',
         path: '#references',
@@ -439,6 +452,10 @@ watch(activeView, async (newView) => {
       console.log('Loading interests data due to navigation...')
       await interestStore.loadInterests();
       activeComponent.value = InterestList;
+    } else if (newView === 'projects') {
+      console.log('Loading projects data due to navigation...')
+      await projectStore.loadProjects();
+      activeComponent.value = ProjectList;
     } else if (newView === 'references') {
       console.log('Loading references data due to navigation...')
       await referenceStore.loadReferences();
@@ -524,6 +541,12 @@ const handleNavigation = (path: string) => {
       label: 'Intérêts'
     });
   }
+  else if (viewId === 'projects') {
+    breadcrumbItems.splice(1, 1, {
+      id: 'projects',
+      label: 'Projets'
+    });
+  }
   else if (viewId === 'references') {
     breadcrumbItems.splice(1, 1, {
       id: 'references',
@@ -567,6 +590,8 @@ watch(activeView, (viewId) => {
     activeComponent.value = LanguageList
   } else if (viewId === 'interests') {
     activeComponent.value = InterestList
+  } else if (viewId === 'projects') {
+    activeComponent.value = ProjectList
   } else if (viewId === 'references') {
     activeComponent.value = ReferenceList
   } else {
@@ -649,6 +674,7 @@ onMounted(() => {
                activeView === 'skills' ? 'Compétences' :
                activeView === 'languages' ? 'Langues' :
                activeView === 'interests' ? 'Intérêts' :
+               activeView === 'projects' ? 'Projets' :
                activeView === 'references' ? 'Références' :
                activeView.charAt(0).toUpperCase() + activeView.slice(1)"
         :description="activeView === 'basics' ? 'Renseignez vos informations personnelles et de contact pour votre CV' :
@@ -661,6 +687,7 @@ onMounted(() => {
                     activeView === 'skills' ? 'Ajoutez vos compétences techniques et professionnelles' :
                     activeView === 'languages' ? 'Ajoutez les langues que vous maîtrisez et leur niveau' :
                     activeView === 'interests' ? 'Ajoutez les intérêts que vous partagez et les domaines d\'activité' :
+                    activeView === 'projects' ? 'Gérez vos projets personnels et professionnels' :
                     activeView === 'references' ? 'Ajoutez les références que vous avez rencontrées' :
                     'Gérez les paramètres de votre CV'"
       />
@@ -867,6 +894,26 @@ onMounted(() => {
         
         <div class="p-6">
           <InterestList />
+        </div>
+      </div>
+
+      <!-- Projects View -->
+      <div v-if="activeView === 'projects'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Projets</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <ProjectList />
         </div>
       </div>
 
