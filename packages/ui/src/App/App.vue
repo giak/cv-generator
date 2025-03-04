@@ -31,15 +31,20 @@ import { usePublicationStore } from '@ui/modules/cv/presentation/stores/publicat
 import PublicationList from '@ui/modules/cv/presentation/components/PublicationList.vue'
 import { useSkillStore } from '@ui/modules/cv/presentation/stores/skill'
 import SkillList from '@ui/modules/cv/presentation/components/SkillList.vue'
+import { useLanguageStore } from '@ui/modules/cv/presentation/stores/language'
+import LanguageList from '@ui/modules/cv/presentation/components/LanguageList.vue'
+import { useWorkStore } from '@ui/modules/cv/presentation/stores/work'
 
 const store = useResumeStore()
 const errorStore = useErrorStore()
+const workStore = useWorkStore()
 const volunteerStore = useVolunteerStore()
 const educationStore = useEducationStore()
 const awardStore = useAwardStore()
 const certificateStore = useCertificateStore()
 const publicationStore = usePublicationStore()
 const skillStore = useSkillStore()
+const languageStore = useLanguageStore()
 
 // Variable pour le composant actif à afficher en fonction de la vue
 const activeComponent = ref()
@@ -302,6 +307,18 @@ const navigationGroups: NavGroup[] = [
         icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
               </svg>`
+      },
+      {
+        id: 'languages',
+        label: 'Langues',
+        path: '#languages',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+                <path d="M5 7l2-2h10l2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7z"></path>
+                <path d="M9 2v3"></path>
+                <path d="M15 2v3"></path>
+                <path d="M9 13h6"></path>
+                <path d="M9 17h4"></path>
+              </svg>`
       }
     ]
   },
@@ -357,29 +374,51 @@ const activeView = ref('basics');
 
 // Load section data when activeView changes
 watch(activeView, async (newView) => {
-  if (newView === 'volunteer') {
-    console.log('Loading volunteer data due to navigation...')
-    await volunteerStore.loadVolunteers()
-  } else if (newView === 'education') {
-    console.log('Loading education data due to navigation...')
-    await educationStore.loadEducation()
-  } else if (newView === 'awards') {
-    console.log('Loading awards data due to navigation...')
-    await awardStore.loadAwards()
-  } else if (newView === 'certificates') {
-    console.log('Loading certificates data due to navigation...')
-    await certificateStore.loadCertificates()
-  } else if (newView === 'publications') {
-    console.log('Loading publications data due to navigation...')
-    await publicationStore.loadPublications()
-  } else if (newView === 'skills') {
-    console.log('Loading skills data due to navigation...')
-    await skillStore.loadSkills()
-  } else if (newView === 'notifications') {
-    console.log('Loading notifications data due to navigation...')
-    // Implement notifications data loading logic
+  try {
+    if (newView === 'experience') {
+      console.log('Loading work data due to navigation...')
+      await workStore.loadWorks()
+      activeComponent.value = WorkList;
+    } else if (newView === 'basics') {
+      console.log('Loading basics data due to navigation...')
+      await store.loadResume()
+      activeComponent.value = BasicsForm;
+    } else if (newView === 'volunteer') {
+      console.log('Loading volunteer data due to navigation...')
+      await volunteerStore.loadVolunteers();
+      activeComponent.value = VolunteerList;
+    } else if (newView === 'education') {
+      console.log('Loading education data due to navigation...')
+      await educationStore.loadEducation();
+      activeComponent.value = EducationList;
+    } else if (newView === 'awards') {
+      console.log('Loading awards data due to navigation...')
+      await awardStore.loadAwards();
+      activeComponent.value = AwardList;
+    } else if (newView === 'certificates') {
+      console.log('Loading certificates data due to navigation...')
+      await certificateStore.loadCertificates();
+      activeComponent.value = CertificateList;
+    } else if (newView === 'publications') {
+      console.log('Loading publications data due to navigation...')
+      await publicationStore.loadPublications();
+      activeComponent.value = PublicationList;
+    } else if (newView === 'skills') {
+      console.log('Loading skills data due to navigation...')
+      await skillStore.loadSkills();
+      activeComponent.value = SkillList;
+    } else if (newView === 'languages') {
+      console.log('Loading languages data due to navigation...')
+      await languageStore.loadLanguages();
+      activeComponent.value = LanguageList;
+    } else if (newView === 'notifications') {
+      console.log('Loading notifications data due to navigation...')
+      // Implement notifications data loading logic
+    }
+  } catch (error) {
+    console.error(`Error loading data for ${newView}:`, error);
   }
-})
+});
 
 // Gestion de la navigation
 const handleNavigation = (path: string) => {
@@ -441,6 +480,12 @@ const handleNavigation = (path: string) => {
       label: 'Compétences'
     });
   }
+  else if (viewId === 'languages') {
+    breadcrumbItems.splice(1, 1, {
+      id: 'languages',
+      label: 'Langues'
+    });
+  }
   else if (viewId === 'notifications') {
     breadcrumbItems.splice(1, 1, {
       id: 'notifications',
@@ -474,6 +519,8 @@ watch(activeView, (viewId) => {
     activeComponent.value = PublicationList
   } else if (viewId === 'skills') {
     activeComponent.value = SkillList
+  } else if (viewId === 'languages') {
+    activeComponent.value = LanguageList
   } else {
     // Fallback à basics si la vue n'est pas reconnue
     activeComponent.value = BasicsForm
@@ -551,6 +598,8 @@ onMounted(() => {
                activeView === 'awards' ? 'Prix et Distinctions' :
                activeView === 'certificates' ? 'Certifications' :
                activeView === 'publications' ? 'Publications' :
+               activeView === 'skills' ? 'Compétences' :
+               activeView === 'languages' ? 'Langues' :
                activeView.charAt(0).toUpperCase() + activeView.slice(1)"
         :description="activeView === 'basics' ? 'Renseignez vos informations personnelles et de contact pour votre CV' :
                     activeView === 'experience' ? 'Gérez vos expériences professionnelles pour votre CV' :
@@ -559,6 +608,8 @@ onMounted(() => {
                     activeView === 'awards' ? 'Présentez vos prix, récompenses et reconnaissances professionnelles' :
                     activeView === 'certificates' ? 'Ajoutez vos certifications professionnelles et diplômes' :
                     activeView === 'publications' ? 'Présentez vos livres, articles et travaux publiés' :
+                    activeView === 'skills' ? 'Ajoutez vos compétences techniques et professionnelles' :
+                    activeView === 'languages' ? 'Ajoutez les langues que vous maîtrisez et leur niveau' :
                     'Gérez les paramètres de votre CV'"
       />
       
@@ -724,6 +775,26 @@ onMounted(() => {
         
         <div class="p-6">
           <SkillList />
+        </div>
+      </div>
+
+      <!-- Languages View -->
+      <div v-if="activeView === 'languages'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Langues</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <LanguageList />
         </div>
       </div>
 
