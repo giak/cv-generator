@@ -1,16 +1,12 @@
 <script setup lang="ts">
-import { useResumeStore } from '@ui/modules/cv/presentation/stores/resume'
+import { onMounted, watch, type Component } from 'vue'
 import BasicsForm from '@ui/modules/cv/presentation/components/BasicsForm.vue'
 import WorkList from '@ui/modules/cv/presentation/components/WorkList.vue'
 import VolunteerList from '@ui/modules/cv/presentation/components/VolunteerList.vue'
 import EducationList from '@ui/modules/cv/presentation/components/EducationList.vue'
 import AwardList from '@ui/modules/cv/presentation/components/AwardList.vue'
 import CertificateList from '@ui/modules/cv/presentation/components/CertificateList.vue'
-import { onMounted, reactive, ref, watch } from 'vue'
-import { Resume } from '@cv-generator/core'
-import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
 import ErrorNotification from '../components/notification/ErrorNotification.vue'
-import { useErrorStore, type ErrorInfo } from '../core/stores/error'
 import ToastDemo from '../components/notification/ToastDemo.vue'
 // Import layout components
 import { 
@@ -19,560 +15,66 @@ import {
   BreadcrumbNav, 
   UserInfo, 
   SearchInput, 
-  PageHeader,
-  type NavGroup,
-  type BreadcrumbItem
+  PageHeader
 } from '../components/layouts'
-import { useVolunteerStore } from '@ui/modules/cv/presentation/stores/volunteer'
-import { useEducationStore } from '@ui/modules/cv/presentation/stores/education'
-import { useAwardStore } from '@ui/modules/cv/presentation/stores/award'
-import { useCertificateStore } from '@ui/modules/cv/presentation/stores/certificate'
-import { usePublicationStore } from '@ui/modules/cv/presentation/stores/publication'
 import PublicationList from '@ui/modules/cv/presentation/components/PublicationList.vue'
-import { useSkillStore } from '@ui/modules/cv/presentation/stores/skill'
 import SkillList from '@ui/modules/cv/presentation/components/SkillList.vue'
-import { useLanguageStore } from '@ui/modules/cv/presentation/stores/language'
 import LanguageList from '@ui/modules/cv/presentation/components/LanguageList.vue'
-import { useWorkStore } from '@ui/modules/cv/presentation/stores/work'
-import { useInterestStore } from '@ui/modules/cv/presentation/stores/interest'
 import InterestList from '@ui/modules/cv/presentation/components/InterestList.vue'
-import { useReferenceStore } from '@ui/modules/cv/presentation/stores/reference'
 import ReferenceList from '@ui/modules/cv/presentation/components/ReferenceList.vue'
-import { useProjectStore } from '@ui/modules/cv/presentation/stores/project'
 import ProjectList from '@ui/modules/cv/presentation/components/ProjectList.vue'
+import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
 
-const store = useResumeStore()
-const errorStore = useErrorStore()
-const workStore = useWorkStore()
-const volunteerStore = useVolunteerStore()
-const educationStore = useEducationStore()
-const awardStore = useAwardStore()
-const certificateStore = useCertificateStore()
-const publicationStore = usePublicationStore()
-const skillStore = useSkillStore()
-const languageStore = useLanguageStore()
-const interestStore = useInterestStore()
-const referenceStore = useReferenceStore()
-const projectStore = useProjectStore()
+// Import composables
+import { useStores } from '../composables/ui/useStores'
+import { useAppState } from '../composables/ui/useAppState'
+import { useNavigation } from '../composables/ui/useNavigation'
+import { useErrorHandling } from '../composables/ui/useErrorHandling'
 
-// Variable pour le composant actif à afficher en fonction de la vue
-const activeComponent = ref()
-
-// Créer un CV vide par défaut avec reactive pour une meilleure gestion de l'état
-const basics = reactive<BasicsInterface>({
-  name: '',
-  email: '',
-  label: '',
-  phone: '',
-  url: '',
-  image: '',
-  summary: '',
-  location: {
-    address: '',
-    postalCode: '',
-    city: '',
-    countryCode: '',
-    region: ''
-  },
-  profiles: []
-})
+// Initialize composables
+const { resumeStore } = useStores()
+const { 
+  activeComponent, 
+  activeView, 
+  isSidebarOpen, 
+  basics, 
+  initializeBasics, 
+  updateBasics, 
+  saveBasics, 
+  toggleSidebar, 
+  setupResizeListener 
+} = useAppState()
+const { 
+  navigationGroups, 
+  breadcrumbItems, 
+  handleNavigation, 
+  getActiveViewTitle, 
+  getActiveViewDescription 
+} = useNavigation({ activeView, activeComponent })
+const { handleErrorAction } = useErrorHandling()
 
 // Charger le CV au montage du composant
 onMounted(async () => {
-  await store.loadResume()
-  // Initialiser basics avec les données du store
-  if (store.resume?.basics) {
-    const storeBasics = store.resume.basics
-    console.log('Loading data from store:', storeBasics)
-    Object.assign(basics, {
-      name: storeBasics.name ?? '',
-      email: storeBasics.email ?? '',
-      label: storeBasics.label ?? '',
-      phone: storeBasics.phone ?? '',
-      url: storeBasics.url ?? '',
-      image: storeBasics.image ?? '',
-      summary: storeBasics.summary ?? '',
-      location: storeBasics.location ?? {
-        address: '',
-        postalCode: '',
-        city: '',
-        countryCode: '',
-        region: ''
-      },
-      profiles: storeBasics.profiles ?? []
-    })
-    console.log('Loaded data into basics:', basics)
-  }
+  await resumeStore.loadResume()
+  await initializeBasics()
+  setupResizeListener()
 })
 
 // Gérer la mise à jour du formulaire
 const handleBasicsUpdate = (value: BasicsInterface) => {
-  console.log('=== UI Layer - Basics Update ===')
-  console.log('Received update:', JSON.stringify(value))
-  
-  // Mettre à jour le modèle directement
-  basics.name = value.name || ''
-  basics.email = value.email || ''
-  basics.label = value.label || ''
-  basics.phone = value.phone || ''
-  basics.url = value.url || ''
-  basics.image = value.image || ''
-  basics.summary = value.summary || ''
-  
-  // Mettre à jour location avec focus particulier sur countryCode
-  if (value.location && basics.location) {
-    basics.location.address = value.location.address || ''
-    basics.location.postalCode = value.location.postalCode || ''
-    basics.location.city = value.location.city || ''
-    basics.location.countryCode = value.location.countryCode || ''
-    basics.location.region = value.location.region || ''
-    
-    // Ajout d'un log spécifique pour le countryCode
-    console.log(`Updated countryCode: '${value.location.countryCode}'`)
-  } else if (value.location) {
-    // Si basics.location est undefined mais value.location existe
-    basics.location = {
-      address: value.location.address || '',
-      postalCode: value.location.postalCode || '',
-      city: value.location.city || '',
-      countryCode: value.location.countryCode || '',
-      region: value.location.region || ''
-    }
-  }
-  
-  // Mettre à jour profiles
-  basics.profiles = [...(value.profiles || [])]
-  
-  // Log complet des données, y compris les champs problématiques
-  console.log('Updated basics with ALL fields:', JSON.stringify({
-    ...basics,
-    image: basics.image,
-    location: basics.location ? {
-      ...basics.location,
-      countryCode: basics.location.countryCode
-    } : null
-  }))
+  updateBasics(value)
 }
 
 // Gérer la sauvegarde du formulaire
 const handleValidate = async () => {
-  try {
-    console.log('=== UI Layer - Form Submission ===')
-    console.log('Current basics state:', JSON.parse(JSON.stringify(basics)))
-    
-    // Créer les données du CV à sauvegarder - le store s'occupera de l'agrégation avec les autres sections
-    const resumeData = {
-      basics: {
-        ...basics,
-        location: { ...basics.location },
-        profiles: [...(basics.profiles || [])]
-      }
-    }
-    
-    console.log('Basics data to save:', resumeData)
-
-    // Sauvegarder les données du CV - le store s'occupera de récupérer les autres sections
-    await store.saveResume(resumeData)
-    console.log('CV sauvegardé avec succès dans App.vue')
-  } catch (error) {
-    console.error('Erreur dans App.vue lors de la sauvegarde:', error)
-  }
+  await saveBasics()
 }
-
-// Log changes to basics
-watch(basics, (newValue) => {
-  console.log('Basics updated:', JSON.parse(JSON.stringify(newValue)))
-}, { deep: true })
-
-// Handle error actions for recovery
-const handleErrorAction = async (error: ErrorInfo) => {
-  if (!error.action) return
-  
-  console.log('Handling error action:', error.action)
-  
-  const [storeName, methodName] = error.action.handler.split('/')
-  
-  // Handle Resume store actions
-  if (storeName === 'resume') {
-    switch (methodName) {
-      case 'retryLastOperation':
-        if (error.action.params?.operation === 'save') {
-          console.log('Retrying save operation')
-          await handleValidate()
-        } else if (error.action.params?.operation === 'load') {
-          console.log('Retrying load operation')
-          await store.loadResume()
-        }
-        break
-      default:
-        console.warn('Unknown resume store method:', methodName)
-    }
-  }
-  
-  // Handle application-wide actions
-  if (storeName === 'app') {
-    switch (methodName) {
-      case 'enableOfflineMode':
-        console.log('Enabling offline mode')
-        // Implement offline mode logic
-        break
-      default:
-        console.warn('Unknown app method:', methodName)
-    }
-  }
-  
-  // Dismiss the error after handling it
-  errorStore.dismissError(error.id)
-}
-
-// État du menu latéral pour responsive
-const isSidebarOpen = ref(false);
-const toggleSidebar = () => {
-  isSidebarOpen.value = !isSidebarOpen.value;
-  
-  // Ajouter/retirer une classe au body pour empêcher le défilement sur mobile
-  if (isSidebarOpen.value) {
-    document.body.classList.add('sidebar-open');
-  } else {
-    document.body.classList.remove('sidebar-open');
-  }
-};
-
-// Setup navigation items for sidebar
-const navigationGroups: NavGroup[] = [
-  {
-    id: 'cv',
-    title: 'Curriculum Vitae',
-    items: [
-      {
-        id: 'basics',
-        label: 'Informations de base',
-        path: '#basics',
-        active: true,
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>`
-      },
-      {
-        id: 'experience',
-        label: 'Expérience',
-        path: '#experience',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-              </svg>`
-      },
-      {
-        id: 'volunteer',
-        label: 'Bénévolat',
-        path: '#volunteer',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="8.5" cy="7" r="4"></circle>
-                <line x1="20" y1="8" x2="20" y2="14"></line>
-                <line x1="23" y1="11" x2="17" y2="11"></line>
-              </svg>`
-      },
-      {
-        id: 'education',
-        label: 'Formation',
-        path: '#education',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M22 10v6M2 10v6M17 10a5 5 0 0 0-10 0M12 10v6M7 16h10"></path>
-              </svg>`
-      },
-      {
-        id: 'awards',
-        label: 'Prix & Distinctions',
-        path: '#awards',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <circle cx="12" cy="8" r="7"></circle>
-                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-              </svg>`
-      },
-      {
-        id: 'certificates',
-        label: 'Certifications',
-        path: '#certificates',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path>
-                <path d="M9 12l2 2 4-4"></path>
-              </svg>`
-      },
-      {
-        id: 'publications',
-        label: 'Publications',
-        path: '#publications',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>`
-      },
-      {
-        id: 'skills',
-        label: 'Compétences',
-        path: '#skills',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-              </svg>`
-      },
-      {
-        id: 'languages',
-        label: 'Langues',
-        path: '#languages',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M5 7l2-2h10l2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7z"></path>
-                <path d="M9 2v3"></path>
-                <path d="M15 2v3"></path>
-                <path d="M9 13h6"></path>
-                <path d="M9 17h4"></path>
-              </svg>`
-      },
-      {
-        id: 'interests',
-        label: 'Intérêts',
-        path: '#interests',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 8v4"></path>
-                <path d="M12 16h.01"></path>
-              </svg>`
-      },
-      {
-        id: 'projects',
-        label: 'Projets',
-        path: '#projects',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="3" y1="9" x2="21" y2="9"></line>
-                <line x1="9" y1="21" x2="9" y2="9"></line>
-              </svg>`
-      },
-      {
-        id: 'references',
-        label: 'Références',
-        path: '#references',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M17 6.1H3M21 12.5H3M21 18.9H3M16 18.9L14.8 3"/>
-              </svg>`
-      }
-    ]
-  },
-  {
-    id: 'options',
-    title: 'Options',
-    items: [
-      {
-        id: 'notifications',
-        label: 'Notifications',
-        path: '#notifications',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-              </svg>`
-      },
-      {
-        id: 'themes',
-        label: 'Thèmes',
-        path: '#themes',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-              </svg>`
-      },
-      {
-        id: 'settings',
-        label: 'Paramètres',
-        path: '#settings',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-              </svg>`
-      }
-    ]
-  }
-];
-
-// Setup breadcrumb items
-const breadcrumbItems: BreadcrumbItem[] = [
-  {
-    id: 'home',
-    label: 'CV Generator',
-    path: '#'
-  },
-  {
-    id: 'basics',
-    label: 'Informations de base'
-  }
-];
-
-// Ajout de la vue active
-const activeView = ref('basics');
-
-// Load section data when activeView changes
-watch(activeView, async (newView) => {
-  try {
-    if (newView === 'experience') {
-      console.log('Loading work data due to navigation...')
-      await workStore.loadWorks()
-      activeComponent.value = WorkList;
-    } else if (newView === 'basics') {
-      console.log('Loading basics data due to navigation...')
-      await store.loadResume()
-      activeComponent.value = BasicsForm;
-    } else if (newView === 'volunteer') {
-      console.log('Loading volunteer data due to navigation...')
-      await volunteerStore.loadVolunteers();
-      activeComponent.value = VolunteerList;
-    } else if (newView === 'education') {
-      console.log('Loading education data due to navigation...')
-      await educationStore.loadEducation();
-      activeComponent.value = EducationList;
-    } else if (newView === 'awards') {
-      console.log('Loading awards data due to navigation...')
-      await awardStore.loadAwards();
-      activeComponent.value = AwardList;
-    } else if (newView === 'certificates') {
-      console.log('Loading certificates data due to navigation...')
-      await certificateStore.loadCertificates();
-      activeComponent.value = CertificateList;
-    } else if (newView === 'publications') {
-      console.log('Loading publications data due to navigation...')
-      await publicationStore.loadPublications();
-      activeComponent.value = PublicationList;
-    } else if (newView === 'skills') {
-      console.log('Loading skills data due to navigation...')
-      await skillStore.loadSkills();
-      activeComponent.value = SkillList;
-    } else if (newView === 'languages') {
-      console.log('Loading languages data due to navigation...')
-      await languageStore.loadLanguages();
-      activeComponent.value = LanguageList;
-    } else if (newView === 'interests') {
-      console.log('Loading interests data due to navigation...')
-      await interestStore.loadInterests();
-      activeComponent.value = InterestList;
-    } else if (newView === 'projects') {
-      console.log('Loading projects data due to navigation...')
-      await projectStore.loadProjects();
-      activeComponent.value = ProjectList;
-    } else if (newView === 'references') {
-      console.log('Loading references data due to navigation...')
-      await referenceStore.loadReferences();
-      activeComponent.value = ReferenceList;
-    } else if (newView === 'notifications') {
-      console.log('Loading notifications data due to navigation...')
-      // Implement notifications data loading logic
-    }
-  } catch (error) {
-    console.error(`Error loading data for ${newView}:`, error);
-  }
-});
-
-// Gestion de la navigation
-const handleNavigation = (path: string) => {
-  console.log('Navigation to:', path);
-  
-  const pathWithoutHash = path.startsWith('#') ? path.substring(1) : path;
-  const segments = pathWithoutHash.split('/');
-  const viewId = segments[0] || 'basics';
-  
-  console.log('Setting active view to:', viewId);
-  activeView.value = viewId;
-  
-  // Mise à jour des breadcrumbs en fonction de la vue active
-  if (viewId === 'basics') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'basics',
-      label: 'Informations de base'
-    });
-  }
-  else if (viewId === 'experience') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'experience',
-      label: 'Expérience professionnelle'
-    });
-  }
-  else if (viewId === 'volunteer') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'volunteer',
-      label: 'Bénévolat'
-    });
-  }
-  else if (viewId === 'education') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'education',
-      label: 'Formation'
-    });
-  }
-  else if (viewId === 'awards') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'awards',
-      label: 'Prix et distinctions'
-    });
-  }
-  else if (viewId === 'certificates') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'certificates',
-      label: 'Certifications'
-    });
-  }
-  else if (viewId === 'publications') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'publications',
-      label: 'Publications'
-    });
-  }
-  else if (viewId === 'skills') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'skills',
-      label: 'Compétences'
-    });
-  }
-  else if (viewId === 'languages') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'languages',
-      label: 'Langues'
-    });
-  }
-  else if (viewId === 'interests') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'interests',
-      label: 'Intérêts'
-    });
-  }
-  else if (viewId === 'projects') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'projects',
-      label: 'Projets'
-    });
-  }
-  else if (viewId === 'references') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'references',
-      label: 'Références'
-    });
-  }
-  else if (viewId === 'notifications') {
-    breadcrumbItems.splice(1, 1, {
-      id: 'notifications',
-      label: 'Notifications'
-    });
-  }
-  else {
-    // Autres vues
-    breadcrumbItems.splice(1, 1, {
-      id: viewId,
-      label: viewId.charAt(0).toUpperCase() + viewId.slice(1)
-    });
-  }
-};
 
 // Watch activeView pour mettre à jour le composant actif
 watch(activeView, (viewId) => {
   if (viewId === 'basics') {
     activeComponent.value = BasicsForm
-  } else if (viewId === 'work') {
+  } else if (viewId === 'experience') {
     activeComponent.value = WorkList
   } else if (viewId === 'volunteer') {
     activeComponent.value = VolunteerList
@@ -599,17 +101,6 @@ watch(activeView, (viewId) => {
     activeComponent.value = BasicsForm
   }
 })
-
-// Fermer la sidebar quand la largeur de la fenêtre change (responsive)
-onMounted(() => {
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768 && isSidebarOpen.value) {
-      // Sur desktop, on cache simplement la sidebar sans transition
-      isSidebarOpen.value = false;
-      document.body.classList.remove('sidebar-open');
-    }
-  });
-});
 </script>
 
 <template>
@@ -664,32 +155,8 @@ onMounted(() => {
       
       <!-- Page Header - dynamically change based on active view -->
       <PageHeader
-        :title="activeView === 'basics' ? 'Informations de base' : 
-               activeView === 'experience' ? 'Expérience professionnelle' :
-               activeView === 'volunteer' ? 'Expérience de bénévolat' :
-               activeView === 'education' ? 'Formation' :
-               activeView === 'awards' ? 'Prix et Distinctions' :
-               activeView === 'certificates' ? 'Certifications' :
-               activeView === 'publications' ? 'Publications' :
-               activeView === 'skills' ? 'Compétences' :
-               activeView === 'languages' ? 'Langues' :
-               activeView === 'interests' ? 'Intérêts' :
-               activeView === 'projects' ? 'Projets' :
-               activeView === 'references' ? 'Références' :
-               activeView.charAt(0).toUpperCase() + activeView.slice(1)"
-        :description="activeView === 'basics' ? 'Renseignez vos informations personnelles et de contact pour votre CV' :
-                    activeView === 'experience' ? 'Gérez vos expériences professionnelles pour votre CV' :
-                    activeView === 'volunteer' ? 'Ajoutez vos activités de bénévolat pour enrichir votre CV' :
-                    activeView === 'education' ? 'Gérez votre parcours académique et vos diplômes' :
-                    activeView === 'awards' ? 'Présentez vos prix, récompenses et reconnaissances professionnelles' :
-                    activeView === 'certificates' ? 'Ajoutez vos certifications professionnelles et diplômes' :
-                    activeView === 'publications' ? 'Présentez vos livres, articles et travaux publiés' :
-                    activeView === 'skills' ? 'Ajoutez vos compétences techniques et professionnelles' :
-                    activeView === 'languages' ? 'Ajoutez les langues que vous maîtrisez et leur niveau' :
-                    activeView === 'interests' ? 'Ajoutez les intérêts que vous partagez et les domaines d\'activité' :
-                    activeView === 'projects' ? 'Gérez vos projets personnels et professionnels' :
-                    activeView === 'references' ? 'Ajoutez les références que vous avez rencontrées' :
-                    'Gérez les paramètres de votre CV'"
+        :title="getActiveViewTitle"
+        :description="getActiveViewDescription"
       />
       
       <!-- Main Content -->
@@ -710,7 +177,7 @@ onMounted(() => {
         <div class="p-6">
           <BasicsForm
             :modelValue="basics"
-            :loading="store.loading"
+            :loading="resumeStore.loading"
             @update:modelValue="handleBasicsUpdate"
             @validate="handleValidate"
           />
@@ -719,6 +186,26 @@ onMounted(() => {
 
       <!-- Work Experience View -->
       <div v-if="activeView === 'experience'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
+          <h2 class="font-medium text-white">Expérience professionnelle</h2>
+          <div>
+            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <WorkList />
+        </div>
+      </div>
+      
+      <!-- Work Experience View (for when activeView is 'work') -->
+      <div v-if="activeView === 'work'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
           <h2 class="font-medium text-white">Expérience professionnelle</h2>
           <div>

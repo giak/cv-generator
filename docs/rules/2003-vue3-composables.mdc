@@ -1,0 +1,390 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 2003-vue3-composables
+
+ENFORCE extraction de logique dans des composables Vue.js 3 pour GARANTIR réutilisabilité et maintenabilité
+
+- Auteur: Dev Team
+- Statut: Approuvé
+- Date de création: 2024-07-01
+- Dernière mise à jour: 2024-07-20
+
+## Objectif
+
+Standardiser la création et l'utilisation des composables Vue.js 3 pour extraire la logique des composants, améliorant ainsi la réutilisabilité, la testabilité et la maintenabilité du code.
+
+## Contexte
+
+Les composables (Composition API) sont une fonctionnalité clé de Vue.js 3 qui permettent d'extraire et de réutiliser la logique entre les composants. Cette approche favorise une meilleure séparation des responsabilités et facilite la maintenance du code.
+
+## Règles
+
+### Structure et Organisation
+
+1. **Emplacement**: Tous les composables doivent être placés dans le répertoire `src/composables/` avec une organisation par domaine:
+   - `src/composables/ui/` - Composables liés à l'interface utilisateur
+   - `src/composables/core/` - Composables de base réutilisables
+   - `src/composables/domain/` - Composables spécifiques au domaine métier
+
+2. **Nommage**: Les noms des composables doivent:
+   - Commencer par le préfixe `use` (ex: `useNavigation.ts`)
+   - Décrire clairement leur responsabilité
+   - Utiliser le camelCase
+
+3. **Responsabilité unique**: Chaque composable doit avoir une responsabilité unique et bien définie.
+
+### Implémentation
+
+1. **Typage strict**: Tous les composables doivent utiliser un typage TypeScript strict:
+   ```typescript
+   // ✅ Bon
+   const useCounter = (initialValue: number = 0): {
+     count: Ref<number>;
+     increment: () => void;
+     decrement: () => void;
+   } => {
+     const count = ref(initialValue)
+     // ...
+   }
+   
+   // ❌ Mauvais
+   const useCounter = (initialValue = 0) => {
+     const count = ref(initialValue)
+     // ...
+   }
+   ```
+
+2. **Interface de retour cohérente**: Tous les composables doivent retourner un objet contenant leurs valeurs réactives et méthodes:
+   ```typescript
+   // ✅ Bon
+   const useNavigation = () => {
+     // ...
+     return {
+       currentRoute,
+       navigate,
+       goBack
+     }
+   }
+   ```
+
+3. **Isolation des dépendances**: Les dépendances externes doivent être injectées ou initialisées à l'intérieur du composable:
+   ```typescript
+   // ✅ Bon - Injection
+   const useApi = (httpClient: HttpClient) => {
+     // ...
+   }
+
+   // ✅ Bon - Initialisation interne
+   const useApi = () => {
+     const httpClient = new HttpClient()
+     // ...
+   }
+   ```
+
+4. **Gestion du cycle de vie**: Utiliser les hooks de cycle de vie Vue appropriés:
+   ```typescript
+   // ✅ Bon
+   const useDataFetching = () => {
+     // ...
+     onMounted(() => {
+       fetchData()
+     })
+     
+     onBeforeUnmount(() => {
+       cancelPendingRequests()
+     })
+     // ...
+   }
+   ```
+
+5. **Gestion des effets secondaires**: Tous les effets secondaires doivent être gérés de manière appropriée:
+   ```typescript
+   // ✅ Bon
+   const useSubscription = () => {
+     // ...
+     const unsubscribe = () => {
+       // Logique de désabonnement
+     }
+     
+     onBeforeUnmount(unsubscribe)
+     // ...
+     return {
+       // ...
+       unsubscribe
+     }
+   }
+   ```
+
+### Documentation
+
+1. **JSDoc standardisé**: Chaque composable doit être documenté avec JSDoc:
+   ```typescript
+   /**
+    * Gère la navigation dans l'application
+    * 
+    * @param {Object} options - Options de configuration
+    * @param {boolean} options.useHistory - Utiliser l'historique de navigation
+    * @returns {Object} Méthodes et propriétés de navigation
+    * @example
+    * const { currentRoute, navigate } = useNavigation({ useHistory: true })
+    * navigate('/dashboard')
+    */
+   ```
+
+2. **Effets secondaires**: Documenter tous les effets secondaires potentiels:
+   ```typescript
+   /**
+    * @sideEffect Enregistre un écouteur d'événements global qui sera 
+    * automatiquement nettoyé lors du démontage du composant
+    */
+   ```
+
+3. **Exemples d'utilisation**: Inclure au moins un exemple d'utilisation:
+   ```typescript
+   /**
+    * @example
+    * const { count, increment } = useCounter(10)
+    * increment() // count.value devient 11
+    */
+   ```
+
+### Tests
+
+1. **Tests unitaires obligatoires**: Chaque composable doit être accompagné de tests unitaires couvrant:
+   - Les valeurs par défaut
+   - Les fonctions exposées
+   - Les effets réactifs
+   - La gestion des erreurs
+
+2. **Isolation des tests**: Utiliser des mocks pour les dépendances externes:
+   ```typescript
+   // ✅ Bon
+   vi.mock('vue-router', () => ({
+     useRouter: vi.fn(() => ({
+       push: vi.fn()
+     }))
+   }))
+   ```
+
+3. **Couverture minimale**: Assurer une couverture de test d'au moins 85% pour chaque composable.
+
+### Intégration avec l'Architecture Hexagonale
+
+1. **Respect des limites architecturales**: Les composables doivent respecter les limites de l'architecture hexagonale:
+   - Les composables UI ne doivent pas accéder directement aux adaptateurs d'infrastructure
+   - Les composables domain peuvent interagir avec les ports et adaptateurs appropriés
+
+2. **Injection des dépendances**: Privilégier l'injection des adaptateurs et services:
+   ```typescript
+   // ✅ Bon
+   const useDomainFeature = (repository: Repository) => {
+     // ...
+   }
+   ```
+
+### Performance et Optimisation
+
+1. **Mémoisation**: Utiliser `computed` pour les calculs dérivés coûteux:
+   ```typescript
+   // ✅ Bon
+   const useFilteredList = (items: Ref<Item[]>) => {
+     const filteredItems = computed(() => {
+       return items.value.filter(/* logique de filtrage complexe */)
+     })
+     // ...
+   }
+   ```
+
+2. **Prévention des fuites mémoire**: Nettoyer les ressources et abonnements:
+   ```typescript
+   // ✅ Bon
+   const useWebSocket = () => {
+     const ws = new WebSocket(/* ... */)
+     
+     onBeforeUnmount(() => {
+       ws.close()
+     })
+     // ...
+   }
+   ```
+
+3. **Lazy loading**: Initier les ressources coûteuses à la demande:
+   ```typescript
+   // ✅ Bon
+   const useHeavyResource = () => {
+     let resource: Resource | null = null
+     
+     const initResource = () => {
+       if (!resource) {
+         resource = new Resource()
+       }
+       return resource
+     }
+     // ...
+   }
+   ```
+
+## Gestion d'État
+
+1. **Interaction avec les stores Pinia**: Clarifier l'interaction entre composables et stores:
+   ```typescript
+   // ✅ Bon - Injection du store
+   const useFeature = (store = useFeatureStore()) => {
+     // ...
+   }
+
+   // ✅ Bon - Abstraction du store
+   const useFeature = () => {
+     const store = useFeatureStore()
+     
+     const getData = async () => {
+       return store.fetchData()
+     }
+     
+     return {
+       data: computed(() => store.data),
+       getData
+     }
+   }
+   ```
+
+2. **Partage d'état entre composables**: Utiliser des patterns de partage d'état appropriés:
+   ```typescript
+   // ✅ Bon - État partagé via provide/inject
+   export const stateSymbol = Symbol('state')
+   
+   export const provideState = () => {
+     const state = reactive({/* ... */})
+     provide(stateSymbol, state)
+     return state
+   }
+   
+   export const useState = () => {
+     const state = inject(stateSymbol)
+     if (!state) throw new Error('State not provided')
+     return state
+   }
+   ```
+
+## Exemples
+
+### Composable de Navigation
+
+```typescript
+/**
+ * Gère la navigation dans l'application
+ * 
+ * @returns {Object} Fonctions et état de navigation
+ */
+export const useNavigation = () => {
+  const router = useRouter()
+  const route = useRoute()
+  
+  const currentRoute = computed(() => route.path)
+  
+  const navigate = (path: string) => {
+    router.push(path)
+  }
+  
+  const goBack = () => {
+    router.back()
+  }
+  
+  // Expose l'API publique
+  return {
+    currentRoute,
+    navigate,
+    goBack
+  }
+}
+```
+
+### Composable de Gestion d'État
+
+```typescript
+/**
+ * Gère l'état d'un formulaire avec validation
+ * 
+ * @param {Object} initialData - Données initiales du formulaire
+ * @param {Function} validationSchema - Schéma de validation
+ * @returns {Object} État et méthodes du formulaire
+ */
+export const useForm = <T extends Record<string, any>>(
+  initialData: T,
+  validationSchema?: (data: T) => Record<string, string>
+) => {
+  const formData = reactive({ ...initialData }) as T
+  const errors = ref<Record<string, string>>({})
+  const isSubmitting = ref(false)
+  
+  const validate = () => {
+    if (!validationSchema) return true
+    
+    const validationErrors = validationSchema(formData)
+    errors.value = validationErrors
+    
+    return Object.keys(validationErrors).length === 0
+  }
+  
+  const resetForm = () => {
+    Object.assign(formData, initialData)
+    errors.value = {}
+  }
+  
+  const submitForm = async (submitFn: (data: T) => Promise<void>) => {
+    if (!validate()) return false
+    
+    isSubmitting.value = true
+    try {
+      await submitFn(formData)
+      return true
+    } catch (error) {
+      console.error('Form submission error:', error)
+      return false
+    } finally {
+      isSubmitting.value = false
+    }
+  }
+  
+  return {
+    formData,
+    errors,
+    isSubmitting,
+    validate,
+    resetForm,
+    submitForm
+  }
+}
+```
+
+## Cas d'Usage
+
+Les composables sont particulièrement adaptés pour:
+
+1. Extraire la logique de navigation
+2. Gérer les formulaires et la validation
+3. Abstraire les interactions avec les API
+4. Gérer l'état partagé entre composants
+5. Encapsuler les fonctionnalités d'UI réutilisables
+6. Gérer l'authentification et les autorisations
+7. Implémenter la logique d'internationalisation
+
+## Anti-Patterns
+
+Éviter les pratiques suivantes:
+
+1. ❌ Composables trop larges avec de multiples responsabilités
+2. ❌ Accès direct au DOM sans utiliser les mécanismes Vue (refs, template refs)
+3. ❌ Dépendances circulaires entre composables
+4. ❌ État mutable global sans mécanisme de gestion approprié
+5. ❌ Logique métier complexe qui devrait être dans la couche domaine
+6. ❌ Non-respect des limites architecturales
+
+## Ressources
+
+- [Vue.js 3 Composition API Documentation](mdc:https:/v3.vuejs.org/guide/composition-api-introduction.html)
+- [Vue.js 3 Reactivity Fundamentals](mdc:https:/v3.vuejs.org/guide/reactivity-fundamentals.html)
+- [Vue.js 3 Lifecycle Hooks](mdc:https:/v3.vuejs.org/guide/composition-api-lifecycle-hooks.html) 

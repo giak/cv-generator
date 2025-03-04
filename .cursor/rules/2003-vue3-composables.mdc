@@ -1,0 +1,473 @@
+---
+description: "ENFORCE extraction de logique dans des composables Vue.js 3 pour GARANTIR réutilisabilité et maintenabilité"
+globs: "**/*.{vue,ts,js}"
+alwaysApply: false
+---
+
+# Vue.js 3 Composables Standards
+
+## Contexte
+- Appliquer cette règle lors de la création de composants Vue.js 3 avec Composition API
+- Extraire la logique réutilisable ou complexe dans des composables
+- Suivre les principes de Clean Architecture en séparant l'UI et la logique
+- Privilégier les composables pour encapsuler la logique métier et les effets secondaires
+- Respecter les contraintes de performance (<500ms) et de simplicité du projet
+
+## Requirements
+- Nommer les composables avec le préfixe `use` suivi d'un nom descriptif en camelCase (ex: `useFormValidation`)
+- Extraire la logique dans des composables quand elle est utilisée dans plusieurs composants
+- Extraire la logique dans des composables quand elle complexifie un composant (>100 lignes)
+- Gérer correctement le cycle de vie avec `onMounted`, `onUnmounted`, etc.
+- Retourner uniquement les données et méthodes nécessaires (interface minimaliste)
+- Documenter clairement l'interface du composable (paramètres et valeurs retournées)
+- Supporter les paramètres de type ref ou getter avec `toValue()`
+- Placer les composables dans des fichiers séparés classés par domaine fonctionnel
+- Éviter de créer des composables pour des extractions triviales (<10 lignes)
+- Respecter les principes SOLID, en particulier la responsabilité unique
+- Assurer la cohérence entre composables liés (ex: navigation et rendu conditionnel)
+- Prévoir tous les cas de mapping d'identifiants dans les composables de navigation
+- S'assurer que les valeurs retournées par les composables sont utilisées correctement dans les templates
+
+## Test-Driven Development
+- Écrire des tests unitaires avant l'implémentation des composables
+- Tester toutes les entrées et sorties du composable de façon isolée
+- Utiliser `vitest` et l'écosystème Vue Test Utils pour les tests
+- Mocker les dépendances externes (stores, API, etc.) pour isoler les tests
+- Tester les conditions limites et les cas d'erreur
+- Vérifier les transformations et mappings (ex: 'experience' → 'work')
+- Pour les composables de navigation:
+  - Tester la cohérence entre les identifiants fournis et les états résultants
+  - Vérifier que tous les états possibles sont correctement gérés
+  - Tester les fonctions de mise à jour des miettes de pain (breadcrumbs)
+- Pour les composables d'état:
+  - Tester l'initialisation des états
+  - Vérifier les mises à jour d'état
+  - Tester les actions de sauvegarde
+- Implémenter des tests d'intégration pour vérifier l'interaction entre composables
+
+## Exemples
+<example>
+// Bon exemple: Composable pour la validation de formulaire (use case)
+// useResumeValidator.ts
+import { computed } from 'vue'
+import { toValue } from 'vue'
+import { z } from 'zod'
+import { resumeSchema } from '@/core/schemas/resume.schema'
+
+/**
+ * Composable pour valider les données d'un CV selon le schéma JSON Resume
+ * @param {Ref<object> | object} resumeData - Données du CV (ref, computed ou valeur directe)
+ * @returns {{
+ *   isValid: ComputedRef<boolean>,
+ *   errors: ComputedRef<Array<{path: string, message: string}>>,
+ *   validate: () => {valid: boolean, errors: Array}
+ * }}
+ */
+export function useResumeValidator(resumeData) {
+  // Accepte resumeData comme ref, computed ou valeur directe
+  const validate = () => {
+    const data = toValue(resumeData)
+    try {
+      resumeSchema.parse(data)
+      return { valid: true, errors: [] }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return { 
+          valid: false, 
+          errors: error.errors.map(err => ({
+            path: err.path.join('.'),
+            message: err.message
+          }))
+        }
+      }
+      throw error
+    }
+  }
+  
+  const isValid = computed(() => validate().valid)
+  const errors = computed(() => validate().errors)
+  
+  return {
+    isValid,
+    errors,
+    validate
+  }
+}
+
+// Utilisation dans un composant
+<script setup>
+import { useResumeValidator } from '@/composables/useResumeValidator'
+import { useResumeStore } from '@/stores/resume'
+
+const resumeStore = useResumeStore()
+const { isValid, errors } = useResumeValidator(resumeStore.resume)
+</script>
+</example>
+
+<example>
+// Bon exemple: Composable de navigation avec mappings d'identifiants
+// useNavigation.ts
+import { ref, computed } from 'vue'
+import type { Component } from 'vue'
+
+export interface NavItem {
+  id: string
+  label: string
+  path: string
+  active?: boolean
+  icon?: string
+}
+
+export function useNavigation(options: {
+  activeView: ReturnType<typeof ref<string>>,
+  activeComponent: ReturnType<typeof ref<Component | null>>
+}) {
+  const { activeView, activeComponent } = options
+  
+  // Initialiser les breadcrumbs
+  const breadcrumbItems = ref<NavItem[]>([
+    {
+      id: 'home',
+      label: 'Accueil',
+      path: '#home'
+    }
+  ])
+  
+  // Configuration des groupes de navigation
+  const navigationGroups = [
+    {
+      id: 'cv',
+      title: 'Curriculum Vitae',
+      items: [
+        { id: 'basics', label: 'Informations de base', path: '#basics' },
+        { id: 'experience', label: 'Expérience', path: '#experience' },
+        // Autres items...
+      ]
+    }
+  ]
+  
+  // Gérer la navigation vers une nouvelle vue
+  const handleNavigation = async (path: string) => {
+    // Extraire l'ID de vue du chemin
+    const viewId = path.startsWith('#') ? path.substring(1) : path
+    
+    // Gestion des cas de mapping d'ID
+    activeView.value = viewId === 'experience' ? 'work' : viewId
+    
+    // Mettre à jour les breadcrumbs et charger les données
+    updateBreadcrumbs(viewId)
+    await loadDataForView(viewId)
+  }
+  
+  // Fonction pour mettre à jour les breadcrumbs
+  const updateBreadcrumbs = (viewId: string) => {
+    // Rechercher l'item de navigation correspondant
+    // et mettre à jour les breadcrumbs...
+  }
+  
+  // Fonction pour charger les données
+  const loadDataForView = async (viewId: string) => {
+    // Charger les données en fonction de l'ID de vue...
+  }
+  
+  return {
+    navigationGroups,
+    breadcrumbItems,
+    handleNavigation,
+    updateBreadcrumbs
+  }
+}
+
+// Utilisation dans App.vue
+<script setup>
+import { ref } from 'vue'
+import { useNavigation } from '@/composables/useNavigation'
+
+const activeView = ref('basics')
+const activeComponent = ref(null)
+
+const { 
+  navigationGroups, 
+  breadcrumbItems, 
+  handleNavigation 
+} = useNavigation({ activeView, activeComponent })
+</script>
+
+<template>
+  <!-- Important: inclure des conditions pour TOUS les états possibles -->
+  <div v-if="activeView === 'experience'" class="bg-neutral-850 rounded-md">
+    <WorkList />
+  </div>
+  
+  <!-- Inclure également une condition pour 'work' à cause du mapping -->
+  <div v-if="activeView === 'work'" class="bg-neutral-850 rounded-md">
+    <WorkList />
+  </div>
+</template>
+</example>
+
+<example>
+// Bon exemple: Test unitaire pour un composable de navigation
+// useNavigation.spec.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { useNavigation } from '../ui/useNavigation'
+import { ref, type Component } from 'vue'
+
+// Définir des mocks pour les stores
+const mockResumeStore = {
+  loadResume: vi.fn(),
+  resume: { basics: { name: 'Test Name' } }
+}
+
+// Mocker tous les stores sans utiliser vi.mock au niveau supérieur
+vi.mock('@ui/modules/cv/presentation/stores/resume', () => ({
+  useResumeStore: () => mockResumeStore
+}))
+
+// Créer une fonction utilitaire pour les mocks
+const createMockStore = (name: string) => ({
+  [`load${name}s`]: vi.fn()
+})
+
+describe('useNavigation', () => {
+  // Configurer l'état initial pour chaque test
+  const activeView = ref('basics')
+  const activeComponent = ref<Component | null>(null)
+  
+  let navigation: ReturnType<typeof useNavigation>
+  
+  beforeEach(() => {
+    // Réinitialiser l'état avant chaque test
+    activeView.value = 'basics'
+    navigation = useNavigation({ activeView, activeComponent })
+  })
+  
+  it('should provide the complete navigation structure', () => {
+    // Vérifier que la structure de navigation est complète
+    expect(navigation.navigationGroups.length).toBe(2)
+    
+    const cvGroup = navigation.navigationGroups[0]
+    expect(cvGroup.id).toBe('cv')
+    expect(cvGroup.items.length).toBe(12)
+  })
+  
+  it('should handle navigation to different sections', async () => {
+    // Tester la navigation vers différentes sections
+    await navigation.handleNavigation('#experience')
+    
+    // Vérifier le mapping de 'experience' vers 'work'
+    expect(activeView.value).toBe('work')
+    
+    // Tester un autre cas sans mapping
+    await navigation.handleNavigation('#education')
+    expect(activeView.value).toBe('education')
+  })
+  
+  it('should update breadcrumbs correctly', async () => {
+    // Tester la mise à jour des miettes de pain
+    await navigation.handleNavigation('#education')
+    
+    expect(navigation.breadcrumbItems.value.length).toBe(2)
+    expect(navigation.breadcrumbItems.value[1].id).toBe('education')
+    expect(navigation.breadcrumbItems.value[1].label).toBe('Formation')
+  })
+})
+</example>
+
+<example type="invalid">
+// Mauvais exemple: Logique métier intégrée dans le composant
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { resumeSchema } from '@/core/schemas/resume.schema'
+import { z } from 'zod'
+
+// Cette logique de validation devrait être extraite dans un composable
+const resumeData = ref({})
+const validationErrors = ref([])
+
+function validateResume() {
+  try {
+    resumeSchema.parse(resumeData.value)
+    validationErrors.value = []
+    return true
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      validationErrors.value = error.errors.map(err => ({
+        path: err.path.join('.'),
+        message: err.message
+      }))
+      return false
+    }
+    throw error
+  }
+}
+
+// Cette logique de stockage local devrait être extraite dans un composable
+onMounted(() => {
+  try {
+    const stored = localStorage.getItem('resume')
+    if (stored) {
+      resumeData.value = JSON.parse(stored)
+    }
+  } catch (error) {
+    console.error('Failed to load resume from localStorage', error)
+  }
+})
+
+function saveResume() {
+  if (validateResume()) {
+    try {
+      localStorage.setItem('resume', JSON.stringify(resumeData.value))
+    } catch (error) {
+      console.error('Failed to save resume to localStorage', error)
+    }
+  }
+}
+
+// Le composant devient trop complexe avec toute cette logique
+</script>
+</example>
+
+<example type="invalid">
+// Mauvais exemple: Navigation incohérente entre composable et template
+// useNavigation.ts
+export function useNavigation(options) {
+  const { activeView } = options
+  
+  const handleNavigation = (path) => {
+    const viewId = path.startsWith('#') ? path.substring(1) : path
+    
+    // Transformation de 'experience' en 'work' dans le composable
+    activeView.value = viewId === 'experience' ? 'work' : viewId
+  }
+  
+  return { handleNavigation }
+}
+
+// App.vue
+<template>
+  <!-- Incohérent: vérifie seulement 'experience' mais pas 'work' -->
+  <div v-if="activeView === 'experience'">
+    <WorkList />
+  </div>
+  
+  <!-- Manque la condition pour 'work' alors que le composable
+       transforme 'experience' en 'work' -->
+  
+  <!-- Cela provoquera un problème quand on clique sur "Expérience professionnelle" -->
+</template>
+</example>
+
+<example type="invalid">
+// Mauvais exemple: Test incomplet pour un composable de navigation
+// useNavigation.spec.ts
+import { describe, it, expect } from 'vitest'
+import { useNavigation } from '../useNavigation'
+import { ref } from 'vue'
+
+describe('useNavigation', () => {
+  it('should handle navigation', () => {
+    const activeView = ref('basics')
+    const { handleNavigation } = useNavigation({ activeView })
+    
+    // Test incomplet: ne vérifie pas le mapping 'experience' -> 'work'
+    handleNavigation('#basics')
+    expect(activeView.value).toBe('basics')
+    
+    // Manque de test pour les autres cas comme 'experience' -> 'work'
+    
+    // Ne teste pas les mises à jour de breadcrumbs
+    
+    // Ne teste pas les erreurs ou cas limites
+  })
+})
+</example>
+
+## ⚠️ Points Critiques
+
+<critical>
+- NE PAS extraire de logique dans un composable si cela n'apporte pas une réelle valeur de réutilisation ou de clarté
+- ÉVITER de créer des composables "fourre-tout" qui violent le principe de responsabilité unique
+- RESPECTER la contrainte de performance du projet (<500ms) dans la conception des composables
+- PRÉFÉRER plusieurs composables simples à un composable complexe
+- DOCUMENTER clairement l'interface des composables pour faciliter leur utilisation
+- NE PAS créer de composables pour une logique purement statique qui ne gère pas d'état au fil du temps
+- TOUJOURS assurer la cohérence entre les transformations d'état dans les composables et les conditions d'affichage dans les templates
+- TOUJOURS tester tous les cas de mapping et transformations dans les composables (par ex: 'experience' → 'work')
+</critical>
+
+## ✅ Bonnes Pratiques
+
+- **Localisation**: Placer les composables dans un dossier dédié (`/composables`) organisé par domaine
+- **Testabilité**: Concevoir les composables pour qu'ils soient facilement testables en isolation
+- **Séparation des préoccupations**: Suivre les principes de Clean Architecture
+  - Composables de domaine (logique métier pure)
+  - Composables d'application (cas d'utilisation)
+  - Composables d'infrastructure (localStorage, API, etc.)
+  - Composables UI (navigation, forms, etc.)
+- **Interfaces claires**: Retourner uniquement ce qui est nécessaire au composant consommateur
+- **Documentation**: Documenter les paramètres et valeurs de retour avec JSDoc
+- **Réactivité**: Utiliser `toValue()` pour supporter les refs et les getters comme arguments
+- **Effet de bord**: Nettoyer correctement les effets de bord avec `onUnmounted`
+- **État isolé**: Chaque instance d'un composable doit avoir son propre état isolé
+- **Composition**: Construire des composables complexes en composant des composables plus simples
+- **Cohérence UI**: S'assurer que les transformations d'état dans les composables sont reflétées correctement dans les templates
+- **Tests TDD**: Écrire d'abord les tests qui définissent le comportement attendu du composable
+
+## 🔄 Organisation par Couche Architecturale
+
+Selon les principes Clean Architecture du projet, les composables doivent être organisés par couche:
+
+1. **Composables de domaine** (`/composables/domain`)
+   - Logique métier pure liée aux entités du domaine
+   - Validation selon le schéma JSON Resume
+   - Transformation et enrichissement des données
+   
+2. **Composables d'application** (`/composables/application`)
+   - Cas d'utilisation qui orchestrent les opérations
+   - Workflow métier
+   - Gestion de l'état applicatif
+   
+3. **Composables d'infrastructure** (`/composables/infrastructure`)
+   - Interaction avec localStorage
+   - Appels API
+   - Export PDF/HTML/JSON
+   
+4. **Composables UI** (`/composables/ui`)
+   - Gestion des interactions utilisateur
+   - Gestion des formulaires et de la navigation
+   - Animation et transitions
+
+## 🧪 Workflow TDD pour les Composables
+
+1. **Définir l'interface**
+   - Identifier les inputs (paramètres) et outputs (valeurs retournées)
+   - Définir les dépendances et services requis
+
+2. **Écrire les tests unitaires**
+   - Tester l'initialisation de l'état
+   - Tester les transformations et réactions aux inputs
+   - Tester les cas limites et les erreurs
+   - Mocker toutes les dépendances externes
+
+3. **Implémenter le composable**
+   - Écrire l'implémentation minimale pour faire passer les tests
+   - Observer le principe YAGNI (You Aren't Gonna Need It)
+   - Refactoriser pour améliorer la lisibilité et la performance
+
+4. **Tests d'intégration**
+   - Vérifier l'interaction avec les autres composables
+   - Tester le comportement dans des composants réels
+
+5. **Documentation et exemples**
+   - Documenter l'API avec JSDoc
+   - Fournir des exemples d'utilisation
+
+## 🔗 Références
+- [Vue.js - Composables](mdc:https:/vuejs.org/guide/reusability/composables.html)
+- [Conventions et Bonnes Pratiques](mdc:https:/vuejs.org/guide/reusability/composables.html#conventions-and-best-practices)
+- [Clean Code dans Vue.js](mdc:https:/dev.to/hakimov_dev/writing-clean-reusable-components-in-vue-3-composition-api-best-practices-37mj)
+- [VueUse](mdc:https:/vueuse.org) - Collection de composables Vue
+- [Vitest](mdc:https:/vitest.dev) - Framework de test unitaire pour Vue
+
+<version>1.1.0</version> 
