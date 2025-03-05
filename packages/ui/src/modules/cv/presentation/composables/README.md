@@ -491,3 +491,178 @@ Check out the example components in the `components/examples` directory:
 ## License
 
 MIT
+
+# Composables for CV Generator
+
+This directory contains Vue 3 composables used throughout the CV Generator application.
+
+## useCollectionField
+
+`useCollectionField` is a composable that simplifies the management of collection fields in form components. It provides a standardized way to:
+
+- Add items to a collection
+- Remove items from a collection
+- Update specific items in a collection
+- Handle temporary state for adding new items
+- Validate collection items
+- Manage UI state for forms (showing/hiding add forms, edit state, etc.)
+
+### Basic Usage
+
+Here's a simple example of how to use the `useCollectionField` composable:
+
+```typescript
+import { reactive } from "vue";
+import { useCollectionField } from "../composables/useCollectionField";
+
+// Define your collection item interface
+interface MyCollectionItem {
+  id?: string;
+  name: string;
+  value: string;
+}
+
+// Your form model that contains the collection
+const formModel = reactive({
+  myItems: [] as MyCollectionItem[],
+});
+
+// Default values for new items
+const defaultItem: MyCollectionItem = {
+  name: "",
+  value: "",
+};
+
+// Function to update the field in your model
+const updateField = (field: string, value: MyCollectionItem[]) => {
+  formModel[field as keyof typeof formModel] = value;
+};
+
+// Optional: Validation function
+const validateItem = (item: MyCollectionItem) => {
+  const errors: Record<string, string> = {};
+
+  if (!item.name) {
+    errors.name = "Name is required";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+};
+
+// Initialize the composable
+const {
+  items, // Ref<MyCollectionItem[]> - Current items in the collection
+  newItem, // Ref<MyCollectionItem> - Model for new item being created
+  isAddingItem, // Ref<boolean> - Whether the add form is displayed
+  editingItemId, // Ref<string | null> - ID of item being edited (if any)
+  validationErrors, // Ref<Record<string, string>> - Current validation errors
+  addItem, // (item?: MyCollectionItem) => void - Add an item to collection
+  removeItem, // (idOrIndex: string | number) => void - Remove an item
+  updateItem, // (id: string, updatedItem: MyCollectionItem) => void - Update item
+  startEditing, // (idOrIndex: string | number) => MyCollectionItem - Begin editing
+  resetNewItem, // () => void - Reset the new item to defaults
+  toggleAddForm, // () => void - Toggle add form visibility
+  cancelEditing, // () => void - Cancel edit mode
+  reorderItems, // (newOrder: string[]) => void - Reorder items
+} = useCollectionField<MyCollectionItem>({
+  fieldName: "myItems", // Field name in parent model
+  updateField, // Function to update parent model
+  collection: () => formModel.myItems, // Access to collection data
+  defaultItemValues: defaultItem, // Default values for new items
+  validateItem, // Optional validation function
+  identifierField: "id", // Default: 'id'
+  enableLogging: false, // Enable performance logging
+});
+```
+
+### Usage in Templates
+
+In your template, you can use the returned values and functions like this:
+
+```vue
+<template>
+  <!-- Toggle add form button -->
+  <button @click="toggleAddForm">
+    {{ isAddingItem ? "Cancel" : "Add Item" }}
+  </button>
+
+  <!-- Add/Edit form -->
+  <div v-if="isAddingItem">
+    <h3>{{ editingItemId ? "Edit Item" : "Add New Item" }}</h3>
+
+    <input v-model="newItem.name" placeholder="Name" />
+    <p v-if="validationErrors.name" class="error">
+      {{ validationErrors.name }}
+    </p>
+
+    <input v-model="newItem.value" placeholder="Value" />
+
+    <button @click="isAddingItem = false">Cancel</button>
+    <button
+      @click="editingItemId ? updateItem(editingItemId, newItem) : addItem()"
+    >
+      {{ editingItemId ? "Update" : "Add" }}
+    </button>
+  </div>
+
+  <!-- List of items -->
+  <div v-for="item in items" :key="item.id">
+    <div>{{ item.name }}: {{ item.value }}</div>
+    <button @click="editItem(item.id)">Edit</button>
+    <button @click="removeItem(item.id)">Delete</button>
+  </div>
+</template>
+
+<script setup>
+// Helper function to start editing an item
+const editItem = (id) => {
+  const itemToEdit = startEditing(id);
+  Object.assign(newItem, itemToEdit);
+  isAddingItem.value = true;
+};
+</script>
+```
+
+### API Reference
+
+#### Options
+
+| Option              | Type                                                                 | Required | Description                                                     |
+| ------------------- | -------------------------------------------------------------------- | -------- | --------------------------------------------------------------- |
+| `fieldName`         | `string`                                                             | Yes      | The field name in the parent model that contains the collection |
+| `updateField`       | `(field: string, value: T[]) => void`                                | Yes      | Function to update the collection in the parent model           |
+| `collection`        | `Ref<T[]> \| (() => T[])`                                            | Yes      | Current collection from the parent model                        |
+| `defaultItemValues` | `T`                                                                  | Yes      | Default values for a new item                                   |
+| `validateItem`      | `(item: T) => { isValid: boolean; errors?: Record<string, string> }` | No       | Optional validator function for items                           |
+| `identifierField`   | `keyof T`                                                            | No       | Field to use as a unique identifier (defaults to 'id')          |
+| `enableLogging`     | `boolean`                                                            | No       | Whether to enable performance logging                           |
+
+#### Returns
+
+| Property           | Type                                                                                                                       | Description                                                    |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `items`            | `Ref<T[]>`                                                                                                                 | Current collection items                                       |
+| `newItem`          | `Ref<T>`                                                                                                                   | New item being prepared for addition                           |
+| `isAddingItem`     | `Ref<boolean>`                                                                                                             | Whether the add form is currently visible                      |
+| `editingItemId`    | `Ref<string \| null>`                                                                                                      | ID of the item being edited (if any)                           |
+| `validationErrors` | `Ref<Record<string, string>>`                                                                                              | Any validation errors for the current item                     |
+| `addItem`          | `(item?: T) => void`                                                                                                       | Add a new item to the collection                               |
+| `removeItem`       | `(idOrIndex: string \| number) => void`                                                                                    | Remove an item from the collection by ID or index              |
+| `updateItem`       | `(id: string, updatedItem: T) => void`                                                                                     | Update an existing item in the collection                      |
+| `startEditing`     | `(idOrIndex: string \| number) => T`                                                                                       | Setup editing for an existing item, returns a copy of the item |
+| `resetNewItem`     | `() => void`                                                                                                               | Reset the new item to default values                           |
+| `toggleAddForm`    | `() => void`                                                                                                               | Toggle the visibility of the add form                          |
+| `cancelEditing`    | `() => void`                                                                                                               | Cancel current editing operation                               |
+| `reorderItems`     | `(newOrder: string[]) => void`                                                                                             | Reorder collection items based on array of IDs                 |
+| `perfMetrics`      | `{ addOperations: number, removeOperations: number, updateOperations: number, validationOperations: number } \| undefined` | Performance metrics if logging is enabled                      |
+
+### Example Components
+
+For a complete working example, see:
+
+- `packages/ui/src/modules/cv/presentation/components/examples/CollectionFieldExample.vue`
+
+This composable is used to standardize collection field handling across the CV Generator application.

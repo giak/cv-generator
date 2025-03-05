@@ -513,9 +513,10 @@ flowchart TD
 
 1. **J1: Composables Fondamentaux** (Fin Semaine 1)
 
-   - `useFormModel`, `useFormValidation`, `useCollectionField` développés
-   - Tests unitaires complets
-   - Documentation de base
+   - `useFormModel` (complété), `useFormValidation` (complété), `useCollectionField` (complété)
+   - Tests unitaires complets pour les composables complétés
+   - Documentation complète pour les composables complétés
+   - Intégration réussie de `useCollectionField` dans le composant BasicsForm
 
 2. **J2: Composants Réutilisables** (Fin Semaine 2)
 

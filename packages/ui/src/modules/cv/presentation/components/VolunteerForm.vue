@@ -2,6 +2,7 @@
 import type { VolunteerInterface } from '../../../../../node_modules/@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
+import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
 import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
 import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
 import { computed, ref } from 'vue'
@@ -119,6 +120,14 @@ const handleCancel = () => {
   emit('cancel')
 }
 
+// Handle the "currently volunteering" state
+const handleCurrentlyVolunteeringChange = (isCurrentlyVolunteering: boolean) => {
+  if (isCurrentlyVolunteering) {
+    // If currently volunteering, clear the end date
+    handleFieldUpdate('endDate', '')
+  }
+}
+
 // Icons for form fields
 const icons = {
   organization: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
@@ -179,28 +188,26 @@ const icons = {
         />
       </div>
 
-      <FormField
-        name="startDate"
-        label="Date de début"
-        :model-value="formModel.startDate"
-        :error="errors.startDate"
-        :icon="icons.date"
-        help-text="Date à laquelle vous avez commencé le bénévolat."
-        required
-        @update:model-value="handleFieldUpdate('startDate', $event)"
-        @blur="validateField('startDate', formModel.startDate)"
-      />
-
-      <FormField
-        name="endDate"
-        label="Date de fin"
-        :model-value="formModel.endDate"
-        :error="errors.endDate"
-        :icon="icons.date"
-        help-text="Date de fin (laisser vide si en cours)."
-        @update:model-value="handleFieldUpdate('endDate', $event)"
-        @blur="validateField('endDate', formModel.endDate)"
-      />
+      <div class="col-span-1 md:col-span-2">
+        <DateRangeFields
+          :startDate="formModel.startDate"
+          :endDate="formModel.endDate"
+          :isCurrentlyActive="!formModel.endDate"
+          :startDateError="errors.startDate"
+          :endDateError="errors.endDate"
+          :startDateIcon="icons.date"
+          :endDateIcon="icons.date"
+          :required="true"
+          :startDateHelpText="'Date à laquelle vous avez commencé le bénévolat.'"
+          :endDateHelpText="'Date de fin (laisser vide si en cours).'"
+          :currentlyActiveLabel="'Bénévolat en cours'"
+          @update:startDate="handleFieldUpdate('startDate', $event)"
+          @update:endDate="handleFieldUpdate('endDate', $event)"
+          @update:isCurrentlyActive="handleCurrentlyVolunteeringChange"
+          @startDate-blur="validateField('startDate', $event)"
+          @endDate-blur="validateField('endDate', $event)"
+        />
+      </div>
 
       <div class="col-span-1 md:col-span-2">
         <FormField

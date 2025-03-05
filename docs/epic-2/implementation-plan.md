@@ -76,13 +76,13 @@ Nous adopterons une approche progressive par phases:
 
 ### Calendrier de Migration
 
-| Semaine   | Activité                                   | Composants Concernés                                      | Livrables                        |
-| --------- | ------------------------------------------ | --------------------------------------------------------- | -------------------------------- |
-| Semaine 1 | Développement des composables fondamentaux | `useFormModel`, `useCollectionField`, `useFormValidation` | Composables testés et documentés |
-| Semaine 2 | Développement des composants réutilisables | `DateRangeFields`, `CollectionManager`                    | Composants testés et documentés  |
-| Semaine 3 | Migration des composants pilotes           | `BasicsForm`, `WorkForm`, `EducationForm`                 | Composants pilotes refactorisés  |
-| Semaine 4 | Migration des composants similaires        | Autres formulaires et composants de collection            | 50% des composants migrés        |
-| Semaine 5 | Finalisation et optimisation               | Tous les composants restants                              | 100% des composants migrés       |
+| Semaine   | Activité                                   | Composants Concernés                                                     | Livrables                                        |
+| --------- | ------------------------------------------ | ------------------------------------------------------------------------ | ------------------------------------------------ |
+| Semaine 1 | Développement des composables fondamentaux | `useFormModel` (✅), `useCollectionField` (✅), `useFormValidation` (✅) | Composables testés et documentés - 3/3 complétés |
+| Semaine 2 | Développement des composants réutilisables | `DateRangeFields`, `CollectionManager`                                   | Composants testés et documentés                  |
+| Semaine 3 | Migration des composants pilotes           | `BasicsForm`, `WorkForm`, `EducationForm`                                | Composants pilotes refactorisés                  |
+| Semaine 4 | Migration des composants similaires        | Autres formulaires et composants de collection                           | 50% des composants migrés                        |
+| Semaine 5 | Finalisation et optimisation               | Tous les composants restants                                             | 100% des composants migrés                       |
 
 ## 4. Points de Synchronisation et Validation
 

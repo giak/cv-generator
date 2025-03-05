@@ -2,6 +2,7 @@
 import type { EducationInterface } from '../../../../../node_modules/@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
+import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
 import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
 import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
 import { computed, ref } from 'vue'
@@ -121,6 +122,14 @@ const handleCancel = () => {
   emit('cancel')
 }
 
+// Handle the "currently studying" state
+const handleCurrentlyStudyingChange = (isCurrentlyStudying: boolean) => {
+  if (isCurrentlyStudying) {
+    // If currently studying, clear the end date
+    handleFieldUpdate('endDate', '')
+  }
+}
+
 // Icons for form fields
 const icons = {
   institution: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>`,
@@ -193,28 +202,26 @@ const icons = {
         @blur="validateField('url', formModel.url)"
       />
 
-      <FormField
-        name="startDate"
-        label="Date de début"
-        :model-value="formModel.startDate"
-        :error="errors.startDate"
-        :icon="icons.date"
-        help-text="Date à laquelle vous avez commencé vos études."
-        required
-        @update:model-value="handleFieldUpdate('startDate', $event)"
-        @blur="validateField('startDate', formModel.startDate)"
-      />
-
-      <FormField
-        name="endDate"
-        label="Date de fin"
-        :model-value="formModel.endDate"
-        :error="errors.endDate"
-        :icon="icons.date"
-        help-text="Date de fin (laisser vide si en cours)."
-        @update:model-value="handleFieldUpdate('endDate', $event)"
-        @blur="validateField('endDate', formModel.endDate)"
-      />
+      <div class="col-span-1 md:col-span-2">
+        <DateRangeFields
+          :startDate="formModel.startDate"
+          :endDate="formModel.endDate"
+          :isCurrentlyActive="!formModel.endDate"
+          :startDateError="errors.startDate"
+          :endDateError="errors.endDate"
+          :startDateIcon="icons.date"
+          :endDateIcon="icons.date"
+          :required="true"
+          :startDateHelpText="'Date à laquelle vous avez commencé vos études.'"
+          :endDateHelpText="'Date de fin (laisser vide si en cours).'"
+          :currentlyActiveLabel="'Formation en cours'"
+          @update:startDate="handleFieldUpdate('startDate', $event)"
+          @update:endDate="handleFieldUpdate('endDate', $event)"
+          @update:isCurrentlyActive="handleCurrentlyStudyingChange"
+          @startDate-blur="validateField('startDate', $event)"
+          @endDate-blur="validateField('endDate', $event)"
+        />
+      </div>
 
       <FormField
         name="score"

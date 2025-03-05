@@ -2,6 +2,7 @@
 import type { WorkInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
+import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
 import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
 import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
 import { computed, reactive, ref } from 'vue'
@@ -91,6 +92,14 @@ const removeHighlight = (index: number) => {
   })
 }
 
+// Handle the "currently working" state
+const handleCurrentPositionChange = (isCurrentPosition: boolean) => {
+  if (isCurrentPosition) {
+    // If it's the current position, clear the end date
+    handleFieldUpdate('endDate', '')
+  }
+}
+
 // Validate form before emitting validate event
 const handleSubmit = async () => {
   console.log('Work form submission - Current model:', JSON.parse(JSON.stringify(props.modelValue)))
@@ -177,30 +186,26 @@ const icons = {
         @blur="validateField('position', formModel.position)"
       />
 
-      <FormField
-        name="startDate"
-        label="Date de début"
-        :model-value="formModel.startDate"
-        :error="errors.startDate"
-        :icon="icons.startDate"
-        placeholder="YYYY-MM-DD"
-        help-text="Format: AAAA-MM-JJ (ex: 2020-01-15)"
-        required
-        @update:model-value="handleFieldUpdate('startDate', $event)"
-        @blur="validateField('startDate', formModel.startDate)"
-      />
-
-      <FormField
-        name="endDate"
-        label="Date de fin"
-        :model-value="formModel.endDate"
-        :error="errors.endDate"
-        :icon="icons.endDate"
-        placeholder="YYYY-MM-DD (ou laissez vide si en cours)"
-        help-text="Laissez vide si c'est votre emploi actuel."
-        @update:model-value="handleFieldUpdate('endDate', $event)"
-        @blur="validateField('endDate', formModel.endDate)"
-      />
+      <div class="col-span-1 md:col-span-2">
+        <DateRangeFields
+          :startDate="formModel.startDate"
+          :endDate="formModel.endDate"
+          :isCurrentlyActive="!formModel.endDate"
+          :startDateError="errors.startDate"
+          :endDateError="errors.endDate"
+          :startDateIcon="icons.startDate"
+          :endDateIcon="icons.endDate"
+          :required="true"
+          :startDateHelpText="'Format: AAAA-MM-JJ (ex: 2020-01-15)'"
+          :endDateHelpText="'Laissez vide si c\'est votre emploi actuel.'"
+          :currentlyActiveLabel="'Emploi actuel'"
+          @update:startDate="handleFieldUpdate('startDate', $event)"
+          @update:endDate="handleFieldUpdate('endDate', $event)"
+          @update:isCurrentlyActive="handleCurrentPositionChange"
+          @startDate-blur="validateField('startDate', $event)"
+          @endDate-blur="validateField('endDate', $event)"
+        />
+      </div>
 
       <div class="col-span-1 md:col-span-2">
         <FormField

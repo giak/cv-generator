@@ -4,6 +4,7 @@ import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import { useFieldValidation as useCVFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
 import { computed, ref, onMounted } from 'vue'
 
 // Performance measurement
@@ -27,7 +28,9 @@ onMounted(() => {
       validations: perfMeasurements.validations,
       renderTime: perfMeasurements.renderTime,
       // Include metrics from useFormModel
-      ...perfMetrics
+      ...perfMetrics,
+      // Include metrics from useCollectionField if logging enabled
+      ...(profilesFieldMetrics || {})
     })
   }
 })
@@ -96,65 +99,53 @@ const handleLocationUpdate = (field: keyof LocationInterface, value: string) => 
   updateFn('location', field, value)
 }
 
-// Gestionnaire des profils
-const newProfile = ref<ProfileInterface>({
+// Create a type-safe wrapper function for updateField to use with profiles collection
+const updateProfilesField = (field: string, value: ProfileInterface[]) => {
+  if (field === 'profiles') {
+    updateField('profiles', value)
+  }
+}
+
+// Default profile for new items
+const defaultProfile: ProfileInterface = {
   network: '',
   username: '',
   url: ''
-})
+}
 
-const isAddingProfile = ref(false)
-
-const toggleProfileForm = () => {
-  isAddingProfile.value = !isAddingProfile.value
-  
-  // Reset du formulaire à la fermeture
-  if (!isAddingProfile.value) {
-    newProfile.value = {
-      network: '',
-      username: '',
-      url: ''
+// Use the collection field composable for profiles
+const {
+  items: profiles,
+  newItem: newProfile,
+  isAddingItem: isAddingProfile,
+  validationErrors: profileValidationErrors,
+  addItem: addProfile,
+  removeItem: removeProfile,
+  toggleAddForm: toggleProfileForm,
+  perfMetrics: profilesFieldMetrics
+} = useCollectionField<ProfileInterface>({
+  fieldName: 'profiles',
+  updateField: updateProfilesField,
+  collection: computed(() => localModel.profiles || []),
+  defaultItemValues: defaultProfile,
+  validateItem: (profile) => {
+    const errors: Record<string, string> = {}
+    
+    if (!profile.network) {
+      errors.network = 'Le réseau est requis'
     }
-  }
-}
-
-const addProfile = () => {
-  const opStart = performance.now()
-  // Valider les champs du profil
-  if (!newProfile.value.network || !newProfile.value.username) {
-    return // Ne pas ajouter de profils incomplets
-  }
-  
-  // Créer une copie du nouveau profil
-  const profileToAdd = { ...newProfile.value }
-  console.log('Adding profile:', JSON.stringify(profileToAdd))
-  
-  // Ajouter le profil au modèle local
-  const updatedProfiles = [...(localModel.profiles || []), profileToAdd]
-  updateField('profiles', updatedProfiles)
-  
-  // Reset et fermer le formulaire
-  newProfile.value = {
-    network: '',
-    username: '',
-    url: ''
-  }
-  isAddingProfile.value = false
-  
-  perfMeasurements.profileOperations++
-  console.log(`Profile add operation took ${performance.now() - opStart}ms (total: ${perfMeasurements.profileOperations})`)
-}
-
-const removeProfile = (index: number) => {
-  console.log(`Removing profile at index ${index}`)
-  
-  // Create a new array without the profile at the specified index
-  const updatedProfiles = [...(localModel.profiles || [])]
-  updatedProfiles.splice(index, 1)
-  
-  // Update the profiles field
-  updateField('profiles', updatedProfiles)
-}
+    
+    if (!profile.username) {
+      errors.username = 'Le nom d\'utilisateur est requis'
+    }
+    
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors
+    }
+  },
+  enableLogging: process.env.NODE_ENV === 'development'
+})
 
 // Valider le formulaire avant d'émettre l'événement de validation
 const { errors, validateField, validateForm } = useCVFieldValidation()
@@ -378,6 +369,7 @@ const icons = {
             :icon="icons.profile"
             placeholder="Ex: LinkedIn"
             help-text="Nom du réseau social."
+            :error="profileValidationErrors.network"
             required
           />
           
@@ -387,6 +379,7 @@ const icons = {
             v-model="newProfile.username"
             placeholder="Ex: jeandupont"
             help-text="Votre identifiant sur ce réseau."
+            :error="profileValidationErrors.username"
             required
           />
           
@@ -404,7 +397,7 @@ const icons = {
           <button 
             type="button"
             class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-            @click="addProfile"
+            @click="addProfile()"
           >
             Ajouter
           </button>
@@ -412,9 +405,9 @@ const icons = {
       </div>
       
       <!-- Liste des profils existants -->
-      <div v-if="localModel.profiles && localModel.profiles.length > 0" class="space-y-3">
+      <div v-if="profiles.length > 0" class="space-y-3">
         <div 
-          v-for="(profile, index) in localModel.profiles" 
+          v-for="(profile, index) in profiles" 
           :key="`profile-${index}`"
           class="bg-neutral-900 p-3 rounded-lg flex justify-between items-center"
         >

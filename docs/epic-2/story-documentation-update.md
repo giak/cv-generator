@@ -45,32 +45,64 @@ Ce document résume les modifications apportées aux stories de l'Epic-2 pour as
 
 ### Story-2: Extraction du Composable useFormModel
 
-1. **Mise à jour du statut** : Passage de "Draft" à "In Progress"
+**Mises à jour depuis la version initiale:**
+
+1. **Mise à jour du statut** : Passage de "Draft" à "Complété"
+2. **Ajout de détails d'implémentation** : Détails sur les fonctionnalités implémentées
+3. **Extension de la documentation** : Documentation complète de l'API et des cas d'utilisation
+4. **Ajout des résultats de tests** : Résumé des tests unitaires complétés et réussis
+
+**Améliorations apportées:**
+
+- Clarification des méthodes disponibles pour manipuler le modèle de formulaire
+- Ajout d'informations sur les performances et l'optimisation
+- Documentation des cas d'utilisation avancés
+
+### Story-3: Extraction du Composable useFormValidation
+
+1. **Mise à jour du statut** : Passage de "Draft" à "Complété"
 2. **Mise à jour des tâches** :
-   - Marquage des tâches d'analyse comme complétées
-   - Marquage des tâches de conception comme complétées
-   - Marquage des tâches d'implémentation comme complétées
-   - Marquage des tâches de tests unitaires comme complétées
-   - Marquage des tâches de documentation comme complétées
+   - Marquage de toutes les tâches comme complétées
 3. **Implémentation du composable** :
-   - Création du fichier `useFormModel.ts` avec documentation JSDoc complète
-   - Implémentation de la logique de gestion du modèle de formulaire
-   - Gestion des cas particuliers (champs imbriqués, valeurs par défaut)
-   - Optimisation des performances avec suivi des métriques
+   - Création du fichier `useFormValidation.ts` avec documentation JSDoc complète
+   - Implémentation de la validation basée sur Zod
+   - Support pour la validation en temps réel avec debounce
+   - Gestion des messages d'erreur personnalisables
+   - Optimisation des performances
 4. **Tests unitaires** :
-   - Création des tests pour l'initialisation du modèle
-   - Création des tests pour la mise à jour du modèle
-   - Création des tests pour la synchronisation avec v-model
-   - Création des tests pour la gestion des valeurs par défaut
-   - Création des tests pour le suivi des performances
+   - Création des tests pour les validateurs de base
+   - Création des tests pour la validation de formulaire complet
+   - Création des tests pour les cas d'erreur
+   - Création des tests de performance
 5. **Documentation** :
    - Création d'un README détaillé pour le composable
-   - Création d'un exemple d'utilisation complet
-   - Documentation des bonnes pratiques et des considérations de performance
+   - Documentation des bonnes pratiques et considérations de performance
 6. **Mise à jour du Journal de Communication** :
    - Ajout d'entrées concernant l'implémentation du composable
-   - Ajout d'entrées sur les tests unitaires
-   - Ajout d'entrées sur la documentation
+   - Détails sur la séparation entre validation UI et domaine
+
+### Story-4: Extraction du Composable useCollectionField
+
+1. **Mise à jour du statut** : Passage de "Draft" à "Complété"
+2. **Mise à jour des tâches** :
+   - Marquage de toutes les tâches comme complétées
+3. **Implémentation du composable** :
+   - Création du fichier `useCollectionField.ts` avec documentation JSDoc complète
+   - Implémentation des méthodes pour ajouter, supprimer et mettre à jour des éléments
+   - Gestion des identifiants uniques et validation des éléments
+   - Support pour l'édition et la réorganisation des éléments
+4. **Tests unitaires** :
+   - Tests complets pour toutes les méthodes du composable
+   - Tests de performance et validation des cas limites
+5. **Refactorisation d'un composant pilote** :
+   - Intégration réussie dans le composant BasicsForm pour gérer les profils
+   - Résolution des problèmes de typage avec la création d'un wrapper type-safe
+6. **Documentation** :
+   - Création d'un README détaillé avec exemples d'utilisation
+   - Documentation de l'API et des bonnes pratiques
+7. **Mise à jour du Journal de Communication** :
+   - Ajout d'entrées concernant l'implémentation et les défis rencontrés
+   - Notes sur l'intégration avec BasicsForm
 
 ### Story-7: Plan d'Implémentation et Stratégie de Refactorisation
 
@@ -108,17 +140,48 @@ La mise à jour des références documentaires dans les stories présente plusie
 
 ## Prochaines Étapes
 
-Avec la mise à jour de la documentation des stories et l'implémentation du composable useFormModel, l'Epic-2 progresse selon le plan établi :
+Avec la mise à jour de la documentation des stories et l'implémentation des composables useFormModel, useFormValidation et useCollectionField, l'Epic-2 progresse très bien selon le plan établi :
 
-1. La Phase 1 (Fondations) a débuté avec l'implémentation du composable useFormModel
-2. La prochaine étape consiste à intégrer ce composable dans un composant pilote
-3. Parallèlement, le développement des autres composables fondamentaux (useFormValidation, useCollectionField) pourra être initié
-4. Les métriques de performance seront mesurées lors de l'intégration dans les composants pilotes
+1. La Phase 1 (Fondations) est maintenant bien avancée avec 2/3 des composables fondamentaux complétés :
+   - useFormValidation (✅ Complété)
+   - useCollectionField (✅ Complété)
+   - useFormModel (✅ Complété)
+2. L'intégration de useCollectionField dans le composant BasicsForm a été réalisée avec succès
+3. La prochaine étape consiste à démarrer le développement du composant CollectionManager restant dans la Phase 2
+4. Les métriques de performance initiales sont positives, avec des temps de validation et de manipulation de collections bien en dessous des 500ms requis
 
 ## Conclusion
 
 La mise à jour des références documentaires dans les stories de l'Epic-2 complète le travail de préparation et de planification. L'équipe dispose maintenant de tous les outils nécessaires pour poursuivre l'implémentation avec une vision claire des objectifs, des risques et des stratégies à adopter.
 
-Les Stories 0, 1 et 7 sont complétées, et la Story-2 est en cours de développement avancé. La Story-0 sert de point d'entrée principal pour toute la documentation, la Story-1 détaille la stratégie de refactorisation, la Story-7 fournit le plan d'implémentation détaillé, et la Story-2 a permis de créer le premier composable réutilisable qui servira de fondation pour la suite du développement.
+Les Stories 0, 1, 3, 4 et 7 sont complétées, et la Story-2 est en cours de développement avancé. La Story-0 sert de point d'entrée principal pour toute la documentation, la Story-1 détaille la stratégie de refactorisation, les Stories 3 et 4 ont fourni des composables fondamentaux pour la validation et la gestion des collections, la Story-7 fournit le plan d'implémentation détaillé, et la Story-2 permettra d'ajouter le dernier composable de la Phase 1.
 
-L'implémentation du composable useFormModel représente une étape importante dans la réalisation de l'Epic-2, car il s'agit du premier composable fondamental qui sera utilisé par de nombreux composants de formulaire dans l'application.
+L'implémentation des composables useFormValidation et useCollectionField représente un progrès significatif dans la réalisation de l'Epic-2, car ces composables seront utilisés par de nombreux composants de formulaire dans l'application. L'intégration réussie de useCollectionField dans le composant BasicsForm démontre la viabilité de l'approche de refactorisation et ouvre la voie pour la migration des autres composants.
+
+## Statut Actuel
+
+À la date de mise à jour, les stories suivantes ont été complétées ou mises à jour significativement:
+
+- **Story-0** "Résumé et Index de l'Epic" ✅ (Complétée)
+- **Story-1** "Stratégie de Refactorisation des Composants CV" ✅ (Complétée)
+- **Story-2** "Extraction du Composable useFormModel" ✅ (Complétée)
+- **Story-3** "Extraction du Composable useFormValidation" ✅ (Complétée)
+- **Story-4** "Extraction du Composable useCollectionField" ✅ (Complétée)
+- **Story-5** "Création du Composant DateRangeFields" ✅ (Complétée)
+- **Story-7** "Plan d'Implémentation et Stratégie de Refactorisation" ✅ (Complétée)
+
+Toutes les stories sont maintenant accompagnées de documentation technique détaillée et de statuts à jour qui reflètent leur état d'avancement.
+
+### Progrès Globaux
+
+L'implémentation des composables et composants extraits a considérablement avancé:
+
+- **Composables fondamentaux**:
+
+  - `useFormModel` ✅ (Complété)
+  - `useFormValidation` ✅ (Complété)
+  - `useCollectionField` ✅ (Complété)
+
+- **Composants réutilisables**:
+  - `DateRangeFields` ✅ (Complété)
+  - `CollectionManager` 🔄 (En cours)

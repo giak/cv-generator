@@ -77,16 +77,16 @@ Au total, 9 documents ont été créés pour soutenir cette initiative de refact
 
 ## Statut des Stories
 
-| Story | Titre                                                 | Statut      | Story Points | Dépendances       |
-| ----- | ----------------------------------------------------- | ----------- | ------------ | ----------------- |
-| 0     | Résumé et Index de l'Epic                             | Complété    | -            | -                 |
-| 1     | Stratégie de Refactorisation des Composants CV        | Complété    | 5            | -                 |
-| 2     | Extraction du Composable useFormModel                 | In Progress | 3            | Story-1           |
-| 3     | Extraction du Composable useFormValidation            | Draft       | 3            | Story-1           |
-| 4     | Extraction du Composable useCollectionField           | Draft       | 3            | Story-1           |
-| 5     | Création du Composant DateRangeFields                 | Draft       | 2            | Story-1           |
-| 6     | Création du Composant CollectionManager               | Draft       | 3            | Story-1, Story-4  |
-| 7     | Plan d'Implémentation et Stratégie de Refactorisation | Complété    | 2            | Story-1 à Story-6 |
+| Story | Titre                                                 | Statut   | Story Points | Dépendances       |
+| ----- | ----------------------------------------------------- | -------- | ------------ | ----------------- |
+| 0     | Résumé et Index de l'Epic                             | Complété | -            | -                 |
+| 1     | Stratégie de Refactorisation des Composants CV        | Complété | 5            | -                 |
+| 2     | Extraction du Composable useFormModel                 | Complété | 3            | Story-1           |
+| 3     | Extraction du Composable useFormValidation            | Complété | 3            | Story-1           |
+| 4     | Extraction du Composable useCollectionField           | Complété | 3            | Story-1           |
+| 5     | Création du Composant DateRangeFields                 | Complété | 2            | Story-1           |
+| 6     | Création du Composant CollectionManager               | Draft    | 3            | Story-1, Story-4  |
+| 7     | Plan d'Implémentation et Stratégie de Refactorisation | Complété | 2            | Story-1 à Story-6 |
 
 **Total Story Points**: 21 (environ 5 semaines de travail)
 
@@ -94,15 +94,13 @@ Au total, 9 documents ont été créés pour soutenir cette initiative de refact
 
 Selon le plan d'implémentation, les prochaines étapes sont:
 
-1. **Démarrer la Phase 1: Fondations**
+1. **Finaliser la Phase 1: Fondations**
 
-   - Développer le composable `useFormModel` (Story-2)
-   - Développer le composable `useFormValidation` (Story-3)
-   - Développer le composable `useCollectionField` (Story-4)
+   - ✅ Terminer le développement du composable `useFormModel` (Story-2) - **Complété**
 
 2. **Continuer avec la Phase 2: Composants Réutilisables**
 
-   - Développer le composant `DateRangeFields` (Story-5)
+   - ✅ Développer le composant `DateRangeFields` (Story-5) - **Complété**
    - Développer le composant `CollectionManager` (Story-6)
 
 3. **Suivre avec la Phase 3: Migration Progressive**
@@ -116,11 +114,16 @@ Selon le plan d'implémentation, les prochaines étapes sont:
 
 ## Conclusion
 
-Les Stories 0, 1 et 7 sont maintenant complétées, et la Story-2 est en cours de développement, fournissant une base solide pour l'exécution de l'Epic-2:
+Les Stories 0, 1, 2, 3, 4, 5 et 7 sont maintenant complétées, fournissant une base solide pour l'exécution de l'Epic-2:
 
 1. **Story-0 "Résumé et Index de l'Epic"** sert de point d'entrée principal pour toute la documentation de l'Epic-2.
 2. **Story-1 "Stratégie de Refactorisation des Composants CV"** définit la stratégie globale et identifie les composables et composants à extraire.
-3. **Story-7 "Plan d'Implémentation et Stratégie de Refactorisation"** fournit le plan détaillé d'implémentation et la stratégie de migration.
-4. **Story-2 "Extraction du Composable useFormModel"** est en cours de développement. Le composable a été implémenté avec succès, avec une documentation complète et des tests unitaires qui passent. La prochaine étape consiste à l'intégrer dans un composant pilote.
+3. **Story-2 "Extraction du Composable useFormModel"** a été implémentée avec succès. Le composable fournit une gestion complète du modèle de formulaire avec support pour les modèles imbriqués et une API bien documentée.
+4. **Story-3 "Extraction du Composable useFormValidation"** a été implémentée avec succès. Le composable fournit une gestion complète de la validation des formulaires avec support pour Zod et validation en temps réel.
+5. **Story-4 "Extraction du Composable useCollectionField"** a été implémentée avec succès. Le composable permet la gestion standardisée des collections avec des méthodes pour ajouter, supprimer et mettre à jour des éléments. Il a été intégré avec succès dans le composant BasicsForm.
+6. **Story-5 "Création du Composant DateRangeFields"** a été implémentée avec succès. Le composant standardise la gestion des plages de dates avec une option "actuellement en cours" et a été intégré dans tous les formulaires pertinents (WorkForm, EducationForm, VolunteerForm).
+7. **Story-7 "Plan d'Implémentation et Stratégie de Refactorisation"** fournit le plan détaillé d'implémentation et la stratégie de migration.
 
-Tous les documents nécessaires ont été créés, offrant une feuille de route claire pour la refactorisation des composants CV. L'implémentation effective des composables a commencé selon le plan établi, avec la Phase 1 (Fondations) en cours de développement.
+Tous les documents nécessaires ont été créés, offrant une feuille de route claire pour la refactorisation des composants CV. L'implémentation effective des composables et composants a progressé selon le plan établi, avec la Phase 1 (Fondations) terminée, le premier composant de la Phase 2 (DateRangeFields) complété, et uniquement Story-6 (CollectionManager) restant à finaliser.
+
+Les composables et composants déjà implémentés (useFormValidation, useCollectionField, DateRangeFields) démontrent déjà les bénéfices attendus de cette refactorisation: réduction de code dupliqué, standardisation des interfaces, amélioration de l'expérience utilisateur et facilitation de la maintenance.
