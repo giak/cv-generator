@@ -20,9 +20,28 @@ version: 1.1.0
   - Tri automatique des expériences par ordre chronologique inverse
   - Navigation entre les sections "Basic Information" et "Work Experience"
   - Implémentation complète selon le standard JSON Resume
+- Epic-2 "Refactorisation des Composants CV" complété avec:
+  - Composable `useFormModel` pour la gestion standardisée des modèles de formulaire
+  - Composable `useFormValidation` pour la validation centralisée des formulaires
+  - Composable `useCollectionField` pour la gestion des collections d'éléments
+  - Composant `DateRangeFields` pour les plages de dates avec option "en cours"
+  - Composant `CollectionManager` pour l'affichage et la gestion des listes d'éléments
+
+### Changed 🔄
+
+- Refactorisation du composant `WorkList` pour utiliser le nouveau `CollectionManager`
+- Standardisation du code des formulaires avec les nouveaux composables
+- Amélioration de la gestion des états de formulaire grâce à `useFormModel`
+- Optimisation de la validation des données avec `useFormValidation`
+- Simplification de la manipulation des collections avec `useCollectionField`
 
 ### Progress 📊
 
+- Epic-2 "Refactorisation des Composants CV" complété à 100%
+  - ✅ Fondations: tous les composables fondamentaux complétés
+  - ✅ Composants Réutilisables: tous les composants prévus développés
+  - ✅ Documentation: toute la documentation technique finalisée
+  - ✅ Tests: tous les tests unitaires et d'intégration complétés
 - Epic-2 "Édition de CV" complété à 60%
   - ✅ Formulaires pour les informations de base (basics)
   - ✅ Formulaires pour l'expérience professionnelle (work)
@@ -31,6 +50,63 @@ version: 1.1.0
   - ⏳ Support des sections optionnelles du standard JSON Resume
 
 ### Technical Details 🔧
+
+> 💡 **Epic-2 - Architectures des Composables**
+
+```mermaid
+---
+title: Architecture des Composables
+---
+graph TD
+    A[Composants Formulaire] -->|Utilise| B[useFormModel]
+    A -->|Valide avec| C[useFormValidation]
+    D[Composants Liste] -->|Gère collections avec| E[useCollectionField]
+    F[WorkList] -->|Utilise| G[CollectionManager]
+    G -->|S'intègre avec| E
+    B -->|S'intègre avec| C
+```
+
+> 💡 **useFormModel Implementation**
+
+```typescript
+// useFormModel - Gestion des modèles de formulaire
+export function useFormModel<T extends Record<string, any>>({
+  modelValue,
+  emit,
+  defaultValues,
+  enableLogging = false,
+}: FormModelOptions<T>): FormModelReturn<T> {
+  const localModel = computed({
+    get: () => modelValue.value || defaultValues,
+    set: (newValue) => emit("update:modelValue", newValue),
+  });
+
+  // Mise à jour d'un champ simple
+  const updateField = (field: keyof T, value: any) => {
+    emit("update:modelValue", {
+      ...modelValue.value,
+      [field]: value,
+    });
+  };
+
+  // Mise à jour d'un champ imbriqué
+  const updateNestedField = <K extends keyof T, N extends keyof T[K]>(
+    object: K,
+    field: N,
+    value: T[K][N]
+  ) => {
+    emit("update:modelValue", {
+      ...modelValue.value,
+      [object]: {
+        ...modelValue.value[object],
+        [field]: value,
+      },
+    });
+  };
+
+  return { localModel, updateField, updateNestedField };
+}
+```
 
 > 💡 **Work Experience Implementation**
 
@@ -91,6 +167,8 @@ graph TD
 - Analyses de CV et suggestions d'amélioration
 - Interface administrateur pour la gestion des modèles
 - Internationalisation (i18n) pour l'interface utilisateur
+- Migration des composants existants vers les nouveaux composables de l'Epic-2
+- Refactorisation progressive des composants d'interface utilisateur
 
 ### Technical Improvements 🔧
 

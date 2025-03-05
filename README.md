@@ -13,6 +13,7 @@ version: 1.1.0
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/giak/cv-generator/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![JSON Resume](https://img.shields.io/badge/JSON%20Resume-Compatible-orange.svg)](https://jsonresume.org/)
+[![Status](https://img.shields.io/badge/Status-WIP-yellow)](https://github.com/giak/cv-generator)
 
 > 💡 **Modern CV builder with full [JSON Resume](https://jsonresume.org/) standard support, real-time validation, and multiple export formats**
 
@@ -139,25 +140,67 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - Architecture Clean Architecture mise en place
   - Structure en packages établie
   - Modèles de données JSON Resume implémentés
-- **Epic-2: Édition de CV** 🔄 60% Complété
+- **Epic-2: Refactorisation des Composants CV** ✅ 100% Complété
+  - ✅ Composable `useFormModel` pour la gestion standardisée des modèles de formulaire
+  - ✅ Composable `useFormValidation` pour la validation centralisée des formulaires
+  - ✅ Composable `useCollectionField` pour la gestion des collections d'éléments
+  - ✅ Composant `DateRangeFields` pour les plages de dates avec option "en cours"
+  - ✅ Composant `CollectionManager` pour l'affichage et la gestion des listes d'éléments
+- **Epic-3: Édition de CV** 🔄 60% Complété
   - ✅ Formulaires pour les informations de base (basics)
   - ✅ Formulaires pour l'expérience professionnelle (work)
   - 🔄 Formulaires pour l'éducation (education) en cours
   - ⏳ Formulaires pour les compétences (skills) et autres sections planifiés
-- **Epic-3: Prévisualisation et exportation** ⏳ Planifié
+- **Epic-4: Prévisualisation et exportation** ⏳ Planifié
+- **Epic-5: Optimisation ATS** ⏳ Planifié
 
-- **Epic-4: Optimisation ATS** ⏳ Planifié
+### Latest Feature: CollectionManager Component
 
-### Latest Feature: Work Experience
+Pour plus de détails sur le nouveau composant `CollectionManager`, consultez la [documentation de l'Epic-2](docs/epic-2/epic-2-completion-summary.md) ou la [Story-6](.ai/epic-2/story-6.story.md) qui détaille son implémentation.
 
-![Work Experience Editor](docs/assets/work-experience.png)
+The new `CollectionManager` component provides a standardized interface for displaying and managing collections of items:
 
-The Work Experience section has been fully integrated with:
+- Uniform UI for all collection-based components (WorkList, EducationList, SkillList, etc.)
+- Consistent item actions (add, edit, delete)
+- Customizable display through flexible slot system
+- Integrated with useCollectionField composable for state management
+- Built-in confirmation dialogs for destructive actions
+- Support for empty states and loading indicators
 
-- Real-time validation against JSON Resume schema
-- Highlights management with drag-and-drop reordering
-- Complete implementation of the Result pattern for error handling
-- Value Objects pattern for domain validation
+### Reusable Composables
+
+The Epic-2 has delivered several high-quality, reusable composables:
+
+- **useFormModel**: Standardized form state management with TypeScript safety
+
+  ```typescript
+  const { localModel, updateField, updateNestedField } = useFormModel({
+    modelValue: computed(() => props.modelValue),
+    emit: (event, value) => emit(event, value),
+    defaultValues: {
+      /* default values */
+    },
+  });
+  ```
+
+- **useFormValidation**: Comprehensive validation with schema support
+
+  ```typescript
+  const { errors, validateField, validateForm } = useFormValidation(schema);
+  ```
+
+- **useCollectionField**: Collection management for arrays of items
+  ```typescript
+  const { items, newItem, addItem, removeItem, updateItem } =
+    useCollectionField({
+      fieldName: "items",
+      collection: computed(() => model.items),
+      updateField,
+      defaultItemValues: {
+        /* defaults */
+      },
+    });
+  ```
 
 ## Architecture
 
@@ -202,6 +245,14 @@ The application follows a Clean Architecture approach with Domain-Driven Design 
 - **Repository Pattern**: Abstraction layer for data persistence
 - **Clean Architecture**: Separation of concerns with domain, application, and infrastructure layers
 - **Domain-Driven Design**: Rich domain model with entities and value objects
+- **Composable Pattern**: Reusable logic with Vue Composition API
+  ```typescript
+  // Example of Composable Pattern with useFormModel
+  export function useFormModel<T>({ modelValue, emit, defaultValues }) {
+    // Implementation...
+    return { localModel, updateField, updateNestedField };
+  }
+  ```
 
 ```mermaid
 ---
@@ -823,4 +874,4 @@ See [CHANGELOG.md](CHANGELOG.md) for a detailed list of changes between versions
 
 ---
 
-_Last updated: March 02, 2025_
+_Last updated: March 10, 2025_
