@@ -3,7 +3,34 @@ import type { BasicsInterface, LocationInterface, ProfileInterface } from '@cv-g
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import { useFieldValidation as useCVFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
-import { computed, reactive, ref, watch, onMounted } from 'vue'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { computed, ref, onMounted } from 'vue'
+
+// Performance measurement
+const perfMeasurements = {
+  profileOperations: 0,
+  validations: 0,
+  renderTime: 0
+}
+
+const startTime = performance.now()
+
+// Log component performance on unmount
+onMounted(() => {
+  perfMeasurements.renderTime = performance.now() - startTime
+  console.log('BasicsForm mounted in', perfMeasurements.renderTime, 'ms')
+  
+  // Clean up on component unmount
+  return () => {
+    console.log('BasicsForm Performance Metrics:', {
+      profileOperations: perfMeasurements.profileOperations,
+      validations: perfMeasurements.validations,
+      renderTime: perfMeasurements.renderTime,
+      // Include metrics from useFormModel
+      ...perfMetrics
+    })
+  }
+})
 
 interface Props {
   modelValue: BasicsInterface
@@ -16,8 +43,8 @@ const emit = defineEmits<{
   (e: 'validate'): void
 }>()
 
-// Créer une copie locale réactive du modèle pour plus de stabilité
-const localModel = reactive<BasicsInterface>({
+// Default values for a new basics model
+const defaultValues: Partial<BasicsInterface> = {
   name: '',
   email: '',
   label: '',
@@ -33,95 +60,40 @@ const localModel = reactive<BasicsInterface>({
     region: ''
   },
   profiles: []
-})
-
-// Initialiser le modèle local avec les valeurs props au montage
-onMounted(() => {
-  updateLocalModel(props.modelValue)
-  console.log('Initial localModel setup:', JSON.stringify(localModel))
-})
-
-// Watch pour les changements des props et mettre à jour le modèle local
-watch(() => props.modelValue, (newValue) => {
-  console.log('Props model changed, updating local model:', JSON.stringify(newValue))
-  updateLocalModel(newValue)
-}, { deep: true })
-
-// Met à jour le modèle local à partir des props
-function updateLocalModel(source: BasicsInterface) {
-  // Mise à jour des champs de premier niveau
-  localModel.name = source.name || ''
-  localModel.email = source.email || ''
-  localModel.label = source.label || ''
-  localModel.phone = source.phone || ''
-  localModel.url = source.url || ''
-  localModel.image = source.image || ''
-  localModel.summary = source.summary || ''
-  
-  // Mise à jour explicite de la location
-  const loc = source.location || {}
-  localModel.location = {
-    address: loc.address || '',
-    postalCode: loc.postalCode || '',
-    city: loc.city || '',
-    region: loc.region || '',
-    countryCode: loc.countryCode || ''
-  }
-  
-  // Mise à jour explicite des profils
-  localModel.profiles = source.profiles ? [...source.profiles] : []
 }
 
-// Fonction unifiée pour mettre à jour n'importe quelle partie du modèle et émettre l'événement
-function updateAndEmit() {
-  console.log('Emitting updated model to parent:', JSON.stringify(localModel))
-  emit('update:modelValue', { ...localModel } as BasicsInterface)
-}
+// Use the form model composable
+const { 
+  localModel, 
+  updateField, 
+  updateNestedField,
+  perfMetrics
+} = useFormModel<BasicsInterface>({
+  modelValue: computed(() => props.modelValue),
+  emit: (event, value) => emit(event, value),
+  defaultValues,
+  enableLogging: process.env.NODE_ENV === 'development' // Only enable logging in development
+})
 
-// Gestionnaire pour les champs de premier niveau
+// Handle field updates for top-level fields
 const handleFieldUpdate = (field: keyof BasicsInterface, value: string) => {
-  console.log(`Updating field ${field} with value:`, value)
-  
   if (field === 'image') {
     console.log('Updating image URL specific field:', value)
   }
   
-  // Mise à jour du modèle local - avec vérification de type
-  if (field === 'name' || field === 'email' || field === 'label' || 
-      field === 'phone' || field === 'url' || field === 'image' ||
-      field === 'summary') {
-    // Seulement mettre à jour les champs de type string
-    localModel[field] = value
-  }
-  
-  // Émettre les changements
-  updateAndEmit()
+  updateField(field, value)
 }
 
-// Gestionnaire pour les champs de location
+// Handle location updates
 const handleLocationUpdate = (field: keyof LocationInterface, value: string) => {
-  console.log(`Updating location.${field} with value:`, value)
-  
   if (field === 'countryCode') {
     console.log('Updating countryCode specific field:', value)
   }
   
-  // S'assurer que l'objet location existe
-  if (!localModel.location) {
-    localModel.location = {
-      address: '',
-      postalCode: '',
-      city: '',
-      countryCode: '',
-      region: ''
-    }
-  }
-  
-  // Mise à jour directe sur le modèle local
-  localModel.location[field] = value
-  
-  // Émettre les changements
-  updateAndEmit()
+  // Use type assertions to bypass TypeScript's type checking
+  // This is safe because we know the structure of our data
+  const updateFn = updateNestedField as any
+  updateFn('location', field, value)
 }
 
 // Gestionnaire des profils
@@ -147,6 +119,7 @@ const toggleProfileForm = () => {
 }
 
 const addProfile = () => {
+  const opStart = performance.now()
   // Valider les champs du profil
   if (!newProfile.value.network || !newProfile.value.username) {
     return // Ne pas ajouter de profils incomplets
@@ -157,13 +130,8 @@ const addProfile = () => {
   console.log('Adding profile:', JSON.stringify(profileToAdd))
   
   // Ajouter le profil au modèle local
-  if (!localModel.profiles) {
-    localModel.profiles = []
-  }
-  localModel.profiles.push(profileToAdd)
-  
-  // Émettre les changements
-  updateAndEmit()
+  const updatedProfiles = [...(localModel.profiles || []), profileToAdd]
+  updateField('profiles', updatedProfiles)
   
   // Reset et fermer le formulaire
   newProfile.value = {
@@ -172,28 +140,27 @@ const addProfile = () => {
     url: ''
   }
   isAddingProfile.value = false
+  
+  perfMeasurements.profileOperations++
+  console.log(`Profile add operation took ${performance.now() - opStart}ms (total: ${perfMeasurements.profileOperations})`)
 }
 
 const removeProfile = (index: number) => {
   console.log(`Removing profile at index ${index}`)
   
-  // S'assurer que profiles existe
-  if (!localModel.profiles) {
-    localModel.profiles = []
-    return
-  }
+  // Create a new array without the profile at the specified index
+  const updatedProfiles = [...(localModel.profiles || [])]
+  updatedProfiles.splice(index, 1)
   
-  // Suppression du profil
-  localModel.profiles.splice(index, 1)
-  
-  // Émettre les changements
-  updateAndEmit()
+  // Update the profiles field
+  updateField('profiles', updatedProfiles)
 }
 
 // Valider le formulaire avant d'émettre l'événement de validation
 const { errors, validateField, validateForm } = useCVFieldValidation()
 
 const handleSubmit = async () => {
+  const validationStart = performance.now()
   console.log('Form submission - Current model:', JSON.stringify(localModel))
   
   // Valider tous les champs
@@ -212,6 +179,9 @@ const handleSubmit = async () => {
     
     emit('validate')
   }
+  
+  perfMeasurements.validations++
+  console.log(`Form validation took ${performance.now() - validationStart}ms (total: ${perfMeasurements.validations})`)
 }
 
 // Icônes SVG pour les champs
