@@ -85,7 +85,7 @@ Au total, 9 documents ont été créés pour soutenir cette initiative de refact
 | 3     | Extraction du Composable useFormValidation            | Complété | 3            | Story-1           |
 | 4     | Extraction du Composable useCollectionField           | Complété | 3            | Story-1           |
 | 5     | Création du Composant DateRangeFields                 | Complété | 2            | Story-1           |
-| 6     | Création du Composant CollectionManager               | Draft    | 3            | Story-1, Story-4  |
+| 6     | Création du Composant CollectionManager               | Complété | 3            | Story-1, Story-4  |
 | 7     | Plan d'Implémentation et Stratégie de Refactorisation | Complété | 2            | Story-1 à Story-6 |
 
 **Total Story Points**: 21 (environ 5 semaines de travail)
@@ -101,7 +101,7 @@ Selon le plan d'implémentation, les prochaines étapes sont:
 2. **Continuer avec la Phase 2: Composants Réutilisables**
 
    - ✅ Développer le composant `DateRangeFields` (Story-5) - **Complété**
-   - Développer le composant `CollectionManager` (Story-6)
+   - ✅ Développer le composant `CollectionManager` (Story-6) - **Complété**
 
 3. **Suivre avec la Phase 3: Migration Progressive**
 
@@ -114,7 +114,7 @@ Selon le plan d'implémentation, les prochaines étapes sont:
 
 ## Conclusion
 
-Les Stories 0, 1, 2, 3, 4, 5 et 7 sont maintenant complétées, fournissant une base solide pour l'exécution de l'Epic-2:
+Les Stories 0, 1, 2, 3, 4, 5, 6 et 7 sont maintenant complétées, fournissant une base solide pour l'exécution de l'Epic-2:
 
 1. **Story-0 "Résumé et Index de l'Epic"** sert de point d'entrée principal pour toute la documentation de l'Epic-2.
 2. **Story-1 "Stratégie de Refactorisation des Composants CV"** définit la stratégie globale et identifie les composables et composants à extraire.
@@ -122,8 +122,11 @@ Les Stories 0, 1, 2, 3, 4, 5 et 7 sont maintenant complétées, fournissant une 
 4. **Story-3 "Extraction du Composable useFormValidation"** a été implémentée avec succès. Le composable fournit une gestion complète de la validation des formulaires avec support pour Zod et validation en temps réel.
 5. **Story-4 "Extraction du Composable useCollectionField"** a été implémentée avec succès. Le composable permet la gestion standardisée des collections avec des méthodes pour ajouter, supprimer et mettre à jour des éléments. Il a été intégré avec succès dans le composant BasicsForm.
 6. **Story-5 "Création du Composant DateRangeFields"** a été implémentée avec succès. Le composant standardise la gestion des plages de dates avec une option "actuellement en cours" et a été intégré dans tous les formulaires pertinents (WorkForm, EducationForm, VolunteerForm).
-7. **Story-7 "Plan d'Implémentation et Stratégie de Refactorisation"** fournit le plan détaillé d'implémentation et la stratégie de migration.
+7. **Story-6 "Création du Composant CollectionManager"** a été implémentée avec succès. Le composant fournit une interface utilisateur standardisée pour la gestion des collections avec des fonctionnalités d'ajout, d'édition et de suppression d'éléments. Il a été intégré avec succès dans le composant WorkList et peut être facilement réutilisé pour d'autres listes.
+8. **Story-7 "Plan d'Implémentation et Stratégie de Refactorisation"** fournit le plan détaillé d'implémentation et la stratégie de migration.
 
-Tous les documents nécessaires ont été créés, offrant une feuille de route claire pour la refactorisation des composants CV. L'implémentation effective des composables et composants a progressé selon le plan établi, avec la Phase 1 (Fondations) terminée, le premier composant de la Phase 2 (DateRangeFields) complété, et uniquement Story-6 (CollectionManager) restant à finaliser.
+Tous les documents nécessaires ont été créés, offrant une feuille de route claire pour la refactorisation des composants CV. L'implémentation effective des composables et composants a progressé selon le plan établi, avec la Phase 1 (Fondations) et la Phase 2 (Composants Réutilisables) terminées.
 
-Les composables et composants déjà implémentés (useFormValidation, useCollectionField, DateRangeFields) démontrent déjà les bénéfices attendus de cette refactorisation: réduction de code dupliqué, standardisation des interfaces, amélioration de l'expérience utilisateur et facilitation de la maintenance.
+Les composables et composants implémentés (useFormModel, useFormValidation, useCollectionField, DateRangeFields, CollectionManager) démontrent déjà les bénéfices attendus de cette refactorisation: réduction de code dupliqué, standardisation des interfaces, amélioration de l'expérience utilisateur et facilitation de la maintenance.
+
+La prochaine étape consiste à passer à la Phase 3 (Migration Progressive) pour refactoriser les composants pilotes et les composants restants en utilisant les fondations et composants réutilisables développés.
