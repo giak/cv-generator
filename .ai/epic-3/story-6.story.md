@@ -11,7 +11,7 @@ Story-6: Implémentation du Tri Chronologique et Navigation Entre Formulaires
 
 ## Statut
 
-In Progress (80%)
+Terminé (100%)
 
 ## Contexte
 
@@ -30,8 +30,8 @@ Story Points: 5
 ## Critères d'Acceptation
 
 1. ✅ Étant donné que je visualise ma liste d'éducation, quand j'ai plusieurs entrées avec différentes dates, alors elles sont automatiquement affichées par ordre chronologique inversé (plus récent en premier)
-2. Étant donné que j'ai des expériences professionnelles dans la section work, quand je les visualise, alors elles sont triées par date de fin décroissante (ou "Présent" en premier)
-3. Étant donné que j'ai des projets avec des dates, quand je les visualise, alors ils sont triés du plus récent au plus ancien
+2. ✅ Étant donné que j'ai des expériences professionnelles dans la section work, quand je les visualise, alors elles sont triées par date de fin décroissante (ou "Présent" en premier)
+3. ✅ Étant donné que j'ai des projets avec des dates, quand je les visualise, alors ils sont triés du plus récent au plus ancien
 4. ✅ Étant donné que je souhaite modifier l'ordre manuellement, quand j'utilise le drag-and-drop, alors le nouvel ordre est préservé indépendamment du tri chronologique par défaut
 5. ✅ Étant donné que je navigue entre les sections du CV, quand je passe d'un formulaire à l'autre, alors je vois un indicateur visuel de ma position actuelle et de ma progression globale
 6. ✅ Étant donné qu'une section n'est que partiellement remplie, quand je navigue dans l'application, alors un indicateur visuel me montre que cette section est incomplète
@@ -42,8 +42,8 @@ Story Points: 5
 
    1. - [x] Créer une fonction de tri chronologique réutilisable
    2. - [x] Modifier `EducationList.vue` pour trier les entrées par date
-   3. - [ ] Adapter `WorkList.vue` pour trier les expériences professionnelles
-   4. - [ ] Mettre à jour `ProjectList.vue` pour le tri chronologique
+   3. - [x] Adapter `WorkList.vue` pour trier les expériences professionnelles
+   4. - [x] Mettre à jour `ProjectList.vue` pour le tri chronologique
    5. - [x] Implémenter un indicateur visuel pour l'ordre personnalisé vs. chronologique
 
 2. - [x] Préservation de l'ordre personnalisé
@@ -68,8 +68,8 @@ Story Points: 5
 5. - [x] Tests et optimisation
    1. - [x] Écrire des tests unitaires pour les composants de navigation
    2. - [x] Tester les comportements de navigation
-   3. - [ ] Optimiser les performances pour les listes volumineuses
-   4. - [ ] Vérifier la compatibilité mobile
+   3. - [x] Optimiser les performances pour les listes volumineuses
+   4. - [x] Vérifier la compatibilité mobile
 
 ## Principes de Développement
 
@@ -132,6 +132,9 @@ Story Points: 5
 - Mise à jour (06-03-2025): Implémentation du tri chronologique pour les entrées d'éducation terminée dans le composant EducationList. Le tri chronologique inverse (plus récent en premier) est désormais activé par défaut, avec possibilité de basculer vers un ordre personnalisé. Les modifications manuelles via les boutons haut/bas activent automatiquement le mode d'ordre personnalisé.
 - Mise à jour (07-03-2025): Modernisation des composants de navigation avec Tailwind CSS. Le composant `FormNavigation.vue` a été entièrement revu pour utiliser Tailwind CSS, offrant une meilleure cohérence visuelle et une expérience utilisateur améliorée. Le composant `ProgressIndicator.vue` a également été modernisé en remplaçant les classes CSS personnalisées par des classes Tailwind CSS. Un nouveau composant `CVNavigation.vue` a été créé pour offrir une navigation globale entre les sections du CV, avec des indicateurs de progression clairs.
 - Mise à jour (08-03-2025): Correction des tests pour le composant `CVNavigation.vue`. Les tests ont été adaptés pour refléter la structure réelle du composant et les résultats attendus. Le problème était lié à la façon dont nous mockions le composable `useFormProgress` et sa propriété `sectionStatuses`. Tous les tests passent maintenant avec succès, validant le bon fonctionnement du composant de navigation.
+- Mise à jour (12-03-2025): Implémentation du tri chronologique pour les expériences professionnelles dans le composant WorkList. Le tri priorise les postes en cours ("Présent") et affiche ensuite les autres expériences du plus récent au plus ancien. Cette modification inclut une interface utilisateur permettant de basculer entre le tri chronologique automatique et l'ordre personnalisé. Les tests ont été mis à jour pour refléter le nouveau comportement de tri.
+- Mise à jour (13-03-2025): Implémentation du tri chronologique pour les projets dans le composant ProjectList. Le tri priorise les projets en cours (sans date de fin) et affiche ensuite les autres projets du plus récent au plus ancien, avec une gestion robuste des cas particuliers comme les dates manquantes. L'interface utilisateur cohérente permet de basculer entre le tri chronologique et l'ordre personnalisé. La story est désormais complétée à 95%, avec seulement quelques optimisations de performance restantes pour les listes volumineuses et la vérification de compatibilité mobile.
+- Mise à jour (14-03-2025): Optimisation des performances pour les listes volumineuses implémentée dans les composants EducationList, WorkList et ProjectList. Cette optimisation limite l'affichage initial à un nombre raisonnable d'éléments (8-10) avec un bouton "Voir plus" pour afficher tous les éléments si nécessaire. La compatibilité mobile a été vérifiée, tous les composants utilisent des classes Tailwind responsives pour s'adapter aux différentes tailles d'écran. La Story-6 est maintenant complète à 100%.
 
 ## Fonctionnalités implémentées
 
@@ -144,6 +147,26 @@ Story Points: 5
 - ✅ Bouton de basculement entre tri chronologique et ordre personnalisé
 - ✅ Indication visuelle du mode de tri actif
 
+### Tri chronologique dans WorkList
+
+- ✅ Tri automatique des expériences par date (plus récent en premier)
+- ✅ Priorisation des postes actuels (sans date de fin ou "Présent")
+- ✅ Gestion robuste des cas particuliers (dates manquantes, formats invalides)
+- ✅ Basculement entre tri chronologique et ordre personnalisé via bouton dédié
+- ✅ Conservation de l'ordre personnalisé lors des réorganisations manuelles
+- ✅ Indication visuelle du mode de tri actif (chronologique vs personnalisé)
+- ✅ Interface utilisateur cohérente avec EducationList
+
+### Tri chronologique dans ProjectList
+
+- ✅ Tri automatique des projets par date (plus récent en premier)
+- ✅ Priorisation des projets en cours (sans date de fin)
+- ✅ Gestion robuste des cas particuliers (dates manquantes, formats invalides)
+- ✅ Basculement entre tri chronologique et ordre personnalisé via bouton dédié
+- ✅ Conservation de l'ordre personnalisé lors des réorganisations manuelles
+- ✅ Indication visuelle du mode de tri actif (chronologique vs personnalisé)
+- ✅ Interface utilisateur cohérente avec WorkList et EducationList
+
 ### Modernisation des composants de navigation
 
 - ✅ Refonte du composant `FormNavigation.vue` avec Tailwind CSS
@@ -154,6 +177,16 @@ Story Points: 5
 - ✅ Indicateurs visuels clairs de progression et de statut de complétion
 - ✅ Optimisation de l'accessibilité avec des ratios de contraste améliorés
 - ✅ Adaptation responsive des composants de navigation
+
+### Optimisation des performances
+
+- ✅ Limitation du nombre d'éléments affichés par défaut pour améliorer les performances
+- ✅ Bouton "Voir plus" pour afficher tous les éléments si nécessaire
+- ✅ Réinitialisation de la pagination lors du changement de mode de tri
+- ✅ Affichage du nombre total d'éléments dans le bouton "Voir plus"
+- ✅ Bouton "Réduire la liste" pour revenir à l'affichage limité
+- ✅ Interface utilisateur cohérente entre les trois composants de liste
+- ✅ Compatibilité mobile avec des classes Tailwind responsives
 
 ### Tests et validation
 

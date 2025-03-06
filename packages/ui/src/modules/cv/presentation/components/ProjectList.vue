@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <CollectionManager
-      :items="projects"
+      :items="displayedProjects"
       title="Projets"
       description="Gérez vos projets personnels et professionnels pour votre CV"
       addButtonText="Ajouter un projet"
@@ -12,6 +12,28 @@
       @edit="openEditForm"
       @delete="openDeleteConfirm"
     >
+      <!-- Sorting options -->
+      <template #header-actions>
+        <div v-if="projects.length > 1" class="flex items-center">
+          <button 
+            type="button"
+            @click="toggleSortOrder"
+            class="flex items-center text-sm px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 transition-colors"
+            :class="{'text-primary-300': useChronologicalSort && !isCustomOrder, 'text-neutral-400': !useChronologicalSort || isCustomOrder}"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <polyline points="21 8 21 21"></polyline>
+              <polyline points="10 21 3 21 3 8"></polyline>
+              <line x1="14" y1="4" x2="14" y2="21"></line>
+              <line x1="18" y1="4" x2="18" y2="21"></line>
+              <line x1="3" y1="12" x2="10" y2="12"></line>
+              <line x1="3" y1="16" x2="10" y2="16"></line>
+            </svg>
+            {{ useChronologicalSort && !isCustomOrder ? 'Tri chronologique' : 'Ordre personnalisé' }}
+          </button>
+        </div>
+      </template>
+      
       <template #emptyIcon>
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-12 h-12">
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -91,6 +113,31 @@
         </div>
       </template>
     </CollectionManager>
+    
+    <!-- Performance optimization: show more/less button -->
+    <div v-if="hasMoreItems" class="flex justify-center mt-4">
+      <button 
+        @click="toggleShowAllItems" 
+        class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
+      >
+        <span>Voir tous les projets ({{ sortedProjects.length }})</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+    
+    <div v-if="showAllItems && sortedProjects.length > itemsPerPage" class="flex justify-center mt-4">
+      <button 
+        @click="toggleShowAllItems" 
+        class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
+      >
+        <span>Réduire la liste</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </button>
+    </div>
     
     <!-- Modal pour ajouter/modifier un projet -->
     <div v-if="showForm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -187,6 +234,14 @@ const projectStore = useProjectStore()
 // État des projets
 const isLoading = computed(() => projectStore.isLoading)
 
+// State for sorting
+const useChronologicalSort = ref(true)
+const isCustomOrder = ref(false)
+
+// Performance optimization for large lists
+const itemsPerPage = ref(10) // Default limit for better performance
+const showAllItems = ref(false)
+
 // Setup de useCollectionField pour gérer les projets
 const { 
   items: projects,
@@ -210,6 +265,66 @@ const {
   },
   identifierField: 'id'
 })
+
+// Chronologically sorted projects (most recent first)
+const sortedProjects = computed(() => {
+  // If using custom order, return the original list
+  if (!useChronologicalSort.value || isCustomOrder.value) {
+    return projects.value;
+  }
+  
+  // Create a copy to avoid modifying the source
+  return [...projects.value].sort((a, b) => {
+    // For projects, we'll prioritize ongoing projects (those with no endDate)
+    // and then sort by the most recent startDate or endDate
+    const isCurrentA = !a.endDate || a.endDate === '';
+    const isCurrentB = !b.endDate || b.endDate === '';
+    
+    // If one is current but not the other, prioritize the current one
+    if (isCurrentA && !isCurrentB) return -1;
+    if (!isCurrentA && isCurrentB) return 1;
+    
+    // If both have end dates, compare them (most recent first)
+    if (a.endDate && b.endDate) {
+      return new Date(b.endDate).getTime() - new Date(a.endDate).getTime();
+    }
+    
+    // If both are current or neither has an end date, compare start dates
+    if (a.startDate && b.startDate) {
+      return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+    }
+    
+    // Handle cases with missing dates
+    if (!a.startDate && !b.startDate) return 0;
+    if (!a.startDate) return 1; // a should come after b
+    if (!b.startDate) return -1; // b should come after a
+    
+    return 0;
+  });
+});
+
+// Displayed projects (either sorted or original based on setting) with pagination
+const displayedProjects = computed(() => {
+  const projectsToDisplay = sortedProjects.value;
+  
+  // If showing all items or if the list is smaller than the limit, return all
+  if (showAllItems.value || projectsToDisplay.length <= itemsPerPage.value) {
+    return projectsToDisplay;
+  }
+  
+  // Otherwise, return limited items for better performance
+  return projectsToDisplay.slice(0, itemsPerPage.value);
+});
+
+// Determine if we have more items to show
+const hasMoreItems = computed(() => {
+  return sortedProjects.value.length > itemsPerPage.value && !showAllItems.value;
+});
+
+// Toggle between showing limited items and all items
+const toggleShowAllItems = () => {
+  showAllItems.value = !showAllItems.value;
+};
 
 // État du formulaire
 const isEditing = ref(false)
@@ -348,9 +463,29 @@ const confirmDelete = async () => {
   }
 }
 
+// Toggle between chronological and custom order
+const toggleSortOrder = async () => {
+  useChronologicalSort.value = !useChronologicalSort.value
+  
+  // If switching to chronological and we have a custom order,
+  // reset the custom order flag
+  if (useChronologicalSort.value && isCustomOrder.value) {
+    isCustomOrder.value = false
+    // Note: We're not actually changing the stored order here,
+    // just displaying in chronological order
+  }
+  
+  // Reset pagination when toggling sort
+  showAllItems.value = false;
+}
+
 // Reorder projects up
 const moveUp = async (index: number) => {
   if (index <= 0) return
+  
+  // Mark as custom order
+  isCustomOrder.value = true
+  useChronologicalSort.value = false
   
   // Create array of indices, then map to strings
   const indices = [...Array(projects.value.length).keys()]
@@ -372,6 +507,10 @@ const moveUp = async (index: number) => {
 // Reorder projects down
 const moveDown = async (index: number) => {
   if (index >= projects.value.length - 1) return
+  
+  // Mark as custom order
+  isCustomOrder.value = true
+  useChronologicalSort.value = false
   
   // Create array of indices, then map to strings
   const indices = [...Array(projects.value.length).keys()]

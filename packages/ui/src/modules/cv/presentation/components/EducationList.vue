@@ -26,9 +26,13 @@ const editingEducation = ref<EducationInterface>({
   courses: []
 })
 
-// New state for sorting
+// State for sorting
 const useChronologicalSort = ref(true)
 const isCustomOrder = ref(false)
+
+// Performance optimization for large lists
+const itemsPerPage = ref(8) // Default limit for better performance
+const showAllItems = ref(false)
 
 // Chronologically sorted educations (most recent first)
 const sortedEducations = computed(() => {
@@ -49,13 +53,8 @@ const sortedEducations = computed(() => {
     if (!dateA) return 1; // a should come after b
     if (!dateB) return -1; // b should come after a
     
-    // Parse dates - if invalid, put at the end
+    // Compare dates (newest first)
     try {
-      // For "Present" or current roles, put them at the top
-      if (a.endDate === '') return -1;
-      if (b.endDate === '') return 1;
-      
-      // Compare dates (newest first)
       return new Date(dateB).getTime() - new Date(dateA).getTime();
     } catch (error) {
       console.error('Error comparing dates:', error);
@@ -64,10 +63,28 @@ const sortedEducations = computed(() => {
   });
 });
 
-// Exposed educations (either sorted or original based on setting)
+// Displayed educations with pagination for better performance
 const displayedEducations = computed(() => {
-  return sortedEducations.value;
+  const educationsToDisplay = sortedEducations.value;
+  
+  // If showing all items or if the list is smaller than the limit, return all
+  if (showAllItems.value || educationsToDisplay.length <= itemsPerPage.value) {
+    return educationsToDisplay;
+  }
+  
+  // Otherwise, return limited items for better performance
+  return educationsToDisplay.slice(0, itemsPerPage.value);
 });
+
+// Determine if we have more items to show
+const hasMoreItems = computed(() => {
+  return sortedEducations.value.length > itemsPerPage.value && !showAllItems.value;
+});
+
+// Toggle between showing limited items and all items
+const toggleShowAllItems = () => {
+  showAllItems.value = !showAllItems.value;
+};
 
 // Load education on component mount
 onMounted(async () => {
@@ -201,27 +218,29 @@ const moveDown = async (index: number) => {
 }
 
 // Toggle between chronological and custom order
-const toggleSortOrder = async () => {
-  useChronologicalSort.value = !useChronologicalSort.value;
+const toggleSortOrder = () => {
+  useChronologicalSort.value = !useChronologicalSort.value
   
   // If switching to chronological and we have a custom order,
-  // ask if user wants to reset the custom order
+  // reset the custom order flag
   if (useChronologicalSort.value && isCustomOrder.value) {
-    isCustomOrder.value = false;
-    // We could show a confirmation dialog here
+    isCustomOrder.value = false
   }
+  
+  // Reset pagination when toggling sort
+  showAllItems.value = false;
 }
 </script>
 
 <template>
-  <div class="education-list">
+  <div class="space-y-6">
     <CollectionManager
       :items="displayedEducations"
-      title="Formation"
-      description="Ajoutez vos diplômes et formations académiques."
+      title="Formations"
+      description="Gérez vos formations et diplômes pour votre CV"
       addButtonText="Ajouter une formation"
-      emptyStateTitle="Aucune formation ajoutée"
-      emptyStateDescription="Commencez par ajouter votre parcours académique"
+      emptyStateTitle="Aucune formation"
+      emptyStateDescription="Commencez par ajouter une formation pour enrichir votre CV."
       :loading="loading"
       @add="openAddDialog"
       @edit="openEditDialog"
@@ -330,6 +349,31 @@ const toggleSortOrder = async () => {
         </div>
       </template>
     </CollectionManager>
+    
+    <!-- Performance optimization: show more/less button -->
+    <div v-if="hasMoreItems" class="flex justify-center mt-4">
+      <button 
+        @click="toggleShowAllItems" 
+        class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
+      >
+        <span>Voir toutes les formations ({{ sortedEducations.length }})</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+    
+    <div v-if="showAllItems && sortedEducations.length > itemsPerPage" class="flex justify-center mt-4">
+      <button 
+        @click="toggleShowAllItems" 
+        class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
+      >
+        <span>Réduire la liste</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </button>
+    </div>
     
     <!-- Dialog for adding/editing education -->
     <div v-if="showDialog" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">

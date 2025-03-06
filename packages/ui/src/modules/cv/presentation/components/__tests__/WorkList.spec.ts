@@ -85,23 +85,30 @@ describe('WorkList', () => {
     const cards = wrapper.findAll('.mock-card')
     expect(cards.length).toBe(2)
     
+    // With chronological sort, the current job (Senior Engineer) should appear first
     // Check specific content in the first card
-    expect(cards[0].text()).toContain('Software Engineer')
-    expect(cards[0].text()).toContain('Test Company 1')
+    expect(cards[0].text()).toContain('Senior Engineer')
+    expect(cards[0].text()).toContain('Test Company 2')
     
     // Check date formatting
-    expect(cards[0].text()).toContain('janvier 2020 - janvier 2022')
-    expect(cards[1].text()).toContain('février 2022 - Présent')
+    expect(cards[0].text()).toContain('février 2022 - Présent')
     
     // Check highlights
-    expect(cards[0].text()).toContain('Achievement 1')
-    expect(cards[0].text()).toContain('Achievement 2')
+    expect(cards[0].text()).toContain('Achievement 3')
+    expect(cards[0].text()).toContain('Achievement 4')
     
     // Check summary
-    expect(cards[0].text()).toContain('First test job')
+    expect(cards[0].text()).toContain('Current job')
+    
+    // Check specific content in the second card
+    expect(cards[1].text()).toContain('Software Engineer')
+    expect(cards[1].text()).toContain('Test Company 1')
+    expect(cards[1].text()).toContain('janvier 2020 - janvier 2022')
+    expect(cards[1].text()).toContain('Achievement 1')
+    expect(cards[1].text()).toContain('First test job')
     
     // Check URL
-    const url = cards[0].find('a')
+    const url = cards[1].find('a')
     expect(url.attributes('href')).toBe('https://example.com')
   })
   

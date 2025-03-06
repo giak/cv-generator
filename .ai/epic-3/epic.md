@@ -1,6 +1,6 @@
 # Epic-3: Édition de CV
 
-## Statut: En cours (75% complété)
+## Statut: En cours (80% complété)
 
 **Date de début**: 2025-03-10
 **Date de fin prévue**: 2025-04-15
@@ -37,7 +37,7 @@ Cet Epic concerne le développement de l'ensemble des formulaires d'édition né
 | S-4   | Implémentation des formulaires de projets                                   | Draft             | 8      | Moyenne  |
 | S-5   | Finalisation et Optimisation des Formulaires CV Existants                   | In Progress (75%) | 8      | Élevée   |
 | S-5.1 | Fusion des Composants de Navigation pour une Expérience Utilisateur Unifiée | Terminée (100%)   | 5      | Élevée   |
-| S-6   | Implémentation du Tri Chronologique et Navigation Entre Formulaires         | In Progress (80%) | 5      | Élevée   |
+| S-6   | Implémentation du Tri Chronologique et Navigation Entre Formulaires         | Terminée (100%)   | 5      | Élevée   |
 
 ## Progression
 
@@ -53,9 +53,9 @@ Cet Epic concerne le développement de l'ensemble des formulaires d'édition né
 - Formulaires de langues: 80%
 - Formulaires d'intérêts: 60%
 - Formulaires de références: 80%
-- Navigation entre formulaires: 90%
+- Navigation entre formulaires: 100%
 - Tests et documentation: 40%
-- Tri chronologique: 50%
+- Tri chronologique: 100%
 
 ## Critères de Succès
 

@@ -22,6 +22,73 @@ const editingWork = ref<WorkInterface>({
   highlights: []
 })
 
+// State for sorting
+const useChronologicalSort = ref(true)
+const isCustomOrder = ref(false)
+
+// Performance optimization for large lists
+const itemsPerPage = ref(8) // Default limit for better performance
+const showAllItems = ref(false)
+
+// Chronologically sorted work experiences (most recent first)
+const sortedWorks = computed(() => {
+  // If using custom order, return the original list
+  if (!useChronologicalSort.value || isCustomOrder.value) {
+    return works.value;
+  }
+  
+  // Create a copy to avoid modifying the source
+  return [...works.value].sort((a, b) => {
+    // For work experiences, "current" positions (no endDate or empty endDate) should be at the top
+    const isCurrentA = !a.endDate || a.endDate === '';
+    const isCurrentB = !b.endDate || b.endDate === '';
+    
+    // If one is current but not the other, prioritize the current one
+    if (isCurrentA && !isCurrentB) return -1;
+    if (!isCurrentA && isCurrentB) return 1;
+    
+    // If both are current or both are not current, compare by endDate (or startDate if no endDate)
+    const dateA = isCurrentA ? a.startDate : (a.endDate || a.startDate || '');
+    const dateB = isCurrentB ? b.startDate : (b.endDate || b.startDate || '');
+    
+    // Handle cases with missing dates
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1; // a should come after b
+    if (!dateB) return -1; // b should come after a
+    
+    // Compare dates (newest first)
+    try {
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
+    } catch (error) {
+      console.error('Error comparing dates:', error);
+      return 0;
+    }
+  });
+});
+
+// Displayed works (either sorted or original based on setting) with pagination
+const displayedWorks = computed(() => {
+  const worksToDisplay = sortedWorks.value;
+  
+  // If showing all items or if the list is smaller than the limit, return all
+  if (showAllItems.value || worksToDisplay.length <= itemsPerPage.value) {
+    return worksToDisplay;
+  }
+  
+  // Otherwise, return limited items for better performance
+  return worksToDisplay.slice(0, itemsPerPage.value);
+});
+
+// Determine if we have more items to show
+const hasMoreItems = computed(() => {
+  return sortedWorks.value.length > itemsPerPage.value && !showAllItems.value;
+});
+
+// Toggle between showing limited items and all items
+const toggleShowAllItems = () => {
+  showAllItems.value = !showAllItems.value;
+};
+
 // Load works on component mount
 onMounted(async () => {
   await workStore.loadWorks()
@@ -96,6 +163,10 @@ const deleteWork = async (work: WorkWithId) => {
 const moveUp = async (index: number) => {
   if (index <= 0) return
   
+  // Mark as custom order
+  isCustomOrder.value = true
+  useChronologicalSort.value = false
+  
   const newOrder = [...Array(works.value.length).keys()]
   const temp = newOrder[index]
   newOrder[index] = newOrder[index - 1]
@@ -111,6 +182,10 @@ const moveUp = async (index: number) => {
 const moveDown = async (index: number) => {
   if (index >= works.value.length - 1) return
   
+  // Mark as custom order
+  isCustomOrder.value = true
+  useChronologicalSort.value = false
+  
   const newOrder = [...Array(works.value.length).keys()]
   const temp = newOrder[index]
   newOrder[index] = newOrder[index + 1]
@@ -122,23 +197,58 @@ const moveDown = async (index: number) => {
     console.error('Error reordering work experiences:', error)
   }
 }
+
+// Toggle between chronological and custom order
+const toggleSortOrder = () => {
+  useChronologicalSort.value = !useChronologicalSort.value
+  
+  // If switching to chronological and we have a custom order,
+  // reset the custom order flag
+  if (useChronologicalSort.value && isCustomOrder.value) {
+    isCustomOrder.value = false
+  }
+  
+  // Reset pagination when toggling sort
+  showAllItems.value = false;
+}
 </script>
 
 <template>
-  <div class="work-list">
+  <div class="space-y-6">
     <CollectionManager
-      :items="works"
+      :items="displayedWorks"
       title="Expériences Professionnelles"
-      description="Ajoutez vos expériences professionnelles pour compléter votre CV."
+      description="Gérez vos expériences professionnelles pour votre CV"
       addButtonText="Ajouter une expérience"
       emptyStateTitle="Aucune expérience professionnelle"
-      emptyStateDescription="Ajoutez vos expériences professionnelles pour compléter votre CV."
-      emptyStateButtonText="Ajouter une expérience"
+      emptyStateDescription="Commencez par ajouter une expérience professionnelle pour enrichir votre CV."
       :loading="loading"
       @add="openAddDialog"
       @edit="openEditDialog"
       @delete="deleteWork"
     >
+      <!-- Sorting options -->
+      <template #header-actions>
+        <div v-if="works.length > 1" class="flex items-center">
+          <button 
+            type="button"
+            @click="toggleSortOrder"
+            class="flex items-center text-sm px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 transition-colors"
+            :class="{'text-primary-300': useChronologicalSort && !isCustomOrder, 'text-neutral-400': !useChronologicalSort || isCustomOrder}"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <polyline points="21 8 21 21"></polyline>
+              <polyline points="10 21 3 21 3 8"></polyline>
+              <line x1="14" y1="4" x2="14" y2="21"></line>
+              <line x1="18" y1="4" x2="18" y2="21"></line>
+              <line x1="3" y1="12" x2="10" y2="12"></line>
+              <line x1="3" y1="16" x2="10" y2="16"></line>
+            </svg>
+            {{ useChronologicalSort && !isCustomOrder ? 'Tri chronologique' : 'Ordre personnalisé' }}
+          </button>
+        </div>
+      </template>
+      
       <template #item="{ item: work }">
         <div class="flex flex-col">
           <h3 class="text-lg font-medium text-white">{{ work.position }}</h3>
@@ -208,6 +318,31 @@ const moveDown = async (index: number) => {
         </div>
       </template>
     </CollectionManager>
+    
+    <!-- Performance optimization: show more/less button -->
+    <div v-if="hasMoreItems" class="flex justify-center mt-4">
+      <button 
+        @click="toggleShowAllItems" 
+        class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
+      >
+        <span>Voir toutes les expériences ({{ sortedWorks.length }})</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+    
+    <div v-if="showAllItems && sortedWorks.length > itemsPerPage" class="flex justify-center mt-4">
+      <button 
+        @click="toggleShowAllItems" 
+        class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
+      >
+        <span>Réduire la liste</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </button>
+    </div>
     
     <!-- Dialog for adding/editing work experience -->
     <div v-if="showDialog" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">

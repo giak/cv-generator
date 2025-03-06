@@ -33,6 +33,18 @@ version: 1.1.0
   - Composable `useCollectionField` pour la gestion des collections d'éléments
   - Composant `DateRangeFields` pour les plages de dates avec option "en cours"
   - Composant `CollectionManager` pour l'affichage et la gestion des listes d'éléments
+- Implémentation complète du tri chronologique pour les composants de liste :
+  - `EducationList` : Tri automatique du plus récent au plus ancien avec priorité aux formations en cours
+  - `WorkList` : Tri automatique des expériences professionnelles avec priorité aux postes actuels
+  - `ProjectList` : Tri chronologique des projets avec option de basculement vers un ordre personnalisé
+  - Possibilité de basculer entre tri chronologique et ordre personnalisé dans toutes les listes
+  - Indicateurs visuels pour distinguer le mode de tri actif
+- Optimisation des performances pour les listes volumineuses :
+  - Pagination avec limitation du nombre d'éléments affichés par défaut
+  - Boutons "Voir plus" et "Réduire la liste" pour contrôler l'affichage
+  - Réinitialisation automatique de la pagination lors du changement de mode de tri
+  - Interface utilisateur responsive adaptée à tous les appareils
+  - Amélioration des performances pour les listes avec de nombreux éléments
 
 ### Changed 🔄
 
