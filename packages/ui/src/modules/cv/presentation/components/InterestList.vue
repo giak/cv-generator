@@ -1,44 +1,18 @@
 <template>
   <div class="space-y-6">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h2 class="text-xl font-bold">Intérêts</h2>
-        <p class="text-neutral-400 text-sm">
-          Gérez vos centres d'intérêt pour votre CV
-        </p>
-      </div>
-      
-      <Button
-        @click="openAddModal"
-        variant="primary"
-        size="md"
-      >
-        <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </template>
-        Ajouter un intérêt
-      </Button>
-    </div>
-
-    <!-- État de chargement -->
-    <div v-if="isLoading" class="py-12 flex justify-center">
-      <svg class="animate-spin h-8 w-8 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      <span class="ml-3 text-neutral-400">Chargement des intérêts...</span>
-    </div>
-
-    <!-- État vide -->
-    <EmptyState 
-      v-else-if="!interests || interests.length === 0"
-      title="Aucun intérêt"
-      description="Commencez par ajouter un intérêt pour enrichir votre CV."
+    <CollectionManager
+      :items="interests"
+      title="Intérêts"
+      description="Gérez vos centres d'intérêt pour votre CV"
+      addButtonText="Ajouter un intérêt"
+      emptyStateTitle="Aucun intérêt"
+      emptyStateDescription="Commencez par ajouter un intérêt pour enrichir votre CV."
+      :loading="isLoading"
+      @add="openAddModal"
+      @edit="editInterest"
+      @delete="confirmDelete"
     >
-      <template #icon>
+      <template #emptyIcon>
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-12 h-12">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -46,74 +20,57 @@
         </svg>
       </template>
       
-      <Button 
-        variant="primary"
-        size="md"
-        @click="openAddModal"
-      >
-        <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </template>
-        Ajouter un intérêt
-      </Button>
-    </EmptyState>
-
-    <!-- Liste des intérêts -->
-    <TransitionGroup v-else name="list" tag="div" class="space-y-4">
-      <Card
-        v-for="interest in interests"
-        :key="interest.id"
-        class="hover:border-indigo-500/50 transition-colors"
-      >
-        <div class="flex flex-col md:flex-row justify-between">
-          <div class="flex-grow">
-            <div class="flex flex-col mb-2">
-              <h3 class="font-semibold text-lg mb-1">{{ interest.name }}</h3>
-              <div v-if="interest.keywords && interest.keywords.length > 0" class="flex flex-wrap gap-2">
-                <span 
-                  v-for="(keyword, index) in interest.keywords" 
-                  :key="index"
-                  class="px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 text-xs font-medium"
-                >
-                  {{ keyword }}
-                </span>
-              </div>
-              <p v-else class="text-neutral-400 text-sm italic">
-                Aucun mot-clé
-              </p>
+      <template #item="{ item: interest }">
+        <div class="flex-grow">
+          <div class="flex flex-col mb-2">
+            <h3 class="font-semibold text-lg mb-1">{{ interest.name }}</h3>
+            <div v-if="interest.keywords && interest.keywords.length > 0" class="flex flex-wrap gap-2">
+              <span 
+                v-for="(keyword, index) in interest.keywords" 
+                :key="index"
+                class="px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 text-xs font-medium"
+              >
+                {{ keyword }}
+              </span>
             </div>
+            <p v-else class="text-neutral-400 text-sm italic">
+              Aucun mot-clé
+            </p>
           </div>
-          
-          <div class="flex space-x-3 mt-4 md:mt-0">
+        </div>
+      </template>
+      
+      <template #itemActions="{ item: interest, index }">
+        <div class="flex flex-col gap-2">
+          <!-- Reorder buttons -->
+          <div class="flex gap-1">
             <button
-              class="p-2 text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 rounded-full transition-colors"
-              @click="editInterest(interest)"
-              title="Modifier"
+              type="button"
+              @click="moveUp(index)"
+              :disabled="index === 0"
+              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+              title="Déplacer vers le haut"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                <polyline points="18 15 12 9 6 15"></polyline>
               </svg>
             </button>
+            
             <button
-              class="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-full transition-colors"
-              @click="confirmDelete(interest)"
-              title="Supprimer"
+              type="button"
+              @click="moveDown(index)"
+              :disabled="index === interests.length - 1"
+              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+              title="Déplacer vers le bas"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
+                <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
           </div>
         </div>
-      </Card>
-    </TransitionGroup>
+      </template>
+    </CollectionManager>
     
     <!-- Modal pour ajouter/modifier un intérêt -->
     <div v-if="showModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -193,30 +150,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useInterestStore } from '../stores/interest';
-import InterestForm from './InterestForm.vue';
-import Button from '@ui/components/shared/Button.vue';
-import Card from '@ui/components/shared/Card.vue';
-import EmptyState from '@ui/components/shared/EmptyState.vue';
-import type { ValidatedInterest } from '../stores/interest';
+import { ref, computed, onMounted } from 'vue'
+import { useInterestStore } from '../stores/interest'
+import InterestForm from './InterestForm.vue'
+import Button from '@ui/components/shared/Button.vue'
+import CollectionManager from '@ui/components/shared/CollectionManager.vue'
+import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
+import type { ValidatedInterest } from '../stores/interest'
 
 // Store
-const interestStore = useInterestStore();
+const interestStore = useInterestStore()
+
+// Setup de useCollectionField pour gérer les intérêts
+const { 
+  items: interests,
+  reorderItems
+} = useCollectionField<ValidatedInterest>({
+  fieldName: 'interests',
+  collection: computed(() => interestStore.interests || []),
+  updateField: () => {}, // On utilise directement le store
+  defaultItemValues: {
+    name: '',
+    id: '',
+    keywords: [],
+    toJSON: () => ({ id: '', name: '', keywords: [] })
+  },
+  identifierField: 'id'
+})
 
 // State
-const interests = computed(() => interestStore.interests);
-const isLoading = computed(() => interestStore.loading.interests);
-const isDeleting = ref(false);
+const isLoading = computed(() => interestStore.loading.interests)
+const isDeleting = ref(false)
 
 // Modal state
-const showModal = ref(false);
-const isEditing = ref(false);
-const currentInterestId = ref<string | null>(null);
+const showModal = ref(false)
+const isEditing = ref(false)
+const currentInterestId = ref<string | null>(null)
 
 // Delete confirmation state
-const showDeleteModal = ref(false);
-const interestToDelete = ref<ValidatedInterest | null>(null);
+const showDeleteModal = ref(false)
+const interestToDelete = ref<ValidatedInterest | null>(null)
 
 // Toast notifications
 const toast = ref({
@@ -224,91 +197,133 @@ const toast = ref({
   message: '',
   type: 'success' as 'success' | 'error',
   timeout: null as number | null
-});
+})
 
 // Load interests on component mount
 onMounted(async () => {
-  await interestStore.loadInterests();
-});
+  await interestStore.loadInterests()
+})
 
 // Open modal to add new interest
 const openAddModal = () => {
-  currentInterestId.value = null;
-  isEditing.value = false;
-  showModal.value = true;
-};
+  currentInterestId.value = null
+  isEditing.value = false
+  showModal.value = true
+}
 
 // Open modal to edit existing interest
 const editInterest = (interest: ValidatedInterest) => {
-  currentInterestId.value = interest.id;
-  isEditing.value = true;
-  showModal.value = true;
-};
+  currentInterestId.value = interest.id
+  isEditing.value = true
+  showModal.value = true
+}
 
 // Close modal
 const closeModal = () => {
-  showModal.value = false;
+  showModal.value = false
   setTimeout(() => {
-    currentInterestId.value = null;
-  }, 300);
-};
+    currentInterestId.value = null
+  }, 300)
+}
 
 // Handle interest saved event
 const onInterestSaved = () => {
-  showToast(isEditing.value ? 'Intérêt mis à jour avec succès' : 'Intérêt ajouté avec succès', 'success');
-  closeModal();
-};
+  showToast(isEditing.value ? 'Intérêt mis à jour avec succès' : 'Intérêt ajouté avec succès', 'success')
+  closeModal()
+}
 
 // Open delete confirmation modal
 const confirmDelete = (interest: ValidatedInterest) => {
-  interestToDelete.value = interest;
-  showDeleteModal.value = true;
-};
+  interestToDelete.value = interest
+  showDeleteModal.value = true
+}
 
 // Close delete confirmation modal
 const closeDeleteModal = () => {
-  showDeleteModal.value = false;
+  showDeleteModal.value = false
   setTimeout(() => {
-    interestToDelete.value = null;
-  }, 300);
-};
+    interestToDelete.value = null
+  }, 300)
+}
 
 // Delete interest
 const deleteInterest = async () => {
-  if (!interestToDelete.value) return;
+  if (!interestToDelete.value) return
   
-  isDeleting.value = true;
+  isDeleting.value = true
   
   try {
-    await interestStore.deleteInterest(interestToDelete.value.id);
-    showToast('Intérêt supprimé avec succès', 'success');
+    await interestStore.deleteInterest(interestToDelete.value.id)
+    showToast('Intérêt supprimé avec succès', 'success')
   } catch (error) {
-    console.error('Error deleting interest:', error);
-    showToast('Erreur lors de la suppression de l\'intérêt', 'error');
+    console.error('Error deleting interest:', error)
+    showToast('Erreur lors de la suppression de l\'intérêt', 'error')
   } finally {
-    isDeleting.value = false;
-    closeDeleteModal();
+    isDeleting.value = false
+    closeDeleteModal()
   }
-};
+}
+
+// Reorder interests up
+const moveUp = async (index: number) => {
+  if (index <= 0) return
+  
+  // Create array of indices, then map to strings
+  const indices = [...Array(interests.value.length).keys()]
+  const temp = indices[index]
+  indices[index] = indices[index - 1]
+  indices[index - 1] = temp
+  
+  // Convert to string IDs for the reorder method
+  const newOrder = indices.map(i => interests.value[i].id)
+  
+  try {
+    await interestStore.reorderInterests(newOrder)
+  } catch (error) {
+    console.error('Error reordering interests:', error)
+    showToast('Erreur lors de la réorganisation des intérêts', 'error')
+  }
+}
+
+// Reorder interests down
+const moveDown = async (index: number) => {
+  if (index >= interests.value.length - 1) return
+  
+  // Create array of indices, then map to strings
+  const indices = [...Array(interests.value.length).keys()]
+  const temp = indices[index]
+  indices[index] = indices[index + 1]
+  indices[index + 1] = temp
+  
+  // Convert to string IDs for the reorder method
+  const newOrder = indices.map(i => interests.value[i].id)
+  
+  try {
+    await interestStore.reorderInterests(newOrder)
+  } catch (error) {
+    console.error('Error reordering interests:', error)
+    showToast('Erreur lors de la réorganisation des intérêts', 'error')
+  }
+}
 
 // Show toast notification
 const showToast = (message: string, type: 'success' | 'error') => {
   // Clear any existing timeout
   if (toast.value.timeout) {
-    clearTimeout(toast.value.timeout);
-    toast.value.timeout = null;
+    clearTimeout(toast.value.timeout)
+    toast.value.timeout = null
   }
   
   // Update toast
-  toast.value.message = message;
-  toast.value.type = type;
-  toast.value.visible = true;
+  toast.value.message = message
+  toast.value.type = type
+  toast.value.visible = true
   
   // Hide after 3 seconds
   toast.value.timeout = window.setTimeout(() => {
-    toast.value.visible = false;
-  }, 3000);
-};
+    toast.value.visible = false
+  }, 3000)
+}
 </script>
 
 <style scoped>

@@ -10,79 +10,68 @@
       <FormField
         name="name"
         label="Nom du projet"
-        :model-value="form.name"
-        :error="errors.name.length > 0 ? errors.name.join(', ') : ''"
+        :model-value="localModel.name"
+        :error="errors.name"
         :icon="icons.name"
         placeholder="Portfolio, Application mobile..."
         help-text="Nom du projet réalisé."
         required
-        @update:model-value="(value) => form.name = value"
-        @blur="validateField('name')"
+        @update:model-value="(value) => updateField('name', value)"
+        @blur="validateField('name', localModel.name)"
       />
       
       <!-- Champ pour l'URL -->
       <FormField
         name="url"
         label="URL"
-        :model-value="form.url || ''"
-        :error="errors.url.length > 0 ? errors.url.join(', ') : ''"
+        :model-value="localModel.url || ''"
+        :error="errors.url"
         :icon="icons.url"
         placeholder="https://monprojet.com"
         help-text="Lien vers le projet en ligne."
-        @update:model-value="(value) => form.url = value"
-        @blur="validateField('url')"
+        @update:model-value="(value) => updateField('url', value)"
+        @blur="validateField('url', localModel.url)"
       />
       
       <!-- Champ pour l'entité -->
       <FormField
         name="entity"
         label="Entité"
-        :model-value="form.entity || ''"
-        :error="errors.entity.length > 0 ? errors.entity.join(', ') : ''"
+        :model-value="localModel.entity || ''"
+        :error="errors.entity"
         :icon="icons.entity"
         placeholder="Université, Entreprise, Personnel..."
         help-text="Organisation pour laquelle le projet a été réalisé."
-        @update:model-value="(value) => form.entity = value"
-        @blur="validateField('entity')"
+        @update:model-value="(value) => updateField('entity', value)"
+        @blur="validateField('entity', localModel.entity)"
       />
       
       <!-- Champ pour le type -->
       <FormField
         name="type"
         label="Type"
-        :model-value="form.type || ''"
-        :error="errors.type.length > 0 ? errors.type.join(', ') : ''"
+        :model-value="localModel.type || ''"
+        :error="errors.type"
         :icon="icons.type"
         placeholder="Application Web, Mobile, Site vitrine..."
         help-text="Type ou catégorie du projet."
-        @update:model-value="(value) => form.type = value"
-        @blur="validateField('type')"
+        @update:model-value="(value) => updateField('type', value)"
+        @blur="validateField('type', localModel.type)"
       />
-      
-      <!-- Champ pour la date de début -->
-      <FormField
-        name="startDate"
-        label="Date de début"
-        :model-value="form.startDate || ''"
-        :error="errors.startDate.length > 0 ? errors.startDate.join(', ') : ''"
-        :icon="icons.date"
-        placeholder="YYYY-MM-DD"
-        help-text="Date de début du projet (YYYY-MM-DD)."
-        @update:model-value="(value) => form.startDate = value"
-        @blur="validateField('startDate')"
-      />
-      
-      <!-- Champ pour la date de fin -->
-      <FormField
-        name="endDate"
-        label="Date de fin"
-        :model-value="form.endDate || ''"
-        :error="errors.endDate.length > 0 ? errors.endDate.join(', ') : ''"
-        :icon="icons.date"
-        placeholder="YYYY-MM-DD"
-        help-text="Date de fin du projet (YYYY-MM-DD)."
-        @update:model-value="(value) => form.endDate = value"
-        @blur="validateField('endDate')"
+    </div>
+    
+    <!-- Champs de dates -->
+    <div class="mt-6">
+      <DateRangeFields
+        :start-date="localModel.startDate || ''"
+        :end-date="localModel.endDate || ''"
+        :start-date-error="errors.startDate"
+        :end-date-error="errors.endDate"
+        @update:start-date="(value) => updateField('startDate', value)"
+        @update:end-date="(value) => updateField('endDate', value)"
+        @start-date-blur="() => validateField('startDate', localModel.startDate)"
+        @end-date-blur="() => validateField('endDate', localModel.endDate)"
+        @date-range-change="validateDateRange"
       />
     </div>
     
@@ -91,15 +80,15 @@
       <FormField
         name="description"
         label="Description"
-        :model-value="form.description || ''"
-        :error="errors.description.length > 0 ? errors.description.join(', ') : ''"
+        :model-value="localModel.description || ''"
+        :error="errors.description"
         :icon="icons.description"
         placeholder="Décrivez le projet et son contexte..."
         help-text="Description détaillée du projet."
         textarea
         :rows="4"
-        @update:model-value="(value) => form.description = value"
-        @blur="validateField('description')"
+        @update:model-value="(value) => updateField('description', value)"
+        @blur="validateField('description', localModel.description)"
       />
     </div>
     
@@ -121,15 +110,15 @@
             rows="4"
             class="block w-full bg-neutral-800 border border-neutral-700 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500/20 p-3 text-sm"
             placeholder="Entrez un point fort par ligne..."
-            @blur="validateField('highlights')"
+            @blur="validateField('highlights', localModel.highlights)"
           ></textarea>
           
           <p class="mt-1 text-sm text-neutral-400">
             Détaillez les points forts ou réalisations du projet.
           </p>
           
-          <p v-if="errors.highlights.length > 0" class="mt-1 text-sm text-red-400">
-            {{ errors.highlights.join(', ') }}
+          <p v-if="errors.highlights" class="mt-1 text-sm text-red-400">
+            {{ errors.highlights }}
           </p>
         </div>
       </div>
@@ -162,10 +151,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
+import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
 import type { ProjectInterface } from '@cv-generator/shared/src/types/resume.interface'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 
 const props = defineProps<{
   project?: ProjectInterface
@@ -178,115 +170,101 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Formulaire
-const form = reactive<ProjectInterface>({
-  name: '',
-  description: undefined,
-  url: undefined,
-  startDate: undefined,
-  endDate: undefined,
-  highlights: [],
-  entity: undefined,
-  type: undefined,
-  keywords: [],
-  roles: []
-})
+// État du formulaire
+const loading = ref(false)
+const isSubmitting = ref(false)
 
 // Texte pour les highlights (un par ligne)
 const highlightsText = ref('')
 
-// Erreurs de validation
-const errors = reactive({
-  name: [] as string[],
-  description: [] as string[],
-  url: [] as string[],
-  startDate: [] as string[],
-  endDate: [] as string[],
-  highlights: [] as string[],
-  entity: [] as string[],
-  type: [] as string[],
-  keywords: [] as string[],
-  roles: [] as string[]
-})
-
-// État du formulaire
-const loading = ref(false)
-const isSubmitting = ref(false)
+// État d'édition
+const isEditing = computed(() => !!props.projectId || !!props.project)
 
 // Label du bouton de soumission
 const submitButtonLabel = computed(() => {
   return isEditing.value ? 'Enregistrer' : 'Ajouter'
 })
 
-// État d'édition
-const isEditing = computed(() => !!props.projectId || !!props.project)
-
-// Validation d'un champ du formulaire
-const validateField = (field: string) => {
-  if (!errors[field as keyof typeof errors]) {
-    errors[field as keyof typeof errors] = []
-  } else {
-    errors[field as keyof typeof errors] = []
+// Model wrapped in a computed to handle the case of editing
+const modelValue = computed<ProjectInterface>(() => {
+  // Si un projet est fourni, l'utiliser
+  if (props.project) {
+    return props.project
   }
   
-  if (field === 'name') {
-    if (!form.name.trim()) {
-      errors.name.push('Le nom du projet est obligatoire')
-    }
-  } else if (field === 'url') {
-    if (form.url && form.url.trim() !== '') {
-      try {
-        new URL(form.url)
-      } catch (e) {
-        errors.url.push('L\'URL n\'est pas valide')
-      }
-    }
-  } else if (field === 'startDate') {
-    if (form.startDate && !/^\d{4}-\d{2}-\d{2}$/.test(form.startDate)) {
-      errors.startDate.push('La date doit être au format YYYY-MM-DD')
-    }
-  } else if (field === 'endDate') {
-    if (form.endDate && !/^\d{4}-\d{2}-\d{2}$/.test(form.endDate)) {
-      errors.endDate.push('La date doit être au format YYYY-MM-DD')
-    }
-    
-    if (form.startDate && form.endDate && form.startDate > form.endDate) {
-      errors.endDate.push('La date de fin doit être postérieure à la date de début')
-    }
+  // Sinon, retourner un modèle vide
+  return {
+    name: '',
+    description: undefined,
+    url: undefined,
+    startDate: undefined,
+    endDate: undefined,
+    highlights: [],
+    entity: undefined,
+    type: undefined,
+    keywords: [],
+    roles: []
   }
-}
+})
+
+// Form model
+const { 
+  localModel, 
+  updateField
+} = useFormModel<ProjectInterface>({
+  modelValue,
+  emit: () => {}, // Nous n'émettons pas directement update:modelValue
+  defaultValues: {
+    name: '',
+    description: undefined,
+    url: undefined,
+    startDate: undefined,
+    endDate: undefined,
+    highlights: [],
+    entity: undefined,
+    type: undefined,
+    keywords: [],
+    roles: []
+  }
+})
+
+// Form validation
+const { 
+  errors, 
+  validateField, 
+  validateForm,
+  isValid: isFormValid
+} = useValidation<ProjectInterface>(undefined, {
+  requiredFields: ['name']
+})
 
 // Synchronisation des highlights
 watch(highlightsText, (newValue) => {
-  form.highlights = newValue
+  const highlights = newValue
     .split('\n')
     .map(line => line.trim())
     .filter(line => line !== '')
-})
-
-// Validation de tout le formulaire
-const validateForm = () => {
-  validateField('name')
-  validateField('url')
-  validateField('startDate')
-  validateField('endDate')
-  validateField('description')
-  validateField('highlights')
-  validateField('entity')
-  validateField('type')
   
-  return isFormValid.value
-}
-
-// État de la validation du formulaire
-const isFormValid = computed(() => {
-  return form.name.trim() !== '' && 
-         Object.values(errors).every(errorArr => errorArr.length === 0)
+  updateField('highlights', highlights)
 })
+
+// Validation spécifique pour les dates
+const validateDateRange = ({ startDate, endDate }: { startDate: string, endDate?: string }) => {
+  validateField('startDate', startDate)
+  if (endDate) validateField('endDate', endDate)
+  
+  if (startDate && endDate && startDate > endDate) {
+    errors.value.endDate = 'La date de fin doit être postérieure à la date de début'
+    return false
+  }
+  
+  return true
+}
 
 // Gestion de la soumission du formulaire
 const handleSubmit = () => {
-  if (!validateForm()) {
+  // Valider tous les champs du formulaire
+  if (!validateForm(localModel)) {
     return
   }
   
@@ -294,38 +272,27 @@ const handleSubmit = () => {
   
   try {
     emit('submit', {
-      name: form.name.trim(),
-      description: form.description?.trim() || undefined,
-      url: form.url?.trim() || undefined,
-      startDate: form.startDate?.trim() || undefined,
-      endDate: form.endDate?.trim() || undefined,
-      highlights: form.highlights?.length ? form.highlights : undefined,
-      entity: form.entity?.trim() || undefined,
-      type: form.type?.trim() || undefined,
-      keywords: form.keywords?.length ? form.keywords : undefined,
-      roles: form.roles?.length ? form.roles : undefined
+      name: localModel.name,
+      description: localModel.description,
+      url: localModel.url,
+      startDate: localModel.startDate,
+      endDate: localModel.endDate,
+      highlights: localModel.highlights?.length ? localModel.highlights : undefined,
+      entity: localModel.entity,
+      type: localModel.type,
+      keywords: localModel.keywords?.length ? localModel.keywords : undefined,
+      roles: localModel.roles?.length ? localModel.roles : undefined
     })
   } finally {
     isSubmitting.value = false
   }
 }
 
-// Initialisation du formulaire si un projet existe
+// Initialisation du formulaire
 onMounted(() => {
   if (props.project) {
-    form.name = props.project.name || ''
-    form.description = props.project.description
-    form.url = props.project.url
-    form.startDate = props.project.startDate
-    form.endDate = props.project.endDate
-    form.highlights = props.project.highlights || []
-    form.entity = props.project.entity
-    form.type = props.project.type
-    form.keywords = props.project.keywords || []
-    form.roles = props.project.roles || []
-    
-    // Mettre à jour le texte des highlights
-    highlightsText.value = form.highlights.join('\n')
+    // Initialiser le texte des highlights
+    highlightsText.value = props.project.highlights?.join('\n') || ''
   }
 })
 

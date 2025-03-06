@@ -1,7 +1,7 @@
 ---
 title: CV Generator
 author: Giak
-date: 2025-03-02
+date: 2025-03-06
 status: active
 version: 1.1.0
 ---
@@ -13,7 +13,7 @@ version: 1.1.0
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/giak/cv-generator/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![JSON Resume](https://img.shields.io/badge/JSON%20Resume-Compatible-orange.svg)](https://jsonresume.org/)
-[![Status](https://img.shields.io/badge/Status-WIP-yellow)](https://github.com/giak/cv-generator)
+[![Status](https://img.shields.io/badge/Status-Active-green)](https://github.com/giak/cv-generator)
 
 > 💡 **Modern CV builder with full [JSON Resume](https://jsonresume.org/) standard support, real-time validation, and multiple export formats**
 
@@ -36,22 +36,27 @@ pnpm dev
 - [Overview](#overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Development Commands](#development-commands)
-- [Usage](#usage)
-  - [Creating a New CV](#creating-a-new-cv)
-  - [Editing CV Sections](#editing-cv-sections)
-    - [Basic Information](#basic-information)
-    - [Work Experience](#work-experience)
-  - [Exporting Your CV](#exporting-your-cv)
-  - [Importing Existing Data](#importing-existing-data)
-- [Project Structure](#project-structure)
+- [Current Status](#current-status)
+  - [Implementation Progress](#implementation-progress)
+  - [Latest Feature: Standardized List Components](#latest-feature-standardized-list-components-with-collectionmanager)
+  - [Reusable Composables](#reusable-composables)
 - [Architecture](#architecture)
   - [Key Principles](#key-principles)
   - [Clean Architecture](#clean-architecture)
   - [Domain-Driven Design](#domain-driven-design)
+  - [JSON Resume Interoperability](#json-resume-interoperability)
+  - [ATS Optimization](#ats-optimization)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Development Commands](#development-commands)
+  - [Docker Deployment](#docker-deployment)
+- [Usage](#usage)
+  - [Creating a New CV](#creating-a-new-cv)
+  - [Editing CV Sections](#editing-cv-sections)
+  - [Exporting Your CV](#exporting-your-cv)
+  - [Importing Existing Data](#importing-existing-data)
+- [Project Structure](#project-structure)
 - [Development](#development)
   - [Testing Strategy](#testing-strategy)
   - [Code Style](#code-style)
@@ -67,6 +72,7 @@ pnpm dev
   - [Update Procedures](#update-procedures)
   - [FAQ](#faq)
 - [Changelog](#changelog)
+  - [Recent Updates](#recent-updates-v110)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
 
@@ -126,7 +132,7 @@ CV Generator provides a structured, standardized approach to CV creation using t
 | Vue.js       | 3.4+    | Frontend framework and component architecture   | Reactivity, composition API, TypeScript support     |
 | TypeScript   | 5.7+    | Type safety and enhanced developer experience   | Strong typing, better IDE support, error prevention |
 | Vite         | 6.0+    | Build tool and development server               | Fast HMR, efficient bundling, plugins               |
-| Tailwind CSS | 3.x     | Utility-first styling framework                 | Responsive design, minimal CSS, customizability     |
+| Tailwind CSS | 3.4.0   | Utility-first styling framework                 | Responsive design, minimal CSS, customizability     |
 | Vitest       | 3.x+    | Testing framework integrated with Vite          | Fast test execution, Vue component testing          |
 | Pinia        | 2.1+    | State management with TypeScript support        | DevTools, modular stores, composition API           |
 | Zod          | 3.22+   | Schema validation and runtime type checking     | Type inference, custom validations                  |
@@ -146,26 +152,80 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - ✅ Composable `useCollectionField` pour la gestion des collections d'éléments
   - ✅ Composant `DateRangeFields` pour les plages de dates avec option "en cours"
   - ✅ Composant `CollectionManager` pour l'affichage et la gestion des listes d'éléments
+  - ✅ Tous les composants formulaires (12/12) refactorisés
+  - ✅ Tous les composants listes (10/10) refactorisés
+  - ✅ Documentation technique et tests unitaires complétés
 - **Epic-3: Édition de CV** 🔄 60% Complété
   - ✅ Formulaires pour les informations de base (basics)
   - ✅ Formulaires pour l'expérience professionnelle (work)
-  - 🔄 Formulaires pour l'éducation (education) en cours
+  - 🔄 Implémentation des formulaires pour l'éducation (education) en cours
   - ⏳ Formulaires pour les compétences (skills) et autres sections planifiés
+  - ⏳ Support des sections optionnelles du standard JSON Resume
 - **Epic-4: Prévisualisation et exportation** ⏳ Planifié
 - **Epic-5: Optimisation ATS** ⏳ Planifié
 
-### Latest Feature: CollectionManager Component
+### Latest Feature: Standardized List Components with CollectionManager
 
-Pour plus de détails sur le nouveau composant `CollectionManager`, consultez la [documentation de l'Epic-2](docs/epic-2/epic-2-completion-summary.md) ou la [Story-6](.ai/epic-2/story-6.story.md) qui détaille son implémentation.
+✨ **Major Achievement: All list components have been completely refactored!** ✨
 
-The new `CollectionManager` component provides a standardized interface for displaying and managing collections of items:
+The entire CV generator now has a consistent, modern UI across all list components. We've successfully refactored:
 
-- Uniform UI for all collection-based components (WorkList, EducationList, SkillList, etc.)
-- Consistent item actions (add, edit, delete)
-- Customizable display through flexible slot system
-- Integrated with useCollectionField composable for state management
-- Built-in confirmation dialogs for destructive actions
-- Support for empty states and loading indicators
+- `WorkList`
+- `EducationList`
+- `SkillList`
+- `ProjectList`
+- `InterestList`
+- `LanguageList`
+- `AwardList`
+- `CertificateList`
+- `PublicationList`
+- `ReferenceList`
+
+Each component now uses:
+
+- 🔄 The `CollectionManager` component for a unified user interface
+- 🧩 The `useCollectionField` composable for state management and CRUD operations
+- ⬆️⬇️ Drag-and-drop reordering capabilities for intuitive item organization
+- 🛡️ Standardized form validation with real-time feedback
+- 🚫 Confirmation dialogs for destructive actions to prevent accidental data loss
+
+This standardization brings several benefits:
+
+1. **Consistent user experience** across all sections of the CV
+2. **Reduced codebase size** by eliminating duplicated functionality
+3. **Improved maintainability** through shared components
+4. **Enhanced user workflows** with standardized interactions
+5. **Faster development** for future features leveraging these components
+
+For more details on the implementation, check the [Epic-2 documentation](docs/epic-2/epic-2-completion-summary.md) or review the individual stories in [.ai/epic-2/](.ai/epic-2/).
+
+```typescript
+// Example usage of useCollectionField in PublicationList.vue
+const {
+  items,
+  newItem,
+  isAddingItem,
+  editingItemId,
+  addItem,
+  updateItem,
+  removeItem,
+  startEditing,
+  cancelEditing,
+  resetFormState,
+} = useCollectionField({
+  fieldName: "publications",
+  collection: computed(() => localModel.value.publications),
+  updateField,
+  defaultItemValues: {
+    name: "",
+    publisher: "",
+    releaseDate: "",
+    website: "",
+    summary: "",
+    id: crypto.randomUUID(),
+  },
+});
+```
 
 ### Reusable Composables
 
@@ -853,11 +913,32 @@ See [CHANGELOG.md](CHANGELOG.md) for a detailed list of changes between versions
 
 ### Recent Updates (v1.1.0)
 
+#### Added 🎉
+
+- Completed refactorization of all list components with `CollectionManager` and `useCollectionField`:
+  - `PublicationList`, `CertificateList`, `AwardList`, `LanguageList`, `InterestList`, `ProjectList`
+- Implemented reordering capabilities for all list components
+- Standardized UI for all collection-based components
+- Completed Epic-2 "Refactorisation des Composants CV" at 100%
 - Added comprehensive validation strategy with Result pattern
+- Built new composables: `useFormModel`, `useFormValidation`, `useCollectionField`
+- Created reusable components: `DateRangeFields`, `CollectionManager`
+
+#### Changed 🔄
+
 - Reorganized core module into bounded contexts (CV, Export, User)
 - Improved error handling throughout the application
 - Updated project structure based on Domain-Driven Design principles
 - Fixed several UI issues with responsive design
+- Optimized data validation with `useFormValidation`
+- Simplified collection manipulation with `useCollectionField`
+
+#### Technical Improvements 🔧
+
+- Harmonization of SCSS styles with Tailwind classes
+- Optimization of UI components
+- Migration from Google Fonts to local fonts (InterTight, FiraCode)
+- Improved page loading performance with self-hosted fonts
 
 ## License
 
@@ -874,4 +955,4 @@ See [CHANGELOG.md](CHANGELOG.md) for a detailed list of changes between versions
 
 ---
 
-_Last updated: March 10, 2025_
+_Last updated: March 06, 2025_

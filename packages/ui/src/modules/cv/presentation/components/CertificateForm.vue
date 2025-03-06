@@ -9,52 +9,52 @@
       <FormField
         name="name"
         label="Nom du certificat"
-        :model-value="formModel.name"
+        :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
         placeholder="Ex: AWS Certified Solutions Architect"
         help-text="Nom ou titre de la certification obtenue."
         required
         @update:model-value="handleFieldUpdate('name', $event)"
-        @blur="validateField('name', formModel.name)"
+        @blur="validateField('name', localModel.name)"
       />
 
       <FormField
         name="issuer"
         label="Organisme émetteur"
-        :model-value="formModel.issuer"
+        :model-value="localModel.issuer"
         :error="errors.issuer"
         :icon="icons.issuer"
         placeholder="Ex: Amazon Web Services"
         help-text="Organisation ayant délivré la certification."
         required
         @update:model-value="handleFieldUpdate('issuer', $event)"
-        @blur="validateField('issuer', formModel.issuer)"
+        @blur="validateField('issuer', localModel.issuer)"
       />
 
       <FormField
         name="date"
         label="Date d'obtention"
-        :model-value="formModel.date"
+        :model-value="localModel.date"
         :error="errors.date"
         :icon="icons.date"
         help-text="Date à laquelle vous avez obtenu cette certification."
         required
         @update:model-value="handleFieldUpdate('date', $event)"
-        @blur="validateField('date', formModel.date)"
+        @blur="validateField('date', localModel.date)"
       />
 
       <FormField
         name="url"
         type="url"
         label="URL de vérification"
-        :model-value="formModel.url"
+        :model-value="localModel.url || ''"
         :error="errors.url"
         :icon="icons.url"
         placeholder="Ex: https://www.credential.net/certification/123456"
         help-text="Lien vers la vérification en ligne de la certification (optionnel)."
         @update:model-value="handleFieldUpdate('url', $event)"
-        @blur="validateField('url', formModel.url)"
+        @blur="validateField('url', localModel.url || '')"
       />
     </div>
 
@@ -81,9 +81,9 @@
 import type { CertificateInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
-import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
-import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
-import { computed, ref } from 'vue'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { computed } from 'vue'
 
 interface Props {
   modelValue: CertificateInterface
@@ -100,54 +100,42 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Create a local form model
-const formModel = computed(() => ({
-  name: props.modelValue.name || '',
-  date: props.modelValue.date || '',
-  issuer: props.modelValue.issuer || '',
-  url: props.modelValue.url || ''
-}))
-
-// Form validation setup
-const { errors, validateField, validateForm } = useFieldValidation()
-const { updateField } = useModelUpdate({
-  emit: emit as (event: string, ...args: any[]) => void,
-  modelValue: computed(() => props.modelValue)
+// Setup form model using useFormModel composable
+const {
+  localModel,
+  updateField
+} = useFormModel<CertificateInterface>({
+  modelValue: computed(() => props.modelValue),
+  emit: (event, value) => emit(event, value),
+  defaultValues: {
+    name: '',
+    date: '',
+    issuer: '',
+    url: ''
+  }
 })
 
-// Update field handler
+// Setup form validation using useValidation composable
+const {
+  errors,
+  validateField,
+  validateForm
+} = useValidation<CertificateInterface>(undefined, {
+  requiredFields: ['name', 'date', 'issuer']
+})
+
+// Handle field updates
 const handleFieldUpdate = (field: keyof CertificateInterface, value: string) => {
-  console.log(`Updating certificate field ${String(field)} with value:`, value)
-  
-  // Create a clean copy of the current data
-  const updatedData = {
-    ...props.modelValue,
-    [field]: value
-  }
-  
-  console.log('Emitting certificate update with data:', updatedData)
-  emit('update:modelValue', updatedData)
+  updateField(field, value)
+  validateField(field, value)
 }
 
 // Handle form submission
 const handleSubmit = async () => {
-  console.log('Certificate form submission - Current model:', JSON.stringify(props.modelValue))
-  
   // Validate all fields
-  const formIsValid = validateForm(props.modelValue)
-  console.log('Form validation result:', formIsValid)
+  const formIsValid = validateForm(localModel)
   
   if (formIsValid) {
-    // Check that required fields are present
-    if (!props.modelValue.name || !props.modelValue.date || !props.modelValue.issuer) {
-      console.error('Required fields missing:', {
-        name: !props.modelValue.name,
-        date: !props.modelValue.date,
-        issuer: !props.modelValue.issuer
-      })
-      return
-    }
-    
     emit('validate')
   }
 }

@@ -10,7 +10,7 @@
       <FormField
         name="name"
         label="Intérêt"
-        :model-value="form.name"
+        :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.interest"
         placeholder="Programmation, Photographie, Voyages..."
@@ -25,7 +25,7 @@
         <label class="block text-sm font-medium text-neutral-200 mb-1">Mots-clés</label>
         <div class="flex flex-wrap gap-2 mb-2">
           <div 
-            v-for="(keyword, index) in form.keywords" 
+            v-for="(keyword, index) in (localModel.keywords || [])" 
             :key="index"
             class="flex items-center bg-neutral-800 px-3 py-1 rounded-full"
           >
@@ -103,6 +103,8 @@ import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import { useInterestStore } from '../stores/interest'
 import type { InterestInterface } from '@cv-generator/shared/src/types/resume.interface'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 
 // Props
 const props = defineProps<{
@@ -119,46 +121,64 @@ const emit = defineEmits<{
 const interestStore = useInterestStore()
 
 // State
-const form = ref<InterestInterface>({
-  name: '',
-  keywords: []
-})
-
-const errors = ref({
-  name: '',
-  keywords: ''
-})
-
 const loading = ref(false)
 const isSubmitting = ref(false)
 const newKeyword = ref('')
+
+// Model wrapped in a computed to handle the null case
+const modelValue = computed<InterestInterface>(() => {
+  // Return empty model when creating a new interest
+  if (!props.interestId || !interestStore.interests) {
+    return {
+      name: '',
+      keywords: []
+    }
+  }
+  
+  // Find the interest by ID
+  const interest = interestStore.interests.find(i => i.id === props.interestId)
+  return interest || { name: '', keywords: [] }
+})
+
+// Form model
+const { 
+  localModel, 
+  updateField,
+  updateModel
+} = useFormModel<InterestInterface>({
+  modelValue,
+  emit: () => {}, // We don't emit updates directly to parent
+  defaultValues: {
+    name: '',
+    keywords: []
+  }
+})
+
+// Form validation
+const { 
+  errors, 
+  validateField, 
+  validateForm 
+} = useValidation<InterestInterface>(undefined, {
+  requiredFields: ['name']
+})
 
 // Computed
 const isEditing = computed(() => !!props.interestId)
 
 // Methods
 const loadInterest = async () => {
-  if (!props.interestId || !interestStore.interests) return
+  if (!props.interestId) return
   
   loading.value = true
   
   try {
     // Load interests if not already loaded
-    if (!interestStore.interests) {
+    if (!interestStore.interests || interestStore.interests.length === 0) {
       await interestStore.loadInterests()
     }
     
-    // Find the interest by ID
-    const interest = interestStore.interests.find(i => i.id === props.interestId)
-    
-    if (interest) {
-      form.value = {
-        name: interest.name,
-        keywords: [...interest.keywords] // Clone the array to prevent mutations
-      }
-    } else {
-      console.error('Interest not found')
-    }
+    // The modelValue computed will update the localModel automatically
   } catch (error) {
     console.error('Failed to load interest:', error)
   } finally {
@@ -166,48 +186,19 @@ const loadInterest = async () => {
   }
 }
 
-const validateField = (field: keyof InterestInterface, value: any): boolean => {
-  if (field === 'name') {
-    if (!value || !value.trim()) {
-      errors.value.name = 'Veuillez entrer un nom d\'intérêt'
-      return false
-    }
-  } else if (field === 'keywords') {
-    // Keywords are optional, but we might want to validate their format
-    if (value && !Array.isArray(value)) {
-      errors.value.keywords = 'Format de mots-clés invalide'
-      return false
-    }
-  }
-  
-  // Use indexing with type safety
-  if (field === 'name' || field === 'keywords') {
-    errors.value[field] = ''
-  }
-  
-  return true
-}
-
-const validateForm = (): boolean => {
-  let isValid = true
-  
-  isValid = validateField('name', form.value.name) && isValid
-  isValid = validateField('keywords', form.value.keywords) && isValid
-  
-  return isValid
-}
-
 const addKeyword = () => {
   if (!newKeyword.value.trim()) return
   
   // Add the keyword if it doesn't already exist
   const keyword = newKeyword.value.trim()
-  if (!form.value.keywords) {
-    form.value.keywords = []
-  }
   
-  if (!form.value.keywords.includes(keyword)) {
-    form.value.keywords.push(keyword)
+  // Ensure keywords array exists
+  const currentKeywords = localModel.keywords || []
+  
+  // Add keyword if it doesn't already exist
+  if (!currentKeywords.includes(keyword)) {
+    const updatedKeywords = [...currentKeywords, keyword]
+    updateField('keywords', updatedKeywords)
   }
   
   // Clear the input
@@ -215,23 +206,26 @@ const addKeyword = () => {
 }
 
 const removeKeyword = (index: number) => {
-  if (form.value.keywords && index >= 0 && index < form.value.keywords.length) {
-    form.value.keywords.splice(index, 1)
+  const currentKeywords = localModel.keywords || []
+  if (index >= 0 && index < currentKeywords.length) {
+    const updatedKeywords = [...currentKeywords]
+    updatedKeywords.splice(index, 1)
+    updateField('keywords', updatedKeywords)
   }
 }
 
 const saveInterest = async () => {
-  if (!validateForm()) return
+  if (!validateForm(localModel)) return
   
   isSubmitting.value = true
   
   try {
     if (isEditing.value && props.interestId) {
       // Update existing interest
-      await interestStore.updateInterest(props.interestId, form.value)
+      await interestStore.updateInterest(props.interestId, localModel)
     } else {
       // Add new interest
-      await interestStore.addInterest(form.value)
+      await interestStore.addInterest(localModel)
     }
     
     emit('saved')

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { EducationInterface } from '../../../../../node_modules/@cv-generator/shared/src/types/resume.interface'
+import type { EducationInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
-import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
-import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { computed, ref } from 'vue'
 
 interface Props {
@@ -22,45 +22,47 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Create a local form model
-const formModel = computed(() => ({
-  institution: props.modelValue.institution || '',
-  area: props.modelValue.area || '',
-  studyType: props.modelValue.studyType || '',
-  url: props.modelValue.url || '',
-  startDate: props.modelValue.startDate || '',
-  endDate: props.modelValue.endDate || '',
-  score: props.modelValue.score || '',
-  courses: [...(props.modelValue.courses || [])]
-}))
+// Setup form model using useFormModel composable
+const {
+  localModel,
+  updateField,
+  updateModel
+} = useFormModel<EducationInterface>({
+  modelValue: computed(() => props.modelValue),
+  emit: (event, value) => emit(event, value),
+  defaultValues: {
+    institution: '',
+    area: '',
+    studyType: '',
+    url: '',
+    startDate: '',
+    endDate: '',
+    score: '',
+    courses: []
+  }
+})
 
 // Courses management
 const newCourse = ref('')
 const courseError = ref('')
 
-// Form validation setup
-const { errors, validateField, validateForm } = useFieldValidation()
-const { updateField } = useModelUpdate({
-  emit: emit as (event: string, ...args: any[]) => void,
-  modelValue: computed(() => props.modelValue)
+// Setup form validation using useValidation composable
+const {
+  errors,
+  validateField,
+  validateForm
+} = useValidation<EducationInterface>(undefined, {
+  requiredFields: ['institution', 'area', 'studyType', 'startDate']
 })
 
-// Update field handler
+// Handle field updates
 const handleFieldUpdate = (field: keyof EducationInterface, value: string) => {
-  console.log(`Updating education field ${String(field)} with value:`, value)
-  
   if (field === 'courses') {
     return // This is handled separately
   }
   
-  // Create a clean copy of the current data
-  const updatedData = {
-    ...props.modelValue,
-    [field]: value
-  }
-  
-  console.log('Emitting education update with data:', updatedData)
-  emit('update:modelValue', updatedData) // Update directly instead of using updateField
+  updateField(field, value)
+  validateField(field, value)
 }
 
 // Handle adding a course
@@ -71,48 +73,28 @@ const addCourse = () => {
   }
   
   courseError.value = ''
-  const updatedCourses = [...(props.modelValue.courses || []), newCourse.value.trim()]
+  const updatedCourses = [...(localModel.courses || []), newCourse.value.trim()]
   
-  // Update using direct emit to ensure consistency
-  emit('update:modelValue', {
-    ...props.modelValue,
-    courses: updatedCourses
-  })
+  // Update the courses array
+  updateField('courses', updatedCourses)
   newCourse.value = ''
 }
 
 // Handle removing a course
 const removeCourse = (index: number) => {
-  const updatedCourses = [...(props.modelValue.courses || [])]
+  const updatedCourses = [...(localModel.courses || [])]
   updatedCourses.splice(index, 1)
   
-  // Update using direct emit to ensure consistency
-  emit('update:modelValue', {
-    ...props.modelValue,
-    courses: updatedCourses
-  })
+  // Update the courses array
+  updateField('courses', updatedCourses)
 }
 
 // Handle form submission
 const handleSubmit = async () => {
-  console.log('Education form submission - Current model:', JSON.stringify(props.modelValue))
-  
   // Validate all fields
-  const formIsValid = validateForm(props.modelValue)
-  console.log('Form validation result:', formIsValid)
+  const formIsValid = validateForm(localModel)
   
   if (formIsValid) {
-    // Check that required fields are present
-    if (!props.modelValue.institution || !props.modelValue.area || !props.modelValue.studyType || !props.modelValue.startDate) {
-      console.error('Required fields missing:', {
-        institution: !props.modelValue.institution,
-        area: !props.modelValue.area,
-        studyType: !props.modelValue.studyType,
-        startDate: !props.modelValue.startDate
-      })
-      return
-    }
-    
     emit('validate')
   }
 }
@@ -153,60 +135,60 @@ const icons = {
       <FormField
         name="institution"
         label="Établissement"
-        :model-value="formModel.institution"
+        :model-value="localModel.institution"
         :error="errors.institution"
         :icon="icons.institution"
         placeholder="Ex: Université de Paris"
         help-text="Nom de l'établissement où vous avez étudié."
         required
         @update:model-value="handleFieldUpdate('institution', $event)"
-        @blur="validateField('institution', formModel.institution)"
+        @blur="validateField('institution', localModel.institution)"
       />
 
       <FormField
         name="area"
         label="Domaine d'étude"
-        :model-value="formModel.area"
+        :model-value="localModel.area"
         :error="errors.area"
         :icon="icons.area"
         placeholder="Ex: Informatique"
         help-text="Domaine ou spécialité de vos études."
         required
         @update:model-value="handleFieldUpdate('area', $event)"
-        @blur="validateField('area', formModel.area)"
+        @blur="validateField('area', localModel.area)"
       />
 
       <FormField
         name="studyType"
         label="Type de diplôme"
-        :model-value="formModel.studyType"
+        :model-value="localModel.studyType"
         :error="errors.studyType"
         :icon="icons.studyType"
         placeholder="Ex: Master"
         help-text="Type ou niveau de diplôme obtenu."
         required
         @update:model-value="handleFieldUpdate('studyType', $event)"
-        @blur="validateField('studyType', formModel.studyType)"
+        @blur="validateField('studyType', localModel.studyType)"
       />
 
       <FormField
         name="url"
         type="url"
         label="Site Web"
-        :model-value="formModel.url"
+        :model-value="localModel.url || ''"
         :error="errors.url"
         :icon="icons.url"
         placeholder="Ex: https://universite.fr"
         help-text="Site web de l'établissement (optionnel)."
         @update:model-value="handleFieldUpdate('url', $event)"
-        @blur="validateField('url', formModel.url)"
+        @blur="validateField('url', localModel.url || '')"
       />
 
       <div class="col-span-1 md:col-span-2">
         <DateRangeFields
-          :startDate="formModel.startDate"
-          :endDate="formModel.endDate"
-          :isCurrentlyActive="!formModel.endDate"
+          :startDate="localModel.startDate"
+          :endDate="localModel.endDate || ''"
+          :isCurrentlyActive="!localModel.endDate"
           :startDateError="errors.startDate"
           :endDateError="errors.endDate"
           :startDateIcon="icons.date"
@@ -226,13 +208,13 @@ const icons = {
       <FormField
         name="score"
         label="Note / Distinction"
-        :model-value="formModel.score"
+        :model-value="localModel.score || ''"
         :error="errors.score"
         :icon="icons.score"
         placeholder="Ex: Mention Bien, 16/20"
         help-text="Résultat obtenu ou distinction honorifique (optionnel)."
         @update:model-value="handleFieldUpdate('score', $event)"
-        @blur="validateField('score', formModel.score)"
+        @blur="validateField('score', localModel.score || '')"
       />
     </div>
 
@@ -267,9 +249,9 @@ const icons = {
       </div>
       
       <!-- Liste des cours -->
-      <ul v-if="formModel.courses && formModel.courses.length > 0" class="space-y-2">
+      <ul v-if="localModel.courses && localModel.courses.length > 0" class="space-y-2">
         <li 
-          v-for="(course, index) in formModel.courses" 
+          v-for="(course, index) in localModel.courses" 
           :key="`course-${index}`"
           class="bg-neutral-800 p-3 rounded-lg flex justify-between items-center"
         >

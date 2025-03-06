@@ -10,26 +10,26 @@
       <FormField
         name="name"
         label="Nom de la compétence"
-        :model-value="formModel.name"
+        :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
         placeholder="Ex: JavaScript"
         help-text="Nom de la compétence ou technologie."
         required
-        @update:model-value="handleFieldUpdate('name', $event)"
-        @blur="validateField('name', formModel.name)"
+        @update:model-value="(value) => updateField('name', value)"
+        @blur="validateField('name', localModel.name)"
       />
 
       <FormField
         name="level"
         label="Niveau de maîtrise"
-        :model-value="formModel.level"
+        :model-value="localModel.level || ''"
         :error="errors.level"
         :icon="icons.level"
         placeholder="Ex: Expert, Intermédiaire, Débutant"
         help-text="Votre niveau de maîtrise de cette compétence (optionnel)."
-        @update:model-value="handleFieldUpdate('level', $event)"
-        @blur="validateField('level', formModel.level)"
+        @update:model-value="(value) => updateField('level', value)"
+        @blur="validateField('level', localModel.level)"
       />
     </div>
 
@@ -63,10 +63,10 @@
       </div>
       
       <!-- Keywords list -->
-      <div v-if="formModel.keywords && formModel.keywords.length > 0" class="mt-4">
+      <div v-if="localModel.keywords && localModel.keywords.length > 0" class="mt-4">
         <div class="flex flex-wrap gap-2">
           <div 
-            v-for="(keyword, index) in formModel.keywords" 
+            v-for="(keyword, index) in localModel.keywords" 
             :key="index"
             class="bg-neutral-700 text-white px-3 py-1 rounded-full flex items-center"
           >
@@ -95,8 +95,8 @@
 import type { SkillInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
-import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
-import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 import { computed, ref } from 'vue'
 
 interface Props {
@@ -114,41 +114,27 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Create a local form model
-const formModel = computed(() => ({
-  name: props.modelValue.name || '',
-  level: props.modelValue.level || '',
-  keywords: [...(props.modelValue.keywords || [])]
-}))
+// Create a computed model value for useFormModel
+const modelValue = computed<SkillInterface>(() => props.modelValue)
 
 // Keywords management
 const newKeyword = ref('')
 const keywordError = ref('')
 
-// Form validation setup
-const { errors, validateField, validateForm } = useFieldValidation()
-const { updateField } = useModelUpdate({
-  emit: emit as (event: string, ...args: any[]) => void,
-  modelValue: computed(() => props.modelValue)
+// Use the new composables
+const { localModel, updateField } = useFormModel<SkillInterface>({
+  modelValue,
+  emit: (event, value) => emit('update:modelValue', value),
+  defaultValues: {
+    name: '',
+    level: '',
+    keywords: []
+  }
 })
 
-// Update field handler
-const handleFieldUpdate = (field: keyof SkillInterface, value: string) => {
-  console.log(`Updating skill field ${String(field)} with value:`, value)
-  
-  if (field === 'keywords') {
-    return // This is handled separately
-  }
-  
-  // Create a clean copy of the current data
-  const updatedData = {
-    ...props.modelValue,
-    [field]: value
-  }
-  
-  console.log('Emitting skill update with data:', updatedData)
-  emit('update:modelValue', updatedData)
-}
+const { errors, validateField, validateForm } = useValidation<SkillInterface>(undefined, {
+  requiredFields: ['name']
+})
 
 // Handle adding a keyword
 const addKeyword = () => {
@@ -158,41 +144,33 @@ const addKeyword = () => {
   }
   
   keywordError.value = ''
-  const updatedKeywords = [...(props.modelValue.keywords || []), newKeyword.value.trim()]
+  const updatedKeywords = [...(localModel.keywords || []), newKeyword.value.trim()]
   
-  // Update using direct emit to ensure consistency
-  emit('update:modelValue', {
-    ...props.modelValue,
-    keywords: updatedKeywords
-  })
+  updateField('keywords', updatedKeywords)
   newKeyword.value = ''
 }
 
 // Handle removing a keyword
 const removeKeyword = (index: number) => {
-  const updatedKeywords = [...(props.modelValue.keywords || [])]
+  const updatedKeywords = [...(localModel.keywords || [])]
   updatedKeywords.splice(index, 1)
   
-  // Update using direct emit to ensure consistency
-  emit('update:modelValue', {
-    ...props.modelValue,
-    keywords: updatedKeywords
-  })
+  updateField('keywords', updatedKeywords)
 }
 
 // Handle form submission
 const handleSubmit = async () => {
-  console.log('Skill form submission - Current model:', JSON.stringify(props.modelValue))
+  console.log('Skill form submission - Current model:', JSON.parse(JSON.stringify(localModel)))
   
   // Validate all fields
-  const formIsValid = validateForm(props.modelValue)
+  const formIsValid = validateForm(localModel)
   console.log('Form validation result:', formIsValid)
   
   if (formIsValid) {
-    // Check that required fields are present
-    if (!props.modelValue.name) {
+    // Ensure required fields are present
+    if (!localModel.name) {
       console.error('Required fields missing:', {
-        name: !props.modelValue.name
+        name: !localModel.name
       })
       return
     }

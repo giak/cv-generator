@@ -1,103 +1,82 @@
 <template>
   <div>
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-medium text-white">Publications</h2>
-      <button 
-        @click="openAddDialog"
-        class="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white text-sm"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
+    <CollectionManager
+      :items="publications"
+      title="Publications"
+      description="Gérez vos publications pour enrichir votre CV"
+      addButtonText="Ajouter une publication"
+      emptyStateTitle="Aucune publication"
+      emptyStateDescription="Vous n'avez pas encore ajouté de publications à votre CV."
+      :loading="loading.loading"
+      @add="openAddDialog"
+      @edit="openEditDialog"
+      @delete="confirmDelete"
+    >
+      <template #emptyIcon>
+        <svg class="w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
         </svg>
-        Ajouter une publication
-      </button>
-    </div>
-
-    <!-- Loading state -->
-    <div v-if="loading.loading" class="flex flex-col items-center justify-center py-12">
-      <svg class="animate-spin h-8 w-8 text-indigo-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      <p class="text-neutral-400">Chargement des publications...</p>
-    </div>
-
-    <!-- Empty state -->
-    <div v-else-if="!publications.length" class="bg-neutral-800 rounded-md border border-neutral-700 p-6 text-center">
-      <svg class="mx-auto h-12 w-12 text-neutral-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-      </svg>
-      <h3 class="text-lg font-medium text-white mb-2">Aucune publication</h3>
-      <p class="text-neutral-400 mb-6">Vous n'avez pas encore ajouté de publications à votre CV.</p>
-      <button 
-        @click="openAddDialog" 
-        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white"
-      >
-        Ajouter une publication
-      </button>
-    </div>
-
-    <!-- Publication list -->
-    <div v-else class="space-y-4">
-      <div 
-        v-for="publication in publications" 
-        :key="publication.id"
-        class="bg-neutral-800 rounded-md border border-neutral-700 overflow-hidden"
-      >
-        <Card>
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="font-medium text-white">{{ publication.name }}</h3>
-              <p class="text-sm text-neutral-400 mt-1">
-                <span>{{ publication.publisher }}</span>
-                <span class="mx-2">•</span>
-                <span>{{ formatDate(publication.releaseDate) }}</span>
-              </p>
-              <p v-if="publication.summary" class="mt-2 text-sm text-neutral-300">
-                {{ publication.summary }}
-              </p>
-              <a 
-                v-if="publication.url" 
-                :href="publication.url" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="inline-flex items-center mt-2 text-xs text-indigo-400 hover:text-indigo-300"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-                Voir la publication
-              </a>
-            </div>
-            <div class="flex space-x-2">
-              <button 
-                @click="openEditDialog(publication)" 
-                class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
-              <button 
-                @click="confirmDelete(publication)" 
-                class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-700 hover:text-red-400 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  <line x1="10" y1="11" x2="10" y2="17"></line>
-                  <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>
-              </button>
-            </div>
+      </template>
+      
+      <template #item="{ item: publication }">
+        <div>
+          <h3 class="font-medium text-white">{{ publication.name }}</h3>
+          <p class="text-sm text-neutral-400 mt-1">
+            <span>{{ publication.publisher }}</span>
+            <span class="mx-2">•</span>
+            <span>{{ formatDate(publication.releaseDate) }}</span>
+          </p>
+          <p v-if="publication.summary" class="mt-2 text-sm text-neutral-300">
+            {{ publication.summary }}
+          </p>
+          <a 
+            v-if="publication.url" 
+            :href="publication.url" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="inline-flex items-center mt-2 text-xs text-indigo-400 hover:text-indigo-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            Voir la publication
+          </a>
+        </div>
+      </template>
+      
+      <template #itemActions="{ item: publication, index }">
+        <div class="flex flex-col gap-2">
+          <!-- Reorder buttons -->
+          <div class="flex gap-1">
+            <button
+              type="button"
+              @click="moveUp(index)"
+              :disabled="index === 0"
+              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+              title="Déplacer vers le haut"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+            </button>
+            
+            <button
+              type="button"
+              @click="moveDown(index)"
+              :disabled="index === publications.length - 1"
+              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+              title="Déplacer vers le bas"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
           </div>
-        </Card>
-      </div>
-    </div>
+        </div>
+      </template>
+    </CollectionManager>
     
     <!-- Dialog for adding/editing publications -->
     <div v-if="showDialog" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -144,18 +123,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { usePublicationStore } from '@ui/modules/cv/presentation/stores/publication'
 import type { ValidatedPublication } from '@ui/modules/cv/presentation/stores/publication'
 import type { PublicationInterface } from '@cv-generator/shared/src/types/resume.interface'
 import PublicationForm from './PublicationForm.vue'
-import Card from '@ui/components/shared/Card.vue'
+import CollectionManager from '@ui/components/shared/CollectionManager.vue'
+import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
 
 // Store instance
 const publicationStore = usePublicationStore()
 
-// Publications data
-const publications = ref<ValidatedPublication[]>([])
+// Set up useCollectionField for managing publications
+const { 
+  items: publications,
+  reorderItems
+} = useCollectionField<ValidatedPublication>({
+  fieldName: 'publications',
+  collection: computed(() => publicationStore.publications || []),
+  updateField: () => {}, // Using the store directly
+  defaultItemValues: {
+    id: '',
+    name: '',
+    publisher: '',
+    releaseDate: '',
+    url: '',
+    summary: '',
+    toJSON: function() { return this; }
+  },
+  identifierField: 'id'
+})
+
 const { loading } = publicationStore
 
 // Dialog state
@@ -175,18 +173,8 @@ const publicationToDelete = ref<ValidatedPublication | null>(null)
 
 // Load publications on component mount
 onMounted(async () => {
-  await loadPublications()
+  await publicationStore.loadPublications()
 })
-
-// Load publications from store
-const loadPublications = async () => {
-  try {
-    const result = await publicationStore.loadPublications()
-    publications.value = result
-  } catch (error) {
-    console.error('Failed to load publications:', error)
-  }
-}
 
 // Format date for display
 const formatDate = (dateString: string) => {
@@ -254,7 +242,6 @@ const savePublication = async () => {
       }
     }
     
-    await loadPublications()
     closeDialog()
   } catch (error) {
     console.error('Error saving publication:', error)
@@ -272,11 +259,46 @@ const deleteConfirmed = async () => {
   
   try {
     await publicationStore.deletePublication(publicationToDelete.value.id)
-    await loadPublications()
     showDeleteConfirm.value = false
     publicationToDelete.value = null
   } catch (error) {
     console.error('Error deleting publication:', error)
+  }
+}
+
+// Reorder publications up
+const moveUp = async (index: number) => {
+  if (index <= 0) return
+  
+  try {
+    // Get the IDs for reordering
+    const newOrder = [...publications.value.map(item => item.id)]
+    // Swap positions
+    const temp = newOrder[index]
+    newOrder[index] = newOrder[index - 1]
+    newOrder[index - 1] = temp
+    
+    await publicationStore.reorderPublications(newOrder)
+  } catch (error) {
+    console.error('Error reordering publications:', error)
+  }
+}
+
+// Reorder publications down
+const moveDown = async (index: number) => {
+  if (index >= publications.value.length - 1) return
+  
+  try {
+    // Get the IDs for reordering
+    const newOrder = [...publications.value.map(item => item.id)]
+    // Swap positions
+    const temp = newOrder[index]
+    newOrder[index] = newOrder[index + 1]
+    newOrder[index + 1] = temp
+    
+    await publicationStore.reorderPublications(newOrder)
+  } catch (error) {
+    console.error('Error reordering publications:', error)
   }
 }
 </script>

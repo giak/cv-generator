@@ -1,7 +1,7 @@
 ---
 title: CV Generator Changelog
 author: Giak
-date: 2025-03-02
+date: 2025-03-06
 status: maintained
 version: 1.1.0
 ---
@@ -14,6 +14,13 @@ version: 1.1.0
 
 ### Added 🎉
 
+- Refactorisation complète des composants de liste :
+  - `PublicationList` : Implémentation de `CollectionManager` et `useCollectionField` avec réordonnancement
+  - `CertificateList` : Implémentation de `CollectionManager` et `useCollectionField` avec réordonnancement
+  - `AwardList` : Implémentation de `CollectionManager` et `useCollectionField` avec réordonnancement
+  - `LanguageList` : Implémentation de `CollectionManager` et `useCollectionField` avec réordonnancement
+  - `InterestList` : Implémentation de `CollectionManager` et `useCollectionField` avec réordonnancement
+  - `ProjectList` : Implémentation de `CollectionManager` et `useCollectionField` avec réordonnancement
 - Intégration complète de la section "Work Experience" (Expérience Professionnelle)
   - Création du formulaire d'édition avec validation en temps réel
   - Gestion des points forts (highlights) avec ajout/suppression dynamique
@@ -29,6 +36,8 @@ version: 1.1.0
 
 ### Changed 🔄
 
+- Standardisation complète de l'interface utilisateur pour tous les composants de liste
+- Implémentation du réordonnancement pour tous les composants de liste
 - Refactorisation du composant `WorkList` pour utiliser le nouveau `CollectionManager`
 - Standardisation du code des formulaires avec les nouveaux composables
 - Amélioration de la gestion des états de formulaire grâce à `useFormModel`
@@ -40,6 +49,8 @@ version: 1.1.0
 - Epic-2 "Refactorisation des Composants CV" complété à 100%
   - ✅ Fondations: tous les composables fondamentaux complétés
   - ✅ Composants Réutilisables: tous les composants prévus développés
+  - ✅ Composants List: tous les composants list refactorisés (100%)
+  - ✅ Composants Form: tous les composants form refactorisés (100%)
   - ✅ Documentation: toute la documentation technique finalisée
   - ✅ Tests: tous les tests unitaires et d'intégration complétés
 - Epic-2 "Édition de CV" complété à 60%
@@ -66,45 +77,95 @@ graph TD
     B -->|S'intègre avec| C
 ```
 
-> 💡 **useFormModel Implementation**
+> 💡 **useCollectionField Implementation**
 
 ```typescript
-// useFormModel - Gestion des modèles de formulaire
-export function useFormModel<T extends Record<string, any>>({
-  modelValue,
-  emit,
-  defaultValues,
-  enableLogging = false,
-}: FormModelOptions<T>): FormModelReturn<T> {
-  const localModel = computed({
-    get: () => modelValue.value || defaultValues,
-    set: (newValue) => emit("update:modelValue", newValue),
-  });
+// useCollectionField - Gestion standardisée des collections
+export function useCollectionField<T extends Record<string, any>>({
+  fieldName,
+  collection,
+  updateField,
+  defaultItemValues,
+  identifierField = "id",
+}: CollectionFieldOptions<T>): CollectionFieldReturn<T> {
+  // Items de la collection
+  const items = computed(() => collection.value);
 
-  // Mise à jour d'un champ simple
-  const updateField = (field: keyof T, value: any) => {
-    emit("update:modelValue", {
-      ...modelValue.value,
-      [field]: value,
-    });
+  // État de l'interface
+  const isAddingItem = ref(false);
+  const editingItemId = ref<string | null>(null);
+
+  // Nouvel item avec valeurs par défaut
+  const newItem = ref<T>({ ...defaultItemValues } as T);
+
+  // Ajout d'un nouvel item
+  const addItem = (item: T) => {
+    updateField(fieldName, [...collection.value, item]);
+    resetFormState();
   };
 
-  // Mise à jour d'un champ imbriqué
-  const updateNestedField = <K extends keyof T, N extends keyof T[K]>(
-    object: K,
-    field: N,
-    value: T[K][N]
-  ) => {
-    emit("update:modelValue", {
-      ...modelValue.value,
-      [object]: {
-        ...modelValue.value[object],
-        [field]: value,
-      },
-    });
+  // Mise à jour d'un item existant
+  const updateItem = (item: T) => {
+    const index = collection.value.findIndex(
+      (i) => i[identifierField] === item[identifierField]
+    );
+
+    if (index !== -1) {
+      const updatedCollection = [...collection.value];
+      updatedCollection[index] = item;
+      updateField(fieldName, updatedCollection);
+    }
+
+    resetFormState();
   };
 
-  return { localModel, updateField, updateNestedField };
+  // Réorganisation des items
+  const reorderItems = (newOrder: T[]) => {
+    updateField(fieldName, newOrder);
+  };
+
+  // Suppression d'un item
+  const removeItem = (itemOrId: T | string) => {
+    const id =
+      typeof itemOrId === "string" ? itemOrId : itemOrId[identifierField];
+
+    updateField(
+      fieldName,
+      collection.value.filter((item) => item[identifierField] !== id)
+    );
+  };
+
+  // État d'édition
+  const startEditing = (item: T) => {
+    editingItemId.value = item[identifierField];
+    newItem.value = { ...item };
+  };
+
+  // Annulation d'édition
+  const cancelEditing = () => {
+    resetFormState();
+  };
+
+  // Réinitialisation de l'état
+  const resetFormState = () => {
+    isAddingItem.value = false;
+    editingItemId.value = null;
+    newItem.value = { ...defaultItemValues } as T;
+  };
+
+  return {
+    items,
+    isAddingItem,
+    editingItemId,
+    newItem,
+    addItem,
+    updateItem,
+    reorderItems,
+    removeItem,
+    startEditing,
+    cancelEditing,
+    resetFormState,
+  };
 }
 ```
 
@@ -167,7 +228,6 @@ graph TD
 - Analyses de CV et suggestions d'amélioration
 - Interface administrateur pour la gestion des modèles
 - Internationalisation (i18n) pour l'interface utilisateur
-- Migration des composants existants vers les nouveaux composables de l'Epic-2
 - Refactorisation progressive des composants d'interface utilisateur
 
 ### Technical Improvements 🔧

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { AwardInterface } from '../../../../../node_modules/@cv-generator/shared/src/types/resume.interface'
+import type { AwardInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
-import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
-import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
-import { computed, ref } from 'vue'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { computed } from 'vue'
 
 interface Props {
   modelValue: AwardInterface
@@ -21,54 +21,42 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Create a local form model
-const formModel = computed(() => ({
-  title: props.modelValue.title || '',
-  date: props.modelValue.date || '',
-  awarder: props.modelValue.awarder || '',
-  summary: props.modelValue.summary || ''
-}))
-
-// Form validation setup
-const { errors, validateField, validateForm } = useFieldValidation()
-const { updateField } = useModelUpdate({
-  emit: emit as (event: string, ...args: any[]) => void,
-  modelValue: computed(() => props.modelValue)
+// Setup form model using useFormModel composable
+const { 
+  localModel, 
+  updateField 
+} = useFormModel<AwardInterface>({
+  modelValue: computed(() => props.modelValue),
+  emit: (event, value) => emit(event, value),
+  defaultValues: {
+    title: '',
+    date: '',
+    awarder: '',
+    summary: ''
+  }
 })
 
-// Update field handler
+// Setup form validation using useValidation composable
+const { 
+  errors, 
+  validateField, 
+  validateForm 
+} = useValidation<AwardInterface>(undefined, {
+  requiredFields: ['title', 'date', 'awarder']
+})
+
+// Handle field updates
 const handleFieldUpdate = (field: keyof AwardInterface, value: string) => {
-  console.log(`Updating award field ${String(field)} with value:`, value)
-  
-  // Create a clean copy of the current data
-  const updatedData = {
-    ...props.modelValue,
-    [field]: value
-  }
-  
-  console.log('Emitting award update with data:', updatedData)
-  emit('update:modelValue', updatedData)
+  updateField(field, value)
+  validateField(field, value)
 }
 
 // Handle form submission
 const handleSubmit = async () => {
-  console.log('Award form submission - Current model:', JSON.stringify(props.modelValue))
-  
   // Validate all fields
-  const formIsValid = validateForm(props.modelValue)
-  console.log('Form validation result:', formIsValid)
+  const formIsValid = validateForm(localModel)
   
   if (formIsValid) {
-    // Check that required fields are present
-    if (!props.modelValue.title || !props.modelValue.date || !props.modelValue.awarder) {
-      console.error('Required fields missing:', {
-        title: !props.modelValue.title,
-        date: !props.modelValue.date,
-        awarder: !props.modelValue.awarder
-      })
-      return
-    }
-    
     emit('validate')
   }
 }
@@ -98,39 +86,39 @@ const icons = {
       <FormField
         name="title"
         label="Titre du prix"
-        :model-value="formModel.title"
+        :model-value="localModel.title"
         :error="errors.title"
         :icon="icons.title"
         placeholder="Ex: Employé du mois"
         help-text="Nom ou titre du prix ou de la distinction reçue."
         required
         @update:model-value="handleFieldUpdate('title', $event)"
-        @blur="validateField('title', formModel.title)"
+        @blur="validateField('title', localModel.title)"
       />
 
       <FormField
         name="awarder"
         label="Décerné par"
-        :model-value="formModel.awarder"
+        :model-value="localModel.awarder"
         :error="errors.awarder"
         :icon="icons.awarder"
         placeholder="Ex: Entreprise XYZ"
         help-text="Organisation ou personne ayant décerné le prix."
         required
         @update:model-value="handleFieldUpdate('awarder', $event)"
-        @blur="validateField('awarder', formModel.awarder)"
+        @blur="validateField('awarder', localModel.awarder)"
       />
 
       <FormField
         name="date"
         label="Date d'obtention"
-        :model-value="formModel.date"
+        :model-value="localModel.date"
         :error="errors.date"
         :icon="icons.date"
         help-text="Date à laquelle vous avez reçu ce prix."
         required
         @update:model-value="handleFieldUpdate('date', $event)"
-        @blur="validateField('date', formModel.date)"
+        @blur="validateField('date', localModel.date)"
       />
     </div>
 
@@ -139,7 +127,7 @@ const icons = {
       <FormField
         name="summary"
         label="Description"
-        :model-value="formModel.summary"
+        :model-value="localModel.summary || ''"
         :error="errors.summary"
         :icon="icons.summary"
         placeholder="Ex: Reconnaissance pour l'excellence dans le développement de solutions innovantes..."
@@ -147,7 +135,7 @@ const icons = {
         textarea
         rows="4"
         @update:model-value="handleFieldUpdate('summary', $event)"
-        @blur="validateField('summary', formModel.summary)"
+        @blur="validateField('summary', localModel.summary || '')"
       />
     </div>
 

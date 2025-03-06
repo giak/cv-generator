@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { VolunteerInterface } from '../../../../../node_modules/@cv-generator/shared/src/types/resume.interface'
+import type { VolunteerInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
-import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
-import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 import { computed, ref } from 'vue'
 
 interface Props {
@@ -22,45 +22,31 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Create a local form model
-const formModel = computed(() => ({
-  organization: props.modelValue.organization || '',
-  position: props.modelValue.position || '',
-  url: props.modelValue.url || '',
-  startDate: props.modelValue.startDate || '',
-  endDate: props.modelValue.endDate || '',
-  summary: props.modelValue.summary || '',
-  highlights: [...(props.modelValue.highlights || [])]
-}))
+// Create a model value for useFormModel
+const modelValue = computed<VolunteerInterface>(() => props.modelValue)
 
 // Highlights management
 const newHighlight = ref('')
 const highlightError = ref('')
 
-// Form validation setup
-const { errors, validateField, validateForm } = useFieldValidation()
-const { updateField } = useModelUpdate({
-  emit: emit as (event: string, ...args: any[]) => void,
-  modelValue: computed(() => props.modelValue)
+// Use the new composables
+const { localModel, updateField } = useFormModel<VolunteerInterface>({
+  modelValue,
+  emit: (event, value) => emit('update:modelValue', value),
+  defaultValues: {
+    organization: '',
+    position: '',
+    url: '',
+    startDate: '',
+    endDate: '',
+    summary: '',
+    highlights: []
+  }
 })
 
-// Update field handler
-const handleFieldUpdate = (field: keyof VolunteerInterface, value: string) => {
-  console.log(`Updating volunteer field ${String(field)} with value:`, value)
-  
-  if (field === 'highlights') {
-    return // This is handled separately
-  }
-  
-  // Create a clean copy of the current data
-  const updatedData = {
-    ...props.modelValue,
-    [field]: value
-  }
-  
-  console.log('Emitting volunteer update with data:', updatedData)
-  emit('update:modelValue', updatedData) // Update directly instead of using updateField
-}
+const { errors, validateField, validateForm } = useValidation<VolunteerInterface>(undefined, {
+  requiredFields: ['organization', 'position', 'startDate']
+})
 
 // Handle adding a highlight
 const addHighlight = () => {
@@ -70,47 +56,29 @@ const addHighlight = () => {
   }
   
   highlightError.value = ''
-  const updatedHighlights = [...(props.modelValue.highlights || []), newHighlight.value.trim()]
+  const updatedHighlights = [...(localModel.highlights || []), newHighlight.value.trim()]
   
-  // Update using direct emit to ensure consistency
-  emit('update:modelValue', {
-    ...props.modelValue,
-    highlights: updatedHighlights
-  })
+  updateField('highlights', updatedHighlights)
   newHighlight.value = ''
 }
 
 // Handle removing a highlight
 const removeHighlight = (index: number) => {
-  const updatedHighlights = [...(props.modelValue.highlights || [])]
+  const updatedHighlights = [...(localModel.highlights || [])]
   updatedHighlights.splice(index, 1)
   
-  // Update using direct emit to ensure consistency
-  emit('update:modelValue', {
-    ...props.modelValue,
-    highlights: updatedHighlights
-  })
+  updateField('highlights', updatedHighlights)
 }
 
 // Handle form submission
 const handleSubmit = async () => {
-  console.log('Volunteer form submission - Current model:', JSON.stringify(props.modelValue))
+  console.log('Volunteer form submission - Current model:', JSON.stringify(localModel))
   
   // Validate all fields
-  const formIsValid = validateForm(props.modelValue)
+  const formIsValid = validateForm(localModel)
   console.log('Form validation result:', formIsValid)
   
   if (formIsValid) {
-    // Check that required fields are present
-    if (!props.modelValue.organization || !props.modelValue.position || !props.modelValue.startDate) {
-      console.error('Required fields missing:', {
-        organization: !props.modelValue.organization,
-        position: !props.modelValue.position,
-        startDate: !props.modelValue.startDate
-      })
-      return
-    }
-    
     emit('validate')
   }
 }
@@ -124,8 +92,24 @@ const handleCancel = () => {
 const handleCurrentlyVolunteeringChange = (isCurrentlyVolunteering: boolean) => {
   if (isCurrentlyVolunteering) {
     // If currently volunteering, clear the end date
-    handleFieldUpdate('endDate', '')
+    updateField('endDate', '')
   }
+}
+
+// Validate date fields
+const validateDateRange = ({ startDate, endDate }: { startDate: string, endDate?: string }) => {
+  validateField('startDate', startDate)
+  
+  if (endDate) {
+    validateField('endDate', endDate)
+    
+    if (startDate && endDate && startDate > endDate) {
+      errors.value.endDate = 'La date de fin doit être postérieure à la date de début'
+      return false
+    }
+  }
+  
+  return true
 }
 
 // Icons for form fields
@@ -150,27 +134,27 @@ const icons = {
       <FormField
         name="organization"
         label="Organisation"
-        :model-value="formModel.organization"
+        :model-value="localModel.organization"
         :error="errors.organization"
         :icon="icons.organization"
         placeholder="Ex: Croix-Rouge"
         help-text="Nom de l'organisation où vous avez effectué du bénévolat."
         required
-        @update:model-value="handleFieldUpdate('organization', $event)"
-        @blur="validateField('organization', formModel.organization)"
+        @update:model-value="(value) => updateField('organization', value)"
+        @blur="validateField('organization', localModel.organization)"
       />
 
       <FormField
         name="position"
         label="Poste / Rôle"
-        :model-value="formModel.position"
+        :model-value="localModel.position"
         :error="errors.position"
         :icon="icons.position"
         placeholder="Ex: Bénévole aux premiers secours"
         help-text="Votre fonction ou rôle dans l'organisation."
         required
-        @update:model-value="handleFieldUpdate('position', $event)"
-        @blur="validateField('position', formModel.position)"
+        @update:model-value="(value) => updateField('position', value)"
+        @blur="validateField('position', localModel.position)"
       />
 
       <div class="col-span-1 md:col-span-2">
@@ -178,34 +162,35 @@ const icons = {
           name="url"
           type="url"
           label="Site Web"
-          :model-value="formModel.url"
+          :model-value="localModel.url || ''"
           :error="errors.url"
           :icon="icons.url"
           placeholder="Ex: https://organisation.com"
           help-text="Site web de l'organisation (optionnel)."
-          @update:model-value="handleFieldUpdate('url', $event)"
-          @blur="validateField('url', formModel.url)"
+          @update:model-value="(value) => updateField('url', value)"
+          @blur="validateField('url', localModel.url)"
         />
       </div>
 
       <div class="col-span-1 md:col-span-2">
         <DateRangeFields
-          :startDate="formModel.startDate"
-          :endDate="formModel.endDate"
-          :isCurrentlyActive="!formModel.endDate"
-          :startDateError="errors.startDate"
-          :endDateError="errors.endDate"
-          :startDateIcon="icons.date"
-          :endDateIcon="icons.date"
+          :start-date="localModel.startDate"
+          :end-date="localModel.endDate || ''"
+          :is-currently-active="!localModel.endDate"
+          :start-date-error="errors.startDate"
+          :end-date-error="errors.endDate"
+          :start-date-icon="icons.date"
+          :end-date-icon="icons.date"
           :required="true"
-          :startDateHelpText="'Date à laquelle vous avez commencé le bénévolat.'"
-          :endDateHelpText="'Date de fin (laisser vide si en cours).'"
-          :currentlyActiveLabel="'Bénévolat en cours'"
-          @update:startDate="handleFieldUpdate('startDate', $event)"
-          @update:endDate="handleFieldUpdate('endDate', $event)"
-          @update:isCurrentlyActive="handleCurrentlyVolunteeringChange"
-          @startDate-blur="validateField('startDate', $event)"
-          @endDate-blur="validateField('endDate', $event)"
+          :start-date-help-text="'Date à laquelle vous avez commencé le bénévolat.'"
+          :end-date-help-text="'Date de fin (laisser vide si en cours).'"
+          :currently-active-label="'Bénévolat en cours'"
+          @update:start-date="(value) => updateField('startDate', value)"
+          @update:end-date="(value) => updateField('endDate', value)"
+          @update:is-currently-active="handleCurrentlyVolunteeringChange"
+          @start-date-blur="() => validateField('startDate', localModel.startDate)"
+          @end-date-blur="() => validateField('endDate', localModel.endDate)"
+          @date-range-change="validateDateRange"
         />
       </div>
 
@@ -213,14 +198,14 @@ const icons = {
         <FormField
           name="summary"
           label="Résumé"
-          :model-value="formModel.summary"
+          :model-value="localModel.summary || ''"
           :error="errors.summary"
           :icon="icons.summary"
           placeholder="Ex: Participation à des actions de terrain et sensibilisation..."
           help-text="Décrivez brièvement vos responsabilités et activités."
           rows="4"
-          @update:model-value="handleFieldUpdate('summary', $event)"
-          @blur="validateField('summary', formModel.summary)"
+          @update:model-value="(value) => updateField('summary', value)"
+          @blur="validateField('summary', localModel.summary)"
         />
       </div>
     </div>
@@ -256,9 +241,9 @@ const icons = {
       </div>
       
       <!-- Liste des points forts -->
-      <ul v-if="formModel.highlights && formModel.highlights.length > 0" class="space-y-2">
+      <ul v-if="localModel.highlights && localModel.highlights.length > 0" class="space-y-2">
         <li 
-          v-for="(highlight, index) in formModel.highlights" 
+          v-for="(highlight, index) in localModel.highlights" 
           :key="`highlight-${index}`"
           class="bg-neutral-800 p-3 rounded-lg flex justify-between items-center"
         >

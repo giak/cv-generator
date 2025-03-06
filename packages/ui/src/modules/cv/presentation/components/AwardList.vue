@@ -5,12 +5,31 @@ import { useAwardStore } from '@ui/modules/cv/presentation/stores/award'
 import { computed, onMounted, ref } from 'vue'
 import Card from '@ui/components/shared/Card.vue'
 import Button from '@ui/components/shared/Button.vue'
-import EmptyState from '@ui/components/shared/EmptyState.vue'
+import CollectionManager from '@ui/components/shared/CollectionManager.vue'
 import AwardForm from './AwardForm.vue'
+import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
 
 // State for managing the award list
 const awardStore = useAwardStore()
-const awards = computed(() => awardStore.awards || [])
+
+// Set up useCollectionField for managing awards
+const { 
+  items: awards,
+  reorderItems
+} = useCollectionField<AwardWithId>({
+  fieldName: 'awards',
+  collection: computed(() => awardStore.awards || []),
+  updateField: () => {}, // Using the store directly
+  defaultItemValues: {
+    id: '',
+    title: '',
+    date: '',
+    awarder: '',
+    summary: ''
+  },
+  identifierField: 'id'
+})
+
 const loading = computed(() => awardStore.loading)
 
 // Active dialog state
@@ -51,9 +70,9 @@ const openAddDialog = () => {
 }
 
 // Open dialog for editing an existing award entry
-const openEditDialog = (award: AwardWithId, index: number) => {
+const openEditDialog = (award: AwardWithId) => {
   editingAward.value = { ...award }
-  editingAwardIndex.value = index
+  editingAwardIndex.value = awards.value.findIndex(a => a.id === award.id)
   dialogMode.value = 'edit'
   showDialog.value = true
 }
@@ -80,106 +99,123 @@ const saveAward = async () => {
 }
 
 // Delete award entry
-const deleteAward = async (index: number) => {
+const deleteAward = async (award: AwardWithId) => {
   if (confirm('Êtes-vous sûr de vouloir supprimer ce prix ou cette distinction ?')) {
     try {
-      const award = awards.value[index]
       await awardStore.deleteAward(award.id)
     } catch (error) {
       console.error('Error deleting award:', error)
     }
   }
 }
+
+// Reorder awards up
+const moveUp = async (index: number) => {
+  if (index <= 0) return
+  
+  // Create array of indices, then map to strings
+  const indices = [...Array(awards.value.length).keys()]
+  const temp = indices[index]
+  indices[index] = indices[index - 1]
+  indices[index - 1] = temp
+  
+  // Convert to string IDs for the reorder method
+  const newOrder = indices.map(i => awards.value[i].id)
+  
+  try {
+    await awardStore.reorderAwards(newOrder)
+  } catch (error) {
+    console.error('Error reordering awards:', error)
+  }
+}
+
+// Reorder awards down
+const moveDown = async (index: number) => {
+  if (index >= awards.value.length - 1) return
+  
+  // Create array of indices, then map to strings
+  const indices = [...Array(awards.value.length).keys()]
+  const temp = indices[index]
+  indices[index] = indices[index + 1]
+  indices[index + 1] = temp
+  
+  // Convert to string IDs for the reorder method
+  const newOrder = indices.map(i => awards.value[i].id)
+  
+  try {
+    await awardStore.reorderAwards(newOrder)
+  } catch (error) {
+    console.error('Error reordering awards:', error)
+  }
+}
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h2 class="text-xl font-bold">Prix et Distinctions</h2>
-        <p class="text-neutral-400 text-sm">
-          Ajoutez les prix et distinctions que vous avez reçus.
-        </p>
-      </div>
-      
-      <Button
-        @click="openAddDialog"
-        variant="primary"
-        icon="plus"
-        >Ajouter un prix</Button>
-    </div>
-
-    <!-- Empty state when no award entries -->
-    <EmptyState
-      v-if="!loading && (!awards || awards.length === 0)"
-      title="Aucun prix ou distinction ajouté"
-      description="Commencez par ajouter vos récompenses et reconnaissances"
-      icon="award"
+    <CollectionManager
+      :items="awards"
+      title="Prix et Distinctions"
+      description="Ajoutez les prix et distinctions que vous avez reçus."
+      addButtonText="Ajouter un prix"
+      emptyStateTitle="Aucun prix ou distinction ajouté"
+      emptyStateDescription="Commencez par ajouter vos récompenses et reconnaissances"
+      emptyStateIcon="award"
+      :loading="loading"
+      @add="openAddDialog"
+      @edit="openEditDialog"
+      @delete="deleteAward"
     >
-      <Button
-        @click="openAddDialog"
-        variant="primary"
-        icon="plus"
-        >Ajouter un prix</Button>
-    </EmptyState>
-    
-    <!-- Award list -->
-    <div v-else class="space-y-4">
-      <Card
-        v-for="(award, index) in awards"
-        :key="`award-${award.id}`"
-        class="hover:border-indigo-500/50 transition-colors"
-      >
-        <div class="flex flex-col md:flex-row justify-between">
-          <div class="flex-grow">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-              <h3 class="font-semibold text-lg">{{ award.title }}</h3>
-              <span class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 text-xs font-medium">
-                {{ formatDate(award.date) }}
-              </span>
-            </div>
-            
-            <p class="text-primary-100 font-medium mb-3">
-              <span class="text-neutral-400">Décerné par: </span>
-              {{ award.awarder }}
-            </p>
-            
-            <div v-if="award.summary" class="mt-2 text-sm text-neutral-300">
-              {{ award.summary }}
-            </div>
+      <template #item="{ item: award }">
+        <div class="flex-grow">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+            <h3 class="font-semibold text-lg">{{ award.title }}</h3>
+            <span class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 text-xs font-medium">
+              {{ formatDate(award.date) }}
+            </span>
           </div>
           
-          <!-- Actions -->
-          <div class="flex mt-4 md:mt-0 md:ml-4 md:flex-col space-x-2 md:space-x-0 md:space-y-2">
+          <p class="text-primary-100 font-medium mb-3">
+            <span class="text-neutral-400">Décerné par: </span>
+            {{ award.awarder }}
+          </p>
+          
+          <div v-if="award.summary" class="mt-2 text-sm text-neutral-300">
+            {{ award.summary }}
+          </div>
+        </div>
+      </template>
+      
+      <template #itemActions="{ item: award, index }">
+        <div class="flex flex-col gap-2">
+          <!-- Reorder buttons -->
+          <div class="flex gap-1">
             <button
               type="button"
-              @click="openEditDialog(award, index)"
-              class="p-1 rounded text-neutral-400 hover:bg-primary-500/20 hover:text-primary-400 transition-colors"
-              title="Modifier"
+              @click="moveUp(index)"
+              :disabled="index === 0"
+              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+              title="Déplacer vers le haut"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                <polyline points="18 15 12 9 6 15"></polyline>
               </svg>
             </button>
             
             <button
               type="button"
-              @click="deleteAward(index)"
-              class="p-1 rounded text-neutral-400 hover:bg-error-500/20 hover:text-error-400 transition-colors"
-              title="Supprimer"
+              @click="moveDown(index)"
+              :disabled="index === awards.length - 1"
+              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+              title="Déplacer vers le bas"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
+                <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
           </div>
         </div>
-      </Card>
-    </div>
+      </template>
+    </CollectionManager>
     
     <!-- Dialog for adding/editing award -->
     <div v-if="showDialog" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">

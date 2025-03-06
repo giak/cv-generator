@@ -3,9 +3,9 @@ import type { WorkInterface } from '@cv-generator/shared/src/types/resume.interf
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
-import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
-import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
-import { computed, reactive, ref } from 'vue'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { computed, ref } from 'vue'
 
 interface Props {
   modelValue: WorkInterface
@@ -22,45 +22,31 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Create a local form model
-const formModel = computed(() => ({
-  name: props.modelValue.name || '',
-  position: props.modelValue.position || '',
-  url: props.modelValue.url || '',
-  startDate: props.modelValue.startDate || '',
-  endDate: props.modelValue.endDate || '',
-  summary: props.modelValue.summary || '',
-  highlights: [...(props.modelValue.highlights || [])]
-}))
+// Create a computed model value for useFormModel
+const modelValue = computed<WorkInterface>(() => props.modelValue)
 
 // Highlights management
 const newHighlight = ref('')
 const highlightError = ref('')
 
-// Form validation setup
-const { errors, validateField, validateForm } = useFieldValidation()
-const { updateField } = useModelUpdate({
-  emit: emit as (event: string, ...args: any[]) => void,
-  modelValue: computed(() => props.modelValue)
+// Use the new composables
+const { localModel, updateField } = useFormModel<WorkInterface>({
+  modelValue,
+  emit: (event, value) => emit('update:modelValue', value),
+  defaultValues: {
+    name: '',
+    position: '',
+    url: '',
+    startDate: '',
+    endDate: '',
+    summary: '',
+    highlights: []
+  }
 })
 
-// Update field handler
-const handleFieldUpdate = (field: keyof WorkInterface, value: string) => {
-  console.log(`Updating work field ${field} with value:`, value)
-  
-  if (field === 'highlights') {
-    return // This is handled separately
-  }
-  
-  // Create a clean copy of the current data
-  const updatedData = {
-    ...props.modelValue,
-    [field]: value
-  }
-  
-  console.log('Emitting work update with data:', updatedData)
-  emit('update:modelValue', updatedData) // Update directly instead of using updateField
-}
+const { errors, validateField, validateForm, isValid: isFormValid } = useValidation<WorkInterface>(undefined, {
+  requiredFields: ['name', 'position', 'startDate']
+})
 
 // Handle adding a highlight
 const addHighlight = () => {
@@ -70,64 +56,46 @@ const addHighlight = () => {
   }
   
   highlightError.value = ''
-  const updatedHighlights = [...(props.modelValue.highlights || []), newHighlight.value.trim()]
+  const updatedHighlights = [...(localModel.highlights || []), newHighlight.value.trim()]
   
-  // Update using direct emit to ensure consistency
-  emit('update:modelValue', {
-    ...props.modelValue,
-    highlights: updatedHighlights
-  })
+  updateField('highlights', updatedHighlights)
   newHighlight.value = ''
 }
 
 // Handle removing a highlight
 const removeHighlight = (index: number) => {
-  const updatedHighlights = [...(props.modelValue.highlights || [])]
+  const updatedHighlights = [...(localModel.highlights || [])]
   updatedHighlights.splice(index, 1)
   
-  // Update using direct emit to ensure consistency
-  emit('update:modelValue', {
-    ...props.modelValue,
-    highlights: updatedHighlights
-  })
+  updateField('highlights', updatedHighlights)
 }
 
 // Handle the "currently working" state
 const handleCurrentPositionChange = (isCurrentPosition: boolean) => {
   if (isCurrentPosition) {
     // If it's the current position, clear the end date
-    handleFieldUpdate('endDate', '')
+    updateField('endDate', '')
   }
 }
 
 // Validate form before emitting validate event
 const handleSubmit = async () => {
-  console.log('Work form submission - Current model:', JSON.parse(JSON.stringify(props.modelValue)))
+  console.log('Work form submission - Current model:', JSON.parse(JSON.stringify(localModel)))
   
   // Validate all fields
-  const formIsValid = validateForm(props.modelValue)
+  const formIsValid = validateForm(localModel)
   console.log('Form validation result:', formIsValid)
   
   if (formIsValid) {
-    // Ensure all required fields are present
-    if (!props.modelValue.name || !props.modelValue.position || !props.modelValue.startDate) {
-      console.error('Required fields missing:', {
-        name: !props.modelValue.name,
-        position: !props.modelValue.position,
-        startDate: !props.modelValue.startDate
-      })
-      return
-    }
-    
     // Log all the fields to verify they are present
     console.log('Submitting with complete model:', {
-      name: props.modelValue.name,
-      position: props.modelValue.position,
-      startDate: props.modelValue.startDate,
-      endDate: props.modelValue.endDate,
-      url: props.modelValue.url,
-      summary: props.modelValue.summary,
-      highlights: props.modelValue.highlights
+      name: localModel.name,
+      position: localModel.position,
+      startDate: localModel.startDate,
+      endDate: localModel.endDate,
+      url: localModel.url,
+      summary: localModel.summary,
+      highlights: localModel.highlights
     })
     
     emit('validate')
@@ -138,6 +106,22 @@ const handleSubmit = async () => {
 const handleCancel = () => {
   console.log('Cancelling form - emitting cancel event')
   emit('cancel')
+}
+
+// Validate date fields
+const validateDateRange = ({ startDate, endDate }: { startDate: string, endDate?: string }) => {
+  validateField('startDate', startDate)
+  
+  if (endDate) {
+    validateField('endDate', endDate)
+    
+    if (startDate && endDate && startDate > endDate) {
+      errors.value.endDate = 'La date de fin doit être postérieure à la date de début'
+      return false
+    }
+  }
+  
+  return true
 }
 
 // Icônes SVG pour les champs
@@ -163,47 +147,48 @@ const icons = {
       <FormField
         name="name"
         label="Nom de l'entreprise"
-        :model-value="formModel.name"
+        :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
         placeholder="Ex: Acme Inc."
         help-text="Nom de l'entreprise ou de l'organisation."
         required
-        @update:model-value="handleFieldUpdate('name', $event)"
-        @blur="validateField('name', formModel.name)"
+        @update:model-value="(value) => updateField('name', value)"
+        @blur="validateField('name', localModel.name)"
       />
 
       <FormField
         name="position"
         label="Poste occupé"
-        :model-value="formModel.position"
+        :model-value="localModel.position"
         :error="errors.position"
         :icon="icons.position"
         placeholder="Ex: Développeur Full Stack"
         help-text="Intitulé de votre poste dans cette entreprise."
         required
-        @update:model-value="handleFieldUpdate('position', $event)"
-        @blur="validateField('position', formModel.position)"
+        @update:model-value="(value) => updateField('position', value)"
+        @blur="validateField('position', localModel.position)"
       />
 
       <div class="col-span-1 md:col-span-2">
         <DateRangeFields
-          :startDate="formModel.startDate"
-          :endDate="formModel.endDate"
-          :isCurrentlyActive="!formModel.endDate"
-          :startDateError="errors.startDate"
-          :endDateError="errors.endDate"
-          :startDateIcon="icons.startDate"
-          :endDateIcon="icons.endDate"
+          :start-date="localModel.startDate"
+          :end-date="localModel.endDate || ''"
+          :is-currently-active="!localModel.endDate"
+          :start-date-error="errors.startDate"
+          :end-date-error="errors.endDate"
+          :start-date-icon="icons.startDate"
+          :end-date-icon="icons.endDate"
           :required="true"
-          :startDateHelpText="'Format: AAAA-MM-JJ (ex: 2020-01-15)'"
-          :endDateHelpText="'Laissez vide si c\'est votre emploi actuel.'"
-          :currentlyActiveLabel="'Emploi actuel'"
-          @update:startDate="handleFieldUpdate('startDate', $event)"
-          @update:endDate="handleFieldUpdate('endDate', $event)"
-          @update:isCurrentlyActive="handleCurrentPositionChange"
-          @startDate-blur="validateField('startDate', $event)"
-          @endDate-blur="validateField('endDate', $event)"
+          :start-date-help-text="'Format: AAAA-MM-JJ (ex: 2020-01-15)'"
+          :end-date-help-text="'Laissez vide si c\'est votre emploi actuel.'"
+          :currently-active-label="'Emploi actuel'"
+          @update:start-date="(value) => updateField('startDate', value)"
+          @update:end-date="(value) => updateField('endDate', value)"
+          @update:is-currently-active="handleCurrentPositionChange"
+          @start-date-blur="() => validateField('startDate', localModel.startDate)"
+          @end-date-blur="() => validateField('endDate', localModel.endDate)"
+          @date-range-change="validateDateRange"
         />
       </div>
 
@@ -212,13 +197,13 @@ const icons = {
           name="url"
           type="url"
           label="Site web de l'entreprise"
-          :model-value="formModel.url"
+          :model-value="localModel.url || ''"
           :error="errors.url"
           :icon="icons.url"
           placeholder="Ex: https://www.acme.com"
           help-text="URL du site de l'entreprise (optionnel)."
-          @update:model-value="handleFieldUpdate('url', $event)"
-          @blur="validateField('url', formModel.url)"
+          @update:model-value="(value) => updateField('url', value)"
+          @blur="validateField('url', localModel.url)"
         />
       </div>
     </div>
@@ -227,12 +212,13 @@ const icons = {
       <FormField
         name="summary"
         label="Résumé de l'expérience"
-        :model-value="formModel.summary"
+        :model-value="localModel.summary || ''"
         :error="errors.summary"
         :icon="icons.summary"
         placeholder="Décrivez brièvement vos responsabilités et accomplissements..."
         help-text="Un résumé concis de votre rôle et de vos responsabilités."
-        @update:model-value="handleFieldUpdate('summary', $event)"
+        @update:model-value="(value) => updateField('summary', value)"
+        @blur="validateField('summary', localModel.summary)"
       />
     </div>
     
@@ -244,8 +230,8 @@ const icons = {
       </p>
       
       <!-- Liste des points forts existants -->
-      <ul v-if="formModel.highlights && formModel.highlights.length > 0" class="mb-4 space-y-2">
-        <li v-for="(highlight, index) in formModel.highlights" :key="index" class="flex items-center bg-neutral-800 p-2 rounded">
+      <ul v-if="localModel.highlights && localModel.highlights.length > 0" class="mb-4 space-y-2">
+        <li v-for="(highlight, index) in localModel.highlights" :key="index" class="flex items-center bg-neutral-800 p-2 rounded">
           <span class="flex-grow text-sm">{{ highlight }}</span>
           <button 
             type="button" 

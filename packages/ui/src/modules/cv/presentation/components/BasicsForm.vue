@@ -2,7 +2,7 @@
 import type { BasicsInterface, LocationInterface, ProfileInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
-import { useFieldValidation as useCVFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
 import { computed, ref, onMounted } from 'vue'
@@ -30,7 +30,9 @@ onMounted(() => {
       // Include metrics from useFormModel
       ...perfMetrics,
       // Include metrics from useCollectionField if logging enabled
-      ...(profilesFieldMetrics || {})
+      ...(profilesFieldMetrics || {}),
+      // Include metrics from useValidation if logging enabled
+      ...(validationPerfMetrics || {})
     })
   }
 })
@@ -147,8 +149,16 @@ const {
   enableLogging: process.env.NODE_ENV === 'development'
 })
 
-// Valider le formulaire avant d'émettre l'événement de validation
-const { errors, validateField, validateForm } = useCVFieldValidation()
+// Utilisation du nouveau composable useValidation
+const { 
+  errors, 
+  validateField, 
+  validateForm,
+  perfMetrics: validationPerfMetrics 
+} = useValidation<BasicsInterface>(undefined, {
+  requiredFields: ['name', 'email'],
+  enableLogging: process.env.NODE_ENV === 'development'
+})
 
 const handleSubmit = async () => {
   const validationStart = performance.now()

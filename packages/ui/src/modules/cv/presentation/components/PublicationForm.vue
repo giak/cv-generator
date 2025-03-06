@@ -10,52 +10,52 @@
       <FormField
         name="name"
         label="Nom de la publication"
-        :model-value="formModel.name"
+        :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
         placeholder="Ex: Architecture moderne des applications web"
         help-text="Titre de votre publication ou article."
         required
-        @update:model-value="handleFieldUpdate('name', $event)"
-        @blur="validateField('name', formModel.name)"
+        @update:model-value="(value) => handleFieldUpdate('name', value)"
+        @blur="validateField('name', localModel.name)"
       />
 
       <FormField
         name="publisher"
         label="Éditeur"
-        :model-value="formModel.publisher"
+        :model-value="localModel.publisher"
         :error="errors.publisher"
         :icon="icons.publisher"
         placeholder="Ex: Éditions Techniques"
         help-text="Nom de l'éditeur ou de la plateforme de publication."
         required
-        @update:model-value="handleFieldUpdate('publisher', $event)"
-        @blur="validateField('publisher', formModel.publisher)"
+        @update:model-value="(value) => handleFieldUpdate('publisher', value)"
+        @blur="validateField('publisher', localModel.publisher)"
       />
 
       <FormField
         name="releaseDate"
         label="Date de publication"
-        :model-value="formModel.releaseDate"
+        :model-value="localModel.releaseDate"
         :error="errors.releaseDate"
-        :icon="icons.releaseDate"
+        :icon="icons.date"
         help-text="Date à laquelle votre travail a été publié."
         required
-        @update:model-value="handleFieldUpdate('releaseDate', $event)"
-        @blur="validateField('releaseDate', formModel.releaseDate)"
+        @update:model-value="(value) => handleFieldUpdate('releaseDate', value)"
+        @blur="validateField('releaseDate', localModel.releaseDate)"
       />
 
       <FormField
         name="url"
         type="url"
         label="URL de la publication"
-        :model-value="formModel.url"
+        :model-value="localModel.url"
         :error="errors.url"
         :icon="icons.url"
         placeholder="Ex: https://exemple.com/publication"
         help-text="Lien vers la publication en ligne (optionnel)."
-        @update:model-value="handleFieldUpdate('url', $event)"
-        @blur="validateField('url', formModel.url)"
+        @update:model-value="(value) => handleFieldUpdate('url', value)"
+        @blur="validateField('url', localModel.url)"
       />
     </div>
 
@@ -64,90 +64,107 @@
       <FormField
         name="summary"
         label="Résumé"
-        :model-value="formModel.summary"
+        :model-value="localModel.summary"
         :error="errors.summary"
-        :icon="icons.summary"
+        :icon="icons.description"
         placeholder="Décrivez brièvement le contenu de votre publication..."
         help-text="Un court résumé du contenu de votre publication (optionnel)."
-        @update:model-value="handleFieldUpdate('summary', $event)"
-        @blur="validateField('summary', formModel.summary)"
+        @update:model-value="(value) => handleFieldUpdate('summary', value)"
+        @blur="validateField('summary', localModel.summary)"
       />
     </div>
   </Form>
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import type { PublicationInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
-import { useFieldValidation } from '@ui/modules/cv/presentation/composables/useCVFieldValidation'
-import { useModelUpdate } from '@ui/modules/cv/presentation/composables/useModelUpdate'
-import { computed, ref } from 'vue'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 
-interface Props {
-  modelValue: PublicationInterface
-  loading?: boolean
-  isNew?: boolean
+// Define a form-specific interface to handle empty string defaults for optional fields
+interface PublicationFormModel extends Omit<PublicationInterface, 'url' | 'summary'> {
+  url: string;
+  summary: string;
 }
 
-const props = defineProps<Props>()
-
-// Type-safe emits declaration
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: PublicationInterface): void
-  (e: 'validate'): void
-  (e: 'cancel'): void
+// Define props
+const props = defineProps<{
+  modelValue: PublicationInterface
+  publicationId?: string
 }>()
 
-// Create a local form model
-const formModel = computed(() => ({
-  name: props.modelValue.name || '',
-  publisher: props.modelValue.publisher || '',
-  releaseDate: props.modelValue.releaseDate || '',
-  url: props.modelValue.url || '',
-  summary: props.modelValue.summary || ''
-}))
+// Define emits
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: PublicationInterface): void
+  (e: 'cancel'): void
+  (e: 'validate'): void
+}>()
 
-// Form validation setup
-const { errors, validateField, validateForm } = useFieldValidation()
-const { updateField } = useModelUpdate({
-  emit: emit as (event: string, ...args: any[]) => void,
-  modelValue: computed(() => props.modelValue)
+// Loading state
+const loading = ref(false)
+
+// Check if we're creating a new publication or editing an existing one
+const isNew = computed(() => !props.publicationId)
+
+// Setup form model using useFormModel composable
+const { 
+  localModel, 
+  updateField 
+} = useFormModel<PublicationFormModel>({
+  modelValue: computed(() => {
+    // Convert from PublicationInterface to PublicationFormModel
+    const model = { ...props.modelValue };
+    return {
+      ...model,
+      url: model.url || '',      
+      summary: model.summary || ''
+    } as PublicationFormModel;
+  }),
+  emit: (event: 'update:modelValue', value: PublicationFormModel) => {
+    // Convert back from PublicationFormModel to PublicationInterface
+    const publication: PublicationInterface = {
+      name: value.name,
+      publisher: value.publisher,
+      releaseDate: value.releaseDate,
+      // Only include non-empty values for optional fields
+      ...(value.url ? { url: value.url } : {}),
+      ...(value.summary ? { summary: value.summary } : {})
+    };
+    emit(event, publication);
+  },
+  defaultValues: {
+    name: '',
+    publisher: '',
+    releaseDate: '',
+    url: '',      
+    summary: ''    
+  } 
 })
 
-// Update field handler
-const handleFieldUpdate = (field: keyof PublicationInterface, value: string) => {
-  console.log(`Updating publication field ${String(field)} with value:`, value)
-  
-  // Create a clean copy of the current data
-  const updatedData = {
-    ...props.modelValue,
-    [field]: value
-  }
-  
-  console.log('Emitting publication update with data:', updatedData)
-  emit('update:modelValue', updatedData)
+// Setup validation
+const { 
+  errors, 
+  validateField, 
+  validateForm 
+} = useValidation<PublicationFormModel>(undefined, {
+  requiredFields: ['name', 'publisher', 'releaseDate']
+})
+
+// Handle field updates
+const handleFieldUpdate = (field: keyof PublicationFormModel, value: string) => {
+  updateField(field, value)
+  validateField(field, value)
 }
 
 // Handle form submission
 const handleSubmit = async () => {
-  console.log('Publication form submission - Current model:', JSON.stringify(props.modelValue))
-  
-  // Validate all fields
-  const formIsValid = validateForm(props.modelValue)
-  console.log('Form validation result:', formIsValid)
+  // Validate all required fields
+  const formIsValid = validateForm(localModel)
   
   if (formIsValid) {
-    // Check that required fields are present
-    if (!props.modelValue.name || !props.modelValue.publisher || !props.modelValue.releaseDate) {
-      console.error('Required fields missing:', {
-        name: !props.modelValue.name,
-        publisher: !props.modelValue.publisher,
-        releaseDate: !props.modelValue.releaseDate
-      })
-      return
-    }
-    
     emit('validate')
   }
 }
@@ -157,13 +174,13 @@ const handleCancel = () => {
   emit('cancel')
 }
 
-// Icons for form fields
+// Form field icons
 const icons = {
-  name: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
-  publisher: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
-  releaseDate: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
-  url: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
-  summary: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`
+  name: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+  publisher: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M7 7h10"></path><path d="M7 12h10"></path><path d="M7 17h10"></path></svg>',
+  date: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+  url: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>',
+  description: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>'
 }
 </script>
 

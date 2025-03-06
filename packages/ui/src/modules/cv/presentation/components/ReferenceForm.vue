@@ -10,30 +10,30 @@
       <FormField
         name="name"
         label="Nom"
-        :model-value="form.name"
-        :error="errors.name.length > 0 ? errors.name.join(', ') : ''"
+        :model-value="localModel.name"
+        :error="errors.name"
         :icon="icons.name"
         placeholder="John Doe, Jane Smith..."
         help-text="Nom de la personne qui vous recommande."
         required
-        @update:model-value="(value) => form.name = value"
-        @blur="validateField('name')"
+        @update:model-value="(value) => updateField('name', value)"
+        @blur="validateField('name', localModel.name)"
       />
       
       <!-- Champ pour le témoignage -->
       <FormField
         name="reference"
         label="Témoignage"
-        :model-value="form.reference"
-        :error="errors.reference.length > 0 ? errors.reference.join(', ') : ''"
+        :model-value="localModel.reference"
+        :error="errors.reference"
         :icon="icons.reference"
         placeholder="Entrez le témoignage de cette personne..."
         help-text="Le témoignage professionnel de cette personne."
         required
         textarea
         :rows="4"
-        @update:model-value="(value) => form.reference = value"
-        @blur="validateField('reference')"
+        @update:model-value="(value) => updateField('reference', value)"
+        @blur="validateField('reference', localModel.reference)"
       />
     </div>
     
@@ -49,7 +49,7 @@
       <button
         type="submit"
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-        :disabled="!isFormValid || isLoading"
+        :disabled="isLoading"
       >
         <span v-if="isLoading" class="flex items-center">
           <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
@@ -64,10 +64,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import type { ReferenceInterface } from '@cv-generator/shared/src/types/resume.interface'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 
 const props = defineProps<{
   reference?: ReferenceInterface
@@ -80,18 +82,6 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-// Formulaire
-const form = reactive<ReferenceInterface>({
-  name: '',
-  reference: ''
-})
-
-// Erreurs de validation
-const errors = reactive({
-  name: [] as string[],
-  reference: [] as string[]
-})
-
 // État du formulaire
 const loading = ref(false)
 const isEditing = computed(() => !!props.referenceId || !!props.reference)
@@ -101,55 +91,54 @@ const submitButtonLabel = computed(() => {
   return isEditing.value ? 'Enregistrer' : 'Ajouter'
 })
 
-// Validation d'un champ du formulaire
-const validateField = (field: keyof ReferenceInterface) => {
-  errors[field] = []
-  
-  if (field === 'name') {
-    if (!form.name.trim()) {
-      errors.name.push('Le nom est obligatoire')
-    }
-  } else if (field === 'reference') {
-    if (!form.reference.trim()) {
-      errors.reference.push('Le témoignage est obligatoire')
-    }
+// Modèle initial
+const initialModel = computed<ReferenceInterface>(() => {
+  if (props.reference) {
+    return { ...props.reference }
   }
-}
+  return {
+    name: '',
+    reference: ''
+  }
+})
 
-// Validation de tout le formulaire
-const validateForm = () => {
-  validateField('name')
-  validateField('reference')
-  return isFormValid.value
-}
+// Utilisation du composable useFormModel
+const { localModel, updateField } = useFormModel<ReferenceInterface>({
+  modelValue: initialModel,
+  emit: () => {}, // Nous n'utilisons pas update:modelValue ici
+  defaultValues: {
+    name: '',
+    reference: ''
+  }
+})
 
-// État de la validation du formulaire
-const isFormValid = computed(() => {
-  return form.name.trim() !== '' && 
-         form.reference.trim() !== '' && 
-         errors.name.length === 0 && 
-         errors.reference.length === 0
+// Utilisation du composable useValidation
+const { errors, validateField, validateForm, isValid } = useValidation<ReferenceInterface>(undefined, {
+  requiredFields: ['name', 'reference']
+})
+
+// Initialisation du formulaire
+onMounted(() => {
+  // Le modèle est déjà initialisé par useFormModel
+  if (props.reference) {
+    // Validation après initialisation
+    validateField('name', props.reference.name || '')
+    validateField('reference', props.reference.reference || '')
+  }
 })
 
 // Gestion de la soumission du formulaire
 const handleSubmit = () => {
-  if (!validateForm()) {
+  // Valider tous les champs
+  if (!validateForm(localModel)) {
     return
   }
   
   emit('submit', {
-    name: form.name.trim(),
-    reference: form.reference.trim()
+    name: localModel.name.trim(),
+    reference: localModel.reference.trim()
   })
 }
-
-// Initialisation du formulaire si une référence existe
-onMounted(() => {
-  if (props.reference) {
-    form.name = props.reference.name || ''
-    form.reference = props.reference.reference || ''
-  }
-})
 
 // Icônes pour les champs du formulaire
 const icons = {
