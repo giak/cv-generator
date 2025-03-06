@@ -20,8 +20,54 @@ const editingEducation = ref<EducationInterface>({
   area: '',
   studyType: '',
   startDate: '',
+  endDate: '',
+  score: '',
+  url: '',
   courses: []
 })
+
+// New state for sorting
+const useChronologicalSort = ref(true)
+const isCustomOrder = ref(false)
+
+// Chronologically sorted educations (most recent first)
+const sortedEducations = computed(() => {
+  // If using custom order, return the original list
+  if (!useChronologicalSort.value || isCustomOrder.value) {
+    return educations.value;
+  }
+  
+  // Create a copy to avoid modifying the source
+  return [...educations.value].sort((a, b) => {
+    // Determine the dates to use for comparison
+    // Use endDate if available, otherwise use startDate
+    const dateA = a.endDate && a.endDate !== '' ? a.endDate : (a.startDate || '');
+    const dateB = b.endDate && b.endDate !== '' ? b.endDate : (b.startDate || '');
+    
+    // Handle special cases
+    if (!dateA && !dateB) return 0; // Both missing dates
+    if (!dateA) return 1; // a should come after b
+    if (!dateB) return -1; // b should come after a
+    
+    // Parse dates - if invalid, put at the end
+    try {
+      // For "Present" or current roles, put them at the top
+      if (a.endDate === '') return -1;
+      if (b.endDate === '') return 1;
+      
+      // Compare dates (newest first)
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
+    } catch (error) {
+      console.error('Error comparing dates:', error);
+      return 0;
+    }
+  });
+});
+
+// Exposed educations (either sorted or original based on setting)
+const displayedEducations = computed(() => {
+  return sortedEducations.value;
+});
 
 // Load education on component mount
 onMounted(async () => {
@@ -48,6 +94,9 @@ const openAddDialog = () => {
     area: '',
     studyType: '',
     startDate: '',
+    endDate: '',
+    score: '',
+    url: '',
     courses: []
   }
   dialogMode.value = 'add'
@@ -86,24 +135,36 @@ const saveEducation = async () => {
 // Delete education entry
 const deleteEducation = async (education: EducationWithId) => {
   try {
+    if (!education.id) {
+      console.error('Cannot delete education without ID')
+      return
+    }
     await educationStore.deleteEducation(education.id)
   } catch (error) {
     console.error('Error deleting education:', error)
   }
 }
 
-// Reorder education entries
+// Reorder education (move up)
 const moveUp = async (index: number) => {
   if (index <= 0) return
   
-  // Create array of indices, then map to strings
+  // Mark as custom order
+  isCustomOrder.value = true;
+  useChronologicalSort.value = false;
+  
+  // Create array of indices, then swap
   const indices = [...Array(educations.value.length).keys()]
   const temp = indices[index]
   indices[index] = indices[index - 1]
   indices[index - 1] = temp
   
   // Convert to string IDs for the reorderEducation method
-  const newOrder = indices.map(i => educations.value[i].id)
+  const newOrder = indices.map(i => {
+    // Ensure each ID is a string
+    const id = educations.value[i].id;
+    return id ? id.toString() : '';
+  }).filter(id => id !== '');
   
   try {
     await educationStore.reorderEducation(newOrder)
@@ -115,6 +176,10 @@ const moveUp = async (index: number) => {
 const moveDown = async (index: number) => {
   if (index >= educations.value.length - 1) return
   
+  // Mark as custom order
+  isCustomOrder.value = true;
+  useChronologicalSort.value = false;
+  
   // Create array of indices, then map to strings
   const indices = [...Array(educations.value.length).keys()]
   const temp = indices[index]
@@ -122,7 +187,11 @@ const moveDown = async (index: number) => {
   indices[index + 1] = temp
   
   // Convert to string IDs for the reorderEducation method
-  const newOrder = indices.map(i => educations.value[i].id)
+  const newOrder = indices.map(i => {
+    // Ensure each ID is a string
+    const id = educations.value[i].id;
+    return id ? id.toString() : '';
+  }).filter(id => id !== '');
   
   try {
     await educationStore.reorderEducation(newOrder)
@@ -130,12 +199,24 @@ const moveDown = async (index: number) => {
     console.error('Error reordering educations:', error)
   }
 }
+
+// Toggle between chronological and custom order
+const toggleSortOrder = async () => {
+  useChronologicalSort.value = !useChronologicalSort.value;
+  
+  // If switching to chronological and we have a custom order,
+  // ask if user wants to reset the custom order
+  if (useChronologicalSort.value && isCustomOrder.value) {
+    isCustomOrder.value = false;
+    // We could show a confirmation dialog here
+  }
+}
 </script>
 
 <template>
   <div class="education-list">
     <CollectionManager
-      :items="educations"
+      :items="displayedEducations"
       title="Formation"
       description="Ajoutez vos diplômes et formations académiques."
       addButtonText="Ajouter une formation"
@@ -146,6 +227,28 @@ const moveDown = async (index: number) => {
       @edit="openEditDialog"
       @delete="deleteEducation"
     >
+      <!-- Sorting options -->
+      <template #header-actions>
+        <div v-if="educations.length > 1" class="flex items-center">
+          <button 
+            type="button"
+            @click="toggleSortOrder"
+            class="flex items-center text-sm px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 transition-colors"
+            :class="{'text-indigo-300': useChronologicalSort && !isCustomOrder, 'text-neutral-400': !useChronologicalSort || isCustomOrder}"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <polyline points="21 8 21 21"></polyline>
+              <polyline points="10 21 3 21 3 8"></polyline>
+              <line x1="14" y1="4" x2="14" y2="21"></line>
+              <line x1="18" y1="4" x2="18" y2="21"></line>
+              <line x1="3" y1="12" x2="10" y2="12"></line>
+              <line x1="3" y1="16" x2="10" y2="16"></line>
+            </svg>
+            {{ useChronologicalSort && !isCustomOrder ? 'Tri chronologique' : 'Ordre personnalisé' }}
+          </button>
+        </div>
+      </template>
+      
       <template #item="{ item: education }">
         <div class="flex flex-col">
           <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">

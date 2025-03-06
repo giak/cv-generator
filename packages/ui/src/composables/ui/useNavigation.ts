@@ -11,6 +11,7 @@ import { useLanguageStore } from '@ui/modules/cv/presentation/stores/language'
 import { useInterestStore } from '@ui/modules/cv/presentation/stores/interest'
 import { useProjectStore } from '@ui/modules/cv/presentation/stores/project'
 import { useReferenceStore } from '@ui/modules/cv/presentation/stores/reference'
+import { useFormProgress } from '../../modules/cv/presentation/composables/useFormProgress'
 
 // Define the navigation item interface
 export interface NavItem {
@@ -427,6 +428,79 @@ export function useNavigation(options: {
     }
   })
   
+  // Intégration avec le suivi de progression
+  const { 
+    sectionStatuses, 
+    requiredSectionsCompletion, 
+    overallProgress, 
+    findNextIncompleteSection,
+    getNavigationSections 
+  } = useFormProgress()
+  
+  /**
+   * Naviguer vers la section suivante incomplète
+   */
+  const navigateToNextIncompleteSection = () => {
+    const nextSection = findNextIncompleteSection.value
+    if (nextSection) {
+      handleNavigation(nextSection.id)
+    }
+    return nextSection
+  }
+
+  /**
+   * Naviguer vers la section précédente
+   */
+  const navigateToPrevSection = () => {
+    if (!activeView.value) return null
+    
+    const { prev } = getNavigationSections(activeView.value)
+    if (prev) {
+      handleNavigation(prev.id)
+    }
+    return prev
+  }
+
+  /**
+   * Naviguer vers la section suivante
+   */
+  const navigateToNextSection = () => {
+    if (!activeView.value) return null
+    
+    const { next } = getNavigationSections(activeView.value)
+    if (next) {
+      handleNavigation(next.id)
+    }
+    return next
+  }
+
+  /**
+   * Vérifier si une section est incomplète
+   * @param sectionId ID de la section à vérifier
+   */
+  const isSectionIncomplete = (sectionId: string) => {
+    const section = sectionStatuses.value.find(s => s.id === sectionId)
+    return section ? !section.isComplete : false
+  }
+
+  /**
+   * Vérifier si une section est complète
+   * @param sectionId ID de la section à vérifier
+   */
+  const isSectionComplete = (sectionId: string) => {
+    const section = sectionStatuses.value.find(s => s.id === sectionId)
+    return section ? section.isComplete : false
+  }
+
+  /**
+   * Vérifier si une section est partiellement complète
+   * @param sectionId ID de la section à vérifier
+   */
+  const isSectionPartial = (sectionId: string) => {
+    const section = sectionStatuses.value.find(s => s.id === sectionId)
+    return section ? section.isPartial : false
+  }
+  
   // Return the composable functions and state
   return {
     navigationGroups,
@@ -434,6 +508,14 @@ export function useNavigation(options: {
     handleNavigation,
     getActiveViewTitle,
     getActiveViewDescription,
-    updateBreadcrumbs
+    updateBreadcrumbs,
+    loadDataForView,
+    navigateToNextSection,
+    navigateToPrevSection,
+    navigateToNextIncompleteSection,
+    isSectionComplete,
+    isSectionPartial,
+    isSectionIncomplete,
+    sectionStatuses
   }
 } 

@@ -10,13 +10,19 @@ import ErrorNotification from '../components/notification/ErrorNotification.vue'
 import ToastDemo from '../components/notification/ToastDemo.vue'
 // Import layout components
 import { 
-  DashboardLayout, 
-  NavMenu, 
-  BreadcrumbNav, 
-  UserInfo, 
-  SearchInput, 
-  PageHeader
+  DashboardLayout,
+  UserInfo,
+  SearchInput,
+  PageHeader,
+  BreadcrumbNav
 } from '../components/layouts'
+// Import des composants de navigation
+import { 
+  FormNavigation,
+  UnifiedNavigation 
+} from '../components/navigation'
+// Import des composants de statut
+import { ProgressIndicator } from '../components/status'
 import PublicationList from '@ui/modules/cv/presentation/components/PublicationList.vue'
 import SkillList from '@ui/modules/cv/presentation/components/SkillList.vue'
 import LanguageList from '@ui/modules/cv/presentation/components/LanguageList.vue'
@@ -49,7 +55,10 @@ const {
   breadcrumbItems, 
   handleNavigation, 
   getActiveViewTitle, 
-  getActiveViewDescription 
+  getActiveViewDescription,
+  navigateToNextSection,
+  navigateToPrevSection,
+  navigateToNextIncompleteSection
 } = useNavigation({ activeView, activeComponent })
 const { handleErrorAction } = useErrorHandling()
 
@@ -110,8 +119,8 @@ watch(activeView, (viewId) => {
     <DashboardLayout>
       <!-- Sidebar Content -->
       <template #sidebar-content>
-        <NavMenu 
-          :groups="navigationGroups"
+        <UnifiedNavigation 
+          :current-section="activeView"
           @navigate="handleNavigation"
         />
       </template>
@@ -181,6 +190,13 @@ watch(activeView, (viewId) => {
             @update:modelValue="handleBasicsUpdate"
             @validate="handleValidate"
           />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="basics"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -201,6 +217,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <WorkList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="experience"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
       
@@ -221,6 +244,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <WorkList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="work"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -241,6 +271,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <VolunteerList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="volunteer"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -261,6 +298,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <EducationList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="education"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -281,6 +325,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <AwardList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="awards"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -301,6 +352,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <CertificateList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="certificates"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -321,6 +379,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <PublicationList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="publications"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -341,6 +406,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <SkillList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="skills"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -361,6 +433,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <LanguageList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="languages"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -381,6 +460,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <InterestList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="interests"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -401,6 +487,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <ProjectList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="projects"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 
@@ -421,6 +514,13 @@ watch(activeView, (viewId) => {
         
         <div class="p-6">
           <ReferenceList />
+          
+          <!-- Navigation entre les formulaires -->
+          <FormNavigation 
+            current-section="references"
+            show-completion
+            @navigate="handleNavigation"
+          />
         </div>
       </div>
 

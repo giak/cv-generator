@@ -1,5 +1,6 @@
 // Main layout components
 export { default as DashboardLayout } from './DashboardLayout.vue';
+// DEPRECATED: Utiliser UnifiedNavigation dans components/navigation à la place
 export { default as NavMenu } from './NavMenu.vue';
 export { default as BreadcrumbNav } from './BreadcrumbNav.vue';
 export { default as UserInfo } from './UserInfo.vue';

@@ -104,6 +104,9 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - Responsive design for all devices
   - Customizable themes and layouts
   - Drag-and-drop field organization
+  - Event-based navigation without page reloads (SPA)
+  - Visual indicators for form completion status
+  - Intuitive progress tracking across all CV sections
 
 - 💾 **Data Management**
 
@@ -111,6 +114,7 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - Offline capabilities with PWA support
   - Auto-save functionality with history
   - Version control for CV iterations
+  - State preservation during navigation
 
 - ✅ **Validation Strategy**
 
@@ -118,6 +122,14 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - Domain-level validation rules
   - Real-time feedback with error messages
   - Shared Result pattern for consistent error handling
+
+- 🚦 **Advanced Navigation**
+
+  - True Single-Page Application experience
+  - Smart section suggestion based on completion status
+  - Visual progress indicators for each section
+  - Consistent navigation patterns across components
+  - Event-based navigation system for seamless transitions
 
 - 📤 **Export Options**
   - PDF export with customizable styles
@@ -137,6 +149,8 @@ CV Generator provides a structured, standardized approach to CV creation using t
 | Pinia        | 2.1+    | State management with TypeScript support        | DevTools, modular stores, composition API           |
 | Zod          | 3.22+   | Schema validation and runtime type checking     | Type inference, custom validations                  |
 | pnpm         | 10+     | Package manager with monorepo workspace support | Efficient disk usage, workspaces, speed             |
+| Vue Router   | 4.2+    | Client-side routing and navigation              | Seamless SPA transitions, lazy loading              |
+| Mermaid      | 10.x+   | Diagrams and visualization                      | Documentation, architecture visualization           |
 
 ## Current Status
 
@@ -155,77 +169,72 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - ✅ Tous les composants formulaires (12/12) refactorisés
   - ✅ Tous les composants listes (10/10) refactorisés
   - ✅ Documentation technique et tests unitaires complétés
-- **Epic-3: Édition de CV** 🔄 60% Complété
+- **Epic-3: Édition de CV** 🔄 75% Complété
   - ✅ Formulaires pour les informations de base (basics)
   - ✅ Formulaires pour l'expérience professionnelle (work)
-  - 🔄 Implémentation des formulaires pour l'éducation (education) en cours
+  - ✅ Tri chronologique implémenté pour les listes éducation
+  - 🔄 Implémentation des formulaires pour l'éducation (education) en cours (80%)
+  - ✅ Système de navigation modernisé avec émission d'événements
+  - ✅ Composant `UnifiedNavigation` pour une navigation cohérente
+  - ✅ Composant `FormNavigation` refactorisé pour utiliser le même système d'événements
+  - 🔄 Optimisation pour l'expérience mobile en cours
   - ⏳ Formulaires pour les compétences (skills) et autres sections planifiés
   - ⏳ Support des sections optionnelles du standard JSON Resume
 - **Epic-4: Prévisualisation et exportation** ⏳ Planifié
 - **Epic-5: Optimisation ATS** ⏳ Planifié
 
-### Latest Feature: Standardized List Components with CollectionManager
+### Latest Feature: Navigation System Enhancement
 
-✨ **Major Achievement: All list components have been completely refactored!** ✨
+✨ **Recent Achievement: Unified Navigation Experience** ✨
 
-The entire CV generator now has a consistent, modern UI across all list components. We've successfully refactored:
+The application now features a completely unified navigation system that enhances user experience and code maintainability:
 
-- `WorkList`
-- `EducationList`
-- `SkillList`
-- `ProjectList`
-- `InterestList`
-- `LanguageList`
-- `AwardList`
-- `CertificateList`
-- `PublicationList`
-- `ReferenceList`
+- ✅ **Event-Based Navigation**: Replaced direct URL links with a robust event system
 
-Each component now uses:
+  - Prevents page reloads when navigating between CV sections
+  - Provides a true single-page application experience
+  - Improves state persistence between navigation actions
 
-- 🔄 The `CollectionManager` component for a unified user interface
-- 🧩 The `useCollectionField` composable for state management and CRUD operations
-- ⬆️⬇️ Drag-and-drop reordering capabilities for intuitive item organization
-- 🛡️ Standardized form validation with real-time feedback
-- 🚫 Confirmation dialogs for destructive actions to prevent accidental data loss
+- ✅ **Refactored Components**:
 
-This standardization brings several benefits:
+  - `FormNavigation`: Modernized with button-based navigation and event emission
+  - `UnifiedNavigation`: Serves as the primary navigation component with progress indicators
+  - Consistent API and behavior across all navigation components
 
-1. **Consistent user experience** across all sections of the CV
-2. **Reduced codebase size** by eliminating duplicated functionality
-3. **Improved maintainability** through shared components
-4. **Enhanced user workflows** with standardized interactions
-5. **Faster development** for future features leveraging these components
+- ✅ **Improved User Experience**:
+  - Visual progress indicators show completion status for all CV sections
+  - "Continue with" suggestions guide users to incomplete sections
+  - Clear highlighting of the current active section
 
-For more details on the implementation, check the [Epic-2 documentation](docs/epic-2/epic-2-completion-summary.md) or review the individual stories in [.ai/epic-2/](.ai/epic-2/).
+This enhancement brings several benefits:
+
+1. **Seamless user experience** with no page reloads between sections
+2. **State preservation** when navigating between different parts of the CV
+3. **Consistent navigation patterns** throughout the application
+4. **Reduced code duplication** through shared navigation logic
+5. **Improved maintainability** with a unified event-based approach
 
 ```typescript
-// Example usage of useCollectionField in PublicationList.vue
-const {
-  items,
-  newItem,
-  isAddingItem,
-  editingItemId,
-  addItem,
-  updateItem,
-  removeItem,
-  startEditing,
-  cancelEditing,
-  resetFormState,
-} = useCollectionField({
-  fieldName: "publications",
-  collection: computed(() => localModel.value.publications),
-  updateField,
-  defaultItemValues: {
-    name: "",
-    publisher: "",
-    releaseDate: "",
-    website: "",
-    summary: "",
-    id: crypto.randomUUID(),
-  },
-});
+// FormNavigation.vue - Event-based navigation
+const navigateTo = (path: string) => {
+  if (!path) return;
+
+  // Transform path to section ID if needed
+  const sectionId = path.startsWith("/") ? path.substring(1) : path;
+
+  // Emit navigation event instead of using direct links
+  emit("navigate", sectionId);
+};
+
+// App.vue - Centralized navigation handling
+const handleNavigation = (path: string) => {
+  // Extract section ID and update the active view
+  const sectionId = path.startsWith("/") ? path.substring(1) : path;
+  activeView.value = sectionId;
+};
 ```
+
+For detailed information about the navigation system, check the [CHANGELOG.md](CHANGELOG.md) or review the related story in [.ai/epic-3/story-6.story.md](.ai/epic-3/story-6.story.md).
 
 ### Reusable Composables
 
@@ -241,25 +250,6 @@ The Epic-2 has delivered several high-quality, reusable composables:
       /* default values */
     },
   });
-  ```
-
-- **useFormValidation**: Comprehensive validation with schema support
-
-  ```typescript
-  const { errors, validateField, validateForm } = useFormValidation(schema);
-  ```
-
-- **useCollectionField**: Collection management for arrays of items
-  ```typescript
-  const { items, newItem, addItem, removeItem, updateItem } =
-    useCollectionField({
-      fieldName: "items",
-      collection: computed(() => model.items),
-      updateField,
-      defaultItemValues: {
-        /* defaults */
-      },
-    });
   ```
 
 ## Architecture
@@ -909,36 +899,38 @@ A: Please open an issue on our [GitHub repository](https://github.com/giak/cv-ge
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for a detailed list of changes between versions.
+Pour une liste détaillée des modifications, consultez le [CHANGELOG.md](CHANGELOG.md).
 
 ### Recent Updates (v1.1.0)
 
-#### Added 🎉
+#### Navigation System Enhancements
 
-- Completed refactorization of all list components with `CollectionManager` and `useCollectionField`:
-  - `PublicationList`, `CertificateList`, `AwardList`, `LanguageList`, `InterestList`, `ProjectList`
-- Implemented reordering capabilities for all list components
-- Standardized UI for all collection-based components
-- Completed Epic-2 "Refactorisation des Composants CV" at 100%
-- Added comprehensive validation strategy with Result pattern
-- Built new composables: `useFormModel`, `useFormValidation`, `useCollectionField`
-- Created reusable components: `DateRangeFields`, `CollectionManager`
+- ✅ **FormNavigation Refactoring**: Transformation from direct links to event-based navigation
 
-#### Changed 🔄
+  - Remplacement des balises `<a>` par des `<button>` pour éviter les rechargements de page
+  - Implémentation d'un système d'émission d'événements `@navigate` pour une navigation SPA fluide
+  - Intégration avec le système de navigation existant dans App.vue
+  - 100% de couverture de tests pour garantir la fiabilité
 
-- Reorganized core module into bounded contexts (CV, Export, User)
-- Improved error handling throughout the application
-- Updated project structure based on Domain-Driven Design principles
-- Fixed several UI issues with responsive design
-- Optimized data validation with `useFormValidation`
-- Simplified collection manipulation with `useCollectionField`
+- ✅ **UnifiedNavigation Component**: Integration with navigation events system
 
-#### Technical Improvements 🔧
+  - Composant central pour la navigation entre sections du CV
+  - Indicateurs visuels de progression par section
+  - Suggestions intelligentes de la prochaine section à compléter
+  - Support avancé des icônes avec plusieurs niveaux de personnalisation
 
-- Harmonization of SCSS styles with Tailwind classes
-- Optimization of UI components
-- Migration from Google Fonts to local fonts (InterTight, FiraCode)
-- Improved page loading performance with self-hosted fonts
+- ✅ **Progress Tracking**: Implementation of visual indicators for form completion
+  - Statut de section (complète, partielle, incomplète) avec codes couleur intuitifs
+  - Pourcentage de complétion pour chaque section et pour l'ensemble du CV
+  - Mise en évidence visuelle de la section active
+
+Pour plus d'informations, consultez la [Documentation Epic-3](docs/epic-3/) ou le code source dans [src/components/navigation](packages/ui/src/components/navigation/).
+
+#### Previous Key Updates
+
+- 📋 **Standardized List Components**: Complete refactoring of all list components with CollectionManager
+- 🧩 **Reusable Composables**: Implementation of useFormModel, useFormValidation, and useCollectionField
+- 🔍 **Work Experience Implementation**: Full integration with JSON Resume standard
 
 ## License
 

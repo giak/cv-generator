@@ -43,6 +43,12 @@ version: 1.1.0
 - Amélioration de la gestion des états de formulaire grâce à `useFormModel`
 - Optimisation de la validation des données avec `useFormValidation`
 - Simplification de la manipulation des collections avec `useCollectionField`
+- Refactorisation du composant `FormNavigation` pour utiliser des événements plutôt que des liens directs (#498)
+  - Remplacement des balises `<a>` par des `<button>` pour éviter les rechargements de page
+  - Émission d'événements `@navigate` pour une navigation SPA fluide
+  - Intégration avec le système de navigation existant dans `App.vue`
+  - Cohérence avec l'approche utilisée dans le composant `UnifiedNavigation`
+  - Mise à jour des tests pour refléter la nouvelle structure et le comportement
 
 ### Progress 📊
 
@@ -59,6 +65,11 @@ version: 1.1.0
   - 🔄 Implémentation des formulaires pour l'éducation (education)
   - ⏳ Formulaires pour les compétences (skills) et autres sections
   - ⏳ Support des sections optionnelles du standard JSON Resume
+- Epic-3 "Navigation et expérience utilisateur" avancé à 90%
+  - ✅ Composant `UnifiedNavigation` pour une navigation cohérente
+  - ✅ Composant `FormNavigation` modernisé avec système d'événements
+  - ✅ Indicateurs visuels de progression et de statut
+  - 🔄 Optimisation de l'accessibilité mobile
 
 ### Technical Details 🔧
 
@@ -204,6 +215,34 @@ export const useWorkStore = defineStore('work', () => {
 }
 ```
 
+> 💡 **Navigation Event System**
+
+```typescript
+// FormNavigation.vue - Système de navigation par événements
+const navigateTo = (path: string) => {
+  if (!path) return;
+
+  // Si le chemin commence par "/", le transformer en ID de section
+  // ex: "/basics" devient "basics"
+  const sectionId = path.startsWith("/") ? path.substring(1) : path;
+
+  // Émettre l'événement de navigation avec l'ID de section
+  emit("navigate", sectionId);
+};
+
+// App.vue - Gestion des événements de navigation
+const handleNavigation = (path: string) => {
+  if (path && path.startsWith("/")) {
+    // Extraire l'ID de section du chemin (ex: /education -> education)
+    const sectionId = path.substring(1);
+    activeView.value = sectionId;
+  } else {
+    // Si on a déjà l'ID de section sans le "/"
+    activeView.value = path;
+  }
+};
+```
+
 ```mermaid
 ---
 title: Work Experience Data Flow
@@ -218,6 +257,22 @@ graph TD
     G -->|Updates| H[LocalStorage]
     F -->|If Invalid| I[Error Feedback]
     I -->|Displayed in| C
+```
+
+```mermaid
+---
+title: Navigation Event System
+---
+graph TD
+    A[FormNavigation] -->|Émet @navigate| B[App.vue]
+    C[UnifiedNavigation] -->|Émet @navigate| B
+    B -->|Traite événement| D[handleNavigation]
+    D -->|Met à jour| E[activeView]
+    E -->|Déclenche affichage| F[Composant actif]
+
+    G[Bouton de section] -->|Click| A
+    H[Bouton next/prev] -->|Click| A
+    I[Liste de sections] -->|Click| C
 ```
 
 ### Planned Features 🔮
