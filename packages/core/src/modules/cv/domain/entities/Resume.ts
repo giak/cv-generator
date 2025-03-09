@@ -1,8 +1,8 @@
 import type { ResumeInterface, AwardInterface } from '@cv-generator/shared/src/types/resume.interface'
 import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type'
-import { Email } from '../value-objects/Email'
-import { Phone } from '../value-objects/Phone'
-import { Result } from '../shared/Result'
+import { Email } from '../../../../cv/domain/value-objects/email.value-object'
+import { Phone } from '../../../../cv/domain/value-objects/phone.value-object'
+import { isSuccess } from '@cv-generator/shared'
 
 export class Resume {
   private constructor(private readonly data: ResumeInterface) {}
@@ -25,16 +25,21 @@ export class Resume {
     }
     
     // 3. Validation de l'email avec le value object Email
-    const emailResult = Email.create(data.basics.email || '')
-    if (emailResult.isFailure) {
-      errors.push(emailResult.error)
+    if (data.basics?.email) {
+      const emailResult = Email.create(data.basics.email)
+      if (!isSuccess(emailResult)) {
+        errors.push(emailResult.error[0].message)
+      }
     }
     
     // 4. Validation du téléphone si fourni
     if (data.basics.phone) {
       const phoneResult = Phone.create(data.basics.phone)
-      if (phoneResult.isFailure) {
-        errors.push(phoneResult.error)
+      if (!isSuccess(phoneResult) && phoneResult.error) {
+        const errorMessage = phoneResult.error instanceof Array ? phoneResult.error[0].message : phoneResult.error;
+        if (errorMessage) {
+          errors.push(errorMessage);
+        }
       }
     }
     
@@ -83,12 +88,16 @@ export class Resume {
       return { isValid: false, errors }
     }
     
-    // Créer l'instance avec les données validées
-    const resume = new Resume(data as ResumeInterface)
-    return {
-      isValid: true,
-      resume
+    // Création de l'objet Resume si aucune erreur
+    if (errors.length === 0) {
+      return {
+        isValid: true,
+        errors: [],
+        resume: new Resume(data as ResumeInterface)
+      }
     }
+    
+    return { isValid: false, errors }
   }
   
   private static isValidDate(dateString: string): boolean {

@@ -1,6 +1,6 @@
 import type { WorkInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { Result } from '../../../modules/cv/domain/shared/Result'
-import { WorkDate } from '../value-objects/WorkDate'
+import { WorkDate } from '../value-objects/work-date.value-object'
 
 /**
  * Type pour les données de validation de l'entité Work

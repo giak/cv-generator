@@ -1,7 +1,6 @@
 ---
 description: ENFORCE consistent naming conventions across all project files to ensure code readability, maintainability, and searchability
 globs: **/*
-alwaysApply: false
 ---
 ---
 description: ENFORCE consistent naming conventions across all project files to ensure code readability, maintainability, and searchability
@@ -73,7 +72,7 @@ version: 1.0.0
 #### Interfaces & Types
 - **Interfaces**: `PascalCaseInterface` (e.g., `ResumeDataInterface`)
 - **Type Aliases**: `PascalCaseType`  (e.g., `ResumeTemplateType` or `TResumeTemplateType`)
-- **Type Parameters/Generics**: Single uppercase letter or `PascalCaseType` (e.g., `T` or `EntityType`)
+- **Type Parameters/Generics**: Single uppercase letter or `PascalCaseType` (e.g., `EntityType`)
 - **Prop Types**: `PascalCaseProps` (e.g., `ResumeFormProps`)
 
 #### Enums

@@ -1,13 +1,13 @@
 {
   "name": "@cv-generator/shared",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "author": {
     "name": "giak",
     "url": "https://github.com/giak"
   },
-  "description": "Shared types and utilities for CV Generator",
+  "description": "Shared utilities and types for CV Generator",
   "homepage": "https://github.com/giak/cv-generator/tree/main/packages/shared#readme",
   "repository": {
     "type": "git",
@@ -23,9 +23,9 @@
     "types",
     "typescript"
   ],
-  "main": "./dist/index.js",
+  "main": "dist/index.js",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -41,19 +41,16 @@
     }
   },
   "scripts": {
-    "build": "node ../../node_modules/typescript/bin/tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit",
-    "clean": "rimraf dist"
+    "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "rimraf": "^5.0.5",
-    "typescript": "~5.7.3",
-    "vitest": "^3.0.7"
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
   }
 }

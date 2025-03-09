@@ -1,8 +1,8 @@
 import type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface'
 import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type'
-import { Email } from '../value-objects/Email'
-import { Phone } from '../value-objects/Phone'
-import { Result } from '../../../modules/cv/domain/shared/Result'
+import { Email } from '../value-objects/email.value-object'
+import { Phone } from '../value-objects/phone.value-object'
+
 
 /**
  * Resume entity representing a CV in JSON Resume format
@@ -29,16 +29,26 @@ export class Resume {
     }
     
     // 3. Validation de l'email avec le value object Email
-    const emailResult = Email.create(data.basics.email || '')
-    if (emailResult.isFailure) {
-      errors.push(emailResult.error)
+    if (data.basics?.email) {
+      const emailResult = Email.create(data.basics.email)
+      if (!emailResult.success) {
+        errors.push(emailResult.error[0].message)
+      }
     }
     
     // 4. Validation du téléphone si fourni
     if (data.basics.phone) {
       const phoneResult = Phone.create(data.basics.phone)
       if (phoneResult.isFailure) {
-        errors.push(phoneResult.error)
+        // Le résultat peut être une chaîne ou un tableau
+        if (typeof phoneResult.error === 'string') {
+          errors.push(phoneResult.error)
+        } else if (Array.isArray(phoneResult.error)) {
+          // Si c'est un tableau, prendre le premier message
+          errors.push(phoneResult.error[0]?.message || 'Format de téléphone invalide')
+        } else {
+          errors.push('Format de téléphone invalide')
+        }
       }
     }
     

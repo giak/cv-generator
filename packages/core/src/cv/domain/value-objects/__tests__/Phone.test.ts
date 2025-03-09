@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { Phone } from '../Phone'
+import { Phone } from '../phone.value-object'
 
 describe('Phone', () => {
   describe('create', () => {

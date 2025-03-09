@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { WorkDate } from '../WorkDate'
+import { WorkDate } from '../work-date.value-object'
 
 describe('WorkDate Value Object', () => {
   describe('Create method', () => {

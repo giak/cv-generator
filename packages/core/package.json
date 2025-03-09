@@ -1,33 +1,20 @@
 {
   "name": "@cv-generator/core",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
+  "version": "1.0.0",
+  "description": "Core business logic for CV Generator",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "node ../../node_modules/typescript/bin/tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit",
-    "clean": "rimraf dist"
+    "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@cv-generator/shared": "workspace:*",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@vitest/coverage-istanbul": "^3.0.7",
-    "rimraf": "^5.0.5",
-    "typescript": "~5.7.3",
-    "vitest": "^3.0.7"
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
   }
 }

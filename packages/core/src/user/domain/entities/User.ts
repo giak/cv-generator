@@ -1,4 +1,5 @@
-import { Email } from '../../../cv/domain/value-objects/Email';
+import { Email } from '../../../cv/domain/value-objects/email.value-object';
+import { isSuccess } from '@cv-generator/shared';
 
 /**
  * User entity representing a system user
@@ -16,10 +17,10 @@ export class User {
    */
   public static create(id: string, email: string, name: string): User {
     const emailResult = Email.create(email);
-    if (emailResult.isFailure) {
+    if (!isSuccess(emailResult)) {
       throw new Error(`Invalid email: ${email}`);
     }
-    return new User(id, emailResult.getValue(), name);
+    return new User(id, emailResult.value, name);
   }
   
   /**

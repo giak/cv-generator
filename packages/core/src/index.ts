@@ -1,4 +1,8 @@
-// CV Bounded Context
+/**
+ * Exports principaux pour le module core
+ */
+
+// Exports du module CV
 export * from './cv';
 
 // Export Bounded Context

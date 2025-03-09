@@ -24,6 +24,7 @@ L'analyse de l'état actuel de l'Epic-3 révèle plusieurs points à finaliser:
 3. ✅ Des stories non démarrées (S-4) concernant des formulaires importants
 4. Une couverture de tests insuffisante (60%)
 5. Une documentation technique et utilisateur incomplète
+6. Un besoin d'amélioration des messages d'erreur et d'aide (adressé dans les nouvelles stories S-8 et S-9)
 
 Cette story est critique pour garantir la livraison complète de l'Epic-3 dans les délais prévus et avec le niveau de qualité attendu.
 
@@ -83,11 +84,11 @@ Story Points: 8
 
 2. - [ ] Optimisation des performances et UX
 
-   1. - [ ] Améliorer les messages d'erreur et d'aide (de S-5)
+   1. - [ ] Améliorer les messages d'erreur et d'aide (transféré à S-8 et S-9)
 
-      1. - [ ] Créer un système cohérent de messages d'aide contextuelle
-      2. - [ ] Standardiser les messages d'erreur à travers les formulaires
-      3. - [ ] Implémenter des suggestions intelligentes pour la correction
+      1. - [ ] ~~Créer un système cohérent de messages d'aide contextuelle~~ (voir S-9)
+      2. - [ ] ~~Standardiser les messages d'erreur à travers les formulaires~~ (voir S-9)
+      3. - [ ] ~~Implémenter des suggestions intelligentes pour la correction~~ (voir S-8)
 
    2. - [ ] Optimiser les performances pour les formulaires volumineux (de S-5)
       1. - [ ] Mettre en place la virtualisation des listes pour les grands ensembles
@@ -172,6 +173,7 @@ Pour maximiser l'efficacité, nous devons maintenant nous concentrer sur :
 3. ✅ Terminer par les formulaires les moins avancés (publications, distinctions, intérêts à 60%)
 4. Compléter les tests et la documentation
 5. Améliorer les performances et l'UX
+6. Implémenter le nouveau système de validation et de messages d'aide (via S-8 et S-9)
 
 ### Stratégie de tests
 
@@ -186,6 +188,7 @@ Pour maximiser l'efficacité, nous devons maintenant nous concentrer sur :
 - Utiliser les patterns établis pour les nouveaux composants
 - Suivre rigoureusement les conventions de nommage
 - Documenter toute décision architecturale significative
+- Intégrer le Result/Option Pattern pour la gestion des erreurs (voir S-8)
 
 ### UX/UI
 
@@ -193,6 +196,7 @@ Pour maximiser l'efficacité, nous devons maintenant nous concentrer sur :
 - Assurer une expérience réactive même sur mobile
 - Maintenir l'accessibilité (WCAG 2.1 AA) sur tous les composants
 - Valider les interactions avec des tests utilisateurs
+- Améliorer les messages d'erreur et d'aide avec une approche centrée utilisateur (voir S-9)
 
 ## Journal de Communication
 
@@ -205,3 +209,5 @@ Pour maximiser l'efficacité, nous devons maintenant nous concentrer sur :
 - Giak (2025-03-20): Parfait. Considérons ces composants comme finalisés et concentrons-nous sur les formulaires restants. Veillez à maintenir la même cohérence à travers tout le projet.
 - Équipe de développement (2025-03-25): Nous avons terminé l'implémentation de tous les formulaires restants en suivant les patterns établis. Tous les formulaires sont maintenant fonctionnels et respectent les standards définis. Nous allons maintenant nous concentrer sur les tests, la documentation et l'optimisation des performances.
 - Giak (2025-03-25): Excellent travail! Continuez avec les tests et la documentation pour garantir que tout fonctionne correctement et que les futurs développeurs pourront facilement comprendre et maintenir le code.
+- Équipe de développement (2025-03-30): Suite à l'analyse des besoins en matière de messages d'erreur et d'aide, nous avons identifié un besoin de restructuration plus profonde. Nous proposons de créer deux nouvelles stories (S-8 et S-9) spécifiquement dédiées à cette problématique, basées sur le Result/Option Pattern.
+- Giak (2025-03-30): C'est une excellente initiative. Le système actuel de messages est trop basique et manque de contexte pour les utilisateurs. J'approuve la création de ces stories dédiées pour améliorer significativement cet aspect de l'application.

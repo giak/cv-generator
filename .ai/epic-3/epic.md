@@ -39,6 +39,8 @@ Cet Epic concerne le développement de l'ensemble des formulaires d'édition né
 | S-5.1 | Fusion des Composants de Navigation pour une Expérience Utilisateur Unifiée | Terminée (100%)   | 5      | Élevée   |
 | S-6   | Implémentation du Tri Chronologique et Navigation Entre Formulaires         | Terminée (100%)   | 5      | Élevée   |
 | S-7   | Finalisation Globale et Consolidation de l'Epic-3                           | In Progress (70%) | 8      | Critique |
+| S-8   | Implémentation du Système de Validation avec Result/Option Pattern          | Draft             | 5      | Élevée   |
+| S-9   | Système de Messages d'Erreur et d'Aide                                      | Draft             | 4      | Élevée   |
 
 ## Progression
 
@@ -57,6 +59,8 @@ Cet Epic concerne le développement de l'ensemble des formulaires d'édition né
 - Navigation entre formulaires: 100%
 - Tests et documentation: 60%
 - Tri chronologique: 100%
+- Système de validation avancé: 0%
+- Messages d'erreur et d'aide contextuels: 0%
 
 ## Critères de Succès
 
@@ -68,19 +72,23 @@ Cet Epic concerne le développement de l'ensemble des formulaires d'édition né
 - Les tests unitaires couvrent au moins 80% du code
 - Les entrées chronologiques sont correctement triées et organisées
 - La navigation entre formulaires est intuitive et indique clairement la progression
+- Le système de validation offre des messages d'erreur contextuels et des suggestions d'amélioration
+- Les messages d'aide proactifs guident l'utilisateur dans la saisie des informations complexes
 
 ## Risques Identifiés
 
-| Risque                                               | Impact | Probabilité | Mitigation                                                  |
-| ---------------------------------------------------- | ------ | ----------- | ----------------------------------------------------------- |
-| Complexité excessive des formulaires                 | Élevé  | Faible      | Design UX simplifié et feedback utilisateur précoce         |
-| Incohérence entre les sections du CV                 | Moyen  | Faible      | Définition claire des standards et revue régulière          |
-| Performance lente avec beaucoup de données           | Moyen  | Moyenne     | Optimisation de la gestion d'état et tests de charge        |
-| Validation insuffisante des données                  | Élevé  | Faible      | Tests exhaustifs et validation multi-niveaux                |
-| Compatibilité du format d'export                     | Moyen  | Moyenne     | Adhérence stricte au standard JSON Resume                   |
-| Complexité des listes imbriquées                     | Élevé  | Faible      | Conception UI/UX optimisée et tests utilisateurs            |
-| Conflit entre tri automatique et ordre personnalisé  | Moyen  | Faible      | Flags d'état clairs et tests d'interaction rigoureux        |
-| Retard dans la finalisation des formulaires restants | Élevé  | Faible      | Story de consolidation spécifique (S-7) avec vision globale |
+| Risque                                               | Impact | Probabilité | Mitigation                                                        |
+| ---------------------------------------------------- | ------ | ----------- | ----------------------------------------------------------------- |
+| Complexité excessive des formulaires                 | Élevé  | Faible      | Design UX simplifié et feedback utilisateur précoce               |
+| Incohérence entre les sections du CV                 | Moyen  | Faible      | Définition claire des standards et revue régulière                |
+| Performance lente avec beaucoup de données           | Moyen  | Moyenne     | Optimisation de la gestion d'état et tests de charge              |
+| Validation insuffisante des données                  | Élevé  | Faible      | Tests exhaustifs et validation multi-niveaux                      |
+| Compatibilité du format d'export                     | Moyen  | Moyenne     | Adhérence stricte au standard JSON Resume                         |
+| Complexité des listes imbriquées                     | Élevé  | Faible      | Conception UI/UX optimisée et tests utilisateurs                  |
+| Conflit entre tri automatique et ordre personnalisé  | Moyen  | Faible      | Flags d'état clairs et tests d'interaction rigoureux              |
+| Retard dans la finalisation des formulaires restants | Élevé  | Faible      | Story de consolidation spécifique (S-7) avec vision globale       |
+| Complexité du Result/Option Pattern                  | Moyen  | Moyenne     | Documentation claire et exemples pratiques pour l'équipe          |
+| Messages d'aide trop intrusifs                       | Moyen  | Faible      | Tests utilisateurs pour ajuster l'équilibre information/intrusion |
 
 ## Points Techniques Clés
 
@@ -91,6 +99,8 @@ Cet Epic concerne le développement de l'ensemble des formulaires d'édition né
 - Fonctionnalité de drag-and-drop standardisée pour toutes les listes
 - Algorithmes de tri optimisés pour les listes chronologiques
 - Système de navigation intuitive entre formulaires
+- Implementation du Result/Option Pattern pour une gestion robuste des erreurs
+- Système de messages contextuels basé sur la sévérité et le contexte d'utilisation
 
 ## Revue et Validation
 
@@ -112,3 +122,4 @@ La validation de l'Epic sera effectuée par:
 - Une story de consolidation (S-7) a été ajoutée pour garantir la finalisation complète de l'Epic
 - Les composants WorkForm.vue et WorkList.vue servent de référence pour l'implémentation des autres composants de formulaire et de liste
 - Tous les formulaires ont été finalisés selon les standards établis et sont maintenant fonctionnels à 100%
+- Deux nouvelles stories (S-8 et S-9) ont été ajoutées pour améliorer l'expérience utilisateur avec un système avancé de validation et de messages d'aide basé sur le Result/Option Pattern

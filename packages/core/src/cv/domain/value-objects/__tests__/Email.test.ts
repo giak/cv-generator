@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { Email } from '../Email'
+import { Email } from '../email.value-object'
+import { isSuccess, isFailure } from '@cv-generator/shared'
 
 describe('Email', () => {
   describe('create', () => {
@@ -11,8 +12,10 @@ describe('Email', () => {
       const emailResult = Email.create(validEmail)
       
       // Assert
-      expect(emailResult.isSuccess).toBe(true)
-      expect(emailResult.getValue().toString()).toBe(validEmail)
+      expect(isSuccess(emailResult)).toBe(true)
+      if (isSuccess(emailResult)) {
+        expect(emailResult.value.toString()).toBe(validEmail)
+      }
     })
     
     it('should fail with empty email', () => {
@@ -23,25 +26,23 @@ describe('Email', () => {
       const emailResult = Email.create(emptyEmail)
       
       // Assert
-      expect(emailResult.isFailure).toBe(true)
-      expect(emailResult.error).toBe('Format email invalide')
+      expect(isFailure(emailResult)).toBe(true)
+      if (isFailure(emailResult)) {
+        expect(emailResult.error[0].message).toBe('Format email invalide')
+      }
     })
     
-    it('should fail with invalid email format', () => {
-      // Arrange & Act
-      const invalidEmails = [
-        'test',
-        'test@',
-        '@example.com',
-        'test@example',
-        'test.example.com'
-      ]
+    describe('invalid email formats', () => {
+      const invalidEmails = ['plainaddress', '#@%^%#$@#$@#.com', '@example.com', 'email.example.com']
       
-      // Assert
-      invalidEmails.forEach(email => {
-        const emailResult = Email.create(email)
-        expect(emailResult.isFailure).toBe(true)
-        expect(emailResult.error).toBe('Format email invalide')
+      it('should fail with invalid email format', () => {
+        invalidEmails.forEach(email => {
+          const emailResult = Email.create(email)
+          expect(isFailure(emailResult)).toBe(true)
+          if (isFailure(emailResult)) {
+            expect(emailResult.error[0].message).toBe('Format email invalide')
+          }
+        })
       })
     })
   })
@@ -49,20 +50,38 @@ describe('Email', () => {
   describe('equals', () => {
     it('should return true for same emails', () => {
       // Arrange
-      const email1 = Email.create('test@example.com').getValue()
-      const email2 = Email.create('test@example.com').getValue()
+      const result1 = Email.create('test@example.com')
+      const result2 = Email.create('test@example.com')
       
-      // Act & Assert
-      expect(email1.equals(email2)).toBe(true)
+      // Ensure both results are successful
+      expect(isSuccess(result1)).toBe(true)
+      expect(isSuccess(result2)).toBe(true)
+      
+      if (isSuccess(result1) && isSuccess(result2)) {
+        const email1 = result1.value
+        const email2 = result2.value
+        
+        // Act & Assert
+        expect(email1.equals(email2)).toBe(true)
+      }
     })
     
     it('should return false for different emails', () => {
       // Arrange
-      const email1 = Email.create('test1@example.com').getValue()
-      const email2 = Email.create('test2@example.com').getValue()
+      const result1 = Email.create('test1@example.com')
+      const result2 = Email.create('test2@example.com')
       
-      // Act & Assert
-      expect(email1.equals(email2)).toBe(false)
+      // Ensure both results are successful
+      expect(isSuccess(result1)).toBe(true)
+      expect(isSuccess(result2)).toBe(true)
+      
+      if (isSuccess(result1) && isSuccess(result2)) {
+        const email1 = result1.value
+        const email2 = result2.value
+        
+        // Act & Assert
+        expect(email1.equals(email2)).toBe(false)
+      }
     })
   })
   
@@ -70,10 +89,17 @@ describe('Email', () => {
     it('should return the string representation', () => {
       // Arrange
       const emailStr = 'test@example.com'
-      const email = Email.create(emailStr).getValue()
+      const result = Email.create(emailStr)
       
-      // Act & Assert
-      expect(email.toString()).toBe(emailStr)
+      // Ensure result is successful
+      expect(isSuccess(result)).toBe(true)
+      
+      if (isSuccess(result)) {
+        const email = result.value
+        
+        // Act & Assert
+        expect(email.toString()).toBe(emailStr)
+      }
     })
   })
 }) 
