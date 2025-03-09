@@ -1,7 +1,6 @@
 ---
 description: ENFORCE Test-Driven Development workflow with Vitest in Vue 3 components to ensure robust and maintainable code
 globs: src/**/*.{spec,test}.{ts,tsx}
-alwaysApply: false
 ---
 ---
 description: ENFORCE Test-Driven Development workflow with Vitest in Vue 3 components to ensure robust and maintainable code
@@ -9,6 +8,7 @@ globs: ["packages/**/*.{spec,test}.{ts,tsx}", "packages/**/__tests__/*.{ts,tsx}"
 tags: [testing, vitest, vue3, tdd, ddd, composables, components]
 priority: 1
 version: 3.1.0
+alwaysApply: true
 ---
 
 # Test-Driven Development Workflow with Vitest

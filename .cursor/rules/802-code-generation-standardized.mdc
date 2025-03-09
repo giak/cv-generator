@@ -1,7 +1,6 @@
 ---
 description: "ALWAYS APPLY when GENERATING or MODIFYING code to ENSURE efficiency, maintainability and adherence to project standards"
 globs: "**/*.{js,ts,jsx,tsx,java,py,html,css,scss}"
-alwaysApply: false
 ---
 ---
 title: "Standard de Génération de Code Excellence"
@@ -10,6 +9,7 @@ description: "ALWAYS APPLY when GENERATING or MODIFYING code to ENSURE efficienc
 globs: "**/*.{js,ts,jsx,tsx,java,py,html,css,scss}"
 lastUpdated: "2025-03-01"
 tags: ["code-generation", "clean-code", "solid", "ddd", "clean-architecture"]
+alwaysApply: true
 ---
 
 # 🧩 Standard de Génération de Code Excellence

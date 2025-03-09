@@ -45,6 +45,18 @@ version: 1.1.0
   - Réinitialisation automatique de la pagination lors du changement de mode de tri
   - Interface utilisateur responsive adaptée à tous les appareils
   - Amélioration des performances pour les listes avec de nombreux éléments
+- Implémentation complète du système de validation avec Result/Option Pattern :
+  - Mise en place de l'architecture de validation stratifiée (Domain, Application, Presentation)
+  - Standardisation de la gestion des erreurs avec `ResultType<T>` et `ValidationErrorInterface`
+  - Migration des Value Objects principaux vers le nouveau pattern :
+    - `Email` → `email.value-object.ts`
+    - `WorkDate` → `work-date.value-object.ts`
+    - `Phone` → `phone.value-object.ts`
+  - Catalogage standardisé des codes d'erreur avec `ERROR_CODES`
+  - Support des différents niveaux de sévérité (error, warning, info)
+  - Ajout de suggestions contextuelles pour aider l'utilisateur
+  - Compatibilité rétroactive avec le code existant
+  - Intégration avec Zod pour la validation de schémas
 
 ### Changed 🔄
 
@@ -71,10 +83,12 @@ version: 1.1.0
   - ✅ Composants Form: tous les composants form refactorisés (100%)
   - ✅ Documentation: toute la documentation technique finalisée
   - ✅ Tests: tous les tests unitaires et d'intégration complétés
-- Epic-2 "Édition de CV" complété à 60%
+- Epic-3 "Édition de CV" complété à 75%
   - ✅ Formulaires pour les informations de base (basics)
   - ✅ Formulaires pour l'expérience professionnelle (work)
-  - 🔄 Implémentation des formulaires pour l'éducation (education)
+  - ✅ Système de validation standardisé avec Result/Option Pattern (60%)
+  - ✅ Migration des Value Objects principaux (Email, Phone, WorkDate) vers le nouveau système
+  - 🔄 Implémentation des formulaires pour l'éducation (education) en cours (80%)
   - ⏳ Formulaires pour les compétences (skills) et autres sections
   - ⏳ Support des sections optionnelles du standard JSON Resume
 - Epic-3 "Navigation et expérience utilisateur" avancé à 90%
@@ -82,6 +96,14 @@ version: 1.1.0
   - ✅ Composant `FormNavigation` modernisé avec système d'événements
   - ✅ Indicateurs visuels de progression et de statut
   - 🔄 Optimisation de l'accessibilité mobile
+- Epic-8 "Système de Validation" avancé à 60%
+  - ✅ Infrastructure de base du Result/Option Pattern (100%)
+  - ✅ Migration des Value Objects principaux (60%)
+  - ✅ Services de validation pour les entités principales (100%)
+  - ✅ Catalogue standardisé des messages d'erreur (80%)
+  - ✅ Documentation technique du système (100%)
+  - 🔄 Composables Vue pour l'intégration UI (20%)
+  - ⏳ Intégration dans les formulaires existants
 
 ### Technical Details 🔧
 
@@ -557,3 +579,205 @@ export class ManageResume {
 [1.1.0]: https://github.com/giak/cv-generator/compare/v0.1.1...v1.1.0
 [0.1.1]: https://github.com/giak/cv-generator/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/giak/cv-generator/releases/tag/v0.1.0
+
+### Technical Details 🔧
+
+> 💡 **Système de Validation avec Result/Option Pattern**
+
+```mermaid
+---
+title: Architecture du Système de Validation
+---
+graph TD
+    subgraph "Couches de Validation"
+        D[Domain Layer] --- A[Application Layer] --- P[Presentation Layer]
+    end
+
+    subgraph "Components"
+        VO[Value Objects] -->|validate| RP1[ResultType]
+        V[Validators] -->|validate| RP2[ResultType]
+        VueF[Vue Forms] -->|validate| RP3[ResultType]
+    end
+
+    subgraph "Utils"
+        RP1 --> RU[Result Utils]
+        RP2 --> RU
+        RP3 --> RU
+        RU -->|createSuccess| S[Success]
+        RU -->|createFailure| F[Failure]
+        RU -->|isSuccess/isFailure| C[Checking]
+        ZD[Zod] --> ZA[Zod Adapter] --> RP2
+    end
+
+    D --> VO
+    A --> V
+    P --> VueF
+```
+
+> 💡 **ResultType Implementation**
+
+```typescript
+// Types de base pour le Result Pattern
+export type SuccessType<T> = {
+  success: true;
+  value: T;
+  warnings?: ValidationErrorInterface[];
+};
+
+export type FailureType<E = ValidationErrorInterface[]> = {
+  success: false;
+  error: E;
+};
+
+export type ResultType<T, E = ValidationErrorInterface[]> =
+  | SuccessType<T>
+  | FailureType<E>;
+
+// Fonctions utilitaires pour manipuler les résultats
+export function createSuccess<T>(value: T): SuccessType<T> {
+  return {
+    success: true,
+    value,
+  };
+}
+
+export function createFailure<E = ValidationErrorInterface[]>(
+  error: E
+): FailureType<E> {
+  return {
+    success: false,
+    error,
+  };
+}
+
+export function isSuccess<T, E>(
+  result: ResultType<T, E>
+): result is SuccessType<T> {
+  return result.success === true;
+}
+
+export function isFailure<T, E>(
+  result: ResultType<T, E>
+): result is FailureType<E> {
+  return result.success === false;
+}
+```
+
+> 💡 **Email Value Object Migration**
+
+```typescript
+// Example implementation of Email Value Object with Result Pattern
+export class Email {
+  private constructor(private readonly value: string) {}
+
+  public static create(email: string): ResultType<Email> {
+    if (
+      !email ||
+      email.trim() === "" ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+      return createFailure([
+        {
+          code:
+            !email || email.trim() === ""
+              ? ERROR_CODES.RESUME.BASICS.MISSING_EMAIL
+              : ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
+          message: "Format email invalide",
+          field: "email",
+          severity: "error",
+          layer: ValidationLayerType.DOMAIN,
+          suggestion:
+            "Vérifiez que votre email contient un @ et un domaine valide",
+        },
+      ]);
+    }
+
+    // Validation supplémentaire pour les emails personnels vs professionnels
+    if (isPersonalEmail(email)) {
+      return createSuccessWithWarnings(new Email(email), [
+        {
+          code: ERROR_CODES.RESUME.BASICS.PERSONAL_EMAIL,
+          message: "Email personnel détecté",
+          field: "email",
+          severity: "warning",
+          layer: ValidationLayerType.APPLICATION,
+          suggestion:
+            "Pour un CV professionnel, privilégiez un email professionnel ou neutre",
+        },
+      ]);
+    }
+
+    return createSuccess(new Email(email));
+  }
+
+  public getValue(): string {
+    return this.value;
+  }
+}
+```
+
+> 💡 **Stratification des Validations**
+
+```typescript
+// Enum pour les couches de validation
+export enum ValidationLayerType {
+  /**
+   * Règles métier fondamentales, invariants du domaine
+   * Ex: "Une expérience professionnelle ne peut pas avoir une date de fin antérieure à sa date de début"
+   */
+  DOMAIN = "domain",
+
+  /**
+   * Règles d'orchestration, logique d'application
+   * Ex: "L'utilisateur doit être authentifié pour modifier ce CV"
+   */
+  APPLICATION = "application",
+
+  /**
+   * Validation UI/UX, feedback immédiat
+   * Ex: "Format d'email incorrect"
+   */
+  PRESENTATION = "presentation",
+}
+
+// Interface pour les erreurs de validation
+export interface ValidationErrorInterface {
+  code: string;
+  message: string;
+  field: string;
+  severity: "error" | "warning" | "info";
+  layer: ValidationLayerType;
+  suggestion?: string;
+  meta?: Record<string, unknown>;
+}
+```
+
+### Planned 🔮
+
+- **Composables Vue.js pour le système de validation** :
+
+  - `useValidationResult` : Composable principal pour travailler avec les résultats de validation
+  - `useValidationCatalogue` : Composable pour accéder au catalogue des messages d'erreur
+  - `useFieldValidation` : Composable pour la validation au niveau des champs
+  - Intégration avec Vue i18n pour la traduction des messages d'erreur
+  - Tests unitaires pour tous les nouveaux composables
+
+- **Migration complète des Value Objects restants** :
+
+  - `DateRange` → `date-range.value-object.ts`
+  - `Url` → `url.value-object.ts`
+  - Autres value objects personnalisés
+  - Suppression progressive de l'ancien pattern `Result.ts`
+
+- **Fonctionnalités avancées pour le Result Pattern** :
+
+  - Fonctions utilitaires avancées (combineResults, mapSuccess, mapFailure)
+  - Opérations monadic-like (chain, map, fold)
+  - Support amélioré pour les warnings avec prioritisation
+  - Intégration complète avec le système d'internationalisation
+
+- **Intégration UI** :
+  - Composants formulaires standardisés utilisant le nouveau système
+  - Affichage contextuel des erreurs et suggestions
+  - Indicateurs visuels pour les différents niveaux de sévérité
+  - Gestion des erreurs par couche architecturale

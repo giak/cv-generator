@@ -38,7 +38,7 @@ pnpm dev
 - [Tech Stack](#tech-stack)
 - [Current Status](#current-status)
   - [Implementation Progress](#implementation-progress)
-  - [Latest Feature: Standardized List Components](#latest-feature-standardized-list-components-with-collectionmanager)
+  - [Latest Feature: Validation System Implementation](#latest-feature-validation-system-implementation)
   - [Reusable Composables](#reusable-composables)
 - [Architecture](#architecture)
   - [Key Principles](#key-principles)
@@ -118,10 +118,15 @@ CV Generator provides a structured, standardized approach to CV creation using t
 
 - ✅ **Validation Strategy**
 
-  - Comprehensive data validation
-  - Domain-level validation rules
-  - Real-time feedback with error messages
-  - Shared Result pattern for consistent error handling
+  - Robust Result/Option Pattern implementation
+  - Multi-layer validation (Domain, Application, Presentation)
+  - Comprehensive error catalog with standardized codes
+  - Detailed validation messages with helpful suggestions
+  - Warning support for non-blocking validation issues
+  - Rich error context with severity levels and field mapping
+  - Type-safe validation with TypeScript generics
+  - Backward-compatible migration strategy
+  - Zod integration for schema-based validation
 
 - 🚦 **Advanced Navigation**
 
@@ -173,6 +178,8 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - ✅ Formulaires pour les informations de base (basics)
   - ✅ Formulaires pour l'expérience professionnelle (work)
   - ✅ Tri chronologique implémenté pour les listes éducation
+  - ✅ Système de validation standardisé avec Result/Option Pattern (60%)
+  - ✅ Migration des Value Objects principaux (Email, Phone, WorkDate) vers le nouveau système
   - 🔄 Implémentation des formulaires pour l'éducation (education) en cours (80%)
   - ✅ Système de navigation modernisé avec émission d'événements
   - ✅ Composant `UnifiedNavigation` pour une navigation cohérente
@@ -183,58 +190,74 @@ CV Generator provides a structured, standardized approach to CV creation using t
 - **Epic-4: Prévisualisation et exportation** ⏳ Planifié
 - **Epic-5: Optimisation ATS** ⏳ Planifié
 
-### Latest Feature: Navigation System Enhancement
+### Latest Feature: Validation System Implementation
 
-✨ **Recent Achievement: Unified Navigation Experience** ✨
+✨ **Recent Achievement: Standardized Validation System** ✨
 
-The application now features a completely unified navigation system that enhances user experience and code maintainability:
+The application now features a robust validation system based on the Result/Option Pattern:
 
-- ✅ **Event-Based Navigation**: Replaced direct URL links with a robust event system
+- ✅ **Standardized Error Handling**:
 
-  - Prevents page reloads when navigating between CV sections
-  - Provides a true single-page application experience
-  - Improves state persistence between navigation actions
+  - Consistent `ResultType<T>` structure across the application
+  - Layered validation approach (Domain, Application, Presentation)
+  - Type-safe error handling with detailed error information
+  - Support for warnings alongside validation errors
 
-- ✅ **Refactored Components**:
+- ✅ **Improved Value Objects**:
 
-  - `FormNavigation`: Modernized with button-based navigation and event emission
-  - `UnifiedNavigation`: Serves as the primary navigation component with progress indicators
-  - Consistent API and behavior across all navigation components
+  - Migrated key objects: `Email`, `WorkDate`, `Phone`
+  - Backward compatibility with legacy code
+  - Standardized validation approach
+  - Comprehensive error messages with suggestions
 
-- ✅ **Improved User Experience**:
-  - Visual progress indicators show completion status for all CV sections
-  - "Continue with" suggestions guide users to incomplete sections
-  - Clear highlighting of the current active section
+- ✅ **Rich Error Context**:
+  - Error code catalog with standardized naming
+  - Error severity levels (error, warning, info)
+  - Field-specific validation
+  - Helpful suggestions for error resolution
+  - Support for internationalization
 
 This enhancement brings several benefits:
 
-1. **Seamless user experience** with no page reloads between sections
-2. **State preservation** when navigating between different parts of the CV
-3. **Consistent navigation patterns** throughout the application
-4. **Reduced code duplication** through shared navigation logic
-5. **Improved maintainability** with a unified event-based approach
+1. **Better user experience** with detailed, context-aware validation messages
+2. **Improved code quality** through standardized error handling
+3. **Enhanced type safety** with TypeScript-first approach
+4. **Simplified debugging** with consistent error structures
+5. **Progressive enhancement** with backward compatibility
 
 ```typescript
-// FormNavigation.vue - Event-based navigation
-const navigateTo = (path: string) => {
-  if (!path) return;
+// Example: Email value object with Result Pattern
+public static create(email: string): ResultType<Email> {
+  if (!email || email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return createFailure([{
+      code: !email || email.trim() === '' ?
+        ERROR_CODES.RESUME.BASICS.MISSING_EMAIL :
+        ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
+      message: "Format email invalide",
+      field: "email",
+      severity: "error",
+      layer: ValidationLayerType.DOMAIN,
+      suggestion: "Vérifiez que votre email contient un @ et un domaine valide"
+    }]);
+  }
 
-  // Transform path to section ID if needed
-  const sectionId = path.startsWith("/") ? path.substring(1) : path;
+  // Additional validation for personal vs. professional emails
+  if (isPersonalEmail(email)) {
+    return createSuccessWithWarnings(new Email(email), [{
+      code: ERROR_CODES.RESUME.BASICS.PERSONAL_EMAIL,
+      message: "Email personnel détecté",
+      field: "email",
+      severity: "warning",
+      layer: ValidationLayerType.APPLICATION,
+      suggestion: "Pour un CV professionnel, privilégiez un email professionnel ou neutre"
+    }]);
+  }
 
-  // Emit navigation event instead of using direct links
-  emit("navigate", sectionId);
-};
-
-// App.vue - Centralized navigation handling
-const handleNavigation = (path: string) => {
-  // Extract section ID and update the active view
-  const sectionId = path.startsWith("/") ? path.substring(1) : path;
-  activeView.value = sectionId;
-};
+  return createSuccess(new Email(email));
+}
 ```
 
-For detailed information about the navigation system, check the [CHANGELOG.md](CHANGELOG.md) or review the related story in [.ai/epic-3/story-6.story.md](.ai/epic-3/story-6.story.md).
+For detailed information about the validation system, check the documentation in [docs/design/message-systeme-validation.md](docs/design/message-systeme-validation.md) and [docs/design/result-pattern-impl.md](docs/design/result-pattern-impl.md).
 
 ### Reusable Composables
 
@@ -903,34 +926,12 @@ Pour une liste détaillée des modifications, consultez le [CHANGELOG.md](CHANGE
 
 ### Recent Updates (v1.1.0)
 
-#### Navigation System Enhancements
-
-- ✅ **FormNavigation Refactoring**: Transformation from direct links to event-based navigation
-
-  - Remplacement des balises `<a>` par des `<button>` pour éviter les rechargements de page
-  - Implémentation d'un système d'émission d'événements `@navigate` pour une navigation SPA fluide
-  - Intégration avec le système de navigation existant dans App.vue
-  - 100% de couverture de tests pour garantir la fiabilité
-
-- ✅ **UnifiedNavigation Component**: Integration with navigation events system
-
-  - Composant central pour la navigation entre sections du CV
-  - Indicateurs visuels de progression par section
-  - Suggestions intelligentes de la prochaine section à compléter
-  - Support avancé des icônes avec plusieurs niveaux de personnalisation
-
-- ✅ **Progress Tracking**: Implementation of visual indicators for form completion
-  - Statut de section (complète, partielle, incomplète) avec codes couleur intuitifs
-  - Pourcentage de complétion pour chaque section et pour l'ensemble du CV
-  - Mise en évidence visuelle de la section active
-
-Pour plus d'informations, consultez la [Documentation Epic-3](docs/epic-3/) ou le code source dans [src/components/navigation](packages/ui/src/components/navigation/).
-
-#### Previous Key Updates
-
-- 📋 **Standardized List Components**: Complete refactoring of all list components with CollectionManager
-- 🧩 **Reusable Composables**: Implementation of useFormModel, useFormValidation, and useCollectionField
-- 🔍 **Work Experience Implementation**: Full integration with JSON Resume standard
+- **NavigationSystem**: Completely refactored navigation with event-based architecture
+- **FormComponents**: Standardized all form components with TypeScript type safety
+- **CollectionManager**: Added unified list management with drag-and-drop support
+- **ValidationSystem**: Implemented robust Result/Option Pattern for standardized validation
+- **Performance**: Improved rendering performance for large CV collections
+- **i18n**: Enhanced internationalization support for UI elements
 
 ## License
 

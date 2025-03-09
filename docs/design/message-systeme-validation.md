@@ -991,192 +991,258 @@ graph TD
     O --> P
 ```
 
-## 5. Exemples d'Utilisation
+## 5. État d'Implémentation
 
-### 5.1 Intégration dans un Formulaire Vue
+Cette section présente l'état actuel de l'implémentation du système de validation avec le Result/Option Pattern.
 
-```vue
-<!-- packages/ui/src/modules/cv/presentation/components/work/WorkForm.vue -->
-<script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useValidationResult } from "@/composables/validation/useValidationResult";
-import { useHelpSystem } from "@/composables/validation/useHelpSystem";
-import { WorkExperienceValidator } from "@core/cv/application/validators/work-experience.validator";
-import ValidationMessage from "@/components/validation/ValidationMessage.vue";
-import { ERROR_CODES } from "@shared/constants/error-codes.const";
+### 5.1 Composants Implémentés
 
-const props = defineProps<{
-  initialData?: Partial<WorkExperienceDTO>;
-}>();
+#### 5.1.1 Types et Interfaces de Base
 
-const emit = defineEmits<{
-  (e: "submit", data: WorkExperienceDTO): void;
-  (e: "cancel"): void;
-}>();
-
-// Instancier le validateur
-const workValidator = new WorkExperienceValidator();
-
-// Form state
-const formData = ref({
-  company: props.initialData?.company || "",
-  position: props.initialData?.position || "",
-  startDate: props.initialData?.startDate || "",
-  endDate: props.initialData?.endDate || "",
-  summary: props.initialData?.summary || "",
-  highlights: props.initialData?.highlights || [],
-});
-
-// Validation et aide
-const validation = useValidationResult(formData.value);
-const helpSystem = useHelpSystem();
-
-// Chargement des messages d'aide au montage
-onMounted(() => {
-  helpSystem.showHelpMessage("work_position_help");
-  helpSystem.showHelpMessage("work_summary_help");
-});
-
-// Validation en temps réel d'un champ spécifique
-const validateField = (field: string) => {
-  validation.validateField(field, (value) =>
-    workValidator.validateField({ [field]: value }, field)
-  );
-};
-
-// Validation complète au submit
-const handleSubmit = async () => {
-  // Marquer tous les champs comme touchés pour afficher toutes les erreurs
-  validation.touchAllFields();
-
-  // Validation complète
-  const result = await validation.validate(() =>
-    workValidator.validate(formData.value)
-  );
-
-  if (isSuccess(result)) {
-    emit("submit", result.value);
-  }
-};
-</script>
-
-<template>
-  <form @submit.prevent="handleSubmit" class="work-experience-form">
-    <div class="form-group">
-      <label for="company">Entreprise*</label>
-      <input
-        id="company"
-        v-model="formData.company"
-        @blur="validation.touchField('company')"
-        @input="validateField('company')"
-        :class="{
-          'has-error':
-            validation.getVisibleErrorsForField('company').length > 0,
-        }"
-      />
-      <ValidationMessage
-        :errors="validation.getVisibleErrorsForField('company')"
-        :help="helpSystem.getHelpMessageForField('company')"
-        :showErrors="validation.shouldShowErrorsForField('company')"
-        fieldName="company"
-      />
-    </div>
-
-    <div class="form-group">
-      <label for="position">Intitulé du poste*</label>
-      <input
-        id="position"
-        v-model="formData.position"
-        @blur="validation.touchField('position')"
-        @input="validateField('position')"
-        :class="{
-          'has-error':
-            validation.getVisibleErrorsForField('position').length > 0,
-        }"
-      />
-      <ValidationMessage
-        :errors="validation.getVisibleErrorsForField('position')"
-        :help="helpSystem.getHelpMessageForField('position')"
-        :showErrors="validation.shouldShowErrorsForField('position')"
-        fieldName="position"
-      />
-    </div>
-
-    <!-- Autres champs du formulaire -->
-
-    <div class="form-actions">
-      <button type="button" @click="emit('cancel')">Annuler</button>
-      <button type="submit">Enregistrer</button>
-    </div>
-  </form>
-</template>
-```
-
-### 5.2 Utilisation des Value Objects dans un Use Case
-
-````typescript
-// packages/core/src/cv/application/use-cases/create-work-experience.use-case.ts
-import { inject, injectable } from 'tsyringe';
-import { WorkExperienceRepository } from '@core/cv/domain/repositories/work-experience.repository.interface';
-import { DateRange } from '@core/cv/domain/value-objects/date-range.value-object';
-import { WorkExperienceEntity } from '@core/cv/domain/entities/work-experience.entity';
-import { ResultType, WorkExperienceDTO } from '@shared/types';
-import { isSuccess, createSuccess, createFailure } from '@shared/utils/result.utils';
-import { ERROR_CODES } from '@shared/constants/error-codes.const';
-import { ValidationLayerType } from '@shared/enums';
-
-@injectable()
-export class CreateWorkExperienceUseCase {
-  constructor(
-    @inject('WorkExperienceRepository')
-    private readonly workExperienceRepo: WorkExperienceRepository
-  ) {}
-
-  async execute(dto: WorkExperienceDTO): Promise<ResultType<WorkExperienceEntity>> {
-    try {
-      // 1. Valider et créer les Value Objects
-      const dateRangeResult = DateRange.create(dto.startDate, dto.endDate);
-      if (!isSuccess(dateRangeResult)) {
-        return dateRangeResult;
-      }
-
-      // 2. Créer l'entité du domaine avec les Value Objects validés
-      const workExperienceResult = WorkExperienceEntity.create({
-        id: dto.id,
-        company: dto.company,
-        position: dto.position,
-        dateRange: dateRangeResult.value,
-        summary: dto.summary,
-        highlights: dto.highlights
-      });
-
-      if (!isSuccess(workExperienceResult)) {
-        return workExperienceResult;
-      }
-
-      // 3. Persistance
-      const savedEntity = await this.workExperienceRepo.save(workExperienceResult.value);
-
-      return createSuccess(savedEntity);
-    } catch (error) {
-      return createFail
-<think>
-It looks like I need to continue the response that was cut off at the end. The last part was showing "Utilisation des Value Objects dans un Use Case" and got cut off in the middle of an error handling block. Let me continue from there with the remainder of the document.
-</think>
+L'infrastructure fondamentale du pattern Result/Option a été implémentée dans le package `@cv-generator/shared`:
 
 ```typescript
-// Continuation du code précédent
-      return createFailure([{
-        code: ERROR_CODES.SYSTEM.UNEXPECTED_ERROR,
-        message: error instanceof Error ? error.message : "Une erreur inattendue est survenue",
-        field: "_global",
-        severity: "error",
-        layer: ValidationLayerType.APPLICATION
-      }]);
-    }
-  }
+// Types de base pour les résultats de validation
+export type SuccessType<T> = {
+  success: true;
+  value: T;
+  warnings?: ValidationErrorInterface[];
+};
+
+export type FailureType<E> = {
+  success: false;
+  error: E;
+};
+
+export type ResultType<T, E = ValidationErrorInterface[]> =
+  | SuccessType<T>
+  | FailureType<E>;
+
+// Type pour la gestion des valeurs optionnelles
+export type OptionType<T> = T | undefined;
+
+// Type spécifique pour les validations de formulaire
+export type FormValidationResultType<T> = ResultType<
+  T,
+  ValidationErrorInterface[]
+>;
+
+// Interfaces pour les erreurs de validation et messages d'aide
+export interface ValidationErrorInterface {
+  code: string;
+  message: string;
+  field: string;
+  severity: ValidationSeverityType;
+  layer: ValidationLayerType;
+  suggestion?: string;
+  additionalInfo?: Record<string, unknown>;
 }
-````
+
+export interface HelpMessageInterface {
+  id: string;
+  title: string;
+  content: string;
+  field: string;
+  autoShow?: boolean;
+  examples?: string[];
+}
+```
+
+#### 5.1.2 Fonctions Utilitaires
+
+Les utilitaires principaux pour manipuler les résultats de validation sont disponibles:
+
+```typescript
+// Création de résultats
+export function createSuccess<T, E = ValidationErrorInterface[]>(
+  value: T
+): ResultType<T, E>;
+export function createSuccessWithWarnings<T>(
+  value: T,
+  warnings: ValidationErrorInterface[]
+): ResultType<T>;
+export function createFailure<T = unknown, E = ValidationErrorInterface[]>(
+  error: E
+): ResultType<T, E>;
+
+// Tests sur les résultats
+export function isSuccess<T, E>(
+  result: ResultType<T, E>
+): result is SuccessType<T>;
+export function isFailure<T, E>(
+  result: ResultType<T, E>
+): result is FailureType<E>;
+
+// Transformation des résultats
+export function map<T, U, E>(
+  result: ResultType<T, E>,
+  fn: (value: T) => U
+): ResultType<U, E>;
+export function flatMap<T, U, E>(
+  result: ResultType<T, E>,
+  fn: (value: T) => ResultType<U, E>
+): ResultType<U, E>;
+
+// Manipulation des erreurs
+export function getErrorsForField(
+  result: FormValidationResultType<unknown>,
+  fieldName: string
+): ValidationErrorInterface[];
+export function combineValidationResults<T extends Record<string, unknown>>(
+  results: Record<keyof T, FormValidationResultType<unknown>>
+): FormValidationResultType<T>;
+```
+
+#### 5.1.3 Services de Validation
+
+Une architecture complète de validation a été mise en place dans le package `@cv-generator/core`:
+
+```typescript
+// Interface de base pour les services de validation
+export interface ValidationServiceInterface<T> {
+  validate(entity: T): ResultType<T>;
+  validateField<K extends keyof T>(entity: T, fieldName: K): ResultType<T[K]>;
+}
+
+// Classe de base abstraite pour les services de validation
+export abstract class BaseValidationService<T> implements ValidationServiceInterface<T> {
+  // Méthodes abstraites à implémenter dans les classes dérivées
+  abstract validate(entity: T): ResultType<T>;
+  abstract validateField<K extends keyof T>(entity: T, fieldName: K): ResultType<T[K]>;
+
+  // Méthodes utilitaires communes
+  protected createError(code: string, message: string, field: string, layer: ValidationLayerType, ...): ValidationErrorInterface
+  protected isDefined<V>(value: V | null | undefined): value is V
+  protected isEmpty(value: string | null | undefined): boolean
+  protected hasMinLength(value: string, minLength: number): boolean
+}
+
+// Services de validation concrets
+export class WorkValidationService extends BaseValidationService<WorkInterface> { ... }
+export class SkillValidationService extends BaseValidationService<SkillInterface> { ... }
+export class EducationValidationService extends BaseValidationService<EducationInterface> { ... }
+export class ProjectValidationService extends BaseValidationService<ProjectInterface> { ... }
+```
+
+#### 5.1.4 Value Objects Adaptés
+
+Plusieurs value objects ont été adaptés pour utiliser le nouveau pattern:
+
+```typescript
+// Exemple avec Email
+export class Email {
+  private constructor(private readonly value: string) {}
+
+  public static create(email: string): ResultType<Email> {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return createFailure([
+        {
+          code: !email
+            ? ERROR_CODES.RESUME.BASICS.MISSING_EMAIL
+            : ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
+          message: "Format email invalide",
+          field: "email",
+          severity: "error",
+          layer: ValidationLayerType.DOMAIN,
+          suggestion:
+            "Vérifiez que votre email contient un @ et un domaine valide",
+        },
+      ]);
+    }
+    return createSuccess(new Email(email));
+  }
+
+  // Autres méthodes...
+}
+
+// Autres value objects adaptés: Phone, WorkDate, DateRange
+```
+
+#### 5.1.5 Intégration avec Zod
+
+Un adaptateur a été créé pour faciliter l'intégration avec Zod, un outil de validation de schémas:
+
+```typescript
+export function zodToResult<T>(
+  zodResult: z.SafeParseReturnType<unknown, T>,
+  options: {
+    layer?: ValidationLayerType;
+    errorMap?: (error: z.ZodError) => ValidationErrorInterface[];
+  } = {}
+): ResultType<T> {
+  // Implémentation...
+}
+```
+
+### 5.2 Exemples d'Utilisation
+
+#### 5.2.1 Validation d'un Value Object
+
+```typescript
+// Dans un composant ou service
+const emailResult = Email.create(inputEmail);
+
+if (isSuccess(emailResult)) {
+  // Accéder à la valeur validée
+  const email = emailResult.value;
+  console.log(email.getValue());
+} else {
+  // Gérer les erreurs
+  emailResult.error.forEach((err) => {
+    console.error(`Erreur ${err.code}: ${err.message}`);
+    if (err.suggestion) {
+      console.info(`Suggestion: ${err.suggestion}`);
+    }
+  });
+}
+```
+
+#### 5.2.2 Validation avec Services
+
+```typescript
+// Dans un use case ou composant
+const workValidationService = new WorkValidationService();
+const workData = {
+  /* ... */
+};
+
+const result = workValidationService.validate(workData);
+
+if (isSuccess(result)) {
+  // Données valides, procéder
+  saveWork(result.value);
+} else {
+  // Traiter les erreurs par champ
+  const companyErrors = result.error.filter((e) => e.field === "company");
+  const positionErrors = result.error.filter((e) => e.field === "position");
+
+  // Afficher les erreurs par champ dans l'UI
+  displayErrors(companyErrors, positionErrors);
+}
+```
+
+### 5.3 Prochaines Étapes
+
+Les principales tâches restantes pour compléter l'implémentation sont:
+
+1. **Composables Vue.js**:
+
+   - Développer `useValidationResult` pour gérer les résultats de validation dans les composants
+   - Créer `useValidationCatalogue` pour accéder aux messages standardisés
+
+2. **Intégration UI**:
+
+   - Implémenter des composants de formulaire qui utilisent le système de validation
+   - Créer des composants d'affichage pour les erreurs et suggestions
+
+3. **Migration**:
+
+   - Migrer progressivement les formulaires existants vers le nouveau système
+   - Valider l'expérience utilisateur avec les nouveaux formats de messages
+
+4. **Documentation**:
+   - Finaliser la documentation pour les développeurs
+   - Créer des exemples et des patterns réutilisables
 
 ## 6. Avantages de l'Approche Améliorée
 
@@ -1349,3 +1415,110 @@ Ces améliorations nous permettront de fournir une expérience de création de C
 - [GitHub: Design Patterns pour la gestion d'erreurs](https://github.com/giak/design-patterns-typescript/blob/main/src/docs/article/errorHandlers/03-analyse-detaillee.md)
 - [Domain-Driven Design and the Notification Pattern](https://enterprisecraftsmanship.com/posts/notification-pattern/)
 - [Clean Architecture - Uncle Bob](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+
+### 5.4 Stratification des Validations
+
+Le système de validation utilise une stratification claire des règles de validation à travers différentes couches de l'architecture, implémentée via l'enum `ValidationLayerType`:
+
+```typescript
+export enum ValidationLayerType {
+  /**
+   * Règles métier fondamentales, invariants du domaine
+   * Ex: "Une expérience professionnelle ne peut pas avoir une date de fin antérieure à sa date de début"
+   */
+  DOMAIN = "domain",
+
+  /**
+   * Règles d'orchestration, logique d'application
+   * Ex: "L'utilisateur doit être authentifié pour modifier ce CV"
+   */
+  APPLICATION = "application",
+
+  /**
+   * Validation UI/UX, feedback immédiat
+   * Ex: "Format d'email incorrect"
+   */
+  PRESENTATION = "presentation",
+}
+```
+
+Cette stratification permet de:
+
+1. **Prioriser l'affichage des erreurs** selon leur importance (erreurs de domaine d'abord)
+2. **Séparer les préoccupations** de validation par couche architecturale
+3. **Filtrer les erreurs** selon le contexte d'utilisation
+
+#### 5.4.1 Validation au Niveau du Domaine
+
+Les validations de domaine concernent les règles fondamentales du métier qui doivent toujours être respectées:
+
+```typescript
+// Dans email.value-object.ts
+if (
+  !email ||
+  email.trim() === "" ||
+  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+) {
+  return createFailure([
+    {
+      code: ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
+      message: "Format email invalide",
+      field: "email",
+      severity: "error",
+      layer: ValidationLayerType.DOMAIN,
+      suggestion: "Vérifiez que votre email contient un @ et un domaine valide",
+    },
+  ]);
+}
+```
+
+#### 5.4.2 Validation au Niveau de l'Application
+
+Les validations d'application concernent les règles liées à l'orchestration des cas d'utilisation:
+
+```typescript
+// Dans skill-validation.service.ts
+if (skill.name.length < 3) {
+  errors.push(
+    this.createError(
+      ERROR_CODES.COMMON.TOO_SHORT,
+      "Nom de compétence trop court",
+      "name",
+      ValidationLayerType.APPLICATION,
+      "warning",
+      { suggestion: "Utilisez un nom plus descriptif pour cette compétence" }
+    )
+  );
+}
+```
+
+#### 5.4.3 Validation au Niveau de la Présentation
+
+Les validations de présentation concernent les aspects UI/UX et le feedback en temps réel:
+
+```typescript
+// Dans un composable Vue.js (à implémenter)
+const validateInRealTime = (value: string, field: string) => {
+  if (field === "summary" && value.length > 0 && value.length < 100) {
+    return {
+      code: ERROR_CODES.RESUME.WORK.BRIEF_SUMMARY,
+      message: "Description trop brève",
+      field: "summary",
+      severity: "info",
+      layer: ValidationLayerType.PRESENTATION,
+      suggestion: "Une description efficace fait généralement 2-3 paragraphes",
+    };
+  }
+  return null;
+};
+```
+
+#### 5.4.4 Interface Unifiée
+
+Toutes ces validations utilisent la même interface `ValidationErrorInterface`, ce qui permet:
+
+1. Un traitement uniforme des erreurs quelle que soit leur origine
+2. Une présentation cohérente à l'utilisateur
+3. Une priorisation flexible selon le contexte
+
+La combinaison de cette stratification avec le système de sévérité (`error`, `warning`, `info`) offre une grande flexibilité dans le traitement et la présentation des erreurs de validation.

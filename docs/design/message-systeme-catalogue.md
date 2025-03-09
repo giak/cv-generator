@@ -133,13 +133,187 @@ export const ERROR_CODES = {
 export type ErrorCodeType = typeof ERROR_CODES;
 ```
 
-## 3. Messages d'Erreur par Section et Couche
+## 3. Utilisation du Catalogue
+
+Cette section explique comment utiliser le catalogue des codes d'erreur dans l'implémentation et comment l'étendre selon les besoins du projet.
+
+### 3.1 Utilisation dans le Code Actuel
+
+Le catalogue de codes d'erreur est utilisé à travers l'application pour garantir une cohérence dans l'identification et le traitement des erreurs.
+
+#### 3.1.1 Dans les Value Objects
+
+```typescript
+// Exemple dans email.value-object.ts
+public static create(email: string): ResultType<Email> {
+  if (!email || email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return createFailure([{
+      code: !email || email.trim() === '' ?
+        ERROR_CODES.RESUME.BASICS.MISSING_EMAIL :
+        ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
+      message: "Format email invalide",
+      field: "email",
+      severity: "error",
+      layer: ValidationLayerType.DOMAIN,
+      suggestion: "Vérifiez que votre email contient un @ et un domaine valide"
+    }]);
+  }
+
+  // Validation supplémentaire pour les emails personnels vs professionnels
+  if (isPersonalEmail(email)) {
+    return createSuccessWithWarnings(new Email(email), [{
+      code: ERROR_CODES.RESUME.BASICS.PERSONAL_EMAIL,
+      message: "Email personnel détecté",
+      field: "email",
+      severity: "warning",
+      layer: ValidationLayerType.APPLICATION,
+      suggestion: "Pour un CV professionnel, privilégiez un email professionnel ou neutre"
+    }]);
+  }
+
+  return createSuccess(new Email(email));
+}
+```
+
+#### 3.1.2 Dans les Services de Validation
+
+```typescript
+// Exemple dans work-validation.service.ts
+public validate(work: WorkInterface): ResultType<WorkInterface> {
+  const errors: ValidationErrorInterface[] = [];
+
+  // Validation du nom de l'entreprise
+  if (this.isEmpty(work.company)) {
+    errors.push(this.createError(
+      ERROR_CODES.RESUME.WORK.MISSING_COMPANY,
+      "Le nom de l'entreprise est requis",
+      "company",
+      ValidationLayerType.APPLICATION
+    ));
+  } else if (work.company.length < 2) {
+    errors.push(this.createError(
+      ERROR_CODES.COMMON.TOO_SHORT,
+      "Le nom de l'entreprise est trop court",
+      "company",
+      ValidationLayerType.APPLICATION,
+      "warning",
+      {
+        suggestion: "Entrez le nom complet de l'entreprise pour plus de clarté"
+      }
+    ));
+  }
+
+  // Autres validations...
+
+  // Retourner le résultat approprié
+  return errors.length > 0
+    ? createFailure(errors)
+    : createSuccess(work);
+}
+```
+
+#### 3.1.3 Dans les Composants Vue
+
+```typescript
+// Exemple dans un composant Vue
+const handleSubmit = async () => {
+  const result = await workValidationService.validate(formData.value);
+
+  if (isSuccess(result)) {
+    // Traitement en cas de succès
+  } else {
+    // Filtrer et traiter les erreurs par code
+    const missingFieldsErrors = result.error.filter(
+      (e) =>
+        e.code === ERROR_CODES.COMMON.REQUIRED_FIELD ||
+        e.code === ERROR_CODES.RESUME.WORK.MISSING_COMPANY ||
+        e.code === ERROR_CODES.RESUME.WORK.MISSING_POSITION
+    );
+
+    const formatErrors = result.error.filter(
+      (e) =>
+        e.code === ERROR_CODES.COMMON.INVALID_FORMAT ||
+        e.code === ERROR_CODES.COMMON.INVALID_DATE_FORMAT
+    );
+
+    // Affichage adapté selon le type d'erreur
+    if (missingFieldsErrors.length > 0) {
+      showRequiredFieldsMessage(missingFieldsErrors);
+    }
+
+    if (formatErrors.length > 0) {
+      showFormatErrorsMessage(formatErrors);
+    }
+  }
+};
+```
+
+### 3.2 Extension du Catalogue
+
+Le catalogue peut être étendu pour inclure de nouveaux codes d'erreur selon les besoins:
+
+#### 3.2.1 Ajout de Nouveaux Codes
+
+1. Identifier la section appropriée dans `ERROR_CODES` ou créer une nouvelle section si nécessaire
+2. Ajouter le nouveau code avec une chaîne en snake_case
+3. Mettre à jour la documentation pour refléter le nouveau code
+4. Considérer les traductions si l'application est multilingue
+
+Exemple d'extension:
+
+```typescript
+// Ajout d'une nouvelle section pour les certifications
+export const ERROR_CODES = {
+  // Sections existantes...
+
+  RESUME: {
+    // Sous-sections existantes...
+
+    CERTIFICATIONS: {
+      MISSING_NAME: "missing_certification_name",
+      MISSING_ISSUER: "missing_certification_issuer",
+      EXPIRED_CERTIFICATION: "expired_certification",
+      UNVERIFIABLE_CERTIFICATION: "unverifiable_certification",
+    },
+  },
+};
+```
+
+#### 3.2.2 Internationalisation des Messages
+
+Pour les applications multilingues, les codes d'erreur peuvent être utilisés comme clés pour récupérer des messages localisés:
+
+```typescript
+// Fichier de traduction fr.json
+{
+  "errors": {
+    "missing_certification_name": "Le nom de la certification est requis",
+    "missing_certification_issuer": "L'émetteur de la certification est requis",
+    "expired_certification": "Cette certification est expirée",
+    "unverifiable_certification": "Cette certification ne peut pas être vérifiée"
+  }
+}
+
+// Utilisation dans le code
+const message = i18n.t(`errors.${error.code}`);
+```
+
+### 3.3 Bonnes Pratiques
+
+1. **Cohérence des noms**: Utiliser systématiquement snake_case pour les codes d'erreur
+2. **Spécificité**: Créer des codes suffisamment spécifiques pour identifier précisément le problème
+3. **Hiérarchie**: Organiser les codes en sections et sous-sections logiques
+4. **Documentation**: Tenir à jour la documentation des codes et leur signification
+5. **Réutilisation**: Privilégier l'utilisation des codes communs (`COMMON`) pour les erreurs génériques
+6. **Extensibilité**: Concevoir la structure pour permettre l'ajout facile de nouveaux codes
+
+## 4. Catalogue des Messages d'Erreur
 
 Cette version améliorée du catalogue organise les messages par section du CV, et pour chaque message, spécifie la couche architecturale appropriée.
 
-### 3.1 Informations Personnelles (`BasicsForm`)
+### 4.1 Informations Personnelles (`BasicsForm`)
 
-#### 3.1.1 Erreurs Courantes
+#### 4.1.1 Erreurs Courantes
 
 | Code                             | Message                              | Champ      | Sévérité | Couche       | Suggestion                                                                                                          |
 | -------------------------------- | ------------------------------------ | ---------- | -------- | ------------ | ------------------------------------------------------------------------------------------------------------------- |
@@ -154,7 +328,7 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.BASICS.MISSING_SUMMARY`  | Le résumé professionnel est manquant | `summary`  | warning  | APPLICATION  | Un résumé de 3-5 lignes augmente fortement l'impact de votre CV                                                     |
 | `RESUME.BASICS.BRIEF_SUMMARY`    | Résumé trop court                    | `summary`  | info     | PRESENTATION | Un résumé efficace fait généralement 3-5 phrases, soit 300-500 caractères                                           |
 
-#### 3.1.2 Messages d'Aide
+#### 4.1.2 Messages d'Aide
 
 | ID                    | Titre                                     | Champ     | Contenu                                                                                                                                                                                                                                           |
 | --------------------- | ----------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -162,9 +336,9 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `basics_email_help`   | Choisir une adresse email professionnelle | `email`   | Votre adresse email doit refléter votre professionnalisme. Préférez une adresse au format prenom.nom@domaine.com et évitez les adresses personnelles ou fantaisistes.                                                                             |
 | `basics_phone_help`   | Format de téléphone                       | `phone`   | Utilisez un format international avec l'indicatif du pays, par exemple: +33 6 12 34 56 78 pour un numéro français. Cela facilite le contact international.                                                                                        |
 
-### 3.2 Expérience Professionnelle (`WorkForm`)
+### 4.2 Expérience Professionnelle (`WorkForm`)
 
-#### 3.2.1 Erreurs Courantes
+#### 4.2.1 Erreurs Courantes
 
 | Code                             | Message                                 | Champ        | Sévérité | Couche       | Suggestion                                                                                    |
 | -------------------------------- | --------------------------------------- | ------------ | -------- | ------------ | --------------------------------------------------------------------------------------------- |
@@ -179,7 +353,7 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.WORK.MISSING_HIGHLIGHTS` | Aucune réalisation notable mentionnée   | `highlights` | warning  | APPLICATION  | Incluez 2-3 réalisations quantifiables pour valoriser cette expérience                        |
 | `RESUME.WORK.VAGUE_HIGHLIGHTS`   | Réalisations peu précises               | `highlights` | info     | PRESENTATION | Quantifiez vos réalisations (%, chiffres, impact) pour plus d'impact                          |
 
-#### 3.2.2 Messages d'Aide
+#### 4.2.2 Messages d'Aide
 
 | ID                     | Titre                                 | Champ        | Contenu                                                                                                                                                                                                           |
 | ---------------------- | ------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -187,9 +361,9 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `work_highlights_help` | Formuler des réalisations percutantes | `highlights` | Chaque réalisation doit suivre la structure "Action → Résultat → Impact". Par exemple: "Optimisation des requêtes SQL, réduisant les temps de réponse de 40% et améliorant la satisfaction utilisateur".          |
 | `work_summary_help`    | Rédiger une description efficace      | `summary`    | La description doit inclure: le contexte de l'entreprise, votre rôle, vos responsabilités principales, les technologies ou méthodologies utilisées, et l'environnement de travail. Visez 3-4 phrases complètes.   |
 
-### 3.3 Compétences (`SkillForm`)
+### 4.3 Compétences (`SkillForm`)
 
-#### 3.3.1 Erreurs Courantes
+#### 4.3.1 Erreurs Courantes
 
 | Code                               | Message                            | Champ      | Sévérité | Couche       | Suggestion                                                                                                   |
 | ---------------------------------- | ---------------------------------- | ---------- | -------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
@@ -199,7 +373,7 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.SKILLS.MISSING_KEYWORDS`   | Aucun mot-clé associé              | `keywords` | info     | PRESENTATION | Ajoutez des mots-clés pour préciser votre expertise (frameworks, outils, méthodologies)                      |
 | `RESUME.SKILLS.GENERIC_SKILL`      | Compétence trop générique          | `name`     | info     | APPLICATION  | Précisez davantage, par ex. "Programmation" → "JavaScript ES6", "Analyse" → "Analyse de données avec Python" |
 
-#### 3.3.2 Messages d'Aide
+#### 4.3.2 Messages d'Aide
 
 | ID                    | Titre                               | Champ      | Contenu                                                                                                                                                                                                                                            |
 | --------------------- | ----------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -207,9 +381,9 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `skill_level_help`    | Évaluer votre niveau correctement   | `level`    | • Débutant: utilisation basique, besoin de supervision<br>• Intermédiaire: utilisation autonome sur des cas standard<br>• Avancé: maîtrise des cas complexes, capable de former<br>• Expert: connaissance approfondie, contribution à l'écosystème |
 | `skill_keywords_help` | Choisir des mots-clés pertinents    | `keywords` | Les mots-clés enrichissent votre compétence. Pour JavaScript, indiquez par exemple: "ES6+, Node.js, React, Vue.js, TypeScript". Ces termes aident au matching dans les ATS.                                                                        |
 
-### 3.4 Formation (`EducationForm`)
+### 4.4 Formation (`EducationForm`)
 
-#### 3.4.1 Erreurs Courantes
+#### 4.4.1 Erreurs Courantes
 
 | Code                                   | Message                                 | Champ         | Sévérité | Couche       | Suggestion                                                            |
 | -------------------------------------- | --------------------------------------- | ------------- | -------- | ------------ | --------------------------------------------------------------------- |
@@ -221,7 +395,7 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.EDUCATION.MISSING_GPA`         | GPA ou mention non spécifiée            | `gpa`         | info     | APPLICATION  | Ajoutez votre GPA ou mention pour valoriser vos résultats académiques |
 | `RESUME.EDUCATION.VAGUE_COURSES`       | Liste de cours trop vague               | `courses`     | info     | PRESENTATION | Citez les cours les plus pertinents pour le poste visé                |
 
-#### 3.4.2 Messages d'Aide
+#### 4.4.2 Messages d'Aide
 
 | ID                         | Titre                               | Champ       | Contenu                                                                                                                                                                                                                                     |
 | -------------------------- | ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -229,9 +403,9 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `education_courses_help`   | Sélectionner les cours pertinents   | `courses`   | Ne listez que les cours directement liés au poste visé ou qui démontrent une expertise particulière. Privilégiez les cours avancés ou spécialisés plutôt que les cours fondamentaux.                                                        |
 | `education_gpa_help`       | Présenter vos résultats académiques | `gpa`       | Si vous avez obtenu d'excellents résultats, indiquez votre moyenne ou mention. Formats courants: "GPA: 3.8/4.0", "Mention Très Bien", "Major de promotion (95e percentile)".                                                                |
 
-### 3.5 Projets (`ProjectForm`)
+### 4.5 Projets (`ProjectForm`)
 
-#### 3.5.1 Erreurs Courantes
+#### 4.5.1 Erreurs Courantes
 
 | Code                                  | Message                              | Champ         | Sévérité | Couche       | Suggestion                                                                         |
 | ------------------------------------- | ------------------------------------ | ------------- | -------- | ------------ | ---------------------------------------------------------------------------------- |
@@ -243,7 +417,7 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.PROJECT.MISSING_URL`          | Lien vers le projet manquant         | `url`         | info     | PRESENTATION | Ajoutez un lien pour que le recruteur puisse voir votre travail                    |
 | `RESUME.PROJECT.INVALID_URL`          | Format d'URL invalide                | `url`         | warning  | DOMAIN       | Vérifiez que l'URL commence par http:// ou https://                                |
 
-#### 3.5.2 Messages d'Aide
+#### 4.5.2 Messages d'Aide
 
 | ID                         | Titre                                 | Champ         | Contenu                                                                                                                                                                                                                          |
 | -------------------------- | ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -251,9 +425,9 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `project_keywords_help`    | Lister les technologies utilisées     | `keywords`    | Indiquez toutes les technologies significatives utilisées dans le projet. Privilégiez les mots-clés techniques que les recruteurs recherchent, comme les noms de frameworks, bibliothèques, ou plateformes.                      |
 | `project_url_help`         | Ajouter des liens pertinents          | `url`         | Les liens peuvent mener vers: un site en production, un dépôt GitHub/GitLab, une démonstration, ou une documentation. Assurez-vous que les liens sont accessibles et ajoutez une mention si une authentification est nécessaire. |
 
-### 3.6 Bénévolat (`VolunteerForm`)
+### 4.6 Bénévolat (`VolunteerForm`)
 
-#### 3.6.1 Erreurs Courantes
+#### 4.6.1 Erreurs Courantes
 
 | Code                                    | Message                             | Champ          | Sévérité | Couche       | Suggestion                                                       |
 | --------------------------------------- | ----------------------------------- | -------------- | -------- | ------------ | ---------------------------------------------------------------- |
@@ -264,16 +438,16 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.VOLUNTEER.BRIEF_SUMMARY`        | Description trop succincte          | `summary`      | warning  | APPLICATION  | Développez davantage la description de cette expérience          |
 | `RESUME.VOLUNTEER.MISSING_HIGHLIGHTS`   | Aucune réalisation mentionnée       | `highlights`   | info     | PRESENTATION | Ajoutez quelques points pour décrire vos contributions concrètes |
 
-#### 3.6.2 Messages d'Aide
+#### 4.6.2 Messages d'Aide
 
 | ID                          | Titre                            | Champ        | Contenu                                                                                                                                                                                                      |
 | --------------------------- | -------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `volunteer_relevance_help`  | Rendre votre bénévolat pertinent | `summary`    | Même si l'activité n'est pas directement liée à votre domaine professionnel, mettez en avant les compétences transversales développées: gestion de projet, communication, leadership, travail d'équipe, etc. |
 | `volunteer_highlights_help` | Valoriser votre impact           | `highlights` | Pour chaque réalisation, précisez l'impact concret: nombre de personnes aidées, amélioration mesurable, initiative particulière que vous avez pilotée, ou responsabilité spécifique assumée.                 |
 
-### 3.7 Certifications (`CertificateForm`)
+### 4.7 Certifications (`CertificateForm`)
 
-#### 3.7.1 Erreurs Courantes
+#### 4.7.1 Erreurs Courantes
 
 | Code                                       | Message                               | Champ    | Sévérité | Couche       | Suggestion                                                                                                   |
 | ------------------------------------------ | ------------------------------------- | -------- | -------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
@@ -284,16 +458,16 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.CERTIFICATE.MISSING_URL`           | Lien de vérification manquant         | `url`    | info     | PRESENTATION | Ajoutez un lien permettant de vérifier votre certification                                                   |
 | `RESUME.CERTIFICATE.EXPIRED_CERTIFICATION` | Certification potentiellement expirée | `date`   | warning  | APPLICATION  | Cette certification date de plus de 3 ans. Précisez si elle est toujours valide ou si vous l'avez renouvelée |
 
-#### 3.7.2 Messages d'Aide
+#### 4.7.2 Messages d'Aide
 
 | ID                           | Titre                                    | Champ  | Contenu                                                                                                                                                                                                                           |
 | ---------------------------- | ---------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `certificate_name_help`      | Nommer correctement votre certification  | `name` | Utilisez le nom officiel complet de la certification, y compris la version ou le niveau le cas échéant. Par exemple: "AWS Certified Solutions Architect - Associate" au lieu de "Certification AWS".                              |
 | `certificate_relevance_help` | Prioriser les certifications pertinentes | `name` | Listez en priorité les certifications reconnues dans votre secteur et directement pertinentes pour le poste visé. Les certifications techniques ou spécialisées ont généralement plus d'impact que les certifications génériques. |
 
-### 3.8 Publications (`PublicationForm`)
+### 4.8 Publications (`PublicationForm`)
 
-#### 3.8.1 Erreurs Courantes
+#### 4.8.1 Erreurs Courantes
 
 | Code                                      | Message                               | Champ         | Sévérité | Couche       | Suggestion                                                                                    |
 | ----------------------------------------- | ------------------------------------- | ------------- | -------- | ------------ | --------------------------------------------------------------------------------------------- |
@@ -304,16 +478,16 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.PUBLICATION.MISSING_URL`          | Lien vers la publication manquant     | `url`         | warning  | APPLICATION  | Ajoutez un lien permettant d'accéder à votre publication                                      |
 | `RESUME.PUBLICATION.MISSING_SUMMARY`      | Résumé de la publication manquant     | `summary`     | info     | PRESENTATION | Un bref résumé aidera le recruteur à comprendre le sujet et l'importance de votre publication |
 
-#### 3.8.2 Messages d'Aide
+#### 4.8.2 Messages d'Aide
 
 | ID                         | Titre                                   | Champ     | Contenu                                                                                                                                                                                                                                  |
 | -------------------------- | --------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `publication_format_help`  | Formater correctement votre publication | `name`    | Utilisez le format de citation approprié pour votre domaine (APA, MLA, etc.). Pour un article académique, incluez les co-auteurs. Par exemple: "Smith, J., & Doe, A. (2022). Titre de l'article. Nom du Journal, Volume(Numéro), pages." |
 | `publication_summary_help` | Rédiger un résumé efficace              | `summary` | Le résumé doit souligner la contribution unique de votre publication, son impact dans le domaine, et sa pertinence pour le poste visé. Évitez le jargon excessif et privilégiez la clarté.                                               |
 
-### 3.9 Langues (`LanguageForm`)
+### 4.9 Langues (`LanguageForm`)
 
-#### 3.9.1 Erreurs Courantes
+#### 4.9.1 Erreurs Courantes
 
 | Code                                 | Message                          | Champ      | Sévérité | Couche      | Suggestion                                                                     |
 | ------------------------------------ | -------------------------------- | ---------- | -------- | ----------- | ------------------------------------------------------------------------------ |
@@ -322,16 +496,16 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.LANGUAGE.UNDEFINED_FLUENCY`  | Niveau de langue non standard    | `fluency`  | warning  | APPLICATION | Utilisez des niveaux standards (A1-C2, Débutant-Bilingue, etc.)                |
 | `RESUME.LANGUAGE.REDUNDANT_LANGUAGE` | Langue déjà mentionnée           | `language` | warning  | APPLICATION | Cette langue apparaît déjà dans votre CV. Supprimez ce doublon ou modifiez-le. |
 
-#### 3.9.2 Messages d'Aide
+#### 4.9.2 Messages d'Aide
 
 | ID                            | Titre                             | Champ     | Contenu                                                                                                                                                                                                                                                                                   |
 | ----------------------------- | --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `language_fluency_help`       | Évaluer correctement votre niveau | `fluency` | • A1/Débutant: notions de base<br>• A2/Élémentaire: communication simple<br>• B1/Intermédiaire: peut se débrouiller<br>• B2/Avancé: communication fluide sur sujets complexes<br>• C1/Courant: expression précise et nuancée<br>• C2/Bilingue: maîtrise comparable à la langue maternelle |
 | `language_certification_help` | Mentionner vos certifications     | `fluency` | Si vous avez passé des tests officiels (TOEFL, IELTS, DELF, HSK, etc.), mentionnez le score obtenu entre parenthèses. Par exemple: "B2 (TOEFL 95/120)" ou "C1 (DALF C1)".                                                                                                                 |
 
-### 3.10 Prix et Distinctions (`AwardForm`)
+### 4.10 Prix et Distinctions (`AwardForm`)
 
-#### 3.10.1 Erreurs Courantes
+#### 4.10.1 Erreurs Courantes
 
 | Code                           | Message                                     | Champ     | Sévérité | Couche      | Suggestion                                                     |
 | ------------------------------ | ------------------------------------------- | --------- | -------- | ----------- | -------------------------------------------------------------- |
@@ -341,16 +515,16 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.AWARD.MISSING_SUMMARY` | Description de la distinction manquante     | `summary` | warning  | APPLICATION | Expliquez brièvement pourquoi vous avez reçu cette distinction |
 | `RESUME.AWARD.FUTURE_DATE`     | La date indiquée est dans le futur          | `date`    | warning  | DOMAIN      | Vérifiez la date, elle semble être dans le futur               |
 
-#### 3.10.2 Messages d'Aide
+#### 4.10.2 Messages d'Aide
 
 | ID                     | Titre                                     | Champ     | Contenu                                                                                                                                                                                                                                                                 |
 | ---------------------- | ----------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `award_context_help`   | Contextualiser votre distinction          | `summary` | Précisez le contexte et l'importance de cette distinction: combien de personnes étaient en compétition, quelle est sa reconnaissance dans le domaine, quels critères ont été évalués, etc. Ces informations aident à mesurer la valeur réelle de votre accomplissement. |
 | `award_relevance_help` | Sélectionner les distinctions pertinentes | `title`   | Incluez uniquement les distinctions significatives et pertinentes pour votre carrière. Les prix récents et directement liés à votre domaine professionnel ont généralement plus d'impact sur les recruteurs.                                                            |
 
-### 3.11 Centres d'Intérêt (`InterestForm`)
+### 4.11 Centres d'Intérêt (`InterestForm`)
 
-#### 3.11.1 Erreurs Courantes
+#### 4.11.1 Erreurs Courantes
 
 | Code                               | Message                               | Champ      | Sévérité | Couche       | Suggestion                                                    |
 | ---------------------------------- | ------------------------------------- | ---------- | -------- | ------------ | ------------------------------------------------------------- |
@@ -358,16 +532,16 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.INTEREST.BRIEF_NAME`       | Intitulé trop vague                   | `name`     | warning  | APPLICATION  | Précisez davantage ce centre d'intérêt                        |
 | `RESUME.INTEREST.MISSING_KEYWORDS` | Détails manquants                     | `keywords` | info     | PRESENTATION | Ajoutez quelques mots-clés pour détailler ce centre d'intérêt |
 
-#### 3.11.2 Messages d'Aide
+#### 4.11.2 Messages d'Aide
 
 | ID                        | Titre                                      | Champ      | Contenu                                                                                                                                                                                                                                        |
 | ------------------------- | ------------------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `interest_relevance_help` | Choisir des centres d'intérêt stratégiques | `name`     | Privilégiez les centres d'intérêt qui révèlent des qualités professionnelles valorisées (persévérance, créativité, leadership) ou qui pourraient créer une connexion avec le recruteur. Évitez les activités controversées ou trop génériques. |
 | `interest_details_help`   | Enrichir vos centres d'intérêt             | `keywords` | Ajoutez des précisions révélatrices: niveau atteint, fréquence de pratique, réalisations concrètes. Par exemple, au lieu de simplement "Course à pied", indiquez "Course à pied (semi-marathons, 3 compétitions/an)".                          |
 
-### 3.12 Références (`ReferenceForm`)
+### 4.12 Références (`ReferenceForm`)
 
-#### 3.12.1 Erreurs Courantes
+#### 4.12.1 Erreurs Courantes
 
 | Code                                 | Message                                    | Champ       | Sévérité | Couche      | Suggestion                                                   |
 | ------------------------------------ | ------------------------------------------ | ----------- | -------- | ----------- | ------------------------------------------------------------ |
@@ -377,7 +551,7 @@ Cette version améliorée du catalogue organise les messages par section du CV, 
 | `RESUME.REFERENCE.MISSING_POSITION`  | Le poste de la référence est manquant      | `position`  | warning  | APPLICATION | Indiquez le poste ou la fonction de cette personne           |
 | `RESUME.REFERENCE.MISSING_COMPANY`   | L'entreprise de la référence est manquante | `company`   | warning  | APPLICATION | Précisez dans quelle entreprise travaille cette référence    |
 
-#### 3.12.2 Messages d'Aide
+#### 4.12.2 Messages d'Aide
 
 | ID                          | Titre                                 | Champ  | Contenu                                                                                                                                                                                                                                                          |
 | --------------------------- | ------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -406,9 +580,9 @@ sequenceDiagram
     UI-->>User: Affichage du message d'erreur
 ```
 
-## 4. Stratégie d'Affichage des Messages
+## 5. Stratégie d'Affichage des Messages
 
-### 4.1 Timing pour l'Affichage des Erreurs
+### 5.1 Timing pour l'Affichage des Erreurs
 
 | Moment                              | Type d'erreur               | Justification                                           |
 | ----------------------------------- | --------------------------- | ------------------------------------------------------- |
@@ -436,7 +610,7 @@ stateDiagram-v2
     }
 ```
 
-### 4.2 Niveaux de Sévérité et Comportement
+### 5.2 Niveaux de Sévérité et Comportement
 
 | Sévérité  | Style visuel                        | Comportement                                           |
 | --------- | ----------------------------------- | ------------------------------------------------------ |
@@ -444,7 +618,7 @@ stateDiagram-v2
 | `warning` | Orange/Jaune, icône d'avertissement | Permet la soumission avec confirmation                 |
 | `info`    | Bleu/Gris, icône d'information      | Suggestion d'amélioration, n'affecte pas la soumission |
 
-### 4.3 Priorisation par Couche Architecturale
+### 5.3 Priorisation par Couche Architecturale
 
 | Couche         | Priorité d'affichage | Contexte d'utilisation                                                       |
 | -------------- | -------------------- | ---------------------------------------------------------------------------- |
@@ -489,7 +663,7 @@ flowchart TD
     style G3 fill:#88d1ff
 ```
 
-### 4.4 Emplacement des Messages
+### 5.4 Emplacement des Messages
 
 | Contexte                   | Position                             | Format                                  | Couche prioritaire        |
 | -------------------------- | ------------------------------------ | --------------------------------------- | ------------------------- |
@@ -498,9 +672,9 @@ flowchart TD
 | Erreurs globales           | En haut du formulaire                | Boîte d'alerte avec liste des problèmes | DOMAIN, APPLICATION       |
 | Messages d'aide            | Icône (i) à côté du libellé du champ | Popup/tooltip au survol ou clic         | N/A                       |
 
-## 5. Exemples d'Intégration
+## 6. Exemples d'Intégration
 
-### 5.1 Utilisation avec Value Objects
+### 6.1 Utilisation avec Value Objects
 
 ```typescript
 // Dans un Value Object
@@ -568,7 +742,7 @@ classDiagram
     ValueObject <|-- Email
 ```
 
-### 5.2 Intégration avec Zod
+### 6.2 Intégration avec Zod
 
 ```typescript
 // Dans un validateur utilisant Zod
@@ -657,7 +831,7 @@ graph TD
     style I fill:#f9f9d3,stroke:#333
 ```
 
-### 5.3 Affichage des Erreurs par Priorité
+### 6.3 Affichage des Erreurs par Priorité
 
 ```vue
 <!-- 
@@ -677,9 +851,9 @@ graph TD
 <!-- 3. Erreurs DOMAIN (invariants du domaine) -->
 ```
 
-## 6. Modèle pour Ajouter de Nouveaux Messages
+## 7. Modèle pour Ajouter de Nouveaux Messages
 
-### 6.1 Nouveau Message d'Erreur
+### 7.1 Nouveau Message d'Erreur
 
 ```typescript
 // Ajouter la constante de code d'erreur
@@ -702,7 +876,7 @@ const newErrorMessage: ValidationErrorInterface = {
 };
 ```
 
-### 6.2 Nouveau Message d'Aide
+### 7.2 Nouveau Message d'Aide
 
 ```typescript
 const newHelpMessage: HelpMessageInterface = {
@@ -719,7 +893,7 @@ const newHelpMessage: HelpMessageInterface = {
 };
 ```
 
-## 7. Conclusion
+## 8. Conclusion
 
 Ce catalogue de messages enrichi avec la stratification par couche architecturale servira de référence unifiée pour toute l'application CV Generator. Il garantit une expérience utilisateur cohérente et de qualité en fournissant des messages d'erreur contextuels et des conseils pertinents, tout en respectant les principes de Clean Architecture et de DDD.
 
