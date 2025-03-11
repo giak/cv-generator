@@ -1,7 +1,6 @@
 ---
 description: "DEFINE core project architecture, technical stack, and development principles for the CV Generator application"
 globs: ["packages/**/*"]
-alwaysApply: false
 ---
 ---
 title: "CV Generator - Project Architecture & Technical Standards"

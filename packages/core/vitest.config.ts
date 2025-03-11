@@ -13,7 +13,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@cv-generator/shared': resolve(__dirname, '../shared/src')
+      '@': resolve(__dirname, 'src'),
+      '@cv-generator/shared': resolve(__dirname, '../shared/src'),
+      '@cv-generator/infrastructure': resolve(__dirname, '../infrastructure/src'),
+      '@cv-generator/ui': resolve(__dirname, '../ui/src')
     }
   }
 }) 

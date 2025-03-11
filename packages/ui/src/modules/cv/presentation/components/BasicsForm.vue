@@ -2,10 +2,12 @@
 import type { BasicsInterface, LocationInterface, ProfileInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
-import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { useValidationResult } from '@ui/modules/cv/presentation/composables/validation/useValidationResult'
+import { useValidationCatalogue } from '@ui/modules/cv/presentation/composables/validation/useValidationCatalogue'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
 import { computed, ref, onMounted } from 'vue'
+import { createSuccess, createFailure, type ValidationErrorInterface } from '@cv-generator/shared'
 
 // Performance measurement
 const perfMeasurements = {
@@ -32,7 +34,7 @@ onMounted(() => {
       // Include metrics from useCollectionField if logging enabled
       ...(profilesFieldMetrics || {}),
       // Include metrics from useValidation if logging enabled
-      ...(validationPerfMetrics || {})
+      ...(validationMetrics || {})
     })
   }
 })
@@ -149,40 +151,157 @@ const {
   enableLogging: process.env.NODE_ENV === 'development'
 })
 
-// Utilisation du nouveau composable useValidation
-const { 
-  errors, 
-  validateField, 
-  validateForm,
-  perfMetrics: validationPerfMetrics 
-} = useValidation<BasicsInterface>(undefined, {
-  requiredFields: ['name', 'email'],
-  enableLogging: process.env.NODE_ENV === 'development'
+// Règles de validation pour le formulaire BasicsForm
+const basicsCatalogue = useValidationCatalogue({
+  enableLogging: process.env.NODE_ENV === 'development',
+  rules: {
+    name: [
+      {
+        validator: (value: string) => !!value && value.trim().length > 0,
+        message: 'Le nom est requis',
+        severity: 'error' as const,
+        code: 'REQUIRED'
+      },
+      {
+        validator: (value: string) => !value || value.trim().length <= 100,
+        message: 'Le nom ne doit pas dépasser 100 caractères',
+        severity: 'error' as const,
+        code: 'MAX_LENGTH'
+      }
+    ],
+    email: [
+      {
+        validator: (value: string) => !!value && value.trim().length > 0,
+        message: 'L\'email est requis',
+        severity: 'error' as const,
+        code: 'REQUIRED'
+      },
+      {
+        validator: (value: string) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+        message: 'Format email invalide',
+        severity: 'error' as const,
+        code: 'INVALID_FORMAT'
+      }
+    ],
+    url: [
+      {
+        validator: (value: string) => !value || /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(value),
+        message: 'Format URL invalide',
+        severity: 'warning' as const,
+        code: 'INVALID_FORMAT'
+      }
+    ],
+    image: [
+      {
+        validator: (value: string) => !value || /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(value),
+        message: 'Format URL invalide pour l\'image',
+        severity: 'warning' as const,
+        code: 'INVALID_FORMAT'
+      }
+    ],
+    phone: [
+      {
+        validator: (value: string) => !value || /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/.test(value),
+        message: 'Format téléphone invalide',
+        severity: 'warning' as const,
+        code: 'INVALID_FORMAT'
+      }
+    ]
+  }
 })
 
-const handleSubmit = async () => {
+// Utilisation du nouveau composable useValidationResult
+const {
+  result: validationResult,
+  setResult,
+  resetResult,
+  getFieldState,
+  isFailure,
+  totalIssues,
+  perfMetrics: validationMetrics
+} = useValidationResult<BasicsInterface>(undefined, {
+  debug: process.env.NODE_ENV === 'development'
+})
+
+// Fonction pour valider un champ spécifique
+const validateField = (field: keyof BasicsInterface, value: any) => {
+  const fieldState = getFieldState(field as string)
+  
+  // Marquer le champ comme modifié
+  fieldState.markDirty()
+  
+  // Valider le champ avec le catalogue de règles
+  const validationErrors: ValidationErrorInterface[] = []
+  const result = basicsCatalogue.validateField(field as string, value, validationErrors)
+  
+  // Si validation échoue, créer un Result.failure
+  if (!result) {
+    setResult(createFailure(validationErrors))
+    return false
+  }
+  
+  return true
+}
+
+// Fonction pour valider le formulaire complet
+const validateForm = (data: BasicsInterface): boolean => {
   const validationStart = performance.now()
+  
+  // Initialiser les métriques si nécessaires
+  if (validationMetrics && typeof validationMetrics.validationCount === 'number') {
+    validationMetrics.validationCount++;
+  }
+  
+  const validationErrors: ValidationErrorInterface[] = []
+  
+  // Valider tous les champs obligatoires
+  const isValid = [
+    basicsCatalogue.validateField('name', data.name, validationErrors),
+    basicsCatalogue.validateField('email', data.email, validationErrors)
+  ].every(result => result === true)
+  
+  // Valider les autres champs s'ils ont une valeur
+  if (data.url) {
+    basicsCatalogue.validateField('url', data.url, validationErrors)
+  }
+  
+  if (data.image) {
+    basicsCatalogue.validateField('image', data.image, validationErrors)
+  }
+  
+  if (data.phone) {
+    basicsCatalogue.validateField('phone', data.phone, validationErrors)
+  }
+  
+  // Mettre à jour le résultat de validation
+  if (isValid && validationErrors.length === 0) {
+    setResult(createSuccess(data))
+  } else {
+    setResult(createFailure(validationErrors))
+  }
+  
+  // Mettre à jour les métriques de performance
+  const validationDuration = performance.now() - validationStart;
+  if (validationMetrics && typeof validationMetrics.validationTime === 'number') {
+    validationMetrics.validationTime += validationDuration;
+  }
+  
+  perfMeasurements.validations++
+  console.log(`Form validation took ${validationDuration}ms (total: ${perfMeasurements.validations})`)
+  
+  return isValid && validationErrors.length === 0
+}
+
+const handleSubmit = async () => {
   console.log('Form submission - Current model:', JSON.stringify(localModel))
   
-  // Valider tous les champs
+  // Valider le formulaire
   const formIsValid = validateForm(localModel)
   console.log('Form validation result:', formIsValid)
   
   if (formIsValid) {
-    // Vérifier que les champs obligatoires sont présents
-    if (!localModel.name || !localModel.email) {
-      console.error('Required fields missing:', {
-        name: !localModel.name,
-        email: !localModel.email
-      })
-      return
-    }
-    
     emit('validate')
   }
-  
-  perfMeasurements.validations++
-  console.log(`Form validation took ${performance.now() - validationStart}ms (total: ${perfMeasurements.validations})`)
 }
 
 // Icônes SVG pour les champs
@@ -206,12 +325,22 @@ const icons = {
     subtitle="Complétez vos informations pour créer un CV professionnel."
     @submit="handleSubmit"
   >
+    <div v-if="isFailure && totalIssues > 0" 
+         class="bg-red-900/20 border border-red-700 rounded-md p-4 mb-6">
+      <h3 class="text-red-400 font-medium text-sm mb-2">
+        {{ totalIssues > 1 ? `${totalIssues} problèmes détectés` : '1 problème détecté' }}
+      </h3>
+      <p class="text-neutral-300 text-xs">
+        Veuillez corriger les problèmes indiqués dans le formulaire pour continuer.
+      </p>
+    </div>
+  
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         name="name"
         label="Nom complet"
         :model-value="localModel.name || ''"
-        :error="errors.name"
+        :error="getFieldState('name').isDirty.value ? getFieldState('name').firstErrorMessage.value : ''"
         :icon="icons.name"
         placeholder="Ex: Jean Dupont"
         help-text="Votre nom et prénom comme ils apparaîtront sur votre CV."
@@ -225,7 +354,7 @@ const icons = {
         type="email"
         label="Adresse email"
         :model-value="localModel.email || ''"
-        :error="errors.email"
+        :error="getFieldState('email').isDirty.value ? getFieldState('email').firstErrorMessage.value : ''"
         :icon="icons.email"
         placeholder="Ex: jean.dupont@example.com"
         help-text="Email professionnel pour les employeurs potentiels."
@@ -239,7 +368,7 @@ const icons = {
         type="tel"
         label="Téléphone"
         :model-value="localModel.phone || ''"
-        :error="errors.phone"
+        :error="getFieldState('phone').isDirty.value ? getFieldState('phone').firstErrorMessage.value : ''"
         :icon="icons.phone"
         placeholder="Ex: 0612345678"
         help-text="Numéro de téléphone où vous êtes joignable."
@@ -263,7 +392,7 @@ const icons = {
           type="url"
           label="Site Web"
           :model-value="localModel.url || ''"
-          :error="errors.url"
+          :error="getFieldState('url').isDirty.value ? getFieldState('url').firstErrorMessage.value : ''"
           :icon="icons.url"
           placeholder="Ex: https://monportfolio.com"
           help-text="URL de votre portfolio ou site personnel (optionnel)."
@@ -278,7 +407,7 @@ const icons = {
           type="url"
           label="Photo (URL)"
           :model-value="localModel.image || ''"
-          :error="errors.image"
+          :error="getFieldState('image').isDirty.value ? getFieldState('image').firstErrorMessage.value : ''"
           :icon="icons.image"
           placeholder="Ex: https://example.com/photo.jpg"
           help-text="URL de votre photo professionnelle (optionnel)."
@@ -293,7 +422,7 @@ const icons = {
           type="text"
           label="Résumé professionnel"
           :model-value="localModel.summary || ''"
-          :error="errors.summary"
+          :error="getFieldState('summary').isDirty.value ? getFieldState('summary').firstErrorMessage.value : ''"
           :icon="icons.summary"
           placeholder="Ex: Développeur Web passionné avec 5 ans d'expérience..."
           help-text="Brève description de votre parcours et objectifs professionnels."

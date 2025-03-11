@@ -28,7 +28,14 @@ export default defineConfig({
       '@infrastructure': resolve(__dirname, './src'),
       '@infrastructure/repositories': resolve(__dirname, './src/repositories'),
       '@infrastructure/services': resolve(__dirname, './src/services'),
-      '@infrastructure/adapters': resolve(__dirname, './src/adapters')
+      '@infrastructure/adapters': resolve(__dirname, './src/adapters'),
+      
+      '@cv-generator/shared': resolve(__dirname, '../shared/src'),
+      '@cv-generator/core': resolve(__dirname, '../core/src'),
+      '@cv-generator/ui': resolve(__dirname, '../ui/src')
     }
+  },
+  optimizeDeps: {
+    exclude: ['@cv-generator/core', '@cv-generator/shared']
   }
 }) 

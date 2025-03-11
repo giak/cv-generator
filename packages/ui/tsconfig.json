@@ -27,9 +27,18 @@
       "@components/*": ["src/core/components/*"],
       "@composables/*": ["src/core/composables/*"],
       "@utils/*": ["src/core/utils/*"],
-      "@assets/*": ["src/assets/*"]
+      "@assets/*": ["src/assets/*"],
+      
+      "@cv-generator/shared": ["../shared/src"],
+      "@cv-generator/shared/*": ["../shared/src/*"],
+      "@cv-generator/core": ["../core/src"],
+      "@cv-generator/core/*": ["../core/src/*"],
+      "@cv-generator/infrastructure": ["../infrastructure/src"],
+      "@cv-generator/infrastructure/*": ["../infrastructure/src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/types/@cv-generator-shared.d.ts.old"],
+  "references": [
+    { "path": "./tsconfig.node.json" }
+  ]
 } 

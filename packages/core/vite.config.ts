@@ -11,7 +11,11 @@ export default defineConfig({
       '@core/cv/ports': resolve(__dirname, './src/cv/ports'),
       '@core/export': resolve(__dirname, './src/export'),
       '@core/user': resolve(__dirname, './src/user'),
-      '@core/shared': resolve(__dirname, './src/shared')
+      '@core/shared': resolve(__dirname, './src/shared'),
+      
+      '@cv-generator/shared': resolve(__dirname, '../shared/src'),
+      '@cv-generator/infrastructure': resolve(__dirname, '../infrastructure/src'),
+      '@cv-generator/ui': resolve(__dirname, '../ui/src')
     }
   },
   test: {
@@ -25,5 +29,8 @@ export default defineConfig({
       exclude: ['src/**/*.d.ts', 'src/**/*.test.ts', 'src/**/*.spec.ts']
     },
     include: ['src/**/*.{test,spec}.ts']
+  },
+  optimizeDeps: {
+    exclude: ['@cv-generator/shared', '@cv-generator/infrastructure']
   }
 }) 

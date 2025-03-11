@@ -11,10 +11,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@cv-generator/shared": ["../shared/src"],
+      "@cv-generator/shared/*": ["../shared/src/*"],
       "@cv-generator/core": ["../core/src"],
       "@cv-generator/core/*": ["../core/src/*"],
-      "@cv-generator/infrastructure": ["../infrastructure/src"],
-      "@cv-generator/infrastructure/*": ["../infrastructure/src/*"],
       "@cv-generator/ui": ["../ui/src"],
       "@cv-generator/ui/*": ["../ui/src/*"]
     }

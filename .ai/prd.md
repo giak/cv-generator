@@ -1,8 +1,8 @@
 # Product Requirements Document (PRD) pour CV Generator
 
 **Status**: Draft  
-**Version**: 1.4.0  
-**Date**: 2025-03-15  
+**Version**: 1.6.0  
+**Date**: 2025-03-11  
 **Auteur(s)**: Giak
 
 ## Historique des modifications
@@ -13,14 +13,15 @@
 | 2025-03-01 | 1.1.0   | Giak   | Ajout de l'optimisation ATS comme fonctionnalité                                                             |
 | 2025-03-01 | 1.2.0   | Giak   | Simplification du projet (localStorage uniquement, édition JSON Resume)                                      |
 | 2025-03-01 | 1.3.0   | Giak   | Clarification des formats d'export et mise à jour des parcours utilisateur                                   |
-| 2025-03-15 | 1.4.0   | Giak   | Enrichissement des personas, ajout classification MoSCoW et amélioration de la section UX/UI                 |
-| 2025-03-16 | 1.5.0   | Giak   | Alignement avec le document de fondation technique et mise à jour des détails d'interopérabilité JSON Resume |
+| 2025-03-02 | 1.4.0   | Giak   | Enrichissement des personas, ajout classification MoSCoW et amélioration de la section UX/UI                 |
+| 2025-03-05 | 1.5.0   | Giak   | Alignement avec le document de fondation technique et mise à jour des détails d'interopérabilité JSON Resume |
+| 2025-03-11 | 1.6.0   | Giak   | Mise à jour avec la structure monorepo PNPM et alignement avec l'architecture de packages actuelle           |
 
 ## Introduction
 
 ### Description du projet
 
-CV Generator est une application web légère qui permet aux utilisateurs de créer, éditer et exporter des CV au format JSON Resume standard (https://jsonresume.org/schema/). L'application offre une interface intuitive pour la saisie des données, avec validation en temps réel, et permet d'exporter le CV en plusieurs formats (JSON, HTML, PDF). L'application fonctionne entièrement côté client avec persistance dans localStorage, sans nécessiter de backend.
+CV Generator est une application web légère qui permet aux utilisateurs de créer, éditer et exporter des CV au format JSON Resume standard (https://jsonresume.org/schema/). L'application offre une interface intuitive pour la saisie des données, avec validation en temps réel, et permet d'exporter le CV en plusieurs formats (JSON, HTML, PDF). L'application fonctionne entièrement côté client avec persistance dans localStorage, sans nécessiter de backend, et est structurée selon une architecture monorepo PNPM avec des packages bien définis.
 
 ### Contexte business et motivations
 
@@ -31,6 +32,7 @@ Le format JSON Resume offre une solution structurée et standardisée pour stock
 - Des exports en plusieurs formats utilisables (JSON conforme au standard, HTML, PDF)
 - Des conseils pour optimiser le CV pour les systèmes ATS (Applicant Tracking Systems)
 - Le fonctionnement entièrement hors ligne via localStorage
+- Une architecture maintenable basée sur les principes de Clean Architecture
 
 #### Positionnement produit
 
@@ -90,8 +92,9 @@ Malgré l'existence du format JSON Resume, plusieurs problèmes persistent:
 4. Les CV ne sont pas optimisés pour les systèmes ATS qui filtrent les candidatures
 5. Les utilisateurs ont besoin de formats d'export variés (pas seulement JSON)
 6. L'interopérabilité entre outils de l'écosystème JSON Resume est limitée par le manque d'interfaces conviviales
+7. Les applications existantes manquent souvent d'une architecture solide pour la maintenance et l'évolution
 
-CV Generator résout ces problèmes en proposant une solution simple, locale et directe pour éditer et exporter des CV au format JSON Resume standard avec des conseils d'optimisation ATS.
+CV Generator résout ces problèmes en proposant une solution simple, locale et directe pour éditer et exporter des CV au format JSON Resume standard avec des conseils d'optimisation ATS, tout en s'appuyant sur une architecture monorepo robuste et modulaire.
 
 ## Objectifs
 
@@ -103,6 +106,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Permettre l'exportation en plusieurs formats (JSON conforme au standard, HTML, PDF)
 - Fournir des conseils simples pour l'optimisation ATS des CV
 - Assurer la compatibilité complète avec le standard JSON Resume pour l'interopérabilité
+- Implémenter une architecture monorepo PNPM avec séparation claire des responsabilités
 
 ### Critères de succès
 
@@ -113,6 +117,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Tous les formats d'export fonctionnent correctement (JSON conforme au standard, HTML, PDF)
 - Les conseils ATS sont compréhensibles et utiles pour les utilisateurs (satisfaction > 80%)
 - Compatibilité vérifiée avec d'autres outils de l'écosystème JSON Resume
+- Couverture des tests > 80% pour le core, > 70% pour l'UI
 
 ### Indicateurs de performance (KPIs)
 
@@ -131,7 +136,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Tracking anonymisé des actions utilisateur avec localStorage
 - Mesures de performance via les outils de développement du navigateur
 - Formulaire de feedback optionnel après utilisation
-- Analyse des erreurs les plus fréquentes pour amélioration continue
+- Analyse des erreurs les plus fréquentes pour améliorer continue
 - Dashboard de suivi des métriques avec rapports hebdomadaires
 - Tests d'utilisabilité trimestriels avec 5-7 utilisateurs représentatifs
 - Tests d'interopérabilité avec d'autres outils de l'écosystème JSON Resume
@@ -199,6 +204,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Export au format JSON conforme au standard
 - Interface responsive pour desktop et tablette
 - Interopérabilité avec d'autres outils JSON Resume
+- Architecture monorepo avec séparation claire des packages
 
 #### Should Have (Importante)
 
@@ -208,6 +214,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Conseils basiques d'optimisation ATS
 - Import d'un fichier JSON Resume existant
 - Validation à plusieurs niveaux (UI et domaine)
+- Tests unitaires avec couverture > 80% pour le core
 
 #### Could Have (Souhaitée)
 
@@ -216,6 +223,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Score d'optimisation ATS
 - Mode sombre / clair
 - PWA pour un fonctionnement hors ligne amélioré
+- Tests E2E pour les flux principaux
 
 #### Won't Have (Exclue de cette version)
 
@@ -375,11 +383,11 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
 
 ### Epic-1: Fondation du système (Status: Complété)
 
-**Description**: Mise en place de l'architecture technique et des composants fondamentaux de l'application conformément aux principes de Clean Architecture.
+**Description**: Mise en place de l'architecture technique et des composants fondamentaux de l'application conformément aux principes de Clean Architecture et à la structure monorepo PNPM.
 
 **Stories principales**:
 
-- ✅ Configurer l'architecture simplifiée Clean Architecture avec structure en packages
+- ✅ Configurer l'architecture simplifiée Clean Architecture avec structure en packages PNPM
 - ✅ Créer les modèles de données basés sur le format JSON Resume standard
 - ✅ Développer l'interface utilisateur de base et la navigation
 - ✅ Mettre en place la validation Zod et la sauvegarde localStorage
@@ -387,7 +395,7 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
 
 **Critères d'acceptation**:
 
-- Architecture modulaire conforme aux principes Clean Architecture
+- Architecture monorepo avec packages distincts (core, ui, infrastructure, shared)
 - Tests unitaires couvrant les entités du domaine (couverture > 80%)
 - Persistance fonctionnelle dans localStorage
 - Interface de base réactive et accessible
@@ -412,6 +420,7 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
 - Navigation facile entre les sections
 - Auto-sauvegarde après chaque modification
 - Support de toutes les propriétés définies dans le standard
+- Intégration correcte avec les autres packages du monorepo
 
 ### Epic-3: Prévisualisation et exportation (Status: Planifié)
 
@@ -434,6 +443,7 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
 - Téléchargement direct des fichiers générés
 - Performance acceptable sur tous les navigateurs cibles
 - Interopérabilité vérifiée avec d'autres outils de l'écosystème
+- Implémentation correcte dans le package infrastructure du monorepo
 
 ### Epic-4: Optimisation ATS (Status: Planifié)
 
@@ -454,18 +464,20 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
 - Score ATS calculé en temps réel
 - Interface intuitive pour l'affichage des conseils
 - Impact mesurable sur la qualité des CV produits
+- Intégration adéquate entre les packages core, ui et infrastructure
 
 ## État actuel d'implémentation
 
 ### Composants implémentés (✅)
 
-- Architecture Clean Architecture (packages core, ui, infrastructure, shared)
+- Architecture Clean Architecture avec structure monorepo (packages @cv-generator/core, @cv-generator/ui, @cv-generator/infrastructure, @cv-generator/shared)
 - Structure de données basée sur JSON Resume standard
 - Validation avec Zod conforme au schéma officiel
 - Persistance localStorage
 - Formulaires pour informations de base et expérience professionnelle
 - Tests unitaires pour le domaine core (couverture actuelle: 83%)
 - Entités de domaine avec validation multi-niveaux
+- Configuration du monorepo PNPM avec scripts centralisés
 
 ### Composants en cours (🔄)
 
@@ -473,6 +485,7 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
 - Composants UI réutilisables
 - Tests E2E des formulaires
 - Support complet de toutes les sections du standard JSON Resume
+- Amélioration des interactions entre packages
 
 ### Dettes techniques identifiées
 
@@ -480,25 +493,32 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
 - Gestion complète des erreurs
 - Couverture de tests pour les composants UI
 - Documentation complète des interfaces JSON Resume
+- Optimisation des interactions entre packages du monorepo
 
 ## Questions ouvertes
 
 1. **Évolution vers stockage cloud**: Faut-il prévoir une architecture extensible pour ajouter un backend ultérieurement?
 
    - Statut: À discuter lors de la validation du MVP
-   - Impact: Conception des interfaces de repository
+   - Impact: Conception des interfaces de repository dans @cv-generator/core et @cv-generator/infrastructure
    - Options: Rester local ou préparer l'extension vers IndexedDB ou backend
 
 2. **Formats d'exportation additionnels**: Quels formats prioritaires à ajouter après le JSON, HTML et PDF?
 
    - Statut: À déterminer après retours utilisateurs sur le MVP
-   - Impact: Structure du module d'exportation
+   - Impact: Structure du module d'exportation dans @cv-generator/infrastructure
    - Options: DOCX, LaTeX, Markdown
 
 3. **Amélioration des conseils ATS**: Comment améliorer la pertinence des conseils ATS sans utiliser d'IA complexe?
+
    - Statut: Recherche en cours
    - Impact: Qualité de l'optimisation ATS
    - Options: Base de données de règles, analyse statistique, heuristiques
+
+4. **Optimisation du monorepo**: Comment améliorer encore la structure des packages pour maximiser la séparation des préoccupations?
+   - Statut: Évaluation continue
+   - Impact: Maintenance et évolutivité du code
+   - Options: Packages supplémentaires, meilleure isolation, bibliothèque de composants UI séparée
 
 ## Aspects Techniques
 
@@ -510,12 +530,13 @@ La stack technologique a été sélectionnée pour garantir la simplicité, la p
 | ------------ | ------- | ------------------------------------ | ------------------------------------------ |
 | TypeScript   | 5.7+    | Langage principal avec typage strict | Robustesse et maintenabilité du code       |
 | Vue.js       | 3.4+    | Framework UI avec Composition API    | Performances et ergonomie du développement |
-| Vite         | 6.0+    | Build tool et dev server             | Vitesse de développement et de compilation |
-| Pinia        | 2.1+    | State management                     | Gestion d'état type-safe et performante    |
-| Tailwind CSS | 3.x     | Framework CSS utilitaire             | Développement rapide et cohérence visuelle |
+| Vite         | 6.2+    | Build tool et dev server             | Vitesse de développement et de compilation |
+| Pinia        | 2.3+    | State management                     | Gestion d'état type-safe et performante    |
+| Tailwind CSS | 3.4+    | Framework CSS utilitaire             | Développement rapide et cohérence visuelle |
 | Zod          | 3.22+   | Validation de schéma                 | Validation robuste avec inférence de types |
 | Vitest       | 3.0+    | Framework de test                    | Tests rapides et intégrés                  |
 | jsPDF        | 2.5+    | Génération de PDF côté client        | Export PDF sans backend                    |
+| PNPM         | 10.5+   | Gestionnaire de packages             | Monorepo performant et économe en espace   |
 
 ### Contraintes techniques
 
@@ -533,24 +554,31 @@ La stack technologique a été sélectionnée pour garantir la simplicité, la p
    - Optimisation du rendu pour les exports
 
 3. **Compatibilité**
+
    - Support des navigateurs modernes (dernières versions de Chrome, Firefox, Safari, Edge)
    - Application responsive fonctionnant sur desktop et tablette
    - Compatibilité stricte avec le standard JSON Resume
    - Interopérabilité avec les autres outils de l'écosystème
 
+4. **Architecture monorepo**
+   - Structure claire des packages avec responsabilités distinctes
+   - Dépendances minimales entre packages
+   - Cohérence des versions entre packages
+   - Scripts centralisés pour les tâches communes (build, test, lint)
+
 ### Considérations d'architecture
 
-L'architecture suit une version simplifiée des principes de Clean Architecture:
+L'architecture suit une version simplifiée des principes de Clean Architecture dans un monorepo PNPM:
 
 1. **Organisation du code**
 
    - Structure en packages distincts suivant Clean Architecture simplifiée
-     - Core: Entités de domaine et cas d'utilisation
-     - UI: Composants et stores
-     - Infrastructure: Implémentations concrètes (localStorage, exports)
-     - Shared: Types et utilitaires partagés
+     - @cv-generator/core: Entités de domaine et cas d'utilisation
+     - @cv-generator/ui: Composants et stores
+     - @cv-generator/infrastructure: Implémentations concrètes (localStorage, exports)
+     - @cv-generator/shared: Types et utilitaires partagés
    - Séparation du domaine, de l'application, de l'infrastructure et de la présentation
-   - Monorepo avec structure en packages
+   - Monorepo avec structure en packages PNPM
 
 2. **Patterns de conception**
 
@@ -558,7 +586,7 @@ L'architecture suit une version simplifiée des principes de Clean Architecture:
    - Repository pattern pour l'abstraction de localStorage
    - Observer pattern via la réactivité Vue/Pinia
    - Principes SOLID appliqués systématiquement
-   - Séparation des préoccupations entre couches
+   - Séparation des préoccupations entre couches et packages
 
 3. **Persistence des données**
 
@@ -579,6 +607,7 @@ L'architecture suit une version simplifiée des principes de Clean Architecture:
 
 1. **Phase 1: MVP (1-2 semaines)**
 
+   - Mise en place de la structure monorepo PNPM avec les packages essentiels
    - Implémentation complète du schéma JSON Resume standard
    - Formulaires basiques d'édition
    - Stockage localStorage
@@ -605,7 +634,8 @@ L'architecture suit une version simplifiée des principes de Clean Architecture:
 
 1. **Priorité Haute**:
 
-   - Structure core conforme au JSON Resume standard
+   - Structure monorepo PNPM avec packages bien définis
+   - Core conforme au JSON Resume standard
    - Validation complète du schéma officiel
    - Stockage dans localStorage
    - Export au format JSON conforme au standard
@@ -630,7 +660,7 @@ L'architecture suit une version simplifiée des principes de Clean Architecture:
 
 | Jalon          | Description                                    | Date cible   | État        |
 | -------------- | ---------------------------------------------- | ------------ | ----------- |
-| Structure      | Architecture de base et modèles de données     | T+1 semaine  | ✅ Complété |
+| Structure      | Architecture monorepo et modèles de données    | T+1 semaine  | ✅ Complété |
 | Édition        | Formulaires d'édition pour toutes les sections | T+2 semaines | 🔄 60%      |
 | MVP            | Version minimale avec export JSON fonctionnel  | T+3 semaines | ⏳ Planifié |
 | Export complet | Version avec exports HTML et PDF fonctionnels  | T+4 semaines | ⏳ Planifié |
@@ -645,20 +675,23 @@ L'architecture suit une version simplifiée des principes de Clean Architecture:
    - L'export PDF dépend de l'export HTML
    - Les conseils ATS dépendent de l'implémentation des formulaires complets
    - La compatibilité avec le standard JSON Resume dépend de la validation Zod
+   - Le bon fonctionnement du monorepo dépend de la correcte configuration des dépendances entre packages
 
 2. **Dépendances externes**:
    - Suivi des évolutions du standard JSON Resume
    - Compatibilité avec les navigateurs modernes
    - Limitations du localStorage (5MB max)
+   - Gestion des dépendances dans l'écosystème PNPM
 
 ## Annexes et Références
 
 ### Documents liés
 
 - [Architecture technique](./arch.md)
-- [Document de fondation du projet](../project-foundation.md)
+- [Document de fondation du projet](./project-foundation.md)
 - [Spécification JSON Resume](https://jsonresume.org/schema/)
 - [Guide de développement](../docs/development-guide.md)
+- [Structure du monorepo PNPM](../docs/monorepo-structure.md)
 
 ### Ressources complémentaires
 
@@ -666,6 +699,7 @@ L'architecture suit une version simplifiée des principes de Clean Architecture:
 - [Meilleures pratiques ATS](https://www.jobscan.co/blog/ats-friendly-resume/)
 - [Bibliotheque jsPDF](https://github.com/parallax/jsPDF)
 - [Outils de l'écosystème JSON Resume](https://jsonresume.org/getting-started/)
+- [Documentation PNPM Workspaces](https://pnpm.io/workspaces)
 
 ### Glossaire
 
@@ -678,3 +712,5 @@ L'architecture suit une version simplifiée des principes de Clean Architecture:
 - **Optimisation ATS**: Techniques pour améliorer la visibilité d'un CV dans les systèmes ATS
 - **MoSCoW**: Méthode de priorisation (Must have, Should have, Could have, Won't have)
 - **Interopérabilité**: Capacité des systèmes à fonctionner ensemble sans restriction d'accès ou de mise en œuvre
+- **Monorepo**: Approche de gestion de code où plusieurs projets sont stockés dans un seul dépôt
+- **PNPM**: Gestionnaire de packages performant avec support des workspaces

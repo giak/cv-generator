@@ -1,12 +1,29 @@
 /**
  * Validation Module
  * 
- * This module exports all validation-related composables and utilities
- * for form validation in the CV Generator application.
+ * Ce module exporte tous les composables et utilitaires liés à la validation
+ * basée sur le Result/Option Pattern pour l'application CV Generator.
  */
 
-// Export the main validation composable
-export { useValidation } from '../useValidation'
+// Composables principaux
+export { 
+  useValidationResult,
+  type ValidationResultOptionsInterface,
+  type FieldValidationStateInterface,
+  type UseValidationResultReturnInterface
+} from './useValidationResult';
+
+export {
+  useValidationCatalogue,
+  type ValidationCatalogueOptionsInterface,
+  type ValidationCatalogueReturnInterface
+} from './useValidationCatalogue';
+
+// Réexporter l'ancien composable pour compatibilité
+export { useValidation } from '../useValidation';
+
+// Utilitaires spécifiques à Vue
+export * from '../../helpers/result-handlers.utils';
 
 // Export validation examples
 export { default as ValidationExample } from '../../components/examples/ValidationExample.vue'
@@ -15,10 +32,7 @@ export { default as CombinedFormExample } from '../../components/examples/Combin
 export { default as AdvancedValidationExample } from '../../components/examples/AdvancedValidationExample.vue'
 
 // Export validation types
-export type { 
-  ValidationOptions,
-  ValidationResult
-} from '../useValidation'
+export type { ValidationErrorInterface, ValidationSeverityType, ResultType, FormValidationResultType } from '@cv-generator/shared';
 
 /**
  * Validation Module Usage

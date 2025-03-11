@@ -21,7 +21,6 @@ export default defineConfig({
       'node_modules/**/*',
       'dist/**/*'
     ],
-    threads: false,
     deps: {
       inline: ['vuetify'],
     },
@@ -46,6 +45,9 @@ export default defineConfig({
       '@core': resolve(root, 'src/core'),
       '@modules': resolve(root, 'src/modules'),
       '@shared': resolve(root, 'src/shared'),
+      '@cv-generator/shared': resolve(root, '../shared/src'),
+      '@cv-generator/core': resolve(root, '../core/src'),
+      '@cv-generator/infrastructure': resolve(root, '../infrastructure/src')
     }
   }
 })

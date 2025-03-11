@@ -13,7 +13,10 @@ export default defineConfig({
       '@ui/shared': resolve(__dirname, 'src/components/shared'),
       '@ui/modules': resolve(__dirname, 'src/modules'),
       '@ui/utils': resolve(__dirname, 'src/utils'),
-      '@ui/types': resolve(__dirname, 'src/types')
+      '@ui/types': resolve(__dirname, 'src/types'),
+      '@cv-generator/shared': resolve(__dirname, '../shared/src'),
+      '@cv-generator/core': resolve(__dirname, '../core/src'),
+      '@cv-generator/infrastructure': resolve(__dirname, '../infrastructure/src')
     },
   },
   optimizeDeps: {

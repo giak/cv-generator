@@ -11,7 +11,7 @@ Story-8: Implémentation du Système de Validation
 
 ## Statut
 
-In Progress (60% Complété)
+In Progress (80% Complété)
 
 ## Contexte
 
@@ -57,12 +57,12 @@ Story Points: 5
    3. - [x] Ajouter les value objects liés à la validation dans `core/cv/domain/value-objects/`
    4. - [x] Écrire les tests des services de validation
 
-3. - [ ] Composables Vue.js
+3. - [x] Composables Vue.js
 
-   1. - [ ] Développer le composable `useValidationResult` principal
-   2. - [ ] Créer le composable `useValidationCatalogue` pour la gestion du catalogue
-   3. - [ ] Implémenter les utilitaires spécifiques à Vue dans `helpers/result-handlers.utils.ts`
-   4. - [ ] Écrire les tests des composables
+   1. - [x] Développer le composable `useValidationResult` principal
+   2. - [x] Créer le composable `useValidationCatalogue` pour la gestion du catalogue
+   3. - [x] Implémenter les utilitaires spécifiques à Vue dans `helpers/result-handlers.utils.ts`
+   4. - [x] Écrire les tests des composables
 
 4. - [ ] Intégration et Démonstration
 
@@ -121,10 +121,14 @@ Story Points: 5
   - `message-systeme-validation.md`: Architecture et principes généraux
   - `message-systeme-catalogue.md`: Catalogue des messages d'erreur
   - `result-pattern-impl.md`: Détails d'implémentation et guide de migration
+- Les composables Vue.js ont été implémentés:
+  - `useValidationResult`: Gestion des résultats de validation dans les composants Vue
+  - `useValidationCatalogue`: Gestion du catalogue de messages d'erreur et d'aide
+  - Utilitaires spécifiques à Vue pour faciliter l'intégration
 - Les prochaines étapes sont:
-  - Finaliser la migration des value objects restants (`DateRange`, `Url`, etc.)
-  - Développer les composables Vue.js pour faciliter l'intégration UI
   - Intégrer le système dans les formulaires existants
+  - Créer une démo de référence pour montrer les différentes utilisations
+  - Préparer une session de partage de connaissances pour l'équipe
 
 ## Journal de Communication
 
@@ -140,3 +144,4 @@ Story Points: 5
 - **2023-11-10**: Finalisation de la documentation technique dans `docs/design/` avec les guides d'utilisation
 - **2023-11-15**: Mise à jour du catalogue des messages d'erreur avec les sections et exemples d'utilisation
 - **2023-11-20**: Amélioration du mécanisme de compatibilité rétroactive pour les tests existants, tous les tests passent
+- **2023-11-25**: Implémentation des composables Vue.js pour faciliter l'intégration dans les composants

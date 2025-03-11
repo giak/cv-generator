@@ -1,8 +1,8 @@
 # Architecture pour CV Generator
 
 **Statut**: Draft  
-**Version**: 1.5.0  
-**Date**: 2025-03-16  
+**Version**: 1.6.0  
+**Date**: 2025-03-11  
 **Auteur(s)**: Giak  
 **Approbateurs**: Giak
 
@@ -13,14 +13,15 @@
 | 2025-03-01 | 1.0.0   | Giak   | Version initiale du document                                                 |
 | 2025-03-05 | 1.1.0   | Giak   | Ajout des détails d'implémentation du stockage localStorage                  |
 | 2025-03-10 | 1.2.0   | Giak   | Précision des stratégies d'export et de validation                           |
-| 2025-03-15 | 1.4.0   | Giak   | Enrichissement des patterns architecturaux et workflow de test               |
-| 2025-03-16 | 1.5.0   | Giak   | Alignement avec le PRD et renforcement de la conformité JSON Resume standard |
+| 2025-03-10 | 1.4.0   | Giak   | Enrichissement des patterns architecturaux et workflow de test               |
+| 2025-03-10 | 1.5.0   | Giak   | Alignement avec le PRD et renforcement de la conformité JSON Resume standard |
+| 2025-03-11 | 1.6.0   | Giak   | Mise à jour avec la structure monorepo PNPM et alignement avec l'architecture de packages actuelle |
 
 ## Résumé Technique
 
 ### Vision technique générale
 
-CV Generator est conçu selon les principes de Clean Architecture et Domain-Driven Design (DDD) pour créer une application web légère et efficace qui permet d'éditer et d'exporter des CV au format JSON Resume standard (https://jsonresume.org/schema/). L'application est structurée comme un monorepo avec des packages distincts pour chaque couche architecturale, offrant une séparation claire des responsabilités. Elle fonctionne entièrement côté client avec persistance dans localStorage, sans nécessiter de backend dans sa version initiale. Elle permet d'exporter les CV dans plusieurs formats (JSON conforme au standard, HTML, PDF) et offre des conseils pour optimiser les CV pour les systèmes ATS (Applicant Tracking Systems).
+CV Generator est conçu selon les principes de Clean Architecture et Domain-Driven Design (DDD) pour créer une application web légère et efficace qui permet d'éditer et d'exporter des CV au format JSON Resume standard (https://jsonresume.org/schema/). L'application est structurée comme un monorepo PNPM avec des packages distincts pour chaque couche architecturale, offrant une séparation claire des responsabilités. Elle fonctionne entièrement côté client avec persistance dans localStorage, sans nécessiter de backend dans sa version initiale. Elle permet d'exporter les CV dans plusieurs formats (JSON conforme au standard, HTML, PDF) et offre des conseils pour optimiser les CV pour les systèmes ATS (Applicant Tracking Systems).
 
 ### Principes directeurs
 
@@ -32,6 +33,7 @@ CV Generator est conçu selon les principes de Clean Architecture et Domain-Driv
 - **Validation à plusieurs niveaux**: Validation dans les composants UI et dans le domaine
 - **Indépendance des packages**: Chaque package possède une responsabilité claire et des frontières bien définies
 - **Interopérabilité**: Adhérence stricte au standard JSON Resume pour garantir la compatibilité avec d'autres outils
+- **Modularité**: Organisation des packages avec des responsabilités claires et minimisation des dépendances
 
 ### Contraintes principales
 
@@ -41,8 +43,9 @@ CV Generator est conçu selon les principes de Clean Architecture et Domain-Driv
 - **Fonctionnement hors ligne**: Fonctionnement intégralement offline avec localStorage
 - **Formats d'export**: Support de l'export en JSON conforme au standard, HTML et PDF
 - **Taille de bundle**: Bundle JS initial < 200KB (gzippé)
-- **Qualité du code**: Couverture de tests > 80% pour les entités du domaine
+- **Qualité du code**: Couverture de tests > 80% pour les entités du domaine, > 70% pour l'UI
 - **Limitation de stockage**: Respect de la limite de 5MB du localStorage
+- **Maintenance**: Structure monorepo facilitant la maintenance et l'évolution du code
 
 ## Stack Technologique
 
@@ -50,11 +53,14 @@ CV Generator est conçu selon les principes de Clean Architecture et Domain-Driv
 | --------------- | --------------- | ------- | --------------------------------------------------------------------------------------------------- |
 | **Frontend**    | Vue.js          | 3.4+    | Framework progressif avec Composition API permettant une encapsulation efficace des fonctionnalités |
 |                 | TypeScript      | 5.7+    | Sécurité de type, meilleure IDE intégration, et réduction des bugs en production                    |
-|                 | Vite            | 6.0+    | Bundler rapide avec HMR, optimisé pour le développement moderne                                     |
-|                 | Pinia           | 2.1+    | Gestion d'état type-safe intégrée à Vue.js avec support pour les DevTools                           |
-|                 | Tailwind CSS    | 3.x     | CSS utilitaire permettant un développement rapide et cohérent sans CSS spécifique                   |
+|                 | Vite            | 6.2+    | Bundler rapide avec HMR, optimisé pour le développement moderne                                     |
+|                 | Pinia           | 2.3+    | Gestion d'état type-safe intégrée à Vue.js avec support pour les DevTools                           |
+|                 | Tailwind CSS    | 3.4+    | CSS utilitaire permettant un développement rapide et cohérent sans CSS spécifique                   |
+|                 | Vue Router      | 4.2+    | Navigation officielle pour Vue.js                                                                   |
+|                 | Heroicons Vue   | 2.2+    | Collection d'icônes de haute qualité pour Vue                                                      |
 | **Validation**  | Zod             | 3.22+   | Validation de schéma avec inférence de types TypeScript et support complet du standard JSON Resume  |
 | **Persistance** | localStorage    | -       | Stockage côté client pour persistance simple et fonctionnement hors ligne                           |
+| **Utilitaires** | Lodash-es       | 4.17+   | Bibliothèque d'utilitaires JavaScript optimisée pour ES modules                                     |
 | **Export**      | JSON            | -       | Export natif au format JSON Resume standard avec validation de conformité                           |
 |                 | HTML            | -       | Génération HTML via templates Vue.js                                                                |
 |                 | jsPDF           | 2.5+    | Génération de PDF côté client sans backend                                                          |
@@ -62,10 +68,11 @@ CV Generator est conçu selon les principes de Clean Architecture et Domain-Driv
 |                 | Testing Library | Latest  | Bibliothèque de test encourageant les bonnes pratiques                                              |
 | **CI/CD**       | GitHub Actions  | -       | Automatisation des tests, build et déploiement                                                      |
 | **Déploiement** | Docker          | -       | Conteneurisation pour déploiement cohérent                                                          |
+| **Gestion de packages** | PNPM    | 10.5+   | Gestionnaire de packages performant avec support natif des workspaces monorepo                      |
 
 ## Architecture Globale
 
-Notre architecture suit une version simplifiée du modèle Clean Architecture, adaptée à une application frontend sans backend, et organisée selon les principes DDD. L'application est structurée en packages délimitant les contextes (bounded contexts) et les couches.
+Notre architecture suit une version simplifiée du modèle Clean Architecture, adaptée à une application frontend sans backend, et organisée selon les principes DDD. L'application est structurée en monorepo PNPM avec des packages délimitant les contextes (bounded contexts) et les couches.
 
 ```mermaid
 graph TD
@@ -79,47 +86,81 @@ graph TD
     C -- Export PDF --> I[PDF File]
 
     subgraph "Presentation Layer"
-        B
+        B[UI Layer<br>@cv-generator/ui]
     end
 
     subgraph "Business Logic"
-        C
-        D
+        C[Application Layer<br>@cv-generator/core]
+        D[Domain Layer<br>@cv-generator/core]
     end
 
     subgraph "Storage"
-        E
-        F
+        E[Infrastructure Layer<br>@cv-generator/infrastructure]
+        F[localStorage]
+    end
+
+    subgraph "Shared"
+        J[Types & Utils<br>@cv-generator/shared]
     end
 
     subgraph "Export Formats"
-        G
-        H
-        I
+        G[JSON File]
+        H[HTML File]
+        I[PDF File]
     end
+
+    J -.-> B
+    J -.-> C
+    J -.-> D
+    J -.-> E
 ```
 
 ### Organisation des packages
 
-L'application est structurée en monorepo avec les packages suivants:
+L'application est structurée en monorepo PNPM avec les packages suivants:
 
 ```
-packages/
-├── core/              # Couches domaine et application
-├── infrastructure/    # Adaptateurs pour les services externes
-├── shared/            # Types et utilitaires partagés
-└── ui/                # Interface utilisateur Vue.js
+cv-generator/
+├── packages/
+│   ├── core/              # Couches domaine et application
+│   │   ├── src/
+│   │   │   ├── cv/        # Contexte borné CV
+│   │   │   │   ├── domain/
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   └── value-objects/
+│   │   │   │   ├── application/
+│   │   │   │   │   └── use-cases/
+│   │   │   │   └── ports/
+│   │   │   └── ...
+│   ├── infrastructure/    # Adaptateurs pour les services externes
+│   │   ├── src/
+│   │   │   ├── repositories/
+│   │   │   └── export/
+│   ├── shared/            # Types et utilitaires partagés
+│   │   ├── src/
+│   │   │   ├── types/
+│   │   │   ├── schemas/
+│   │   │   └── validators/
+│   └── ui/                # Interface utilisateur Vue.js
+│       ├── src/
+│       │   ├── components/
+│       │   ├── modules/
+│       │   ├── pages/
+│       │   └── App/
+├── pnpm-workspace.yaml    # Configuration du workspace
+└── package.json           # Scripts et dépendances racine
 ```
 
 ### Flux de données principaux
 
 1. **Création et édition de CV**:
 
-   - L'utilisateur interagit avec l'interface UI
-   - Les composables Vue.js appellent les use cases appropriés
+   - L'utilisateur interagit avec l'interface UI (@cv-generator/ui)
+   - Les composables Vue.js appellent les use cases appropriés (@cv-generator/core)
    - Les entités du domaine valident et encapsulent la logique métier JSON Resume standard
-   - Les données sont persistées dans localStorage via un repository
+   - Les données sont persistées dans localStorage via un repository (@cv-generator/infrastructure)
    - La validation se fait à plusieurs niveaux (UI, domaine, infrastructure)
+   - Les types et schémas partagés assurent la cohérence des données (@cv-generator/shared)
 
 2. **Exportation de CV**:
 
@@ -128,7 +169,7 @@ packages/
    - Pour JSON: le fichier est généré directement à partir de l'entité Resume avec validation de conformité
    - Pour HTML: un template Vue.js est utilisé pour générer la représentation HTML
    - Pour PDF: le HTML généré est converti en PDF via jsPDF
-   - Le fichier est proposé en téléchargement à l'utilisateur
+   - Le fichier est proposé en téléchargement à l'utilisateur via les services d'export (@cv-generator/infrastructure)
    - Pour JSON: une validation de conformité au standard est effectuée avant l'export
 
 3. **Optimisation ATS**:
@@ -136,6 +177,7 @@ packages/
    - Des conseils d'optimisation sont proposés en temps réel
    - Un score de lisibilité ATS est calculé
    - Des suggestions de mots-clés sont générées en fonction du contenu
+   - L'affichage des conseils est géré par des composants UI dédiés (@cv-generator/ui)
 
 ### Patterns architecturaux
 
@@ -147,6 +189,7 @@ packages/
 - **Strategy Pattern**: Différentes stratégies d'export selon le format choisi
 - **Value Objects Pattern**: Encapsulation de la validation et du comportement dans des objets de valeur
 - **Result Pattern**: Gestion fonctionnelle des erreurs et des résultats d'opérations
+- **Module Pattern**: Organisation du code en modules avec responsabilités claires dans le monorepo
 
 ## Composants Principaux
 
@@ -275,6 +318,8 @@ ui/
 - Vue.js, Pinia, Vue Router
 - Tailwind CSS
 - Zod (validation)
+- Heroicons Vue
+- Lodash-es
 
 ### 3. Package: Infrastructure (@cv-generator/infrastructure)
 
@@ -401,48 +446,6 @@ shared/
 - Formats MIME appropriés pour les fichiers exportés
 - Nommage cohérent des fichiers générés
 
-## Stratégie de Tests
-
-### Approche multi-niveaux
-
-1. **Tests unitaires**:
-
-   - Tests des entités du domaine et Value Objects
-   - Tests des use cases
-   - Tests des repositories
-   - Tests des composables Vue.js
-   - Validation de conformité au standard JSON Resume
-
-2. **Tests de composants**:
-
-   - Tests des composants Vue.js isolés
-   - Tests d'intégration des formulaires
-   - Validation de l'expérience utilisateur
-
-3. **Tests E2E**:
-   - Tests des parcours utilisateur complets
-   - Tests de création et édition de CV
-   - Tests d'export dans différents formats
-   - Tests d'interopérabilité avec des outils externes
-
-### Configuration des tests
-
-Chaque package possède sa propre configuration Vitest:
-
-- `packages/core/vitest.config.ts`: Tests unitaires pour la logique métier
-- `packages/infrastructure/vitest.config.ts`: Tests des repositories et services
-- `packages/shared/vitest.config.ts`: Tests des utilitaires et validateurs
-- `packages/ui/vitest.config.ts`: Tests des composants et composables
-
-### Couverture de code
-
-Objectifs de couverture:
-
-- Domaine (core): > 90%
-- Infrastructure: > 80%
-- UI: > 70%
-- Global: > 80%
-
 ## Considérations Techniques
 
 ### Sécurité
@@ -487,6 +490,7 @@ Objectifs de couverture:
    - Architecture modulaire permettant l'ajout de nouvelles fonctionnalités
    - Support pour de nouveaux formats d'export
    - Extension possible pour d'autres types de documents
+   - Structure monorepo facilitant l'ajout de nouvelles fonctionnalités
 
 ### Résilience
 
@@ -511,6 +515,51 @@ Objectifs de couverture:
    - Suivi des erreurs rencontrées par les utilisateurs
    - Dashboard de suivi des KPIs
    - Tests d'utilisabilité trimestriels
+
+## Stratégie de Tests
+
+### Approche multi-niveaux
+
+1. **Tests unitaires**:
+
+   - Tests des entités du domaine et Value Objects
+   - Tests des use cases
+   - Tests des repositories
+   - Tests des composables Vue.js
+   - Validation de conformité au standard JSON Resume
+
+2. **Tests de composants**:
+
+   - Tests des composants Vue.js isolés avec Testing Library
+   - Tests d'intégration des formulaires
+   - Validation de l'expérience utilisateur
+
+3. **Tests E2E**:
+   - Tests des parcours utilisateur complets avec Playwright
+   - Tests de création et édition de CV
+   - Tests d'export dans différents formats
+   - Tests d'interopérabilité avec des outils externes
+
+### Configuration des tests
+
+Chaque package possède sa propre configuration Vitest:
+
+- `packages/core/vitest.config.ts`: Tests unitaires pour la logique métier
+- `packages/infrastructure/vitest.config.ts`: Tests des repositories et services
+- `packages/shared/vitest.config.ts`: Tests des utilitaires et validateurs
+- `packages/ui/vitest.config.ts`: Tests des composants et composables
+
+Dans le workspace global:
+- `vitest.workspace.ts`: Configuration globale pour tous les packages
+
+### Couverture de code
+
+Objectifs de couverture:
+
+- Domaine (core): > 90%
+- Infrastructure: > 80%
+- UI: > 70%
+- Global: > 80%
 
 ## Validation et Qualité du Code
 
@@ -551,7 +600,7 @@ Objectifs de couverture:
 1. **Validation**:
 
    - Vérification des types TypeScript
-   - Linting avec ESLint
+   - Linting avec Biome
    - Tests unitaires et de composants
    - Analyse de couverture de code
    - Validation de conformité au standard JSON Resume
@@ -583,6 +632,7 @@ Objectifs de couverture:
 
 1. **Phase 1: MVP (1-2 semaines)**
 
+   - Mise en place de la structure monorepo PNPM avec les packages essentiels
    - Implémentation du schéma JSON Resume standard
    - Formulaires basiques d'édition
    - Stockage localStorage
@@ -609,7 +659,7 @@ Objectifs de couverture:
 
 1. **Fonctionnalités implémentées**:
 
-   - ✅ Architecture Clean et DDD (packages core, ui, infrastructure, shared)
+   - ✅ Architecture Clean et DDD avec structure monorepo PNPM
    - ✅ Structure de données basée sur JSON Resume standard
    - ✅ Validation avec Zod et Value Objects
    - ✅ Persistance localStorage
@@ -624,6 +674,7 @@ Objectifs de couverture:
    - 🔄 Amélioration UX des formulaires
    - 🔄 Tests E2E
    - 🔄 Support complet de toutes les sections du standard JSON Resume
+   - 🔄 Amélioration des interactions entre packages
 
 3. **Fonctionnalités planifiées**:
    - ⏳ Prévisualisation du CV
@@ -636,7 +687,8 @@ Objectifs de couverture:
 
 1. **Priorité Haute**:
 
-   - Structure core conforme au JSON Resume standard (✓ Implémenté)
+   - Structure monorepo PNPM avec packages bien définis (✓ Implémenté)
+   - Core conforme au JSON Resume standard (✓ Implémenté)
    - Validation des données selon le schéma officiel (✓ Implémenté)
    - Stockage dans localStorage (✓ Implémenté)
    - Export au format JSON conforme au standard (✓ Implémenté)
@@ -668,7 +720,7 @@ Objectifs de couverture:
    - **Statut**: Accepté
    - **Conséquences**: Simplicité d'implémentation, limite sur la quantité de données stockables (5MB)
 
-2. **ADR-002: Structure de packages**
+2. **ADR-002: Structure monorepo PNPM**
 
    - **Contexte**: Organisation du code pour faciliter la maintenance
    - **Décision**: Structure en packages distincts suivant Clean Architecture et DDD
@@ -690,10 +742,17 @@ Objectifs de couverture:
    - **Conséquences**: Meilleure expérience utilisateur, robustesse, détection précoce des erreurs
 
 5. **ADR-005: Conformité au standard JSON Resume**
+
    - **Contexte**: Besoin d'interopérabilité avec d'autres outils
    - **Décision**: Adhérence stricte au standard JSON Resume avec validation de conformité
    - **Statut**: Accepté
    - **Conséquences**: Interopérabilité garantie, complexité accrue de validation, meilleure portabilité des données
+
+6. **ADR-006: Utilisation de Zod pour la validation**
+   - **Contexte**: Besoin d'un système de validation robuste avec inférence de types
+   - **Décision**: Utilisation de Zod pour la validation à tous les niveaux
+   - **Statut**: Accepté
+   - **Conséquences**: Validation type-safe, meilleure intégration avec TypeScript, code plus maintenable
 
 ### Structure du schéma JSON Resume
 
@@ -796,6 +855,7 @@ L'application est basée sur le schéma JSON Resume standard (https://jsonresume
 - [jsPDF Documentation](https://rawgit.com/MrRio/jsPDF/master/docs/index.html)
 - [Meilleures pratiques ATS](https://www.jobscan.co/blog/ats-friendly-resume/)
 - [Web Storage API (localStorage)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API)
+- [PNPM Workspaces Documentation](https://pnpm.io/workspaces)
 
 ### Glossaire
 
@@ -807,8 +867,4 @@ L'application est basée sur le schéma JSON Resume standard (https://jsonresume
 - **Use Case**: Encapsule la logique d'application pour un cas d'utilisation spécifique
 - **JSON Resume**: Format standard pour stocker des CV au format JSON
 - **ATS (Applicant Tracking System)**: Système utilisé par les recruteurs pour filtrer automatiquement les CV
-- **Optimisation ATS**: Techniques pour améliorer la visibilité d'un CV dans les systèmes ATS
-- **Monorepo**: Organisation du code source où plusieurs projets/packages sont stockés dans un seul dépôt
-- **Interopérabilité**: Capacité des systèmes à fonctionner ensemble sans restriction d'accès ou de mise en œuvre
-- **Schéma de validation**: Définition formelle de la structure et des contraintes des données
-- **PWA (Progressive Web Application)**: Application web qui offre une expérience similaire aux applications natives
+- **Optimisation ATS**: Techniques pour améliorer la visibilité 
