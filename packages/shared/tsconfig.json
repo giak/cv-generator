@@ -17,7 +17,8 @@
       "@cv-generator/infrastructure/*": ["../infrastructure/src/*"],
       "@cv-generator/ui": ["../ui/src"],
       "@cv-generator/ui/*": ["../ui/src/*"]
-    }
+    },
+    "composite": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts"]

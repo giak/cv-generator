@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useErrorStore } from '../../../../core/stores/error'
 import { ManageResume } from '@cv-generator/core'
 import type { EducationInterface } from '@cv-generator/shared/src/types/resume.interface'
-import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository'
+import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
 import { v4 as uuidv4 } from 'uuid'
 
 // Interface extended to include ID

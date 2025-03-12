@@ -1,6 +1,6 @@
-import type { Resume, ResumeInterface } from "@cv-generator/core"
+import type { ResumeInterface } from "@cv-generator/core"
 import { ManageResume, Resume as ResumeEntity } from "@cv-generator/core"
-import { LocalStorageResumeRepository } from "@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository"
+import { LocalStorageResumeRepository } from "@cv-generator/infrastructure/repositories/LocalStorageResumeRepository"
 import { defineStore } from "pinia"
 import { ref } from "vue"
 import { useErrorStore } from "../../../../core/stores/error"
@@ -10,7 +10,7 @@ import { useEducationStore } from "./education"
 import { useProjectStore } from "./project"
 
 interface ResumeStoreState {
-  resume: Resume | null
+  resume: ResumeEntity | null
   loading: boolean
 }
 
@@ -28,7 +28,7 @@ function createUseCase() {
 
 export const useResumeStore = defineStore("cv.resume", () => {
   // State
-  const resume = ref<Resume | null>(null)
+  const resume = ref<ResumeEntity | null>(null)
   const loading = ref(false)
   
   // Get error store

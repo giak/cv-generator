@@ -5,18 +5,28 @@
  * Ce composable facilite l'intégration des objets ResultType dans les composants Vue.
  */
 
-import { ref, computed, Ref, ComputedRef, UnwrapRef } from 'vue';
+import {
+  ref,
+  computed,
+  reactive,
+  watch,
+  Ref,
+  ComputedRef,
+  UnwrapRef,
+} from 'vue';
 
 // Using type imports to avoid runtime dependencies
 import type {
   ResultType,
   ValidationErrorInterface,
   ValidationSeverityType,
-  FormValidationResultType
+  FormValidationResultType,
+  SuccessType,
+  FailureType
 } from '@cv-generator/shared';
 
 // Import de l'enum ValidationLayerType pour l'utiliser
-import { ValidationLayerType as LayerType } from '@cv-generator/shared';
+import { ValidationLayerType } from '@cv-generator/shared';
 
 // These utility functions will be provided by consumers of this composable
 // This avoids direct runtime dependencies
@@ -52,51 +62,28 @@ export interface ValidationResultOptionsInterface {
   dirtyAfterMs?: number;
 }
 
-export interface FieldValidationStateInterface {
-  /**
-   * Les erreurs pour ce champ
-   */
-  errors: Ref<ValidationErrorInterface[]>;
-  
-  /**
-   * Premier message d'erreur (pour affichage simplifié)
-   */
-  firstErrorMessage: ComputedRef<string>;
-  
-  /**
-   * Niveau de sévérité le plus élevé parmi toutes les erreurs
-   */
-  highestSeverity: ComputedRef<ValidationSeverityType | null>;
-  
-  /**
-   * Si au moins une erreur existe pour ce champ 
-   */
-  hasError: ComputedRef<boolean>;
-  
-  /**
-   * Si au moins un warning existe pour ce champ
-   */
-  hasWarning: ComputedRef<boolean>;
-  
-  /**
-   * Si au moins une information existe pour ce champ
-   */
-  hasInfo: ComputedRef<boolean>;
-  
-  /**
-   * Si le champ a déjà été modifié/interagi avec
-   */
-  isDirty: Ref<boolean>;
-  
-  /**
-   * Marquer le champ comme modifié
-   */
-  markDirty: () => void;
-  
-  /**
-   * Réinitialiser l'état du champ
-   */
-  reset: () => void;
+/**
+ * ValidationFieldState contient l'état de validation pour un champ spécifique
+ */
+export interface ValidationFieldState {
+  /** Liste des erreurs et avertissements pour ce champ */
+  errors: Ref<ValidationErrorInterface[]>
+  /** Indique si le champ a au moins une erreur */
+  hasError: ComputedRef<boolean>
+  /** Indique si le champ a au moins un avertissement */
+  hasWarning: ComputedRef<boolean>
+  /** Indique si le champ a au moins une information */
+  hasInfo: ComputedRef<boolean>
+  /** Sévérité la plus élevée des problèmes (error > warning > info) */
+  highestSeverity: ComputedRef<'error' | 'warning' | 'info' | null>
+  /** Premier message d'erreur (pour affichage simple) */
+  firstErrorMessage: ComputedRef<string>
+  /** Indique si le champ a été modifié par l'utilisateur */
+  isDirty: Ref<boolean>
+  /** Marque le champ comme modifié */
+  markDirty: () => void
+  /** Réinitialise l'état du champ */
+  reset: () => void
 }
 
 export interface UseValidationResultReturnInterface<T> {
@@ -138,7 +125,7 @@ export interface UseValidationResultReturnInterface<T> {
   /**
    * Obtenir un objet d'état de validation pour un champ spécifique
    */
-  getFieldState: (fieldName: string) => FieldValidationStateInterface;
+  getFieldState: (fieldName: string) => ValidationFieldState;
   
   /**
    * Liste des champs avec erreurs
@@ -165,12 +152,16 @@ export interface UseValidationResultReturnInterface<T> {
 }
 
 /**
- * Composable pour gérer les résultats de validation dans Vue
- * Facilite l'intégration des types Result dans les composants
+ * useValidationResult - Composable pour gérer les résultats de validation
  * 
- * @param initialResult Résultat initial
- * @param options Options de configuration
- * @returns Interface pour interagir avec les résultats de validation
+ * Ce composable permet de:
+ * - Stocker et mettre à jour un résultat de validation (ResultType)
+ * - Extraire les erreurs et avertissements du résultat
+ * - Gérer l'état de validation par champ (dirty, errors, warnings)
+ * - Vérifier la validité globale du résultat
+ * 
+ * @param initialResult Résultat initial de validation (optionnel)
+ * @returns Méthodes et propriétés pour gérer le résultat de validation
  */
 export function useValidationResult<T>(
   initialResult: FormValidationResultType<T> | null = null,
@@ -178,26 +169,40 @@ export function useValidationResult<T>(
 ): UseValidationResultReturnInterface<T> {
   const { debug = false, dirtyAfterMs = 500 } = options;
   
-  // État du résultat
-  const result = ref<FormValidationResultType<T> | null>(initialResult);
+  // État principal - le résultat de validation
+  const result = ref<FormValidationResultType<T> | null>(initialResult) as Ref<FormValidationResultType<T> | null>;
+  
+  // État des champs
+  const dirtyFields = ref<Set<string>>(new Set());
+  
+  // Compteurs pour les métriques de performance
+  let validationCount = 0;
+  let validationTime = 0;
   
   // Map des états de champs pour le suivi
-  const fieldStates = new Map<string, FieldValidationStateInterface>();
+  const fieldStates = new Map<string, ValidationFieldState>();
   
-  // Mettre à jour le résultat
+  // Mise à jour du résultat de validation
   const setResult = (newResult: FormValidationResultType<T>): void => {
     if (debug) {
-      console.debug('[useValidationResult] Setting new result:', newResult);
+      console.group('ValidationResult: setResult');
+      console.log('Previous:', result.value);
+      console.log('New:', newResult);
+      console.groupEnd();
     }
-    result.value = newResult;
+    
+    // Conversion explicite pour assurer la compatibilité des types
+    result.value = newResult as FormValidationResultType<T>;
   };
   
-  // Réinitialiser le résultat
+  // Réinitialisation du résultat
   const resetResult = (): void => {
     if (debug) {
-      console.debug('[useValidationResult] Resetting result');
+      console.log('ValidationResult: resetResult');
     }
+    
     result.value = null;
+    dirtyFields.value.clear();
     // Réinitialiser tous les états de champs
     fieldStates.forEach(state => state.reset());
   };
@@ -214,12 +219,18 @@ export function useValidationResult<T>(
   
   // Computed: tous les warnings
   const allWarnings = computed<ValidationErrorInterface[]>(() => {
-    if (!result.value || isSuccess(result.value)) return [];
+    if (!result.value) return [];
     
-    // Utiliser une assertion de type sécurisée
-    const failureResult = result.value as { success: false, error: ValidationErrorInterface[] };
-    const errors = failureResult.error || [];
-    return errors.filter((e: any) => e.severity === 'warning');
+    if (isSuccess(result.value)) {
+      // Pour les résultats de succès, récupérer les warnings du champ warnings
+      const successResult = result.value as SuccessType<T>;
+      return successResult.warnings || [];
+    } else {
+      // Pour les résultats d'échec, filtrer les erreurs avec severity === 'warning'
+      const failureResult = result.value as FailureType<ValidationErrorInterface[]>;
+      const errors = failureResult.error || [];
+      return errors.filter((e: any) => e.severity === 'warning');
+    }
   });
   
   // Computed: est-ce un succès
@@ -266,7 +277,7 @@ export function useValidationResult<T>(
   });
   
   // Obtenir l'état de validation d'un champ spécifique
-  const getFieldState = (fieldName: string): FieldValidationStateInterface => {
+  const getFieldState = (fieldName: string): ValidationFieldState => {
     // Vérifier si on a déjà créé cet état
     if (fieldStates.has(fieldName)) {
       return fieldStates.get(fieldName)!;
@@ -311,7 +322,7 @@ export function useValidationResult<T>(
     };
     
     // Créer l'objet d'état
-    const state: FieldValidationStateInterface = {
+    const state: ValidationFieldState = {
       errors,
       firstErrorMessage,
       highestSeverity,

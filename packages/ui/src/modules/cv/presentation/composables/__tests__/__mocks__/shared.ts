@@ -5,7 +5,11 @@
 // Types
 export type ValidationSeverityType = 'info' | 'warning' | 'error';
 
-export type ValidationLayerType = 'domain' | 'application' | 'presentation';
+export enum ValidationLayerType {
+  DOMAIN = 'domain',
+  APPLICATION = 'application',
+  PRESENTATION = 'presentation'
+};
 
 export interface ValidationErrorInterface {
   code: string;

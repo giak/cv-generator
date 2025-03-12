@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref, reactive } from 'vue'
 import { useCollectionField } from '../useCollectionField'
+import { 
+  createSuccess, 
+  createFailure, 
+  ResultType, 
+  ValidationLayerType,
+  ValidationSeverityType,
+  ValidationErrorInterface
+} from '@cv-generator/shared'
 
 // Mock uuid
 vi.mock('uuid', () => ({
@@ -227,41 +235,44 @@ describe('useCollectionField', () => {
   })
   
   it('should validate items before adding', () => {
-    const validateItem = vi.fn((item: TestItem) => {
-      const errors: Record<string, string> = {}
-      
+    const validateItem = vi.fn((item: TestItem): ResultType<TestItem> => {
       if (!item.name) {
-        errors.name = 'Name is required'
+        return createFailure<TestItem>([{
+          code: 'ERR_REQUIRED_NAME',
+          message: 'Name is required',
+          field: 'name',
+          severity: 'error' as ValidationSeverityType,
+          layer: 'presentation' as ValidationLayerType
+        }]);
       }
       
-      return {
-        isValid: Object.keys(errors).length === 0,
-        errors
-      }
-    })
+      return createSuccess(item);
+    });
     
-    const { addItem, items, validationErrors } = useCollectionField<TestItem>({
+    const { addItem, items, validationErrors, lastValidationResult } = useCollectionField<TestItem>({
       fieldName: 'items',
       updateField: updateFieldFn,
       collection: () => formModel.items,
       defaultItemValues,
       validateItem
-    })
+    });
     
     // Try to add invalid item
-    addItem({ name: '', value: 42 })
+    addItem({ name: '', value: 42 });
     
     // Should not be added
-    expect(items.value).toHaveLength(0)
-    expect(validationErrors.value).toEqual({ name: 'Name is required' })
-    expect(updateFieldFn).not.toHaveBeenCalled()
+    expect(items.value).toHaveLength(0);
+    expect(validationErrors.value).toEqual({ name: 'Name is required' });
+    expect(lastValidationResult.value?.success).toBe(false);
+    expect(updateFieldFn).not.toHaveBeenCalled();
     
     // Try to add valid item
-    addItem({ name: 'Valid Item', value: 42 })
+    addItem({ name: 'Valid Item', value: 42 });
     
     // Should be added
-    expect(items.value).toHaveLength(1)
-    expect(items.value[0].name).toBe('Valid Item')
+    expect(items.value).toHaveLength(1);
+    expect(items.value[0].name).toBe('Valid Item');
+    expect(lastValidationResult.value?.success).toBe(true);
   })
   
   it('should reorder items', () => {

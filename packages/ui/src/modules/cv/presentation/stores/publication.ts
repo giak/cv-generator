@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { useErrorStore } from '../../../../core/stores/error'
 import { ManageResume } from '@cv-generator/core'
 import type { PublicationInterface } from '@cv-generator/shared/src/types/resume.interface'
-import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository'
+import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
 import { useResumeStore } from './resume'
 
 // Interface extended to include ID

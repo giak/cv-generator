@@ -9,7 +9,8 @@ import { ref } from 'vue';
 import {
   ValidationErrorInterface,
   createSuccess,
-  createFailure
+  createFailure,
+  ValidationLayerType
 } from './__mocks__/shared';
 
 // Mock the module before importing the component that uses it
@@ -24,9 +25,9 @@ import { useValidationResult } from '../validation/useValidationResult';
 describe('useValidationResult', () => {
   // Créer des données de test
   const validationErrors: ValidationErrorInterface[] = [
-    { code: 'ERR1', message: 'Erreur 1', field: 'field1', severity: 'error', layer: 'domain' },
-    { code: 'ERR2', message: 'Erreur 2', field: 'field2', severity: 'error', layer: 'domain' },
-    { code: 'WARN1', message: 'Warning 1', field: 'field1', severity: 'warning', layer: 'domain' }
+    { code: 'ERR1', message: 'Erreur 1', field: 'field1', severity: 'error', layer: ValidationLayerType.DOMAIN },
+    { code: 'ERR2', message: 'Erreur 2', field: 'field2', severity: 'error', layer: ValidationLayerType.DOMAIN },
+    { code: 'WARN1', message: 'Warning 1', field: 'field1', severity: 'warning', layer: ValidationLayerType.DOMAIN }
   ];
   
   const successResult = createSuccess({ id: 1, name: 'Test' });
@@ -170,5 +171,98 @@ describe('useValidationResult', () => {
     
     setResult(failureResult);
     expect(totalIssues.value).toBe(3); // 2 erreurs + 1 warning
+  });
+  
+  // Tests supplémentaires pour la transition entre états
+  it('devrait gérer correctement la transition d\'un résultat d\'erreur à un succès', () => {
+    const { setResult, result, isSuccess, isFailure, allErrors, totalIssues } = useValidationResult(failureResult);
+    
+    // Initialement en erreur
+    expect(isFailure.value).toBe(true);
+    expect(allErrors.value.length).toBeGreaterThan(0);
+    
+    // Passer à un succès
+    setResult(successResult);
+    
+    expect(isSuccess.value).toBe(true);
+    expect(isFailure.value).toBe(false);
+    expect(allErrors.value).toHaveLength(0);
+    expect(totalIssues.value).toBe(0);
+  });
+  
+  it('devrait supporter des erreurs avec des structures imbriquées dans additionalInfo', () => {
+    // Créer une erreur avec des informations additionnelles imbriquées
+    const complexError: ValidationErrorInterface = {
+      code: 'COMPLEX_ERROR',
+      message: 'Erreur complexe',
+      field: 'complexField',
+      severity: 'error',
+      layer: ValidationLayerType.DOMAIN,
+      additionalInfo: {
+        nestedObject: {
+          property1: 'value1',
+          property2: [1, 2, 3]
+        },
+        arrayValue: ['a', 'b', 'c']
+      }
+    };
+    
+    const complexFailureResult = createFailure([complexError]);
+    const { result, allErrors } = useValidationResult(complexFailureResult);
+    
+    expect(allErrors.value).toHaveLength(1);
+    expect(allErrors.value[0].code).toBe('COMPLEX_ERROR');
+    expect(allErrors.value[0].additionalInfo).toBeDefined();
+    expect(allErrors.value[0].additionalInfo?.nestedObject).toBeDefined();
+    expect(allErrors.value[0].additionalInfo?.arrayValue).toHaveLength(3);
+  });
+  
+  it('devrait supporter des transitions multiples entre succès et échec', () => {
+    const { setResult, isSuccess, isFailure, totalIssues, resetResult } = useValidationResult();
+    
+    // Séquence: null -> succès -> erreur -> succès -> null
+    expect(isSuccess.value).toBe(false);
+    expect(isFailure.value).toBe(false);
+    expect(totalIssues.value).toBe(0);
+    
+    setResult(successResult);
+    expect(isSuccess.value).toBe(true);
+    expect(isFailure.value).toBe(false);
+    
+    setResult(failureResult);
+    expect(isSuccess.value).toBe(false);
+    expect(isFailure.value).toBe(true);
+    expect(totalIssues.value).toBe(3);
+    
+    setResult(successResult);
+    expect(isSuccess.value).toBe(true);
+    expect(isFailure.value).toBe(false);
+    expect(totalIssues.value).toBe(0);
+    
+    // Réinitialiser
+    resetResult();
+    expect(isSuccess.value).toBe(false);
+    expect(isFailure.value).toBe(false);
+  });
+  
+  it('devrait gérer correctement l\'état dirty entre les transitions de résultats', () => {
+    const { setResult, getFieldState } = useValidationResult(failureResult);
+    
+    // Marquer un champ comme dirty
+    const field1State = getFieldState('field1');
+    field1State.markDirty();
+    expect(field1State.isDirty.value).toBe(true);
+    
+    // Changer le résultat mais l'état dirty devrait persister
+    setResult(successResult);
+    expect(field1State.isDirty.value).toBe(true);
+    
+    // Retour à l'erreur - l'état dirty devrait toujours persister
+    setResult(failureResult);
+    expect(field1State.isDirty.value).toBe(true);
+    
+    // Réinitialiser devrait effacer l'état dirty
+    field1State.reset();
+    expect(field1State.isDirty.value).toBe(false);
   });
 }); 

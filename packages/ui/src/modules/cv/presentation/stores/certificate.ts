@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { useErrorStore } from '../../../../core/stores/error'
 import { ManageResume } from '@cv-generator/core'
 import type { CertificateInterface } from '@cv-generator/shared/src/types/resume.interface'
-import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository'
+import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
 
 export interface CertificateWithId extends CertificateInterface {
   id: string

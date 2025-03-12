@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useErrorStore } from '../../../../core/stores/error'
 import { ManageResume } from '@cv-generator/core'
 import type { WorkInterface } from '@cv-generator/shared/src/types/resume.interface'
-import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository'
+import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
 
 // Interface étendue pour inclure l'ID
 export interface WorkWithId extends WorkInterface {

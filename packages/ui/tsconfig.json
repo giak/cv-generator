@@ -35,10 +35,19 @@
       "@cv-generator/core/*": ["../core/src/*"],
       "@cv-generator/infrastructure": ["../infrastructure/src"],
       "@cv-generator/infrastructure/*": ["../infrastructure/src/*"]
-    }
+    },
+    "composite": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/types/@cv-generator-shared.d.ts.old"],
+  "include": [
+    "src/**/*.ts", 
+    "src/**/*.d.ts", 
+    "src/**/*.tsx", 
+    "src/**/*.vue", 
+    "../shared/src/**/*.ts",
+    "../shared/src/**/*.d.ts"
+  ],
   "references": [
-    { "path": "./tsconfig.node.json" }
+    { "path": "./tsconfig.node.json" },
+    { "path": "../shared" }
   ]
 } 

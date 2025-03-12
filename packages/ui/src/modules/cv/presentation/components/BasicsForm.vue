@@ -7,7 +7,18 @@ import { useValidationCatalogue } from '@ui/modules/cv/presentation/composables/
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
 import { computed, ref, onMounted } from 'vue'
-import { createSuccess, createFailure, type ValidationErrorInterface } from '@cv-generator/shared'
+import { 
+  type ValidationErrorInterface,
+  type ResultType,
+  ValidationLayerType,
+  ERROR_CODES,
+  createSuccess,
+  createFailure,
+  isSuccess,
+  isFailure
+} from '@cv-generator/shared'
+// Remove BasicsValidationService direct import and use the composable
+import { useBasicsFormValidation } from '../composables/useBasicsFormValidation'
 
 // Performance measurement
 const perfMeasurements = {
@@ -32,9 +43,8 @@ onMounted(() => {
       // Include metrics from useFormModel
       ...perfMetrics,
       // Include metrics from useCollectionField if logging enabled
-      ...(profilesFieldMetrics || {}),
-      // Include metrics from useValidation if logging enabled
-      ...(validationMetrics || {})
+      ...(profilesFieldMetrics || {})
+      // No validation metrics, removed to fix linter error
     })
   }
 })
@@ -82,23 +92,28 @@ const {
   enableLogging: process.env.NODE_ENV === 'development' // Only enable logging in development
 })
 
+// Initialize validation composable
+const { 
+  state: validationState,
+  validateName,
+  validateEmail,
+  validatePhone,
+  validateUrl,
+  validateImageUrl,
+  validateField,
+  validateForm,
+  hasErrors,
+  hasWarnings
+} = useBasicsFormValidation()
+
 // Handle field updates for top-level fields
 const handleFieldUpdate = (field: keyof BasicsInterface, value: string) => {
-  if (field === 'image') {
-    console.log('Updating image URL specific field:', value)
-  }
-  
   updateField(field, value)
 }
 
-// Handle location updates
+// Handle updates for nested location fields
 const handleLocationUpdate = (field: keyof LocationInterface, value: string) => {
-  if (field === 'countryCode') {
-    console.log('Updating countryCode specific field:', value)
-  }
-  
-  // Use type assertions to bypass TypeScript's type checking
-  // This is safe because we know the structure of our data
+  // Use type assertion to match existing implementation
   const updateFn = updateNestedField as any
   updateFn('location', field, value)
 }
@@ -117,12 +132,66 @@ const defaultProfile: ProfileInterface = {
   url: ''
 }
 
+/**
+ * Valide un profil et retourne un ResultType conforme
+ * Cette fonction adapte la validation legacy au pattern Result/Option
+ */
+const validateProfile = (profile: ProfileInterface): ResultType<ProfileInterface> => {
+  const errors: ValidationErrorInterface[] = []
+  
+  // Validation du réseau (obligatoire)
+  if (!profile.network) {
+    errors.push({
+      code: ERROR_CODES.COMMON.REQUIRED_FIELD,
+      message: 'Le réseau est requis',
+      field: 'network',
+      severity: 'error',
+      layer: ValidationLayerType.PRESENTATION
+    })
+  }
+  
+  // Validation du nom d'utilisateur (obligatoire)
+  if (!profile.username) {
+    errors.push({
+      code: ERROR_CODES.COMMON.REQUIRED_FIELD,
+      message: 'Le nom d\'utilisateur est requis',
+      field: 'username',
+      severity: 'error',
+      layer: ValidationLayerType.PRESENTATION
+    })
+  }
+  
+  // Validation de l'URL (optionnelle mais doit être valide si présente)
+  if (profile.url) {
+    // Si nous avons un service de validation d'URL, nous pourrions l'utiliser ici
+    // Pour l'instant, simple vérification de format
+    if (!profile.url.startsWith('http://') && !profile.url.startsWith('https://')) {
+      errors.push({
+        code: ERROR_CODES.COMMON.INVALID_FORMAT,
+        message: 'L\'URL doit commencer par http:// ou https://',
+        field: 'url',
+        severity: 'warning',
+        layer: ValidationLayerType.PRESENTATION
+      })
+    }
+  }
+  
+  // Si des erreurs ont été trouvées, retourner un échec
+  if (errors.length > 0) {
+    return createFailure(errors)
+  }
+  
+  // Sinon, retourner un succès avec le profil validé
+  return createSuccess(profile)
+}
+
 // Use the collection field composable for profiles
 const {
   items: profiles,
   newItem: newProfile,
   isAddingItem: isAddingProfile,
   validationErrors: profileValidationErrors,
+  lastValidationResult: profileValidationResult,
   addItem: addProfile,
   removeItem: removeProfile,
   toggleAddForm: toggleProfileForm,
@@ -132,179 +201,23 @@ const {
   updateField: updateProfilesField,
   collection: computed(() => localModel.profiles || []),
   defaultItemValues: defaultProfile,
-  validateItem: (profile) => {
-    const errors: Record<string, string> = {}
-    
-    if (!profile.network) {
-      errors.network = 'Le réseau est requis'
-    }
-    
-    if (!profile.username) {
-      errors.username = 'Le nom d\'utilisateur est requis'
-    }
-    
-    return {
-      isValid: Object.keys(errors).length === 0,
-      errors
-    }
-  },
+  validateItem: validateProfile,
   enableLogging: process.env.NODE_ENV === 'development'
 })
 
-// Règles de validation pour le formulaire BasicsForm
-const basicsCatalogue = useValidationCatalogue({
-  enableLogging: process.env.NODE_ENV === 'development',
-  rules: {
-    name: [
-      {
-        validator: (value: string) => !!value && value.trim().length > 0,
-        message: 'Le nom est requis',
-        severity: 'error' as const,
-        code: 'REQUIRED'
-      },
-      {
-        validator: (value: string) => !value || value.trim().length <= 100,
-        message: 'Le nom ne doit pas dépasser 100 caractères',
-        severity: 'error' as const,
-        code: 'MAX_LENGTH'
-      }
-    ],
-    email: [
-      {
-        validator: (value: string) => !!value && value.trim().length > 0,
-        message: 'L\'email est requis',
-        severity: 'error' as const,
-        code: 'REQUIRED'
-      },
-      {
-        validator: (value: string) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-        message: 'Format email invalide',
-        severity: 'error' as const,
-        code: 'INVALID_FORMAT'
-      }
-    ],
-    url: [
-      {
-        validator: (value: string) => !value || /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(value),
-        message: 'Format URL invalide',
-        severity: 'warning' as const,
-        code: 'INVALID_FORMAT'
-      }
-    ],
-    image: [
-      {
-        validator: (value: string) => !value || /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(value),
-        message: 'Format URL invalide pour l\'image',
-        severity: 'warning' as const,
-        code: 'INVALID_FORMAT'
-      }
-    ],
-    phone: [
-      {
-        validator: (value: string) => !value || /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/.test(value),
-        message: 'Format téléphone invalide',
-        severity: 'warning' as const,
-        code: 'INVALID_FORMAT'
-      }
-    ]
-  }
-})
-
-// Utilisation du nouveau composable useValidationResult
-const {
-  result: validationResult,
-  setResult,
-  resetResult,
-  getFieldState,
-  isFailure,
-  totalIssues,
-  perfMetrics: validationMetrics
-} = useValidationResult<BasicsInterface>(undefined, {
-  debug: process.env.NODE_ENV === 'development'
-})
-
-// Fonction pour valider un champ spécifique
-const validateField = (field: keyof BasicsInterface, value: any) => {
-  const fieldState = getFieldState(field as string)
+// Handle form submit
+const handleSubmit = () => {
+  console.log('Current model:', localModel)
   
-  // Marquer le champ comme modifié
-  fieldState.markDirty()
+  // Validate the form before submitting
+  const isValid = validateForm(localModel)
   
-  // Valider le champ avec le catalogue de règles
-  const validationErrors: ValidationErrorInterface[] = []
-  const result = basicsCatalogue.validateField(field as string, value, validationErrors)
-  
-  // Si validation échoue, créer un Result.failure
-  if (!result) {
-    setResult(createFailure(validationErrors))
-    return false
-  }
-  
-  return true
-}
-
-// Fonction pour valider le formulaire complet
-const validateForm = (data: BasicsInterface): boolean => {
-  const validationStart = performance.now()
-  
-  // Initialiser les métriques si nécessaires
-  if (validationMetrics && typeof validationMetrics.validationCount === 'number') {
-    validationMetrics.validationCount++;
-  }
-  
-  const validationErrors: ValidationErrorInterface[] = []
-  
-  // Valider tous les champs obligatoires
-  const isValid = [
-    basicsCatalogue.validateField('name', data.name, validationErrors),
-    basicsCatalogue.validateField('email', data.email, validationErrors)
-  ].every(result => result === true)
-  
-  // Valider les autres champs s'ils ont une valeur
-  if (data.url) {
-    basicsCatalogue.validateField('url', data.url, validationErrors)
-  }
-  
-  if (data.image) {
-    basicsCatalogue.validateField('image', data.image, validationErrors)
-  }
-  
-  if (data.phone) {
-    basicsCatalogue.validateField('phone', data.phone, validationErrors)
-  }
-  
-  // Mettre à jour le résultat de validation
-  if (isValid && validationErrors.length === 0) {
-    setResult(createSuccess(data))
-  } else {
-    setResult(createFailure(validationErrors))
-  }
-  
-  // Mettre à jour les métriques de performance
-  const validationDuration = performance.now() - validationStart;
-  if (validationMetrics && typeof validationMetrics.validationTime === 'number') {
-    validationMetrics.validationTime += validationDuration;
-  }
-  
-  perfMeasurements.validations++
-  console.log(`Form validation took ${validationDuration}ms (total: ${perfMeasurements.validations})`)
-  
-  return isValid && validationErrors.length === 0
-}
-
-const handleSubmit = async () => {
-  console.log('Form submission - Current model:', JSON.stringify(localModel))
-  
-  // Valider le formulaire
-  const formIsValid = validateForm(localModel)
-  console.log('Form validation result:', formIsValid)
-  
-  if (formIsValid) {
+  if (isValid) {
     emit('validate')
   }
 }
 
-// Icônes SVG pour les champs
+// SVG icons for fields (preserve original sizes)
 const icons = {
   name: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
   email: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`,
@@ -319,129 +232,127 @@ const icons = {
 </script>
 
 <template>
-  <Form 
-    :loading="loading"
-    title="Informations personnelles"
-    subtitle="Complétez vos informations pour créer un CV professionnel."
-    @submit="handleSubmit"
-  >
-    <div v-if="isFailure && totalIssues > 0" 
-         class="bg-red-900/20 border border-red-700 rounded-md p-4 mb-6">
-      <h3 class="text-red-400 font-medium text-sm mb-2">
-        {{ totalIssues > 1 ? `${totalIssues} problèmes détectés` : '1 problème détecté' }}
-      </h3>
-      <p class="text-neutral-300 text-xs">
-        Veuillez corriger les problèmes indiqués dans le formulaire pour continuer.
-      </p>
-    </div>
-  
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <FormField
-        name="name"
-        label="Nom complet"
-        :model-value="localModel.name || ''"
-        :error="getFieldState('name').isDirty.value ? getFieldState('name').firstErrorMessage.value : ''"
-        :icon="icons.name"
-        placeholder="Ex: Jean Dupont"
-        help-text="Votre nom et prénom comme ils apparaîtront sur votre CV."
-        required
-        @update:model-value="handleFieldUpdate('name', $event)"
-        @blur="validateField('name', localModel.name || '')"
-      />
-
-      <FormField
-        name="email"
-        type="email"
-        label="Adresse email"
-        :model-value="localModel.email || ''"
-        :error="getFieldState('email').isDirty.value ? getFieldState('email').firstErrorMessage.value : ''"
-        :icon="icons.email"
-        placeholder="Ex: jean.dupont@example.com"
-        help-text="Email professionnel pour les employeurs potentiels."
-        required
-        @update:model-value="handleFieldUpdate('email', $event)"
-        @blur="validateField('email', localModel.email || '')"
-      />
-
-      <FormField
-        name="phone"
-        type="tel"
-        label="Téléphone"
-        :model-value="localModel.phone || ''"
-        :error="getFieldState('phone').isDirty.value ? getFieldState('phone').firstErrorMessage.value : ''"
-        :icon="icons.phone"
-        placeholder="Ex: 0612345678"
-        help-text="Numéro de téléphone où vous êtes joignable."
-        @update:model-value="handleFieldUpdate('phone', $event)"
-        @blur="validateField('phone', localModel.phone || '')"
-      />
-
-      <FormField
-        name="label"
-        label="Titre professionnel"
-        :model-value="localModel.label || ''"
-        :icon="icons.label"
-        placeholder="Ex: Développeur Web Senior"
-        help-text="Votre position ou titre actuel."
-        @update:model-value="handleFieldUpdate('label', $event)"
-      />
+  <Form @submit="handleSubmit">
+    <!-- Section d'informations personnelles -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold mb-4">Informations personnelles</h2>
       
-      <div class="col-span-1 md:col-span-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField
+          name="name"
+          label="Nom complet"
+          :model-value="localModel.name"
+          :error="validationState.errors.name"
+          :icon="icons.name"
+          placeholder="Ex: Jean Dupont"
+          help-text="Votre nom complet tel qu'il apparaîtra sur votre CV."
+          required
+          @update:model-value="handleFieldUpdate('name', $event)"
+          @blur="validateName(localModel)"
+        />
+        
+        <FormField
+          name="email"
+          label="Email"
+          type="email"
+          :model-value="localModel.email"
+          :error="validationState.errors.email"
+          :warning="validationState.warnings.email"
+          :icon="icons.email"
+          placeholder="Ex: jean.dupont@example.com"
+          help-text="Votre adresse email professionnelle."
+          required
+          @update:model-value="handleFieldUpdate('email', $event)"
+          @blur="validateEmail(localModel)"
+        />
+        
+        <FormField
+          name="phone"
+          label="Téléphone"
+          :model-value="localModel.phone"
+          :error="validationState.errors.phone"
+          :warning="validationState.warnings.phone"
+          :icon="icons.phone"
+          placeholder="Ex: +33612345678"
+          help-text="Votre numéro de téléphone (format international recommandé)."
+          @update:model-value="handleFieldUpdate('phone', $event)"
+          @blur="validatePhone(localModel)"
+        />
+        
+        <FormField
+          name="label"
+          label="Titre professionnel"
+          :model-value="localModel.label"
+          :icon="icons.label"
+          placeholder="Ex: Développeur Web Senior"
+          help-text="Votre titre professionnel actuel."
+          @update:model-value="handleFieldUpdate('label', $event)"
+        />
+        
         <FormField
           name="url"
-          type="url"
           label="Site Web"
-          :model-value="localModel.url || ''"
-          :error="getFieldState('url').isDirty.value ? getFieldState('url').firstErrorMessage.value : ''"
+          type="url"
+          :model-value="localModel.url"
+          :error="validationState.errors.url"
+          :warning="validationState.warnings.url"
           :icon="icons.url"
-          placeholder="Ex: https://monportfolio.com"
-          help-text="URL de votre portfolio ou site personnel (optionnel)."
+          placeholder="Ex: https://jeandupont.com"
+          help-text="URL de votre site web ou portfolio."
           @update:model-value="handleFieldUpdate('url', $event)"
-          @blur="validateField('url', localModel.url || '')"
+          @blur="validateUrl(localModel)"
         />
-      </div>
-
-      <div class="col-span-1 md:col-span-2">
+        
         <FormField
           name="image"
-          type="url"
-          label="Photo (URL)"
-          :model-value="localModel.image || ''"
-          :error="getFieldState('image').isDirty.value ? getFieldState('image').firstErrorMessage.value : ''"
+          label="Photo de profil"
+          :model-value="localModel.image"
+          :error="validationState.errors.image"
+          :warning="validationState.warnings.image"
           :icon="icons.image"
           placeholder="Ex: https://example.com/photo.jpg"
-          help-text="URL de votre photo professionnelle (optionnel)."
+          help-text="URL de votre photo professionnelle."
           @update:model-value="handleFieldUpdate('image', $event)"
-          @blur="validateField('image', localModel.image || '')"
+          @blur="validateImageUrl(localModel)"
         />
+        
+        <!-- Affichage des suggestions si des erreurs de validation -->
+        <div v-if="validationState.errors.image || validationState.warnings.image" class="col-span-2 text-sm">
+          <p class="text-amber-400 pb-2">Suggestions pour l'URL de l'image :</p>
+          <ul class="list-disc list-inside space-y-1 text-neutral-300">
+            <li>Utilisez une URL complète (commençant par http:// ou https://)</li>
+            <li>Vérifiez que l'image est accessible publiquement</li>
+            <li>Utilisez une image professionnelle et de bonne qualité</li>
+            <li>Les formats recommandés sont JPEG, PNG ou WebP</li>
+          </ul>
+        </div>
       </div>
-
-      <div class="col-span-1 md:col-span-2">
+      
+      <div class="mt-6">
         <FormField
           name="summary"
-          type="text"
           label="Résumé professionnel"
-          :model-value="localModel.summary || ''"
-          :error="getFieldState('summary').isDirty.value ? getFieldState('summary').firstErrorMessage.value : ''"
+          type="textarea"
+          :model-value="localModel.summary"
           :icon="icons.summary"
-          placeholder="Ex: Développeur Web passionné avec 5 ans d'expérience..."
-          help-text="Brève description de votre parcours et objectifs professionnels."
-          rows="4"
+          placeholder="Présentez-vous en quelques phrases..."
+          help-text="Résumé concis de votre profil et objectifs professionnels."
           @update:model-value="handleFieldUpdate('summary', $event)"
         />
       </div>
     </div>
     
-    <!-- Section pour l'adresse -->
-    <div class="mt-8 border-t border-neutral-700 pt-6">
-      <h3 class="text-lg font-medium mb-4">Adresse</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Section d'adresse -->
+    <div class="mt-8 border-t border-neutral-700 pt-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Adresse</h2>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField
           name="address"
           label="Adresse"
           :model-value="localModel.location?.address || ''"
           :icon="icons.location"
-          placeholder="Ex: 15 rue de Paris"
+          placeholder="Ex: 123 Rue de Paris"
           help-text="Votre adresse postale."
           @update:model-value="handleLocationUpdate('address', $event)"
         />

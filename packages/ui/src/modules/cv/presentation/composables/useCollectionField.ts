@@ -12,6 +12,13 @@
 
 import { ref, Ref, reactive, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
+import { 
+  ResultType, 
+  ValidationErrorInterface, 
+  isSuccess, 
+  isFailure,
+  createSuccess 
+} from '@cv-generator/shared'
 
 export interface CollectionFieldOptions<T extends Record<string, any>> {
   /**
@@ -35,9 +42,10 @@ export interface CollectionFieldOptions<T extends Record<string, any>> {
   defaultItemValues: T
   
   /**
-   * Optional validator function for items
+   * Optional validator function for items using Result pattern
+   * Returns a ResultType<T> with success/failure instead of { isValid, errors }
    */
-  validateItem?: (item: T) => { isValid: boolean; errors?: Record<string, string> }
+  validateItem?: (item: T) => ResultType<T>
   
   /**
    * Optional field to use as a unique identifier (defaults to 'id')
@@ -75,6 +83,11 @@ export interface CollectionFieldReturn<T extends Record<string, any>> {
    * Any validation errors for the current item
    */
   validationErrors: Ref<Record<string, string>>
+  
+  /**
+   * Last validation result using Result pattern
+   */
+  lastValidationResult: Ref<ResultType<T> | null>
   
   /**
    * Add a new item to the collection
@@ -155,6 +168,7 @@ export function useCollectionField<T extends Record<string, any>>(
   const isAddingItem = ref(false)
   const editingItemId = ref<string | null>(null)
   const validationErrors = ref<Record<string, string>>({})
+  const lastValidationResult = ref<ResultType<T> | null>(null)
   
   // Create a reactive new item with default values
   const newItem = reactive({ ...defaultItemValues }) as T
@@ -170,20 +184,36 @@ export function useCollectionField<T extends Record<string, any>>(
   }
   
   // Validate an item
-  const validateItemInternal = (item: T): boolean => {
-    if (!validateItem) return true
+  const validateItemInternal = (item: T): ResultType<T> => {
+    if (!validateItem) {
+      return createSuccess(item)
+    }
     
     const startTime = enableLogging ? performance.now() : 0
     
     const result = validateItem(item)
-    validationErrors.value = result.errors || {}
+    lastValidationResult.value = result
+    
+    // Update the validationErrors object based on the result
+    if (isFailure(result)) {
+      const errorMap: Record<string, string> = {}
+      result.error.forEach(err => {
+        if (err.field) {
+          errorMap[err.field] = err.message
+        }
+      })
+      validationErrors.value = errorMap
+    } else {
+      // Clear any previous errors
+      validationErrors.value = {}
+    }
     
     if (enableLogging && perfMetrics) {
       perfMetrics.validationOperations++
       console.log(`Validation took ${performance.now() - startTime}ms (total: ${perfMetrics.validationOperations})`)
     }
     
-    return result.isValid
+    return result
   }
   
   // Reset the new item to default values
@@ -212,17 +242,23 @@ export function useCollectionField<T extends Record<string, any>>(
     const itemToAdd = item || { ...newItem }
     
     // Validate the item before adding
-    if (!validateItemInternal(itemToAdd)) {
+    const validationResult = validateItemInternal(itemToAdd)
+    
+    if (isFailure(validationResult)) {
       if (enableLogging) {
         console.warn('Item validation failed:', validationErrors.value)
       }
       return
     }
     
+    // À ce stade, nous savons que la validation a réussi
+    // Utilisons l'item validé du résultat
+    const validatedItem = validationResult.value
+    
     // Ensure the item has an ID
     const itemWithId = {
-      ...itemToAdd,
-      [identifierField]: itemToAdd[identifierField] || generateId()
+      ...validatedItem,
+      [identifierField]: validatedItem[identifierField] || generateId()
     } as T
     
     // Get current collection and add the new item
@@ -309,7 +345,9 @@ export function useCollectionField<T extends Record<string, any>>(
     const startTime = enableLogging ? performance.now() : 0
     
     // Validate the item before updating
-    if (!validateItemInternal(updatedItem)) {
+    const validationResult = validateItemInternal(updatedItem)
+    
+    if (isFailure(validationResult)) {
       if (enableLogging) {
         console.warn('Item validation failed:', validationErrors.value)
       }
@@ -380,6 +418,7 @@ export function useCollectionField<T extends Record<string, any>>(
     isAddingItem,
     editingItemId,
     validationErrors,
+    lastValidationResult,
     addItem,
     removeItem,
     updateItem,

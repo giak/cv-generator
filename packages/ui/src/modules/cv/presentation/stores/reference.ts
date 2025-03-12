@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useErrorStore } from '../../../../core/stores/error'
 import { ManageResume } from '@cv-generator/core'
 import type { ReferenceInterface } from '@cv-generator/shared/src/types/resume.interface'
-import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/src/repositories/LocalStorageResumeRepository'
+import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
 import { v4 as uuidv4 } from 'uuid'
 
 // Implémentation temporaire de validateReference jusqu'à ce que le module soit disponible
