@@ -8,8 +8,9 @@ interface Props {
   label: string
   modelValue: string
   name: string
-  type?: 'text' | 'email' | 'tel' | 'url'
+  type?: 'text' | 'email' | 'tel' | 'url' | 'textarea'
   error?: string
+  warning?: string
   required?: boolean
   fieldPath?: string
   useErrorStore?: boolean

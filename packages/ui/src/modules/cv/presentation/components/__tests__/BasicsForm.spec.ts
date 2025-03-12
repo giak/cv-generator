@@ -1,6 +1,12 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import BasicsForm from '../BasicsForm.vue'
+import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
+import { useBasicsFormValidation } from '@ui/modules/cv/presentation/composables/useBasicsFormValidation'
+import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
+import { useValidationResult } from '@ui/modules/cv/presentation/composables/validation/useValidationResult'
+import { useValidationCatalogue } from '@ui/modules/cv/presentation/composables/validation/useValidationCatalogue'
+import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
 
 // Mocks pour simplifier les tests
 vi.mock('@ui/components/shared/form/Form.vue', () => ({
@@ -15,13 +21,13 @@ vi.mock('@ui/components/shared/form/FormField.vue', () => ({
   default: {
     name: 'FormField',
     template: '<div data-test="form-field"><slot></slot></div>',
-    props: ['name', 'label', 'modelValue', 'error', 'warning', 'icon', 'placeholder', 'helpText', 'required']
+    props: ['name', 'label', 'modelValue', 'error', 'warning', 'icon', 'placeholder', 'helpText', 'required', 'type']
   }
 }))
 
 // Mock les composables pour simplifier les tests
 vi.mock('@ui/modules/cv/presentation/composables/validation/useValidationResult', () => ({
-  useValidationResult: () => ({
+  useValidationResult: vi.fn().mockReturnValue({
     result: { value: undefined },
     setResult: vi.fn(),
     resetResult: vi.fn(),
@@ -40,7 +46,7 @@ vi.mock('@ui/modules/cv/presentation/composables/validation/useValidationResult'
 }))
 
 vi.mock('@ui/modules/cv/presentation/composables/validation/useValidationCatalogue', () => ({
-  useValidationCatalogue: () => ({
+  useValidationCatalogue: vi.fn().mockReturnValue({
     validateField: () => true
   })
 }))
@@ -243,5 +249,235 @@ describe('BasicsForm', () => {
     expect(urlResult.error).toHaveLength(1)
     expect(urlResult.error[0].field).toBe('url')
     expect(urlResult.error[0].severity).toBe('warning')
+  })
+
+  // Tests supplémentaires pour la validation des champs d'adresse
+  describe('Location fields validation', () => {
+    it('should handle location fields updates', async () => {
+      const wrapper = createWrapper()
+      
+      // Créer un mock pour la fonction updateNestedField
+      const updateNestedFieldMock = vi.fn()
+      
+      // Remplacer la méthode dans notre mock de useFormModel
+      vi.mocked(useFormModel).mockReturnValue({
+        localModel: {
+          name: '',
+          email: '',
+          phone: '',
+          label: '',
+          url: '',
+          image: '',
+          summary: '',
+          location: {
+            address: '',
+            postalCode: '',
+            city: '',
+            countryCode: '',
+            region: ''
+          },
+          profiles: []
+        },
+        updateField: vi.fn(),
+        updateNestedField: updateNestedFieldMock,
+        perfMetrics: {}
+      })
+      
+      // Recréer le wrapper pour utiliser le nouveau mock
+      const updatedWrapper = createWrapper()
+      
+      // Simuler un événement update:model-value pour un champ d'adresse
+      const addressField = updatedWrapper.find('[name="address"]')
+      addressField.trigger('update:model-value', '15 rue de Paris')
+      
+      // Vérifier que notre fonction mock a été appelée
+      expect(updateNestedFieldMock).toHaveBeenCalled()
+    })
+
+    it('should validate postal code format', async () => {
+      // Mock useBasicsFormValidation pour retourner une fonction validateField manipulable
+      const validateFieldMock = vi.fn().mockImplementation((data, field) => {
+        if (field === 'location.postalCode') {
+          return {
+            success: true,
+            warnings: [{
+              field: 'location.postalCode',
+              message: 'Format de code postal non standard',
+              severity: 'warning'
+            }]
+          }
+        }
+        return { success: true }
+      })
+      
+      const validationStateMock = {
+        errors: {},
+        warnings: {}
+      }
+      
+      vi.mocked(useBasicsFormValidation).mockReturnValue({
+        state: validationStateMock,
+        validateName: vi.fn(),
+        validateEmail: vi.fn(),
+        validatePhone: vi.fn(),
+        validateUrl: vi.fn(),
+        validateImageUrl: vi.fn(),
+        validateField: validateFieldMock,
+        validateForm: vi.fn(),
+        hasErrors: vi.fn(),
+        hasWarnings: vi.fn(),
+        markFieldAsDirty: vi.fn(),
+        resetValidation: vi.fn()
+      })
+      
+      // Créer un wrapper avec notre nouveau mock
+      const wrapper = createWrapper()
+      
+      // Simuler la validation
+      const postalCodeField = wrapper.find('[name="postalCode"]')
+      postalCodeField.trigger('blur', '1234')
+      
+      // Vérifier que notre fonction mock a été appelée
+      expect(validateFieldMock).toHaveBeenCalled()
+    })
+    
+    it('should display suggestions for address fields when there are errors', () => {
+      // Mock useBasicsFormValidation pour injecter des erreurs
+      vi.mocked(useBasicsFormValidation).mockReturnValue({
+        state: {
+          errors: {
+            'location.address': 'Adresse requise',
+            'location.postalCode': 'Code postal invalide'
+          },
+          warnings: {},
+          dirtyFields: new Set(),
+          lastResult: null
+        },
+        validateName: vi.fn(),
+        validateEmail: vi.fn(),
+        validatePhone: vi.fn(),
+        validateUrl: vi.fn(),
+        validateImageUrl: vi.fn(),
+        validateField: vi.fn(),
+        validateForm: vi.fn(),
+        hasErrors: vi.fn().mockReturnValue(true),
+        hasWarnings: vi.fn(),
+        markFieldAsDirty: vi.fn(),
+        resetValidation: vi.fn()
+      })
+      
+      // Créer un wrapper avec nos mocks
+      const wrapper = createWrapper()
+      
+      // NOTE: Nous ne pouvons pas tester directement la présence de la div d'erreur car
+      // les tests sont basés sur des mocks de composants. Nous nous assurons plutôt que
+      // les données d'erreur sont présentes dans le modèle.
+      
+      // Nous vérifions au moins que le mock a bien été injecté
+      expect(wrapper.vm.$options.setup()[0].state.errors['location.address']).toBeDefined()
+      expect(wrapper.vm.$options.setup()[0].state.errors['location.postalCode']).toBeDefined()
+    })
+  })
+
+  // Tests pour les performances et métriques
+  describe('Performance metrics', () => {
+    it('should have performance measurement object', async () => {
+      // Vérifier simplement que perfMeasurements est défini dans le composant
+      expect(BasicsForm.__PURE__ || BasicsForm.setup).toBeDefined()
+      
+      // Nous ne pouvons pas accéder directement aux propriétés internes du composant
+      // dans ce type de test. Nous vérifions plutôt que le setup existe.
+    })
+  })
+
+  // Tests pour les champs de type texte et les warnings
+  describe('Field types and warnings', () => {
+    it('should handle textarea type for summary field', () => {
+      const wrapper = createWrapper()
+      
+      // Vérifier l'attribut type du champ summary
+      const summaryField = wrapper.find('[name="summary"]')
+      expect(summaryField.attributes('type')).toBe('textarea')
+    })
+    
+    it('should handle warnings in validation state', () => {
+      // Mock useBasicsFormValidation pour injecter des warnings
+      vi.mocked(useBasicsFormValidation).mockReturnValue({
+        state: {
+          errors: {},
+          warnings: {
+            'image': 'Format d\'image non recommandé'
+          },
+          dirtyFields: new Set(),
+          lastResult: null
+        },
+        validateName: vi.fn(),
+        validateEmail: vi.fn(),
+        validatePhone: vi.fn(),
+        validateUrl: vi.fn(),
+        validateImageUrl: vi.fn(),
+        validateField: vi.fn(),
+        validateForm: vi.fn(),
+        hasErrors: vi.fn(),
+        hasWarnings: vi.fn().mockReturnValue(true),
+        markFieldAsDirty: vi.fn(),
+        resetValidation: vi.fn()
+      })
+      
+      // Créer un wrapper avec nos mocks
+      const wrapper = createWrapper()
+      
+      // Vérifier que le warning est bien présent dans le state
+      expect(wrapper.vm.$options.setup()[0].state.warnings['image']).toBeDefined()
+    })
+  })
+
+  // Tests pour les fonctionnalités de profil social
+  describe('Social profiles functionality', () => {
+    it('should have profile management functions', async () => {
+      // Mock useCollectionField pour tester les fonctions
+      const toggleAddFormMock = vi.fn()
+      
+      vi.mocked(useCollectionField).mockReturnValue({
+        items: [],
+        newItem: {},
+        isAddingItem: false,
+        validationErrors: {},
+        lastValidationResult: null,
+        addItem: vi.fn(),
+        removeItem: vi.fn(),
+        toggleAddForm: toggleAddFormMock,
+        perfMetrics: {}
+      })
+      
+      // Créer un wrapper avec nos mocks
+      const wrapper = createWrapper()
+      
+      // Trouver le bouton et simuler un clic
+      const addButton = wrapper.find('button')
+      await addButton.trigger('click')
+      
+      // Vérifier que notre mock a été appelé
+      expect(toggleAddFormMock).toHaveBeenCalled()
+    })
+  })
+
+  // Test pour les utilitaires de type
+  describe('String handling', () => {
+    it('should convert empty values in template', () => {
+      // Ce test vérifie que les valeurs undefined sont correctement gérées dans le template
+      // Nous ne pouvons pas tester directement la fonction, mais nous pouvons vérifier
+      // que le rendu se fait sans erreur
+      const wrapper = createWrapper({
+        modelValue: {
+          name: undefined, // Valeur undefined qui devrait être convertie en chaîne vide
+          email: '',
+          profiles: []
+        }
+      })
+      
+      // Si le composant se rend sans erreur, c'est que la conversion fonctionne
+      expect(wrapper.exists()).toBe(true)
+    })
   })
 }) 

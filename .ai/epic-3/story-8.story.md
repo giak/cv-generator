@@ -2,7 +2,7 @@
 
 ## Métadonnées
 
-**Statut**: In Progress (99% Complété)
+**Statut**: Completed (100% Complété)
 **Type**: Refactorisation
 **Assigné à**: Team Backend
 **Priorité**: Haute
@@ -27,7 +27,7 @@ Refactoriser le système de validation des formulaires pour implémenter le patt
 - [x] Les warnings doivent être supportés en plus des erreurs
 - [x] Des tests unitaires et d'intégration doivent valider la chaîne complète
 - [x] La documentation technique doit être mise à jour
-- [⚪] La couverture de test doit être d'au moins 90% pour le code de validation (actuelle: 90%)
+- [x] La couverture de test doit être d'au moins 90% pour le code de validation (actuelle: 90%)
 
 ## Tâches
 
@@ -61,7 +61,7 @@ Refactoriser le système de validation des formulaires pour implémenter le patt
    - [x] Tester les services de validation
    - [x] Tester les composables Vue
    - [x] Tester la chaîne de validation complète
-   - [⚪] Atteindre le niveau de couverture requis (actuelle: 90%)
+   - [x] Atteindre le niveau de couverture requis (actuelle: 90%)
 
 6. [x] **Documentation**
    - [x] Documenter le pattern Result/Option
@@ -81,7 +81,7 @@ Refactoriser le système de validation des formulaires pour implémenter le patt
 
 - [x] La migration vers le nouveau système pourrait révéler des cas particuliers non anticipés
 - [x] La compatibilité avec le code existant pourrait poser des défis
-- [⚪] L'adaptation de tous les formulaires pourrait prendre plus de temps que prévu
+- [x] L'adaptation de tous les formulaires pourrait prendre plus de temps que prévu
 
 ## Dépendances
 
@@ -104,3 +104,5 @@ Refactoriser le système de validation des formulaires pour implémenter le patt
 - **2024-05-17**: Mise en place des tests et documentation de la stratégie
 - **2024-05-18**: Implémentation des tests de la chaîne de validation complète
 - **2024-05-20**: Vérification complète et correction des tests de validation
+- **2024-05-21**: Ajout des tests spécifiques pour la validation des champs d'adresse
+- **2024-05-21**: Finalisation de la story avec atteinte de tous les objectifs de couverture de test

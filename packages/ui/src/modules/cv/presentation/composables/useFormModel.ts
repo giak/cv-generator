@@ -50,10 +50,10 @@ export interface FormModelReturn<T extends Record<string, any>> {
   /**
    * Update a nested field in the model and emit the change
    */
-  updateNestedField: <K extends keyof T, N extends keyof T[K]>(
+  updateNestedField: <K extends keyof T>(
     parent: K, 
-    field: N, 
-    value: T[K][N]
+    field: string | number | symbol, 
+    value: any
   ) => void
   
   /**
@@ -193,10 +193,10 @@ export function useFormModel<T extends Record<string, any>>(
   }
   
   // Update a nested field in the model and emit the change
-  const updateNestedField = <K extends keyof T, N extends keyof T[K]>(
+  const updateNestedField = <K extends keyof T>(
     parent: K, 
-    field: N, 
-    value: T[K][N]
+    field: string | number | symbol, 
+    value: any
   ) => {
     let updateStart = 0;
     if (enableLogging) {
@@ -210,7 +210,7 @@ export function useFormModel<T extends Record<string, any>>(
     }
     
     // Update the nested field
-    ((localModel as Record<keyof T, any>)[parent] as Record<keyof T[K], any>)[field] = deepCopy(value);
+    ((localModel as Record<keyof T, any>)[parent] as Record<string | number | symbol, any>)[field] = deepCopy(value);
     
     // Emit the change
     emitModelUpdate()

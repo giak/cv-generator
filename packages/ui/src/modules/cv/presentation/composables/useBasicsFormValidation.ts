@@ -232,25 +232,85 @@ export function useBasicsFormValidation() {
   };
   
   /**
+   * Obtient la valeur d'un champ imbriqué à partir d'un chemin de propriété
+   */
+  const getNestedField = (data: BasicsInterface, path: string): any => {
+    const parts = path.split('.');
+    let value: any = data;
+    
+    for (const part of parts) {
+      if (value === undefined || value === null) return undefined;
+      value = value[part as keyof typeof value];
+    }
+    
+    return value;
+  };
+
+  /**
    * Valide un champ spécifique
    */
-  const validateField = (data: BasicsInterface, field: keyof BasicsInterface): boolean => {
+  const validateField = (
+    data: BasicsInterface, 
+    fieldPath: string | keyof BasicsInterface
+  ): boolean => {
+    // Si c'est un chemin imbriqué comme 'location.address'
+    if (typeof fieldPath === 'string' && fieldPath.includes('.')) {
+      // Extraire la partie principale et la sous-propriété
+      const [mainField, subField] = fieldPath.split('.');
+      
+      // Marquer le champ comme modifié
+      state.dirtyFields.add(fieldPath);
+      
+      if (mainField === 'location') {
+        // Validation simple pour les champs d'adresse
+        // Pas d'erreurs spécifiques pour ces champs, mais on peut 
+        // ajouter des règles de validation spécifiques selon les besoins
+        const value = getNestedField(data, fieldPath);
+        
+        // Validation de format pour le code postal (optionnel)
+        if (subField === 'postalCode' && value) {
+          const postalRegex = /^\d{5}$/;  // Simple exemple pour un code postal français
+          if (!postalRegex.test(value)) {
+            state.warnings[fieldPath] = 'Format de code postal non standard';
+          } else {
+            delete state.warnings[fieldPath];
+          }
+        }
+        
+        // Validation du code pays (optionnel)
+        if (subField === 'countryCode' && value) {
+          const countryCodeRegex = /^[A-Z]{2}$/;  // Format ISO à 2 lettres
+          if (!countryCodeRegex.test(value)) {
+            state.warnings[fieldPath] = 'Le code pays doit être au format ISO à 2 lettres (ex: FR)';
+          } else {
+            delete state.warnings[fieldPath];
+          }
+        }
+        
+        // Si pas d'erreur, on nettoie le champ
+        delete state.errors[fieldPath];
+        return true;
+      }
+      
+      // Pour d'autres champs imbriqués, on pourrait ajouter d'autres cas ici
+    }
+
     // Déléguer aux fonctions spécifiques pour les champs principaux
-    if (field === 'name') return validateName(data);
-    if (field === 'email') return validateEmail(data);
-    if (field === 'phone') return validatePhone(data);
-    if (field === 'url') return validateUrl(data);
-    if (field === 'image') return validateImageUrl(data);
+    if (fieldPath === 'name') return validateName(data);
+    if (fieldPath === 'email') return validateEmail(data);
+    if (fieldPath === 'phone') return validatePhone(data);
+    if (fieldPath === 'url') return validateUrl(data);
+    if (fieldPath === 'image') return validateImageUrl(data);
     
-    // Pour les autres champs
-    markFieldAsDirty(field);
+    // Pour les autres champs non imbriqués
+    markFieldAsDirty(fieldPath as keyof BasicsInterface);
     
     // Utiliser le service de validation
-    const result = validationService.validateField(data, field);
+    const result = validationService.validateField(data, fieldPath as keyof BasicsInterface);
     // Conversion de type sécurisée
     state.lastResult = result as unknown as FormValidationResultType<BasicsInterface>;
     
-    return processValidationResult(result, field);
+    return processValidationResult(result, fieldPath as keyof BasicsInterface);
   };
   
   /**

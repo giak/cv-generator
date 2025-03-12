@@ -106,16 +106,18 @@ const {
   hasWarnings
 } = useBasicsFormValidation()
 
+// Type assertion for FormField props to handle string | undefined
+const toStringOrEmpty = (value: string | undefined): string => value || '';
+
 // Handle field updates for top-level fields
 const handleFieldUpdate = (field: keyof BasicsInterface, value: string) => {
   updateField(field, value)
 }
 
 // Handle updates for nested location fields
-const handleLocationUpdate = (field: keyof LocationInterface, value: string) => {
-  // Use type assertion to match existing implementation
-  const updateFn = updateNestedField as any
-  updateFn('location', field, value)
+const handleLocationUpdate = (field: string, value: string) => {
+  // Use typed function instead of type assertion
+  updateNestedField('location', field, value)
 }
 
 // Create a type-safe wrapper function for updateField to use with profiles collection
@@ -241,7 +243,7 @@ const icons = {
         <FormField
           name="name"
           label="Nom complet"
-          :model-value="localModel.name"
+          :model-value="toStringOrEmpty(localModel.name)"
           :error="validationState.errors.name"
           :icon="icons.name"
           placeholder="Ex: Jean Dupont"
@@ -255,7 +257,7 @@ const icons = {
           name="email"
           label="Email"
           type="email"
-          :model-value="localModel.email"
+          :model-value="toStringOrEmpty(localModel.email)"
           :error="validationState.errors.email"
           :warning="validationState.warnings.email"
           :icon="icons.email"
@@ -269,7 +271,7 @@ const icons = {
         <FormField
           name="phone"
           label="Téléphone"
-          :model-value="localModel.phone"
+          :model-value="toStringOrEmpty(localModel.phone)"
           :error="validationState.errors.phone"
           :warning="validationState.warnings.phone"
           :icon="icons.phone"
@@ -282,7 +284,7 @@ const icons = {
         <FormField
           name="label"
           label="Titre professionnel"
-          :model-value="localModel.label"
+          :model-value="toStringOrEmpty(localModel.label)"
           :icon="icons.label"
           placeholder="Ex: Développeur Web Senior"
           help-text="Votre titre professionnel actuel."
@@ -293,7 +295,7 @@ const icons = {
           name="url"
           label="Site Web"
           type="url"
-          :model-value="localModel.url"
+          :model-value="toStringOrEmpty(localModel.url)"
           :error="validationState.errors.url"
           :warning="validationState.warnings.url"
           :icon="icons.url"
@@ -306,7 +308,7 @@ const icons = {
         <FormField
           name="image"
           label="Photo de profil"
-          :model-value="localModel.image"
+          :model-value="toStringOrEmpty(localModel.image)"
           :error="validationState.errors.image"
           :warning="validationState.warnings.image"
           :icon="icons.image"
@@ -333,7 +335,7 @@ const icons = {
           name="summary"
           label="Résumé professionnel"
           type="textarea"
-          :model-value="localModel.summary"
+          :model-value="toStringOrEmpty(localModel.summary)"
           :icon="icons.summary"
           placeholder="Présentez-vous en quelques phrases..."
           help-text="Résumé concis de votre profil et objectifs professionnels."
@@ -352,46 +354,76 @@ const icons = {
           label="Adresse"
           :model-value="localModel.location?.address || ''"
           :icon="icons.location"
+          :error="validationState.errors['location.address']"
+          :warning="validationState.warnings['location.address']"
           placeholder="Ex: 123 Rue de Paris"
           help-text="Votre adresse postale."
           @update:model-value="handleLocationUpdate('address', $event)"
+          @blur="validateField(localModel, 'location.address')"
         />
         
         <FormField
           name="postalCode"
           label="Code Postal"
           :model-value="localModel.location?.postalCode || ''"
+          :error="validationState.errors['location.postalCode']"
+          :warning="validationState.warnings['location.postalCode']"
           placeholder="Ex: 75001"
           help-text="Code postal de votre localité."
           @update:model-value="handleLocationUpdate('postalCode', $event)"
+          @blur="validateField(localModel, 'location.postalCode')"
         />
         
         <FormField
           name="city"
           label="Ville"
           :model-value="localModel.location?.city || ''"
+          :error="validationState.errors['location.city']"
+          :warning="validationState.warnings['location.city']"
           placeholder="Ex: Paris"
           help-text="Nom de votre ville."
           @update:model-value="handleLocationUpdate('city', $event)"
+          @blur="validateField(localModel, 'location.city')"
         />
         
         <FormField
           name="region"
           label="Région"
           :model-value="localModel.location?.region || ''"
+          :error="validationState.errors['location.region']"
+          :warning="validationState.warnings['location.region']"
           placeholder="Ex: Île-de-France"
           help-text="Votre région ou département."
           @update:model-value="handleLocationUpdate('region', $event)"
+          @blur="validateField(localModel, 'location.region')"
         />
         
         <FormField
           name="countryCode"
           label="Code Pays"
           :model-value="localModel.location?.countryCode || ''"
+          :error="validationState.errors['location.countryCode']"
+          :warning="validationState.warnings['location.countryCode']"
           placeholder="Ex: FR"
           help-text="Code pays ISO (ex: FR, US, CA)."
           @update:model-value="handleLocationUpdate('countryCode', $event)"
+          @blur="validateField(localModel, 'location.countryCode')"
         />
+      </div>
+      
+      <!-- Affichage des suggestions pour l'adresse si des erreurs de validation -->
+      <div v-if="validationState.errors['location.address'] || 
+                validationState.errors['location.postalCode'] || 
+                validationState.errors['location.city'] || 
+                validationState.errors['location.countryCode']" 
+           class="mt-4 p-3 bg-neutral-800 rounded-lg text-sm">
+        <p class="text-amber-400 pb-2">Suggestions pour l'adresse :</p>
+        <ul class="list-disc list-inside space-y-1 text-neutral-300">
+          <li>Assurez-vous que l'adresse est complète et correcte</li>
+          <li>Le code postal doit être au format valide pour le pays</li>
+          <li>Utilisez le nom officiel de la ville</li>
+          <li>Le code pays doit être un code ISO à 2 lettres (FR, US, CA, etc.)</li>
+        </ul>
       </div>
     </div>
     
