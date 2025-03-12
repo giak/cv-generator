@@ -1,15 +1,11 @@
-import { ref, reactive } from 'vue';
+import { reactive } from 'vue';
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface';
 import { BasicsValidationService } from '@cv-generator/core';
-import { 
-  isFailure, 
-  isSuccess, 
-  ValidationErrorInterface,
+import {
+  isFailure,
+  isSuccess,
   ResultType,
-  FormValidationResultType,
-  createSuccess,
-  createFailure,
-  createSuccessWithWarnings
+  FormValidationResultType
 } from '@cv-generator/shared';
 
 export interface FormValidationState {
@@ -279,9 +275,22 @@ export function useBasicsFormValidation() {
         
         // Validation du code pays (optionnel)
         if (subField === 'countryCode' && value) {
+          // Modifier la regex pour détecter tous les formats non valides 
+          // (pas exactement 2 lettres majuscules)
           const countryCodeRegex = /^[A-Z]{2}$/;  // Format ISO à 2 lettres
+          
           if (!countryCodeRegex.test(value)) {
-            state.warnings[fieldPath] = 'Le code pays doit être au format ISO à 2 lettres (ex: FR)';
+            // Être plus explicite sur le problème détecté
+            if (/^[a-z]{2}$/.test(value)) {
+              // Si c'est 2 lettres minuscules
+              state.warnings[fieldPath] = 'Le code pays doit être en majuscules (ex: FR)';
+            } else if (/^[A-Za-z]{3,}$/.test(value)) {
+              // Si c'est plus de 2 lettres
+              state.warnings[fieldPath] = 'Le code pays doit être au format ISO à 2 lettres (ex: FR), pas 3 lettres ou plus';
+            } else {
+              // Pour tout autre format invalide
+              state.warnings[fieldPath] = 'Le code pays doit être au format ISO à 2 lettres (ex: FR)';
+            }
           } else {
             delete state.warnings[fieldPath];
           }

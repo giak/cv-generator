@@ -8,7 +8,8 @@ describe('useBasicsFormValidation', () => {
     validateForm, 
     state, 
     validateName, 
-    validateEmail 
+    validateEmail,
+    validateField
   } = useBasicsFormValidation();
 
   describe('validateForm', () => {
@@ -127,6 +128,96 @@ describe('useBasicsFormValidation', () => {
       await waitForNextTick();
       expect(isValidWithValidName).toBe(true);
       expect(state.errors.name).toBeUndefined();
+    });
+
+    it('should validate location fields', async () => {
+      const data: BasicsInterface = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        profiles: [],
+        location: {
+          address: '',
+          postalCode: '',
+          city: '',
+          countryCode: '',
+          region: ''
+        }
+      };
+      
+      // S'assurer que location existe avant de l'utiliser
+      if (data.location) {
+        // Test postal code validation - invalid format (not 5 digits)
+        data.location.postalCode = '1234';
+        const isValidPostalCode = validateField(data, 'location.postalCode');
+        await waitForNextTick();
+        expect(isValidPostalCode).toBe(true); // Should return true because it's just a warning
+        expect(state.warnings['location.postalCode']).toBeDefined();
+        expect(state.warnings['location.postalCode']).toContain('postal');
+        
+        // Test postal code validation - valid format
+        data.location.postalCode = '75001';
+        const isValidPostalCode2 = validateField(data, 'location.postalCode');
+        await waitForNextTick();
+        expect(isValidPostalCode2).toBe(true);
+        expect(state.warnings['location.postalCode']).toBeUndefined();
+        
+        // Test country code validation - invalid format (3 letters instead of 2)
+        data.location.countryCode = 'USA';
+        const isValidCountryCode = validateField(data, 'location.countryCode');
+        await waitForNextTick();
+        expect(isValidCountryCode).toBe(true); // Should return true because it's just a warning
+        expect(state.warnings['location.countryCode']).toBeDefined();
+        expect(state.warnings['location.countryCode']).toContain('code pays');
+        
+        // Test country code validation - valid format
+        data.location.countryCode = 'FR';
+        const isValidCountryCode2 = validateField(data, 'location.countryCode');
+        await waitForNextTick();
+        expect(isValidCountryCode2).toBe(true);
+        expect(state.warnings['location.countryCode']).toBeUndefined();
+        
+        // Test lowercase country code
+        data.location.countryCode = 'fr';
+        const isValidCountryCode3 = validateField(data, 'location.countryCode');
+        await waitForNextTick();
+        expect(isValidCountryCode3).toBe(true);
+        expect(state.warnings['location.countryCode']).toBeDefined();
+        expect(state.warnings['location.countryCode']).toContain('code pays');
+      }
+    });
+
+    it('should validate countryCode field with 3-letter code', async () => {
+      const data: BasicsInterface = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        profiles: [],
+        location: {
+          address: '',
+          postalCode: '',
+          city: '',
+          countryCode: 'USA', // 3-letter code
+          region: ''
+        }
+      };
+
+      // Test 3-letter country code
+      const isValid = validateField(data, 'location.countryCode');
+      await waitForNextTick();
+      
+      // Should be valid but with warnings
+      expect(isValid).toBe(true);
+      expect(state.errors['location.countryCode']).toBeUndefined();
+      expect(state.warnings['location.countryCode']).toBeDefined();
+      expect(state.warnings['location.countryCode']).toContain('ISO à 2 lettres');
+      
+      // Update to valid 2-letter code
+      data.location!.countryCode = 'US';
+      const isValidWithCorrectCode = validateField(data, 'location.countryCode');
+      await waitForNextTick();
+      
+      expect(isValidWithCorrectCode).toBe(true);
+      expect(state.errors['location.countryCode']).toBeUndefined();
+      expect(state.warnings['location.countryCode']).toBeUndefined();
     });
   });
 }); 

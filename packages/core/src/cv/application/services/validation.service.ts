@@ -3,8 +3,8 @@
  * Fournit les méthodes de base pour valider les différentes entités du CV
  */
 
-import { 
-  ResultType, 
+import {
+  ResultType,
   ValidationErrorInterface,
   ValidationLayerType
 } from '@cv-generator/shared';

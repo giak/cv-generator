@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
-import { defineComponent } from 'vue'
-import { mount, type VueWrapper } from '@vue/test-utils'
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface';
+import { defineComponent } from 'vue';
+import { mount, type VueWrapper } from '@vue/test-utils';
 
 // Types pour les événements et données
 interface LocationField {
@@ -224,6 +224,34 @@ describe('BasicsForm - Location Fields Validation', () => {
         location: {
           ...defaultModel.location,
           countryCode: 'fr'
+        }
+      }
+    })
+    
+    // Trouver le champ de code pays et simuler un événement de perte de focus
+    const countryCodeField = wrapper.find('.field[name="countryCode"] input')
+    await countryCodeField.trigger('blur')
+    
+    // Vérifier qu'un événement de validation a été émis
+    const validateEvents = wrapper.emitted('validate-field') as string[][]
+    expect(validateEvents).toBeTruthy()
+    expect(validateEvents[0][0]).toBe('location.countryCode')
+    
+    // Vérifier qu'un avertissement a été émis
+    const warningEvents = wrapper.emitted('validation-warning') as ValidationWarning[][]
+    expect(warningEvents).toBeTruthy()
+    expect(warningEvents[0][0].field).toBe('location.countryCode')
+    expect(warningEvents[0][0].message).toContain('code pays')
+  })
+  
+  it('should validate country code and show warning for 3-letter code', async () => {
+    // Définir un modèle avec un code pays à 3 lettres (au lieu de 2)
+    await wrapper.setProps({
+      modelValue: {
+        ...defaultModel,
+        location: {
+          ...defaultModel.location,
+          countryCode: 'USA'
         }
       }
     })

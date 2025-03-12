@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { 
+import type {
   LocationInterface,
   ProfileInterface,
   BasicsInterface,
@@ -7,7 +7,7 @@ import type {
   EducationInterface,
   SkillInterface,
   ResumeInterface
-} from '../types/resume.interface'
+} from '../types/resume.interface';
 
 export const locationSchema = z.object({
   address: z.string().optional(),

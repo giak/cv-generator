@@ -8,16 +8,12 @@
 import {
   ref,
   computed,
-  reactive,
-  watch,
   Ref,
   ComputedRef,
-  UnwrapRef,
 } from 'vue';
 
 // Using type imports to avoid runtime dependencies
 import type {
-  ResultType,
   ValidationErrorInterface,
   ValidationSeverityType,
   FormValidationResultType,
@@ -26,7 +22,6 @@ import type {
 } from '@cv-generator/shared';
 
 // Import de l'enum ValidationLayerType pour l'utiliser
-import { ValidationLayerType } from '@cv-generator/shared';
 
 // These utility functions will be provided by consumers of this composable
 // This avoids direct runtime dependencies

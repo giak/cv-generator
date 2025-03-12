@@ -1,5 +1,4 @@
 import { Resume, type ResumeRepository } from "@cv-generator/core";
-import type { ResumeInterface } from "@cv-generator/shared/src/types/resume.interface";
 import { z } from "zod";
 
 const STORAGE_KEY = "cv-generator-resume";

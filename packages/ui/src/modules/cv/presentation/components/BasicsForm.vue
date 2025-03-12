@@ -1,21 +1,17 @@
 <script setup lang="ts">
-import type { BasicsInterface, LocationInterface, ProfileInterface } from '@cv-generator/shared/src/types/resume.interface'
+import type { BasicsInterface, ProfileInterface } from '@cv-generator/shared/src/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
-import { useValidationResult } from '@ui/modules/cv/presentation/composables/validation/useValidationResult'
-import { useValidationCatalogue } from '@ui/modules/cv/presentation/composables/validation/useValidationCatalogue'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
-import { computed, ref, onMounted } from 'vue'
-import { 
+import { computed, onMounted } from 'vue'
+import {
   type ValidationErrorInterface,
   type ResultType,
   ValidationLayerType,
   ERROR_CODES,
   createSuccess,
-  createFailure,
-  isSuccess,
-  isFailure
+  createFailure
 } from '@cv-generator/shared'
 // Remove BasicsValidationService direct import and use the composable
 import { useBasicsFormValidation } from '../composables/useBasicsFormValidation'
@@ -101,10 +97,7 @@ const {
   validateUrl,
   validateImageUrl,
   validateField,
-  validateForm,
-  hasErrors,
-  hasWarnings
-} = useBasicsFormValidation()
+  validateForm} = useBasicsFormValidation()
 
 // Type assertion for FormField props to handle string | undefined
 const toStringOrEmpty = (value: string | undefined): string => value || '';
@@ -193,7 +186,6 @@ const {
   newItem: newProfile,
   isAddingItem: isAddingProfile,
   validationErrors: profileValidationErrors,
-  lastValidationResult: profileValidationResult,
   addItem: addProfile,
   removeItem: removeProfile,
   toggleAddForm: toggleProfileForm,
@@ -411,11 +403,15 @@ const icons = {
         />
       </div>
       
-      <!-- Affichage des suggestions pour l'adresse si des erreurs de validation -->
+      <!-- Affichage des suggestions pour l'adresse si des erreurs ou des warnings de validation -->
       <div v-if="validationState.errors['location.address'] || 
                 validationState.errors['location.postalCode'] || 
                 validationState.errors['location.city'] || 
-                validationState.errors['location.countryCode']" 
+                validationState.errors['location.countryCode'] ||
+                validationState.warnings['location.address'] || 
+                validationState.warnings['location.postalCode'] || 
+                validationState.warnings['location.city'] || 
+                validationState.warnings['location.countryCode']" 
            class="mt-4 p-3 bg-neutral-800 rounded-lg text-sm">
         <p class="text-amber-400 pb-2">Suggestions pour l'adresse :</p>
         <ul class="list-disc list-inside space-y-1 text-neutral-300">

@@ -3,11 +3,8 @@
  * Utilise le domaine pour la validation
  */
 
-import { 
-  ResultType, 
-  ValidationErrorInterface,
-  ValidationLayerType,
-  createSuccess,
+import {
+  ResultType,
   createFailure,
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';

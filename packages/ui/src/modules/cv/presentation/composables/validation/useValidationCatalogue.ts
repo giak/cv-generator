@@ -8,10 +8,9 @@
 import { ref, computed, Ref } from 'vue';
 
 // Using type imports to avoid runtime dependencies
-import type { 
-  ValidationErrorInterface, 
-  HelpMessageInterface,
-  ValidationLayerType
+import type {
+  ValidationErrorInterface,
+  HelpMessageInterface
 } from '@cv-generator/shared';
 
 // Import de l'enum ValidationLayerType pour l'utiliser

@@ -2,7 +2,6 @@
 import { computed, ref } from 'vue';
 import { useErrorStore as errorStoreComposable } from '../../../core/stores/error';
 import ValidationFeedback from '../../../components/form/ValidationFeedback.vue';
-import { type PiniaPluginContext } from 'pinia';
 
 interface Props {
   label: string
@@ -115,7 +114,18 @@ const hasError = computed(() => {
         :name="name"
       />
       
-      <div v-if="helpText && !error && !hasFieldError" class="mt-1 text-xs text-neutral-400">
+      <!-- Affichage des warnings -->
+      <p 
+        v-if="warning" 
+        role="alert" 
+        aria-live="polite" 
+        class="mt-1 text-sm text-amber-500 font-medium"
+        :data-test="`${name}-warning`"
+      >
+        {{ warning }}
+      </p>
+      
+      <div v-if="helpText && !error && !hasFieldError && !warning" class="mt-1 text-xs text-neutral-400">
         {{ helpText }}
       </div>
     </div>

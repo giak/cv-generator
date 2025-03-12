@@ -4,8 +4,8 @@
  */
 
 import type { BasicsInterface, LocationInterface, ProfileInterface } from '@cv-generator/shared/src/types/resume.interface';
-import { 
-  ResultType, 
+import {
+  ResultType,
   ValidationErrorInterface,
   ValidationLayerType,
   createSuccess,

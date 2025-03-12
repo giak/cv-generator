@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { BasicsValidationService } from '../basics-validation.service';
 import { isSuccess, isFailure } from '@cv-generator/shared';
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface';
-import { Email } from '../../../domain/value-objects/email.value-object';
 
 describe('BasicsValidationService', () => {
   const validationService = new BasicsValidationService();

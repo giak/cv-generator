@@ -3,8 +3,8 @@
  * Validation et comportements liés aux URLs (sites web, projets, etc.)
  */
 
-import { 
-  ResultType, 
+import {
+  ResultType,
   ValidationErrorInterface,
   ValidationLayerType,
   createSuccess,

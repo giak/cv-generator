@@ -4,9 +4,6 @@ import BasicsForm from '../BasicsForm.vue'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useBasicsFormValidation } from '@ui/modules/cv/presentation/composables/useBasicsFormValidation'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
-import { useValidationResult } from '@ui/modules/cv/presentation/composables/validation/useValidationResult'
-import { useValidationCatalogue } from '@ui/modules/cv/presentation/composables/validation/useValidationCatalogue'
-import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface'
 
 // Mocks pour simplifier les tests
 vi.mock('@ui/components/shared/form/Form.vue', () => ({
@@ -376,6 +373,71 @@ describe('BasicsForm', () => {
       // Nous vérifions au moins que le mock a bien été injecté
       expect(wrapper.vm.$options.setup()[0].state.errors['location.address']).toBeDefined()
       expect(wrapper.vm.$options.setup()[0].state.errors['location.postalCode']).toBeDefined()
+    })
+
+    it('should validate location.countryCode field with 3-letter code', async () => {
+      // Créer un mock spécifique pour cette fonction de test
+      const validateFieldMock = vi.fn().mockImplementation((data, field) => {
+        if (field === 'location.countryCode') {
+          return {
+            success: true,
+            warnings: [{
+              field: 'location.countryCode',
+              message: 'Le code pays doit être au format ISO à 2 lettres (ex: FR)',
+              severity: 'warning'
+            }]
+          }
+        }
+        return { success: true }
+      })
+      
+      const validationStateMock = {
+        errors: {},
+        warnings: {
+          'location.countryCode': 'Le code pays doit être au format ISO à 2 lettres (ex: FR)'
+        },
+        dirtyFields: new Set(['location.countryCode']),
+        lastResult: null
+      }
+      
+      vi.mocked(useBasicsFormValidation).mockReturnValue({
+        state: validationStateMock,
+        validateName: vi.fn(),
+        validateEmail: vi.fn(),
+        validatePhone: vi.fn(),
+        validateUrl: vi.fn(),
+        validateImageUrl: vi.fn(),
+        validateField: validateFieldMock,
+        validateForm: vi.fn(),
+        hasErrors: vi.fn().mockReturnValue(false),
+        hasWarnings: vi.fn().mockReturnValue(true),
+        markFieldAsDirty: vi.fn(),
+        resetValidation: vi.fn()
+      })
+      
+      // Créer un wrapper avec notre mock de validation
+      const wrapper = createWrapper({
+        modelValue: {
+          name: 'John Doe',
+          email: 'john@example.com',
+          profiles: [],
+          location: {
+            address: '123 Rue de Paris',
+            postalCode: '75001',
+            city: 'Paris',
+            countryCode: 'USA', // Code pays à 3 lettres
+            region: 'Île-de-France'
+          }
+        }
+      })
+      
+      // S'assurer que le warning est bien présent dans le state
+      expect(wrapper.vm.$options.setup()[0].hasWarnings()).toBe(true)
+      
+      // Vérifier que le message de warning est affiché dans la section de suggestions
+      const html = wrapper.html()
+      expect(html).toContain('Suggestions pour l\'adresse')
+      expect(html).toContain('Le code pays doit être un code ISO à 2 lettres')
     })
   })
 

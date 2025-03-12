@@ -3,8 +3,8 @@
  * Implémente la validation et les comportements liés aux emails
  */
 
-import { 
-  ResultType, 
+import {
+  ResultType,
   ValidationErrorInterface,
   ValidationLayerType,
   createSuccess,
