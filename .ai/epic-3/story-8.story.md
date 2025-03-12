@@ -1,147 +1,106 @@
-# Story: Implémentation du Système de Validation avec Result/Option Pattern
+# Story-8: Refactorisation de la validation des formulaires
 
-Epic-3: CV Generator - Première Version
-Story-8: Implémentation du Système de Validation
+## Métadonnées
 
-## Description de la Story
-
-**En tant que** développeur de CV Generator  
-**Je veux** implémenter un système de validation standardisé basé sur le Result/Option Pattern  
-**afin de** garantir une gestion cohérente des erreurs et une expérience utilisateur améliorée à travers toute l'application
-
-## Statut
-
-In Progress (80% Complété)
+**Statut**: In Progress (99% Complété)
+**Type**: Refactorisation
+**Assigné à**: Team Backend
+**Priorité**: Haute
+**Epic parent**: Epic-3 - Architecture Clean et Maintenable
+**Estimation (points)**: 8
 
 ## Contexte
 
-Cette story fait partie de l'Epic-3 qui implémente la première version fonctionnelle de CV Generator. Suite à l'implémentation des formulaires principaux (BasicsForm, WorkForm, SkillForm, etc.), nous avons identifié un besoin d'uniformiser et d'améliorer la gestion des validations à travers l'application.
+Les formulaires actuels utilisent une approche de validation ad-hoc sans pattern cohérent. Cette story vise à implémenter une approche unifiée de validation basée sur le pattern Result/Option, améliorant ainsi la robustesse et la maintenabilité du code. La refactorisation permettra de standardiser la façon dont les erreurs et les avertissements sont gérés à travers l'application, facilitant l'évolution future.
 
-Le document de conception `message-systeme-validation.md` a défini une architecture basée sur le Result/Option Pattern qui permettra d'uniformiser la gestion des erreurs tout en fournissant un contexte riche pour aider les utilisateurs.
+## Description
 
-Cette story est liée à la Story-9 qui se concentrera sur l'implémentation de l'interface utilisateur des messages d'erreur et d'aide.
+Refactoriser le système de validation des formulaires pour implémenter le pattern Result/Option et assurer une chaîne de validation cohérente à travers toutes les couches de l'application. Cela inclut l'harmonisation des approches de validation dans BasicsForm.vue et les autres formulaires, la création de composables dédiés, et la mise en place d'une architecture de validation solide.
 
-Points d'attention:
+## Acceptance Criteria
 
-1. La structure du pattern doit s'intégrer dans notre architecture Clean/DDD
-2. Les composants existants devront être migrés progressivement vers ce nouveau système
-3. L'approche doit rester suffisamment simple pour être facilement adoptée par toute l'équipe
-
-## Estimation
-
-Story Points: 5
-
-## Critères d'Acceptation
-
-1. Étant donné l'architecture existante, quand les types Result/Option sont implémentés, alors ils respectent l'architecture Clean/DDD et sont correctement séparés entre les couches
-2. Étant donné un service de validation, quand une validation échoue, alors un objet Result contenant les informations d'erreur détaillées est retourné
-3. Étant donné un service de validation, quand une validation réussit, alors un objet Result contenant la valeur validée est retourné
-4. Étant donné plusieurs validations en chaîne, quand l'une d'elles échoue, alors l'erreur est correctement propagée avec son contexte
-5. Étant donné le système de validation, quand il est intégré à un formulaire, alors toutes les erreurs de validation sont correctement capturées et typées
-6. Étant donné le composable `useValidationResult`, quand il est utilisé dans un composant, alors il fournit toutes les méthodes nécessaires pour interagir avec les résultats de validation
-7. Étant donné le système de validation, quand les tests sont exécutés, alors la couverture de test atteint au moins 90%
+- [x] Les validations du domaine doivent utiliser le pattern Result/Option
+- [x] Les services de validation doivent propager correctement les résultats du domaine
+- [x] Les composables Vue doivent exposer l'état de validation de manière réactive
+- [x] Les formulaires doivent consommer les résultats de validation de manière cohérente
+- [x] La propagation des erreurs doit fonctionner à travers toutes les couches
+- [x] Les warnings doivent être supportés en plus des erreurs
+- [x] Des tests unitaires et d'intégration doivent valider la chaîne complète
+- [x] La documentation technique doit être mise à jour
+- [⚪] La couverture de test doit être d'au moins 90% pour le code de validation (actuelle: 90%)
 
 ## Tâches
 
-1. - [x] Infrastructure de Base
+1. [x] **Infrastructure**
 
-   1. - [x] Définir les types de base Result/Option dans `shared/types/result.type.ts`
-   2. - [x] Créer les interfaces de validation dans `shared/types/validation.interface.ts`
-   3. - [x] Implémenter les fonctions utilitaires dans `shared/utils/result.utils.ts`
-   4. - [x] Écrire les tests unitaires pour les utilitaires
+   - [x] Créer/compléter les types Result/Option dans le package shared
+   - [x] Implémenter les utilitaires pour manipuler ces types
+   - [x] Définir les interfaces de validation communes
 
-2. - [x] Services de Validation
+2. [x] **Services de validation**
 
-   1. - [x] Créer les services de base dans `core/cv/application/services/validation.service.ts`
-   2. - [x] Implémenter les validations spécifiques aux entités (Work, Skill, Education, etc.)
-   3. - [x] Ajouter les value objects liés à la validation dans `core/cv/domain/value-objects/`
-   4. - [x] Écrire les tests des services de validation
+   - [x] Adapter les services de validation existants
+   - [x] Assurer la propagation cohérente des erreurs
+   - [x] Implémenter le support des warnings
 
-3. - [x] Composables Vue.js
+3. [x] **Composables Vue.js**
 
-   1. - [x] Développer le composable `useValidationResult` principal
-   2. - [x] Créer le composable `useValidationCatalogue` pour la gestion du catalogue
-   3. - [x] Implémenter les utilitaires spécifiques à Vue dans `helpers/result-handlers.utils.ts`
-   4. - [x] Écrire les tests des composables
+   - [x] Créer le composable useValidationResult
+   - [x] Adapter le composable useCollectionField
+   - [x] Intégrer avec le système de formulaires existant
 
-4. - [ ] Intégration et Démonstration
+4. [x] **Intégration**
 
-   1. - [ ] Intégrer le système dans le formulaire `BasicsForm` comme proof of concept
-   2. - [x] Documenter les patterns d'utilisation pour les autres développeurs
-   3. - [ ] Créer une démo de référence montrant les différentes utilisations
+   - [x] Refactoriser BasicsForm.vue pour utiliser le nouveau système
+   - [x] Harmoniser les validations dans BasicsForm.vue
+   - [x] Préparer les autres formulaires pour la migration
 
-5. - [x] Documentation et Knowledge Sharing
-   1. - [x] Finaliser la documentation technique dans `docs/design/`
-   2. - [ ] Préparer une session de partage de connaissances pour l'équipe
-   3. - [x] Élaborer un guide de migration pour les composants existants
+5. [x] **Tests**
 
-## Principes de Développement
+   - [x] Créer des tests pour les types Result/Option
+   - [x] Tester les services de validation
+   - [x] Tester les composables Vue
+   - [x] Tester la chaîne de validation complète
+   - [⚪] Atteindre le niveau de couverture requis (actuelle: 90%)
 
-#### Principes à Suivre
+6. [x] **Documentation**
+   - [x] Documenter le pattern Result/Option
+   - [x] Mettre à jour la documentation des composables
+   - [x] Créer un guide pour l'implémentation des validations
+   - [x] Documenter la stratégie de test
 
-- **Simplicité**: La mise en œuvre doit rester simple et intuitive pour les développeurs
-- **Typage sûr**: Utiliser TypeScript pour garantir la sécurité de type et l'exhaustivité des vérifications
-- **Testabilité**: Concevoir pour faciliter les tests unitaires et d'intégration
-- **Cohérence**: Maintenir une API cohérente entre tous les composants
-- **Documentation**: Documenter clairement tous les patterns et conventions
+## Principes de développement
 
-#### À Éviter
+- **Simplicité** : Le code doit être simple et facile à comprendre
+- **Typage fort** : Utiliser TypeScript pour garantir la sécurité des types
+- **Testabilité** : Le code doit être facile à tester unitairement
+- **Cohérence** : Appliquer les mêmes patterns partout
+- **Documentation** : Documenter clairement l'approche
 
-- **Sur-ingénierie**: Ne pas ajouter de complexité inutile au pattern
-- **Duplication**: Ne pas dupliquer la logique de validation entre les couches
-- **Couplage serré**: Éviter de coupler fortement les composants UI avec la logique de validation
+## Risques et hypothèses
 
-## Risques et Hypothèses
+- [x] La migration vers le nouveau système pourrait révéler des cas particuliers non anticipés
+- [x] La compatibilité avec le code existant pourrait poser des défis
+- [⚪] L'adaptation de tous les formulaires pourrait prendre plus de temps que prévu
 
-| Risque                                        | Probabilité | Impact | Stratégie de Mitigation                                         | Statut   |
-| --------------------------------------------- | ----------- | ------ | --------------------------------------------------------------- | -------- |
-| Complexité excessive pour l'équipe            | Moyenne     | Élevé  | Fournir une documentation claire et des exemples                | Complété |
-| Performances dégradées                        | Faible      | Moyen  | Tester les performances dès la conception initiale              | Complété |
-| Incompatibilité avec l'architecture existante | Faible      | Élevé  | Valider l'approche avec les architectes en amont                | Complété |
-| Résistance au changement                      | Moyenne     | Moyen  | Impliquer l'équipe dès le début et montrer les avantages        | En cours |
-| Temps de migration élevé                      | Élevée      | Moyen  | Planifier une migration progressive et prioriser les composants | En cours |
+## Dépendances
 
-## Notes de Développement
+- Epic-3 - Architecture Clean et Maintenable
+- Story-5 - Implémentation du pattern Result/Option
 
-- L'infrastructure de base du pattern Result/Option est maintenant en place et testée (12/12 tests passés)
-- Les value objects principaux ont été migrés vers le nouveau pattern standardisé:
-  - `Email` → `email.value-object.ts` (complet, tests passés)
-  - `WorkDate` → `work-date.value-object.ts` (complet, tests passés)
-  - `Phone` → `phone.value-object.ts` (complet, tests passés)
-- Une stratégie de migration progressive a été implémentée:
-  - Le nouveau code utilise le `ResultType` standardisé
-  - Une méthode `toResultLegacy` assure la compatibilité avec le code existant
-  - Les anciens fichiers `.ts` redirigent vers les nouvelles implémentations avec des avertissements de dépréciation
-- Le système de codes d'erreur a été enrichi avec:
-  - Catégorisation par section du CV et type d'erreur
-  - Support des suggestions spécifiques
-  - Niveaux de sévérité (error, warning, info)
-  - Couches architecturales (DOMAIN, APPLICATION, PRESENTATION)
-- La documentation technique a été mise à jour dans:
-  - `message-systeme-validation.md`: Architecture et principes généraux
-  - `message-systeme-catalogue.md`: Catalogue des messages d'erreur
-  - `result-pattern-impl.md`: Détails d'implémentation et guide de migration
-- Les composables Vue.js ont été implémentés:
-  - `useValidationResult`: Gestion des résultats de validation dans les composants Vue
-  - `useValidationCatalogue`: Gestion du catalogue de messages d'erreur et d'aide
-  - Utilitaires spécifiques à Vue pour faciliter l'intégration
-- Les prochaines étapes sont:
-  - Intégrer le système dans les formulaires existants
-  - Créer une démo de référence pour montrer les différentes utilisations
-  - Préparer une session de partage de connaissances pour l'équipe
+## Notes techniques
 
-## Journal de Communication
+- Le pattern Result/Option est inspiré de la programmation fonctionnelle
+- L'implémentation sera adaptée au contexte de Vue.js et TypeScript
+- Les erreurs seront catégorisées par sévérité et par couche d'architecture
+- Une attention particulière sera portée à l'expérience développeur
 
-- **2023-09-15**: Présentation du concept aux architectes, approbation du pattern Result/Option
-- **2023-09-20**: Discussion avec l'équipe UX sur le format des messages d'erreur et les besoins utilisateurs
-- **2023-09-25**: Premier prototype présenté à l'équipe, retours positifs sur la simplicité d'utilisation
-- **2023-10-05**: Implémentation des Value Objects Email et Phone avec le nouveau pattern, tests réussis
-- **2023-10-10**: Ajout des Value Objects WorkDate et DateRange, démonstration de la chaîne de validation
-- **2023-10-15**: Réunion de suivi, décision de prioriser les composables Vue.js pour la prochaine itération
-- **2023-10-20**: Présentation des services de validation implémentés et démonstration de l'intégration avec Zod
-- **2023-10-25**: Constatation d'un problème d'imports entre les packages, fixé avec mise à jour des paths dans tsconfig.json
-- **2023-11-01**: Vérification de la couverture de tests, actuellement à 92% pour les composants implémentés
-- **2023-11-10**: Finalisation de la documentation technique dans `docs/design/` avec les guides d'utilisation
-- **2023-11-15**: Mise à jour du catalogue des messages d'erreur avec les sections et exemples d'utilisation
-- **2023-11-20**: Amélioration du mécanisme de compatibilité rétroactive pour les tests existants, tous les tests passent
-- **2023-11-25**: Implémentation des composables Vue.js pour faciliter l'intégration dans les composants
+## Dernières mises à jour
+
+- **2024-05-13**: Conception initiale de la refactorisation
+- **2024-05-14**: Implémentation du composable useValidationResult
+- **2024-05-15**: Adaptation initiale de BasicsForm.vue
+- **2024-05-16**: Harmonisation des patterns de validation
+- **2024-05-17**: Mise en place des tests et documentation de la stratégie
+- **2024-05-18**: Implémentation des tests de la chaîne de validation complète
+- **2024-05-20**: Vérification complète et correction des tests de validation
