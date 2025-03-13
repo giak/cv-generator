@@ -1,0 +1,28 @@
+{
+  "common": {
+    "errors": {
+      "requiredField": "Ce champ est obligatoire",
+      "invalidEmail": "Adresse e-mail invalide",
+      "invalidDate": "Format de date invalide"
+    },
+    "actions": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    }
+  },
+  "resume": {
+    "sections": {
+      "basics": "Informations de base",
+      "work": "Expérience professionnelle",
+      "education": "Formation",
+      "skills": "Compétences"
+    },
+    "validation": {
+      "invalidName": "Veuillez saisir un nom valide",
+      "invalidEmail": "Veuillez saisir une adresse e-mail valide",
+      "invalidUrl": "Veuillez saisir une URL valide"
+    }
+  }
+} 

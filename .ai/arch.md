@@ -1,27 +1,28 @@
 # Architecture pour CV Generator
 
 **Statut**: Draft  
-**Version**: 1.6.0  
-**Date**: 2025-03-11  
+**Version**: 1.7.0  
+**Date**: 2025-03-12  
 **Auteur(s)**: Giak  
 **Approbateurs**: Giak
 
 ## Historique des modifications
 
-| Date       | Version | Auteur | Description des modifications                                                |
-| ---------- | ------- | ------ | ---------------------------------------------------------------------------- |
-| 2025-03-01 | 1.0.0   | Giak   | Version initiale du document                                                 |
-| 2025-03-05 | 1.1.0   | Giak   | Ajout des détails d'implémentation du stockage localStorage                  |
-| 2025-03-10 | 1.2.0   | Giak   | Précision des stratégies d'export et de validation                           |
-| 2025-03-10 | 1.4.0   | Giak   | Enrichissement des patterns architecturaux et workflow de test               |
-| 2025-03-10 | 1.5.0   | Giak   | Alignement avec le PRD et renforcement de la conformité JSON Resume standard |
+| Date       | Version | Auteur | Description des modifications                                                                      |
+| ---------- | ------- | ------ | -------------------------------------------------------------------------------------------------- |
+| 2025-03-01 | 1.0.0   | Giak   | Version initiale du document                                                                       |
+| 2025-03-05 | 1.1.0   | Giak   | Ajout des détails d'implémentation du stockage localStorage                                        |
+| 2025-03-10 | 1.2.0   | Giak   | Précision des stratégies d'export et de validation                                                 |
+| 2025-03-10 | 1.4.0   | Giak   | Enrichissement des patterns architecturaux et workflow de test                                     |
+| 2025-03-10 | 1.5.0   | Giak   | Alignement avec le PRD et renforcement de la conformité JSON Resume standard                       |
 | 2025-03-11 | 1.6.0   | Giak   | Mise à jour avec la structure monorepo PNPM et alignement avec l'architecture de packages actuelle |
+| 2025-03-12 | 1.7.0   | Giak   | Ajout de l'architecture d'internationalisation avec Vue I18n et pattern Adapter                    |
 
 ## Résumé Technique
 
 ### Vision technique générale
 
-CV Generator est conçu selon les principes de Clean Architecture et Domain-Driven Design (DDD) pour créer une application web légère et efficace qui permet d'éditer et d'exporter des CV au format JSON Resume standard (https://jsonresume.org/schema/). L'application est structurée comme un monorepo PNPM avec des packages distincts pour chaque couche architecturale, offrant une séparation claire des responsabilités. Elle fonctionne entièrement côté client avec persistance dans localStorage, sans nécessiter de backend dans sa version initiale. Elle permet d'exporter les CV dans plusieurs formats (JSON conforme au standard, HTML, PDF) et offre des conseils pour optimiser les CV pour les systèmes ATS (Applicant Tracking Systems).
+CV Generator est conçu selon les principes de Clean Architecture et Domain-Driven Design (DDD) pour créer une application web légère et efficace qui permet d'éditer et d'exporter des CV au format JSON Resume standard (https://jsonresume.org/schema/). L'application est structurée comme un monorepo PNPM avec des packages distincts pour chaque couche architecturale, offrant une séparation claire des responsabilités. Elle fonctionne entièrement côté client avec persistance dans localStorage, sans nécessiter de backend dans sa version initiale. Elle permet d'exporter les CV dans plusieurs formats (JSON conforme au standard, HTML, PDF), offre des conseils pour optimiser les CV pour les systèmes ATS (Applicant Tracking Systems), et propose une interface utilisateur internationalisée disponible en plusieurs langues.
 
 ### Principes directeurs
 
@@ -34,6 +35,7 @@ CV Generator est conçu selon les principes de Clean Architecture et Domain-Driv
 - **Indépendance des packages**: Chaque package possède une responsabilité claire et des frontières bien définies
 - **Interopérabilité**: Adhérence stricte au standard JSON Resume pour garantir la compatibilité avec d'autres outils
 - **Modularité**: Organisation des packages avec des responsabilités claires et minimisation des dépendances
+- **Internationalisation native**: Architecture conçue pour supporter le multilinguisme tout en respectant Clean Architecture
 
 ### Contraintes principales
 
@@ -46,29 +48,31 @@ CV Generator est conçu selon les principes de Clean Architecture et Domain-Driv
 - **Qualité du code**: Couverture de tests > 80% pour les entités du domaine, > 70% pour l'UI
 - **Limitation de stockage**: Respect de la limite de 5MB du localStorage
 - **Maintenance**: Structure monorepo facilitant la maintenance et l'évolution du code
+- **Multilinguisme**: Support initial du français et de l'anglais, extensible à d'autres langues
 
 ## Stack Technologique
 
-| Catégorie       | Technologie     | Version | Justification                                                                                       |
-| --------------- | --------------- | ------- | --------------------------------------------------------------------------------------------------- |
-| **Frontend**    | Vue.js          | 3.4+    | Framework progressif avec Composition API permettant une encapsulation efficace des fonctionnalités |
-|                 | TypeScript      | 5.7+    | Sécurité de type, meilleure IDE intégration, et réduction des bugs en production                    |
-|                 | Vite            | 6.2+    | Bundler rapide avec HMR, optimisé pour le développement moderne                                     |
-|                 | Pinia           | 2.3+    | Gestion d'état type-safe intégrée à Vue.js avec support pour les DevTools                           |
-|                 | Tailwind CSS    | 3.4+    | CSS utilitaire permettant un développement rapide et cohérent sans CSS spécifique                   |
-|                 | Vue Router      | 4.2+    | Navigation officielle pour Vue.js                                                                   |
-|                 | Heroicons Vue   | 2.2+    | Collection d'icônes de haute qualité pour Vue                                                      |
-| **Validation**  | Zod             | 3.22+   | Validation de schéma avec inférence de types TypeScript et support complet du standard JSON Resume  |
-| **Persistance** | localStorage    | -       | Stockage côté client pour persistance simple et fonctionnement hors ligne                           |
-| **Utilitaires** | Lodash-es       | 4.17+   | Bibliothèque d'utilitaires JavaScript optimisée pour ES modules                                     |
-| **Export**      | JSON            | -       | Export natif au format JSON Resume standard avec validation de conformité                           |
-|                 | HTML            | -       | Génération HTML via templates Vue.js                                                                |
-|                 | jsPDF           | 2.5+    | Génération de PDF côté client sans backend                                                          |
-| **Test**        | Vitest          | 3.0+    | Framework de test rapide et compatible avec l'écosystème Vue.js                                     |
-|                 | Testing Library | Latest  | Bibliothèque de test encourageant les bonnes pratiques                                              |
-| **CI/CD**       | GitHub Actions  | -       | Automatisation des tests, build et déploiement                                                      |
-| **Déploiement** | Docker          | -       | Conteneurisation pour déploiement cohérent                                                          |
-| **Gestion de packages** | PNPM    | 10.5+   | Gestionnaire de packages performant avec support natif des workspaces monorepo                      |
+| Catégorie               | Technologie     | Version | Justification                                                                                       |
+| ----------------------- | --------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| **Frontend**            | Vue.js          | 3.4+    | Framework progressif avec Composition API permettant une encapsulation efficace des fonctionnalités |
+|                         | TypeScript      | 5.7+    | Sécurité de type, meilleure IDE intégration, et réduction des bugs en production                    |
+|                         | Vite            | 6.2+    | Bundler rapide avec HMR, optimisé pour le développement moderne                                     |
+|                         | Pinia           | 2.3+    | Gestion d'état type-safe intégrée à Vue.js avec support pour les DevTools                           |
+|                         | Tailwind CSS    | 3.4+    | CSS utilitaire permettant un développement rapide et cohérent sans CSS spécifique                   |
+|                         | Vue Router      | 4.2+    | Navigation officielle pour Vue.js                                                                   |
+|                         | Vue I18n        | 11.0+   | Internationalisation intégrée à Vue.js avec support avancé de localisation                          |
+|                         | Heroicons Vue   | 2.2+    | Collection d'icônes de haute qualité pour Vue                                                       |
+| **Validation**          | Zod             | 3.22+   | Validation de schéma avec inférence de types TypeScript et support complet du standard JSON Resume  |
+| **Persistance**         | localStorage    | -       | Stockage côté client pour persistance simple et fonctionnement hors ligne                           |
+| **Utilitaires**         | Lodash-es       | 4.17+   | Bibliothèque d'utilitaires JavaScript optimisée pour ES modules                                     |
+| **Export**              | JSON            | -       | Export natif au format JSON Resume standard avec validation de conformité                           |
+|                         | HTML            | -       | Génération HTML via templates Vue.js                                                                |
+|                         | jsPDF           | 2.5+    | Génération de PDF côté client sans backend                                                          |
+| **Test**                | Vitest          | 3.0+    | Framework de test rapide et compatible avec l'écosystème Vue.js                                     |
+|                         | Testing Library | Latest  | Bibliothèque de test encourageant les bonnes pratiques                                              |
+| **CI/CD**               | GitHub Actions  | -       | Automatisation des tests, build et déploiement                                                      |
+| **Déploiement**         | Docker          | -       | Conteneurisation pour déploiement cohérent                                                          |
+| **Gestion de packages** | PNPM            | 10.5+   | Gestionnaire de packages performant avec support natif des workspaces monorepo                      |
 
 ## Architecture Globale
 
@@ -115,6 +119,30 @@ graph TD
     J -.-> E
 ```
 
+### Architecture d'internationalisation
+
+L'internationalisation suit une architecture basée sur le pattern Adapter pour respecter les principes de Clean Architecture :
+
+```mermaid
+graph TD
+    subgraph "UI Layer (@cv-generator/ui)"
+        A[Vue Components] --> B[Vue I18n Plugin]
+        B --> C[Vue I18n Adapter]
+    end
+
+    subgraph "Domain Layer (@cv-generator/core)"
+        D[Domain Entities] --> E[I18n Port]
+    end
+
+    subgraph "Shared Layer (@cv-generator/shared)"
+        F[Translation Keys]
+    end
+
+    C -- Implements --> E
+    A -- Uses --> F
+    D -- Uses --> F
+```
+
 ### Organisation des packages
 
 L'application est structurée en monorepo PNPM avec les packages suivants:
@@ -132,6 +160,9 @@ cv-generator/
 │   │   │   │   │   └── use-cases/
 │   │   │   │   └── ports/
 │   │   │   └── ...
+│   │   │   └── shared/
+│   │   │       └── i18n/
+│   │   │           └── domain-i18n.port.ts  # Port d'internationalisation
 │   ├── infrastructure/    # Adaptateurs pour les services externes
 │   │   ├── src/
 │   │   │   ├── repositories/
@@ -140,12 +171,29 @@ cv-generator/
 │   │   ├── src/
 │   │   │   ├── types/
 │   │   │   ├── schemas/
-│   │   │   └── validators/
+│   │   │   ├── validators/
+│   │   │   └── i18n/
+│   │   │       ├── keys/  # Clés de traduction centralisées
+│   │   │       └── constants/
+│   │   │           └── supported-locales.ts
 │   └── ui/                # Interface utilisateur Vue.js
 │       ├── src/
 │       │   ├── components/
 │       │   ├── modules/
 │       │   ├── pages/
+│       │   ├── i18n/
+│       │   │   ├── vue-i18n-adapter.ts  # Adaptateur Vue I18n
+│       │   │   ├── index.ts
+│       │   │   └── setup.ts
+│       │   ├── locales/  # Fichiers de traduction par langue
+│       │   │   ├── fr/
+│       │   │   │   ├── validation.json
+│       │   │   │   ├── ui.json
+│       │   │   │   └── index.json
+│       │   │   └── en/
+│       │   │       ├── validation.json
+│       │   │       ├── ui.json
+│       │   │       └── index.json
 │       │   └── App/
 ├── pnpm-workspace.yaml    # Configuration du workspace
 └── package.json           # Scripts et dépendances racine
@@ -173,11 +221,19 @@ cv-generator/
    - Pour JSON: une validation de conformité au standard est effectuée avant l'export
 
 3. **Optimisation ATS**:
+
    - L'application analyse le contenu du CV
    - Des conseils d'optimisation sont proposés en temps réel
    - Un score de lisibilité ATS est calculé
    - Des suggestions de mots-clés sont générées en fonction du contenu
    - L'affichage des conseils est géré par des composants UI dédiés (@cv-generator/ui)
+
+4. **Internationalisation**:
+   - Les textes UI utilisent le plugin Vue I18n via `$t('key')`
+   - Les messages d'erreur du domaine utilisent des clés définies dans @cv-generator/shared
+   - Un adaptateur transmet les traductions du UI au domaine via le port d'internationalisation
+   - Les préférences linguistiques de l'utilisateur sont stockées dans localStorage
+   - Le chargement des fichiers de traduction est optimisé par lazy loading
 
 ### Patterns architecturaux
 
@@ -190,6 +246,7 @@ cv-generator/
 - **Value Objects Pattern**: Encapsulation de la validation et du comportement dans des objets de valeur
 - **Result Pattern**: Gestion fonctionnelle des erreurs et des résultats d'opérations
 - **Module Pattern**: Organisation du code en modules avec responsabilités claires dans le monorepo
+- **Adapter Pattern**: Isolation du domaine des implémentations concrètes, notamment pour l'internationalisation
 
 ## Composants Principaux
 
@@ -206,6 +263,7 @@ cv-generator/
 - Fournir la logique de validation métier
 - Gérer les règles d'optimisation ATS
 - Garantir la conformité au standard JSON Resume
+- Définir le port d'internationalisation pour les messages du domaine
 
 **Structure**:
 
@@ -233,6 +291,8 @@ core/
 │   │       └── ExportPDFUseCase.ts
 │   └── ports/
 └── shared/              # Shared Types & Utils
+    └── i18n/            # I18n Port
+        └── domain-i18n.port.ts
 ```
 
 **Implémentation DDD**:
@@ -242,16 +302,18 @@ core/
 - Les use cases orchestrent les opérations entre les entités et les repositories
 - Le pattern Result est utilisé pour gérer les erreurs de façon fonctionnelle
 - Validation complète selon le schéma JSON Resume standard
+- Les messages d'erreur utilisent des clés i18n plutôt que des textes codés en dur
 
 **Interfaces**:
 
 - Interface de repository pour localStorage
 - Interface pour validation
 - Interface pour les services d'export
+- Port d'internationalisation pour les messages du domaine
 
 **Dépendances**:
 
-- @cv-generator/shared (types et validation)
+- @cv-generator/shared (types, validation et clés i18n)
 - Aucune dépendance externe au domaine métier
 
 ### 2. Package: UI (@cv-generator/ui)
@@ -266,6 +328,8 @@ core/
 - Présenter le CV et permettre son exportation
 - Afficher les conseils d'optimisation ATS
 - Présenter un feedback sur la conformité au standard JSON Resume
+- Configurer et gérer l'internationalisation avec Vue I18n
+- Implémenter l'adaptateur Vue I18n pour le port du domaine
 
 **Structure**:
 
@@ -288,6 +352,19 @@ ui/
 ├── pages/            # Pages Vue Router
 │   ├── EditorPage.vue
 │   └── PreviewPage.vue
+├── i18n/             # Configuration i18n
+│   ├── vue-i18n-adapter.ts
+│   ├── setup.ts
+│   └── index.ts
+├── locales/          # Fichiers de traduction
+│   ├── fr/
+│   │   ├── validation.json
+│   │   ├── ui.json
+│   │   └── index.json
+│   └── en/
+│       ├── validation.json
+│       ├── ui.json
+│       └── index.json
 ├── App/              # Composant racine
 │   └── App.vue
 ├── e2e/              # Tests E2E
@@ -303,12 +380,14 @@ ui/
 - Design responsive conforme aux normes WCAG 2.1 AA
 - Interface intuitive et minimaliste
 - Validation en temps réel avec feedback
+- Interface utilisateur multilingue avec sélecteur de langue
 
 **Interfaces**:
 
 - Composants publics
 - Composables pour la logique réutilisable
 - API de store pour la gestion d'état
+- Adaptateur Vue I18n pour le port d'internationalisation
 
 **Dépendances**:
 
@@ -316,6 +395,7 @@ ui/
 - @cv-generator/infrastructure
 - @cv-generator/shared
 - Vue.js, Pinia, Vue Router
+- Vue I18n
 - Tailwind CSS
 - Zod (validation)
 - Heroicons Vue
@@ -378,6 +458,8 @@ infrastructure/
 - Contenir les schémas de validation Zod
 - Définir les types communs
 - Garantir la conformité des types au standard JSON Resume
+- Centraliser les clés de traduction pour l'internationalisation
+- Définir les constantes et codes d'erreur
 
 **Structure**:
 
@@ -388,7 +470,14 @@ shared/
 ├── schemas/          # Schémas Zod pour validation JSON Resume
 │   └── resumeSchema.ts
 ├── validators/       # Validateurs personnalisés
-└── utils/            # Fonctions utilitaires
+├── utils/            # Fonctions utilitaires
+└── i18n/             # Internationalisation
+    ├── keys/         # Clés de traduction centralisées
+    │   ├── validation-keys.ts
+    │   ├── ui-keys.ts
+    │   └── index.ts
+    └── constants/
+        └── supported-locales.ts
 ```
 
 **Implémentation**:
@@ -397,11 +486,14 @@ shared/
 - Schémas Zod pour la validation avec inférence de types
 - Utilitaires partagés entre les packages
 - Helpers pour la validation de conformité au standard
+- Clés de traduction organisées hiérarchiquement pour faciliter la maintenance
+- Constantes pour les locales supportées
 
 **Interfaces**:
 
 - Types et utilitaires exportés
 - Schémas de validation publics
+- Clés de traduction publiques
 
 **Dépendances**:
 
@@ -516,6 +608,35 @@ shared/
    - Dashboard de suivi des KPIs
    - Tests d'utilisabilité trimestriels
 
+### Internationalisation
+
+1. **Architecture i18n**:
+
+   - Pattern Adapter pour isoler le domaine de l'implémentation Vue I18n
+   - Port d'internationalisation agnostique dans le domaine
+   - Centralisation des clés de traduction dans @cv-generator/shared
+   - Adaptateur Vue I18n dans @cv-generator/ui
+   - Support initial du français et de l'anglais
+
+2. **Structure des traductions**:
+
+   - Organisation hiérarchique des clés par domaine fonctionnel
+   - Fichiers de traduction séparés par langue et par domaine fonctionnel
+   - Support de l'interpolation de variables dans les messages
+   - Support de la pluralisation via Vue I18n
+
+3. **Performance**:
+
+   - Chargement paresseux (lazy loading) des fichiers de traduction
+   - Adaptateur léger pour minimiser l'impact sur les performances
+   - Détection automatique de la langue du navigateur
+
+4. **Expérience utilisateur**:
+   - Sélecteur de langue accessible dans l'interface
+   - Persistence de la préférence linguistique utilisateur
+   - Cohérence des messages entre les couches
+   - Support de la traduction des messages d'erreur provenant du domaine
+
 ## Stratégie de Tests
 
 ### Approche multi-niveaux
@@ -550,6 +671,7 @@ Chaque package possède sa propre configuration Vitest:
 - `packages/ui/vitest.config.ts`: Tests des composants et composables
 
 Dans le workspace global:
+
 - `vitest.workspace.ts`: Configuration globale pour tous les packages
 
 ### Couverture de code
@@ -648,12 +770,24 @@ Objectifs de couverture:
    - Conseils ATS de base
    - Import de fichiers JSON Resume existants
 
-3. **Phase 3: Perfectionnement (2 semaines)**
+3. **Phase 3: Internationalisation (1-2 semaines)**
+
+   - Mise en place de Vue I18n et configuration du plugin
+   - Architecture d'internationalisation avec pattern Adapter
+   - Extraction des textes codés en dur vers des fichiers de traduction
+   - Centralisation des clés dans @cv-generator/shared
+   - Création du port d'internationalisation dans le domaine
+   - Implémentation de l'adaptateur Vue I18n dans l'UI
+   - Support initial du français et de l'anglais
+   - Composant de sélection de langue
+
+4. **Phase 4: Perfectionnement (2 semaines)**
    - Améliorations basées sur les retours utilisateurs
    - Optimisation des performances
    - Améliorations des conseils ATS
    - Tests utilisateurs et ajustements finaux
    - Compatibilité renforcée avec les autres outils de l'écosystème
+   - Support de langues additionnelles (optionnel)
 
 ### État actuel d'implémentation
 
@@ -675,6 +809,7 @@ Objectifs de couverture:
    - 🔄 Tests E2E
    - 🔄 Support complet de toutes les sections du standard JSON Resume
    - 🔄 Amélioration des interactions entre packages
+   - 🔄 Mise en place de l'architecture d'internationalisation
 
 3. **Fonctionnalités planifiées**:
    - ⏳ Prévisualisation du CV
@@ -682,6 +817,8 @@ Objectifs de couverture:
    - ⏳ Templates multiples pour l'export
    - ⏳ Améliorations de performance
    - ⏳ Tests d'interopérabilité avec l'écosystème JSON Resume
+   - ⏳ Support initial du français et de l'anglais
+   - ⏳ Implémentation du sélecteur de langue
 
 ### Priorités d'implémentation
 
@@ -693,6 +830,7 @@ Objectifs de couverture:
    - Stockage dans localStorage (✓ Implémenté)
    - Export au format JSON conforme au standard (✓ Implémenté)
    - Interopérabilité avec d'autres outils JSON Resume (En cours)
+   - Architecture d'internationalisation avec pattern Adapter (En cours)
 
 2. **Priorité Moyenne**:
 
@@ -702,12 +840,14 @@ Objectifs de couverture:
    - Conseils ATS de base (À implémenter)
    - Tests unitaires essentiels (En cours)
    - Import de fichiers JSON Resume existants (À implémenter)
+   - Support initial du français et de l'anglais (À implémenter)
 
 3. **Priorité Basse**:
    - Animations et transitions UI
    - Personnalisation avancée des templates
    - Statistiques d'utilisation anonymisées
    - PWA pour fonctionnement hors ligne amélioré
+   - Support de langues additionnelles (après français et anglais)
 
 ## Annexes
 
@@ -749,10 +889,125 @@ Objectifs de couverture:
    - **Conséquences**: Interopérabilité garantie, complexité accrue de validation, meilleure portabilité des données
 
 6. **ADR-006: Utilisation de Zod pour la validation**
+
    - **Contexte**: Besoin d'un système de validation robuste avec inférence de types
    - **Décision**: Utilisation de Zod pour la validation à tous les niveaux
    - **Statut**: Accepté
    - **Conséquences**: Validation type-safe, meilleure intégration avec TypeScript, code plus maintenable
+
+7. **ADR-007: Pattern Adapter pour l'internationalisation**
+   - **Contexte**: Besoin d'internationaliser l'application tout en respectant les principes de Clean Architecture
+   - **Décision**: Utilisation du pattern Adapter avec un port d'internationalisation dans le domaine et un adaptateur Vue I18n dans l'UI
+   - **Statut**: Accepté
+   - **Conséquences**: Le domaine reste indépendant des frameworks externes, possibilité d'ajouter facilement de nouvelles langues, maintien de la cohérence des messages à travers les couches
+
+### Structure de l'internationalisation
+
+L'architecture d'internationalisation suit le pattern Adapter pour respecter les principes de Clean Architecture :
+
+1. **Port d'internationalisation** (@cv-generator/core/src/shared/i18n/domain-i18n.port.ts):
+
+```typescript
+// Interface du port I18n dans le domaine
+export interface DomainI18nPortInterface {
+  // Traduit une clé avec paramètres optionnels
+  translate(key: string, params?: Record<string, any>): string;
+
+  // Vérifie l'existence d'une clé
+  exists(key: string): boolean;
+}
+```
+
+2. **Adaptateur Vue I18n** (@cv-generator/ui/src/i18n/vue-i18n-adapter.ts):
+
+```typescript
+// Adaptateur Vue I18n qui implémente le port du domaine
+import { DomainI18nPortInterface } from "@cv-generator/core";
+import { useI18n } from "vue-i18n";
+
+export class VueI18nAdapter implements DomainI18nPortInterface {
+  private i18n;
+
+  constructor() {
+    this.i18n = useI18n();
+  }
+
+  translate(key: string, params?: Record<string, any>): string {
+    return this.i18n.t(key, params || {});
+  }
+
+  exists(key: string): boolean {
+    return this.i18n.te(key);
+  }
+}
+```
+
+3. **Centralisation des clés** (@cv-generator/shared/src/i18n/keys/):
+
+```typescript
+// Exemple de structure des clés de traduction
+export const I18N_KEYS = {
+  VALIDATION: {
+    RESUME: {
+      BASICS: {
+        EMAIL: {
+          REQUIRED: "validation.resume.basics.email.required",
+          INVALID: "validation.resume.basics.email.invalid",
+          PERSONAL: "validation.resume.basics.email.personal",
+        },
+      },
+    },
+  },
+  UI: {
+    NAVIGATION: {
+      PROGRESS: "ui.navigation.progress",
+      REQUIRED_SECTIONS: "ui.navigation.requiredSections",
+    },
+  },
+};
+```
+
+4. **Utilisation dans les entités du domaine**:
+
+```typescript
+// Avant
+return createFailure([
+  {
+    code: ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
+    message: "Format email invalide", // Message en dur
+    field: "email",
+    severity: "error",
+    layer: ValidationLayerType.DOMAIN,
+  },
+]);
+
+// Après
+return createFailure([
+  {
+    code: ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
+    message: this.i18n.translate(
+      I18N_KEYS.VALIDATION.RESUME.BASICS.EMAIL.INVALID
+    ),
+    i18nKey: I18N_KEYS.VALIDATION.RESUME.BASICS.EMAIL.INVALID,
+    field: "email",
+    severity: "error",
+    layer: ValidationLayerType.DOMAIN,
+  },
+]);
+```
+
+5. **Extension de l'interface d'erreur de validation**:
+
+```typescript
+// Extended ValidationErrorInterface
+export interface I18nValidationErrorInterface extends ValidationErrorInterface {
+  /* Clé de traduction au lieu d'un message direct */
+  i18nKey?: string;
+
+  /* Paramètres pour l'interpolation */
+  i18nParams?: Record<string, any>;
+}
+```
 
 ### Structure du schéma JSON Resume
 
@@ -867,4 +1122,4 @@ L'application est basée sur le schéma JSON Resume standard (https://jsonresume
 - **Use Case**: Encapsule la logique d'application pour un cas d'utilisation spécifique
 - **JSON Resume**: Format standard pour stocker des CV au format JSON
 - **ATS (Applicant Tracking System)**: Système utilisé par les recruteurs pour filtrer automatiquement les CV
-- **Optimisation ATS**: Techniques pour améliorer la visibilité 
+- **Optimisation ATS**: Techniques pour améliorer la visibilité

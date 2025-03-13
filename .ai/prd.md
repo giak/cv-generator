@@ -1,8 +1,8 @@
 # Product Requirements Document (PRD) pour CV Generator
 
 **Status**: Draft  
-**Version**: 1.6.0  
-**Date**: 2025-03-11  
+**Version**: 1.7.0  
+**Date**: 2025-03-12  
 **Auteur(s)**: Giak
 
 ## Historique des modifications
@@ -16,12 +16,13 @@
 | 2025-03-02 | 1.4.0   | Giak   | Enrichissement des personas, ajout classification MoSCoW et amélioration de la section UX/UI                 |
 | 2025-03-05 | 1.5.0   | Giak   | Alignement avec le document de fondation technique et mise à jour des détails d'interopérabilité JSON Resume |
 | 2025-03-11 | 1.6.0   | Giak   | Mise à jour avec la structure monorepo PNPM et alignement avec l'architecture de packages actuelle           |
+| 2025-03-12 | 1.7.0   | Giak   | Ajout de l'internationalisation (i18n) avec Vue I18n et mise à jour de la structure des epics                |
 
 ## Introduction
 
 ### Description du projet
 
-CV Generator est une application web légère qui permet aux utilisateurs de créer, éditer et exporter des CV au format JSON Resume standard (https://jsonresume.org/schema/). L'application offre une interface intuitive pour la saisie des données, avec validation en temps réel, et permet d'exporter le CV en plusieurs formats (JSON, HTML, PDF). L'application fonctionne entièrement côté client avec persistance dans localStorage, sans nécessiter de backend, et est structurée selon une architecture monorepo PNPM avec des packages bien définis.
+CV Generator est une application web légère qui permet aux utilisateurs de créer, éditer et exporter des CV au format JSON Resume standard (https://jsonresume.org/schema/). L'application offre une interface intuitive pour la saisie des données, avec validation en temps réel, support multilingue, et permet d'exporter le CV en plusieurs formats (JSON, HTML, PDF). L'application fonctionne entièrement côté client avec persistance dans localStorage, sans nécessiter de backend, et est structurée selon une architecture monorepo PNPM avec des packages bien définis.
 
 ### Contexte business et motivations
 
@@ -33,6 +34,7 @@ Le format JSON Resume offre une solution structurée et standardisée pour stock
 - Des conseils pour optimiser le CV pour les systèmes ATS (Applicant Tracking Systems)
 - Le fonctionnement entièrement hors ligne via localStorage
 - Une architecture maintenable basée sur les principes de Clean Architecture
+- Support multilingue pour atteindre une audience internationale
 
 #### Positionnement produit
 
@@ -43,6 +45,7 @@ CV Generator se positionne comme une alternative légère et conviviale aux édi
 - Offre l'exportation libre dans des formats standards
 - Garantit le contrôle total des données par l'utilisateur
 - Assure l'interopérabilité avec l'écosystème JSON Resume
+- Propose une interface disponible en plusieurs langues
 
 ### Public cible et parties prenantes
 
@@ -52,6 +55,7 @@ CV Generator se positionne comme une alternative légère et conviviale aux édi
 - Demandeurs d'emploi à l'aise avec les outils numériques
 - Professionnels souhaitant un CV au format structuré et portable
 - Utilisateurs de l'écosystème JSON Resume cherchant un éditeur visuel
+- Utilisateurs internationaux nécessitant une interface dans leur langue
 
 #### Personas détaillés
 
@@ -70,10 +74,17 @@ CV Generator se positionne comme une alternative légère et conviviale aux édi
    - Valeur principale: optimisation ATS et facilité d'utilisation
 
 3. **Marc, freelance multi-profil (42 ans)**
+
    - Maintient plusieurs versions de son CV pour différents types de missions
    - A besoin de pouvoir facilement modifier et adapter son CV
    - Préfère travailler hors ligne sur ses documents
    - Valeur principale: flexibilité et personnalisation
+
+4. **Lucie, consultante internationale (31 ans)**
+   - Travaille sur des projets internationaux nécessitant des CV en différentes langues
+   - Apprécie les interfaces disponibles dans sa langue maternelle
+   - Souhaite adapter son CV selon les standards culturels de chaque pays
+   - Valeur principale: adaptation internationale et flexibilité linguistique
 
 **Parties prenantes**:
 
@@ -81,6 +92,7 @@ CV Generator se positionne comme une alternative légère et conviviale aux édi
 - Communauté JSON Resume
 - Équipe de développement
 - Mainteneurs du standard JSON Resume
+- Contributeurs aux traductions
 
 ### Problématique adressée
 
@@ -93,8 +105,9 @@ Malgré l'existence du format JSON Resume, plusieurs problèmes persistent:
 5. Les utilisateurs ont besoin de formats d'export variés (pas seulement JSON)
 6. L'interopérabilité entre outils de l'écosystème JSON Resume est limitée par le manque d'interfaces conviviales
 7. Les applications existantes manquent souvent d'une architecture solide pour la maintenance et l'évolution
+8. La barrière linguistique limite l'accès aux outils de création de CV de qualité pour les utilisateurs non anglophones
 
-CV Generator résout ces problèmes en proposant une solution simple, locale et directe pour éditer et exporter des CV au format JSON Resume standard avec des conseils d'optimisation ATS, tout en s'appuyant sur une architecture monorepo robuste et modulaire.
+CV Generator résout ces problèmes en proposant une solution simple, locale et directe pour éditer et exporter des CV au format JSON Resume standard avec des conseils d'optimisation ATS, une interface multilingue, tout en s'appuyant sur une architecture monorepo robuste et modulaire.
 
 ## Objectifs
 
@@ -107,6 +120,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Fournir des conseils simples pour l'optimisation ATS des CV
 - Assurer la compatibilité complète avec le standard JSON Resume pour l'interopérabilité
 - Implémenter une architecture monorepo PNPM avec séparation claire des responsabilités
+- Offrir une interface utilisateur internationalisée avec support initial français/anglais
 
 ### Critères de succès
 
@@ -118,6 +132,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Les conseils ATS sont compréhensibles et utiles pour les utilisateurs (satisfaction > 80%)
 - Compatibilité vérifiée avec d'autres outils de l'écosystème JSON Resume
 - Couverture des tests > 80% pour le core, > 70% pour l'UI
+- Support complet de l'interface en français et anglais, avec possibilité d'ajouter facilement d'autres langues
 
 ### Indicateurs de performance (KPIs)
 
@@ -130,6 +145,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Taux de rétention à 30 jours (cible: > 40%)
 - Taux de conversion des exports (proportion d'utilisateurs qui exportent après création)
 - Taux de succès d'interopérabilité (imports/exports sans erreur avec d'autres outils)
+- Utilisation par langue (proportion d'utilisateurs par langue d'interface)
 
 ### Méthode de mesure des KPIs
 
@@ -140,12 +156,13 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Dashboard de suivi des métriques avec rapports hebdomadaires
 - Tests d'utilisabilité trimestriels avec 5-7 utilisateurs représentatifs
 - Tests d'interopérabilité avec d'autres outils de l'écosystème JSON Resume
+- Statistiques d'utilisation par langue d'interface
 
 ## Parcours utilisateur
 
 ### Parcours principal: Création d'un nouveau CV
 
-1. L'utilisateur arrive sur la page d'accueil
+1. L'utilisateur arrive sur la page d'accueil et sélectionne sa langue préférée
 2. Il clique sur "Créer un nouveau CV"
 3. Il remplit les informations de base (nom, coordonnées, résumé)
 4. Il ajoute ses expériences professionnelles une par une
@@ -157,7 +174,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 
 ### Parcours secondaire: Modification d'un CV existant
 
-1. L'utilisateur arrive sur la page d'accueil
+1. L'utilisateur arrive sur la page d'accueil et sélectionne sa langue préférée
 2. Il voit son CV précédemment créé et clique dessus
 3. Il modifie les sections souhaitées
 4. Il reçoit des conseils d'optimisation ATS sur ses modifications
@@ -166,7 +183,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 
 ### Parcours secondaire: Import d'un CV existant
 
-1. L'utilisateur arrive sur la page d'accueil
+1. L'utilisateur arrive sur la page d'accueil et sélectionne sa langue préférée
 2. Il clique sur "Importer un CV"
 3. Il sélectionne un fichier JSON au format JSON Resume standard
 4. Le système valide le fichier et charge les données
@@ -174,14 +191,24 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 6. Il reçoit des conseils d'optimisation ATS
 7. Il prévisualise et exporte son CV
 
+### Parcours secondaire: Changement de langue
+
+1. L'utilisateur clique sur le sélecteur de langue dans l'interface
+2. Il sélectionne la langue souhaitée dans la liste
+3. L'interface se met à jour immédiatement dans la langue choisie
+4. Les messages d'erreur et conseils sont affichés dans la langue sélectionnée
+5. La préférence linguistique est sauvegardée pour les futures visites
+
 ### Écrans principaux et flux utilisateur
 
 1. **Page d'accueil** - Liste des CV existants et options de création/import
 
+   - Options de langue accessibles depuis le header
    - Transition vers → Création de CV ou Modification de CV
 
 2. **Éditeur de CV** - Interface principale avec navigation par sections
 
+   - Tous les textes d'interface et messages dans la langue sélectionnée
    - Navigation entre → Différentes sections du CV (Informations personnelles, Expérience, etc.)
    - Transition vers → Prévisualisation ou Export
 
@@ -215,6 +242,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Import d'un fichier JSON Resume existant
 - Validation à plusieurs niveaux (UI et domaine)
 - Tests unitaires avec couverture > 80% pour le core
+- Internationalisation complète de l'interface (français/anglais)
 
 #### Could Have (Souhaitée)
 
@@ -224,6 +252,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
 - Mode sombre / clair
 - PWA pour un fonctionnement hors ligne amélioré
 - Tests E2E pour les flux principaux
+- Support de langues supplémentaires (allemand, espagnol, etc.)
 
 #### Won't Have (Exclue de cette version)
 
@@ -261,10 +290,20 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
    - Compression des données pour optimiser l'utilisation du localStorage
 
 4. **Optimisation ATS**
+
    - Conseils simples pour améliorer la visibilité du CV par les systèmes ATS
    - Suggestions de mots-clés basées sur le contenu du CV
    - Indication de la "lisibilité ATS" du CV
    - Analyse du contenu en temps réel
+
+5. **Internationalisation**
+   - Support complet de l'interface en français et anglais
+   - Architecture d'internationalisation conforme à Clean Architecture
+   - Centralisation des clés de traduction
+   - Support de la pluralisation et des variables dans les messages
+   - Détection automatique de la langue du navigateur
+   - Persistance de la préférence linguistique utilisateur
+   - Sélecteur de langue accessible dans l'interface
 
 ### Exigences non-fonctionnelles
 
@@ -275,6 +314,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
    - Sauvegarde locale sans impact sur l'UX
    - Bundle JS initial < 200KB (gzippé)
    - Performance optimisée même sur des appareils de puissance moyenne
+   - Chargement paresseux des fichiers de traduction pour optimisation
 
 2. **Compatibilité**
 
@@ -282,6 +322,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
    - Fonctionnement hors ligne complet
    - Compatibilité avec le standard JSON Resume
    - Interopérabilité avec les autres outils de l'écosystème
+   - Support de caractères internationaux et diverses polices
 
 3. **Securité**
 
@@ -294,6 +335,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
    - Conformité au RGPD pour la gestion des données personnelles dans localStorage
    - Respect des bonnes pratiques de confidentialité pour les données stockées localement
    - Adhérence stricte aux spécifications du format JSON Resume standard
+   - Support des standards internationaux pour les formats de date, nombres, etc.
 
 ### Exigences UX/UI
 
@@ -306,6 +348,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
    - Typographie lisible (minimum 16px pour le texte principal)
    - Composants UI cohérents à travers l'application
    - Navigation facilitée entre les sections du CV
+   - Sélecteur de langue visible et accessible
 
 2. **Expérience utilisateur**
    - Validation en temps réel avec messages d'erreur clairs
@@ -317,6 +360,7 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
    - Annulation possible des actions critiques
    - Progression visuelle dans le processus de création
    - Feedback sur la conformité au standard JSON Resume
+   - Cohérence des messages et textes dans toutes les langues supportées
 
 ### Principes UI/UX
 
@@ -342,11 +386,18 @@ CV Generator résout ces problèmes en proposant une solution simple, locale et 
    - Navigation intuitive entre sections
 
 4. **Accessibilité**
+
    - Contraste suffisant pour tous les éléments visuels
    - Support de la navigation au clavier
    - Compatibilité avec les lecteurs d'écran
    - Textes alternatifs pour les éléments visuels
    - Respect des normes WCAG 2.1 AA
+
+5. **Internationalisation**
+   - Textes adaptés à la longueur variable selon les langues
+   - Design flexible pour accommoder différentes longueurs de texte
+   - Respect des conventions culturelles pour les formats (dates, nombres)
+   - Icônes universelles complétant le texte pour améliorer la compréhension
 
 ### Exigences d'intégration
 
@@ -466,6 +517,28 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
 - Impact mesurable sur la qualité des CV produits
 - Intégration adéquate entre les packages core, ui et infrastructure
 
+### Epic-5: Internationalisation (Status: Planifié)
+
+**Description**: Implémentation de l'internationalisation complète de l'application avec Vue I18n, en respectant les principes de Clean Architecture.
+
+**Stories principales**:
+
+- ⏳ Mettre en place Vue I18n dans le projet
+- ⏳ Créer l'architecture d'internationalisation (port/adapter)
+- ⏳ Extraire tous les textes en dur vers des fichiers de traduction
+- ⏳ Implémenter un sélecteur de langue dans l'UI
+- ⏳ Supporter la détection automatique de la langue du navigateur
+- ⏳ Créer des tests pour vérifier la complétude des traductions
+
+**Critères d'acceptation**:
+
+- Architecture d'internationalisation conforme à Clean Architecture
+- Interface utilisateur entièrement traduite en français et anglais
+- Messages d'erreur et validations localisés
+- Persistance de la préférence linguistique utilisateur
+- Tests automatisés pour la complétude des traductions
+- Conformité aux principes de séparation des préoccupations
+
 ## État actuel d'implémentation
 
 ### Composants implémentés (✅)
@@ -494,6 +567,7 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
 - Couverture de tests pour les composants UI
 - Documentation complète des interfaces JSON Resume
 - Optimisation des interactions entre packages du monorepo
+- Préparation de l'architecture pour l'internationalisation
 
 ## Questions ouvertes
 
@@ -516,9 +590,15 @@ Les fonctionnalités suivantes ont été considérées mais sont explicitement e
    - Options: Base de données de règles, analyse statistique, heuristiques
 
 4. **Optimisation du monorepo**: Comment améliorer encore la structure des packages pour maximiser la séparation des préoccupations?
+
    - Statut: Évaluation continue
    - Impact: Maintenance et évolutivité du code
    - Options: Packages supplémentaires, meilleure isolation, bibliothèque de composants UI séparée
+
+5. **Langues additionnelles**: Quelles langues doivent être prioritaires après le français et l'anglais?
+   - Statut: À déterminer après le lancement initial
+   - Impact: Ressources nécessaires pour les traductions et tests
+   - Options: Espagnol, allemand, chinois, japonais
 
 ## Aspects Techniques
 
@@ -532,6 +612,7 @@ La stack technologique a été sélectionnée pour garantir la simplicité, la p
 | Vue.js       | 3.4+    | Framework UI avec Composition API    | Performances et ergonomie du développement |
 | Vite         | 6.2+    | Build tool et dev server             | Vitesse de développement et de compilation |
 | Pinia        | 2.3+    | State management                     | Gestion d'état type-safe et performante    |
+| Vue I18n     | 11.0+   | Bibliothèque d'internationalisation  | Support multilingue intégré à Vue.js       |
 | Tailwind CSS | 3.4+    | Framework CSS utilitaire             | Développement rapide et cohérence visuelle |
 | Zod          | 3.22+   | Validation de schéma                 | Validation robuste avec inférence de types |
 | Vitest       | 3.0+    | Framework de test                    | Tests rapides et intégrés                  |
@@ -552,6 +633,7 @@ La stack technologique a été sélectionnée pour garantir la simplicité, la p
    - L'application doit fonctionner correctement sur des appareils de milieu de gamme
    - Temps de réponse < 500ms pour toutes les interactions
    - Optimisation du rendu pour les exports
+   - Chargement paresseux des fichiers de traduction
 
 3. **Compatibilité**
 
@@ -559,6 +641,7 @@ La stack technologique a été sélectionnée pour garantir la simplicité, la p
    - Application responsive fonctionnant sur desktop et tablette
    - Compatibilité stricte avec le standard JSON Resume
    - Interopérabilité avec les autres outils de l'écosystème
+   - Support de caractères et formats internationaux
 
 4. **Architecture monorepo**
    - Structure claire des packages avec responsabilités distinctes
@@ -596,10 +679,19 @@ L'architecture suit une version simplifiée des principes de Clean Architecture 
    - Stratégie de migration pour l'évolution du schéma
 
 4. **Stratégie d'export**
+
    - Export JSON via conversion directe des objets avec validation de conformité
    - Export HTML via templates Vue rendus côté client
    - Export PDF via conversion HTML en utilisant jsPDF
    - Validation de la conformité au standard JSON Resume
+
+5. **Architecture d'internationalisation**
+   - Pattern Adapter pour isoler le domaine de l'implémentation Vue I18n
+   - Port d'internationalisation dans le domaine
+   - Centralisation des clés de traduction dans @cv-generator/shared
+   - Adaptateur Vue I18n dans @cv-generator/ui
+   - Séparation des messages par domaine fonctionnel (ui, validation, etc.)
+   - Support de la pluralisation et des variables dans les messages
 
 ## Plan et Timeline
 
@@ -623,7 +715,15 @@ L'architecture suit une version simplifiée des principes de Clean Architecture 
    - Conseils ATS de base
    - Import de fichiers JSON Resume existants
 
-3. **Phase 3: Perfectionnement (2 semaines)**
+3. **Phase 3: Internationalisation (1-2 semaines)**
+
+   - Intégration de Vue I18n
+   - Extraction de tous les textes en dur vers des fichiers de traduction
+   - Création de l'architecture d'internationalisation (port/adapter)
+   - Support initial français/anglais
+   - Tests des traductions
+
+4. **Phase 4: Perfectionnement (2 semaines)**
    - Améliorations basées sur les retours utilisateurs
    - Optimisation des performances
    - Améliorations des conseils ATS
@@ -649,12 +749,14 @@ L'architecture suit une version simplifiée des principes de Clean Architecture 
    - Conseils ATS de base
    - Import de fichiers JSON Resume existants
    - Tests unitaires essentiels
+   - Internationalisation (français/anglais)
 
 3. **Priorité Basse**:
    - Animations et transitions UI
    - Personnalisation avancée des templates
    - Statistiques d'utilisation anonymisées
    - PWA pour fonctionnement hors ligne amélioré
+   - Langues supplémentaires
 
 ### Jalons clés
 
@@ -665,6 +767,7 @@ L'architecture suit une version simplifiée des principes de Clean Architecture 
 | MVP            | Version minimale avec export JSON fonctionnel  | T+3 semaines | ⏳ Planifié |
 | Export complet | Version avec exports HTML et PDF fonctionnels  | T+4 semaines | ⏳ Planifié |
 | Conseils ATS   | Intégration des conseils d'optimisation ATS    | T+5 semaines | ⏳ Planifié |
+| I18n           | Internationalisation complète (FR/EN)          | T+5 semaines | ⏳ Planifié |
 | V1.0           | Version complète avec UX améliorée             | T+6 semaines | ⏳ Planifié |
 
 ### Dépendances
@@ -672,16 +775,20 @@ L'architecture suit une version simplifiée des principes de Clean Architecture 
 1. **Dépendances internes**:
 
    - L'exportation dépend de la validation complète des données
+   - L'export PDF dépend de l'export
+   - L'exportation dépend de la validation complète des données
    - L'export PDF dépend de l'export HTML
    - Les conseils ATS dépendent de l'implémentation des formulaires complets
    - La compatibilité avec le standard JSON Resume dépend de la validation Zod
    - Le bon fonctionnement du monorepo dépend de la correcte configuration des dépendances entre packages
+   - L'internationalisation dépend de la structure stable de l'UI et des messages d'erreur
 
 2. **Dépendances externes**:
    - Suivi des évolutions du standard JSON Resume
    - Compatibilité avec les navigateurs modernes
    - Limitations du localStorage (5MB max)
    - Gestion des dépendances dans l'écosystème PNPM
+   - Évolution de Vue I18n et des meilleures pratiques d'internationalisation
 
 ## Annexes et Références
 
@@ -692,6 +799,7 @@ L'architecture suit une version simplifiée des principes de Clean Architecture 
 - [Spécification JSON Resume](https://jsonresume.org/schema/)
 - [Guide de développement](../docs/development-guide.md)
 - [Structure du monorepo PNPM](../docs/monorepo-structure.md)
+- [Guide d'internationalisation](../docs/i18n-guide.md)
 
 ### Ressources complémentaires
 
@@ -700,6 +808,7 @@ L'architecture suit une version simplifiée des principes de Clean Architecture 
 - [Bibliotheque jsPDF](https://github.com/parallax/jsPDF)
 - [Outils de l'écosystème JSON Resume](https://jsonresume.org/getting-started/)
 - [Documentation PNPM Workspaces](https://pnpm.io/workspaces)
+- [Documentation Vue I18n](https://vue-i18n.intlify.dev/)
 
 ### Glossaire
 
@@ -714,3 +823,6 @@ L'architecture suit une version simplifiée des principes de Clean Architecture 
 - **Interopérabilité**: Capacité des systèmes à fonctionner ensemble sans restriction d'accès ou de mise en œuvre
 - **Monorepo**: Approche de gestion de code où plusieurs projets sont stockés dans un seul dépôt
 - **PNPM**: Gestionnaire de packages performant avec support des workspaces
+- **i18n**: Abréviation d'internationalisation (i + 18 lettres + n)
+- **Vue I18n**: Bibliothèque d'internationalisation pour Vue.js
+- **Pattern Adapter**: Pattern de conception qui permet à des interfaces incompatibles de fonctionner ensemble

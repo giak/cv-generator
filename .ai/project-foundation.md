@@ -1,8 +1,8 @@
 ---
 title: "Fondation de Projet - CV Generator"
-version: "1.2.0"
+version: "1.3.0"
 description: "Document de fondation technique pour l'application CV Generator avec support du standard JSON Resume"
-lastUpdated: "2025-03-11"
+lastUpdated: "2025-03-15"
 tags:
   [
     "project-setup",
@@ -12,6 +12,7 @@ tags:
     "json-resume",
     "monorepo",
     "pnpm-workspace",
+    "i18n",
   ]
 ---
 
@@ -33,6 +34,7 @@ tags:
   - Support de l'export en JSON conforme au standard JSON Resume
   - Support d'exports additionnels en HTML et PDF
   - Maintenance facile via l'architecture monorepo
+  - Internationalisation complète (i18n) avec support multi-langue
 
 ## 2️⃣ Vision Technique & Objectifs
 
@@ -45,6 +47,7 @@ tags:
   - Permettre l'exportation des CV dans différents formats (JSON conforme au standard, HTML, PDF)
   - Assurer la compatibilité complète avec le standard JSON Resume (https://jsonresume.org/schema/)
   - Fournir des conseils d'optimisation ATS pour les utilisateurs
+  - Supporter l'internationalisation complète de l'application pour atteindre une audience globale
 - **Principes Directeurs**:
   - **Séparation des préoccupations**: Organisation claire des couches selon Clean Architecture
   - **Entités riches**: Logique métier encapsulée dans les entités du domaine
@@ -54,6 +57,7 @@ tags:
   - **Validation à plusieurs niveaux**: Validation dans l'UI et dans le domaine
   - **Interopérabilité**: Adhérence stricte au standard JSON Resume
   - **Modularité**: Organisation des packages avec des responsabilités claires et minimisation des dépendances
+  - **Internationalisation native**: Architecture prévue pour l'i18n dès la conception
 
 ## 3️⃣ Stack Technologique
 
@@ -64,6 +68,7 @@ tags:
   - Bibliothèques Principales:
     - Pinia 2.3+ (gestion d'état)
     - Vue Router 4.2+ (navigation)
+    - Vue I18n 11.0+ (internationalisation)
     - Tailwind CSS 3.4+ (styling)
     - Zod 3.22+ (validation de schéma JSON Resume)
     - jsPDF 2.5+ (génération de PDF)
@@ -114,12 +119,33 @@ tags:
   cv-generator/
   ├── packages/
   │   ├── core/           # Logique métier, entités et use cases
+  │   │   └── src/
+  │   │       └── shared/
+  │   │           └── i18n/  # Port d'internationalisation pour le domaine
   │   ├── infrastructure/ # Implémentations concrètes (localStorage, exports)
   │   ├── shared/         # Types, constantes et utilitaires partagés
+  │   │   └── src/
+  │   │       ├── constants/
+  │   │       │   └── error-codes.const.ts  # Codes d'erreur existants
+  │   │       └── i18n/
+  │   │           └── keys/  # Clés de traduction centralisées
   │   └── ui/             # Interface utilisateur Vue.js
+  │       └── src/
+  │           ├── i18n/   # Configuration Vue I18n et adaptateurs
+  │           └── locales/  # Fichiers de traduction par langue
   ├── pnpm-workspace.yaml # Configuration du workspace
   └── package.json        # Scripts et dépendances racine
   ```
+
+- **Architecture d'Internationalisation**:
+
+  L'internationalisation suit les principes de Clean Architecture:
+
+  1. **@cv-generator/shared**: Contient les clés de traduction centralisées
+  2. **@cv-generator/core**: Définit un port d'internationalisation agnostique
+  3. **@cv-generator/ui**: Implémente un adaptateur Vue I18n qui connecte le UI au core
+
+  Cette approche permet au domaine de rester isolé tout en bénéficiant des fonctionnalités d'i18n.
 
 - **Flux de Données Principaux**:
 
@@ -138,9 +164,15 @@ tags:
      - Le fichier est généré et proposé en téléchargement (@cv-generator/infrastructure)
 
   3. **Optimisation ATS**:
+
      - L'application analyse le contenu du CV
      - Des conseils d'optimisation sont affichés en temps réel
      - Un score de lisibilité ATS est calculé
+
+  4. **Internationalisation**:
+     - Les textes UI utilisent le plugin Vue I18n via `$t('key')`
+     - Les messages d'erreur du domaine utilisent des clés définies dans shared
+     - Un adaptateur transmet les traductions du UI au domaine via le port d'internationalisation
 
 - **Points d'Intégration Externes**:
   - Possibilité d'importer des CV au format JSON Resume standard depuis d'autres outils
@@ -161,6 +193,15 @@ tags:
   - Immutabilité privilégiée
   - Composition API pour les composants Vue
 
+- **Internationalisation**:
+
+  - Centralisation des clés de traduction dans @cv-generator/shared
+  - Séparation des messages par domaine fonctionnel (ui, validation, etc.)
+  - Utilisation du pattern Adapter pour isoler le domaine de l'implémentation Vue I18n
+  - Support de la pluralisation et des variables dans les messages
+  - Détection automatique de la langue du navigateur
+  - Sauvegarde de la préférence linguistique utilisateur
+
 - **Stratégie de Test**:
 
   - Tests unitaires avec Vitest pour la logique métier (@cv-generator/core)
@@ -168,6 +209,7 @@ tags:
   - Tests E2E pour les flux utilisateurs complets avec Playwright
   - Validation automatique du format JSON Resume dans les tests
   - Couverture minimale: 80% pour le core, 70% pour l'UI
+  - Tests des traductions pour vérifier la complétude et la cohérence
 
 - **Modèle de Collaboration**:
 
@@ -183,6 +225,7 @@ tags:
   - Documentation des structures de données selon le standard JSON Resume
   - JSDoc pour les APIs publiques
   - Changelog maintenu automatiquement
+  - Guide d'internationalisation pour les nouveaux développeurs
 
 ## 6️⃣ Plan d'Implémentation
 
@@ -206,7 +249,15 @@ tags:
      - Conseils ATS de base
      - Import de fichiers JSON Resume existants
 
-  3. **Perfectionnement (2 semaines)**:
+  3. **Internationalisation (1-2 semaines)**:
+
+     - Intégration de Vue I18n
+     - Extraction de tous les textes en dur vers des fichiers de traduction
+     - Création de l'architecture d'internationalisation (port/adapter)
+     - Support initial français/anglais
+     - Tests des traductions
+
+  4. **Perfectionnement (2 semaines)**:
      - Améliorations basées sur les retours utilisateurs
      - Optimisation des performances
      - Améliorations des conseils ATS
@@ -216,13 +267,14 @@ tags:
 - **Priorités Techniques**:
 
   - **Haute**: Structure monorepo, core conforme au JSON Resume, validation complète du schéma, stockage localStorage, export JSON standard
-  - **Moyenne**: UI/UX, prévisualisation CV, export HTML/PDF, conseils ATS basiques, import de CV existants
-  - **Basse**: Animations UI, personnalisation templates, analytics d'utilisation
+  - **Moyenne**: UI/UX, prévisualisation CV, export HTML/PDF, conseils ATS basiques, import de CV existants, internationalisation
+  - **Basse**: Animations UI, personnalisation templates, analytics d'utilisation, langues supplémentaires
 
 - **Proof of Concepts**:
   - POC pour la génération de PDF côté client
   - POC pour l'optimisation des performances avec des CV volumineux
   - POC pour la validation complète du schéma JSON Resume
+  - POC pour l'architecture d'internationalisation conforme à Clean Architecture
 
 ## 7️⃣ Risques et Mitigations
 
@@ -249,11 +301,23 @@ tags:
      - Mitigation: Architecture modulaire permettant des mises à jour faciles, système de migration de données
 
   5. **Expérience offline**:
+
      - Risque: Fonctionnalités limitées en mode hors ligne
      - Mitigation: Architecture PWA, synchronisation intelligente, mode offline explicite
+
   6. **Complexité du monorepo**:
+
      - Risque: Gestion des dépendances et intégration complexes
      - Mitigation: Scripts d'automatisation, CI/CD robuste, documentation claire
+
+  7. **Cohérence des traductions**:
+
+     - Risque: Incohérence des messages entre couches et traductions incomplètes
+     - Mitigation: Centralisation des clés, validation automatique de la complétude des traductions, tests dédiés
+
+  8. **Violation des principes Clean Architecture avec i18n**:
+     - Risque: Le domaine pourrait devenir dépendant du framework Vue I18n
+     - Mitigation: Utilisation du pattern Adapter, interface port abstraite dans le domaine
 
 - **Stratégies de Mitigation**:
 
@@ -263,6 +327,7 @@ tags:
   - Suivi régulier des évolutions du standard JSON Resume
   - Feedback utilisateur proactif
   - Documentation d'architecture et de développement complète
+  - Vérification automatique de la cohérence des traductions
 
 - **Alternatives Envisagées**:
   - Architecture avec backend léger (rejetée pour favoriser la simplicité et le fonctionnement offline)
@@ -270,3 +335,4 @@ tags:
   - Framework React (Vue.js préféré pour sa simplicité et sa Composition API)
   - Format de CV propriétaire (rejeté en faveur du standard ouvert JSON Resume)
   - Structure en multirepo (rejetée en faveur du monorepo pour la cohérence et facilité de développement)
+  - Bibliothèque i18next (rejetée en faveur de Vue I18n pour sa meilleure intégration avec Vue.js)

@@ -1,0 +1,28 @@
+{
+  "common": {
+    "errors": {
+      "requiredField": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "invalidDate": "Invalid date format"
+    },
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
+  "resume": {
+    "sections": {
+      "basics": "Basic Information",
+      "work": "Work Experience",
+      "education": "Education",
+      "skills": "Skills"
+    },
+    "validation": {
+      "invalidName": "Please enter a valid name",
+      "invalidEmail": "Please enter a valid email address",
+      "invalidUrl": "Please enter a valid URL"
+    }
+  }
+} 
