@@ -1,20 +1,46 @@
 <script setup lang="ts">
-import type { BasicsInterface, ProfileInterface } from '@cv-generator/shared/src/types/resume.interface'
+import type { BasicsInterface, ProfileInterface } from '@cv-generator/shared/types/resume.interface'
 import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   type ValidationErrorInterface,
   type ResultType,
   ValidationLayerType,
   ERROR_CODES,
   createSuccess,
-  createFailure
+  createFailure,
+  TRANSLATION_KEYS
 } from '@cv-generator/shared'
 // Remove BasicsValidationService direct import and use the composable
 import { useBasicsFormValidation } from '../composables/useBasicsFormValidation'
+
+// Debug translation keys structure
+console.log('TRANSLATION_KEYS structure:', TRANSLATION_KEYS);
+console.log('RESUME.BASICS:', TRANSLATION_KEYS.RESUME.BASICS);
+console.log('HELP_TEXT available:', TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT ? 'Yes' : 'No');
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const result = t(key);
+    // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
+    if (result === key) {
+      console.warn(`Missing translation key: ${key}, using fallback`);
+      return fallback;
+    }
+    return result;
+  } catch (error) {
+    console.error(`Error translating key: ${key}`, error);
+    return fallback;
+  }
+};
 
 // Performance measurement
 const perfMeasurements = {
@@ -139,6 +165,7 @@ const validateProfile = (profile: ProfileInterface): ResultType<ProfileInterface
     errors.push({
       code: ERROR_CODES.COMMON.REQUIRED_FIELD,
       message: 'Le réseau est requis',
+      i18nKey: TRANSLATION_KEYS.COMMON.ERRORS.REQUIRED_FIELD,
       field: 'network',
       severity: 'error',
       layer: ValidationLayerType.PRESENTATION
@@ -150,6 +177,7 @@ const validateProfile = (profile: ProfileInterface): ResultType<ProfileInterface
     errors.push({
       code: ERROR_CODES.COMMON.REQUIRED_FIELD,
       message: 'Le nom d\'utilisateur est requis',
+      i18nKey: TRANSLATION_KEYS.COMMON.ERRORS.REQUIRED_FIELD,
       field: 'username',
       severity: 'error',
       layer: ValidationLayerType.PRESENTATION
@@ -164,6 +192,7 @@ const validateProfile = (profile: ProfileInterface): ResultType<ProfileInterface
       errors.push({
         code: ERROR_CODES.COMMON.INVALID_FORMAT,
         message: 'L\'URL doit commencer par http:// ou https://',
+        i18nKey: TRANSLATION_KEYS.COMMON.ERRORS.INVALID_FORMAT,
         field: 'url',
         severity: 'warning',
         layer: ValidationLayerType.PRESENTATION
@@ -229,17 +258,17 @@ const icons = {
   <Form @submit="handleSubmit">
     <!-- Section d'informations personnelles -->
     <div class="mb-8">
-      <h2 class="text-xl font-semibold mb-4">Informations personnelles</h2>
+      <h2 class="text-xl font-semibold mb-4">{{ t(TRANSLATION_KEYS.RESUME.SECTIONS.BASICS) }}</h2>
       
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField
           name="name"
-          label="Nom complet"
+          :label="safeTranslate(TRANSLATION_KEYS.RESUME.BASICS.LABELS.NAME, 'Nom')"
           :model-value="toStringOrEmpty(localModel.name)"
           :error="validationState.errors.name"
           :icon="icons.name"
-          placeholder="Ex: Jean Dupont"
-          help-text="Votre nom complet tel qu'il apparaîtra sur votre CV."
+          :placeholder="safeTranslate(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.NAME, 'Entrez votre nom complet')"
+          :help-text="safeTranslate(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.NAME, 'Votre nom complet tel qu\'il apparaîtra sur votre CV.')"
           required
           @update:model-value="handleFieldUpdate('name', $event)"
           @blur="validateName(localModel)"
@@ -247,14 +276,14 @@ const icons = {
         
         <FormField
           name="email"
-          label="Email"
+          :label="safeTranslate(TRANSLATION_KEYS.RESUME.BASICS.LABELS.EMAIL, 'E-mail')"
           type="email"
           :model-value="toStringOrEmpty(localModel.email)"
           :error="validationState.errors.email"
           :warning="validationState.warnings.email"
           :icon="icons.email"
-          placeholder="Ex: jean.dupont@example.com"
-          help-text="Votre adresse email professionnelle."
+          :placeholder="safeTranslate(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.EMAIL, 'Entrez votre e-mail professionnel')"
+          :help-text="safeTranslate(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.EMAIL, 'Votre adresse email professionnelle.')"
           required
           @update:model-value="handleFieldUpdate('email', $event)"
           @blur="validateEmail(localModel)"
@@ -262,62 +291,62 @@ const icons = {
         
         <FormField
           name="phone"
-          label="Téléphone"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.PHONE)"
           :model-value="toStringOrEmpty(localModel.phone)"
           :error="validationState.errors.phone"
           :warning="validationState.warnings.phone"
           :icon="icons.phone"
-          placeholder="Ex: +33612345678"
-          help-text="Votre numéro de téléphone (format international recommandé)."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.PHONE)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.PHONE)"
           @update:model-value="handleFieldUpdate('phone', $event)"
           @blur="validatePhone(localModel)"
         />
         
         <FormField
           name="label"
-          label="Titre professionnel"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.JOB_TITLE)"
           :model-value="toStringOrEmpty(localModel.label)"
           :icon="icons.label"
-          placeholder="Ex: Développeur Web Senior"
-          help-text="Votre titre professionnel actuel."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.JOB_TITLE)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.JOB_TITLE)"
           @update:model-value="handleFieldUpdate('label', $event)"
         />
         
         <FormField
           name="url"
-          label="Site Web"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.WEBSITE)"
           type="url"
           :model-value="toStringOrEmpty(localModel.url)"
           :error="validationState.errors.url"
           :warning="validationState.warnings.url"
           :icon="icons.url"
-          placeholder="Ex: https://jeandupont.com"
-          help-text="URL de votre site web ou portfolio."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.WEBSITE)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.WEBSITE)"
           @update:model-value="handleFieldUpdate('url', $event)"
           @blur="validateUrl(localModel)"
         />
         
         <FormField
           name="image"
-          label="Photo de profil"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.IMAGE)"
           :model-value="toStringOrEmpty(localModel.image)"
           :error="validationState.errors.image"
           :warning="validationState.warnings.image"
           :icon="icons.image"
-          placeholder="Ex: https://example.com/photo.jpg"
-          help-text="URL de votre photo professionnelle."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.IMAGE)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.IMAGE)"
           @update:model-value="handleFieldUpdate('image', $event)"
           @blur="validateImageUrl(localModel)"
         />
         
         <!-- Affichage des suggestions si des erreurs de validation -->
         <div v-if="validationState.errors.image || validationState.warnings.image" class="col-span-2 text-sm">
-          <p class="text-amber-400 pb-2">Suggestions pour l'URL de l'image :</p>
+          <p class="text-amber-400 pb-2">{{ t(TRANSLATION_KEYS.RESUME.BASICS.IMAGE_SUGGESTIONS.TITLE) }}</p>
           <ul class="list-disc list-inside space-y-1 text-neutral-300">
-            <li>Utilisez une URL complète (commençant par http:// ou https://)</li>
-            <li>Vérifiez que l'image est accessible publiquement</li>
-            <li>Utilisez une image professionnelle et de bonne qualité</li>
-            <li>Les formats recommandés sont JPEG, PNG ou WebP</li>
+            <li>{{ t(TRANSLATION_KEYS.RESUME.BASICS.IMAGE_SUGGESTIONS.USE_FULL_URL) }}</li>
+            <li>{{ t(TRANSLATION_KEYS.RESUME.BASICS.IMAGE_SUGGESTIONS.CHECK_PUBLIC_ACCESS) }}</li>
+            <li>{{ t(TRANSLATION_KEYS.RESUME.BASICS.IMAGE_SUGGESTIONS.USE_PROFESSIONAL_IMAGE) }}</li>
+            <li>{{ t(TRANSLATION_KEYS.RESUME.BASICS.IMAGE_SUGGESTIONS.RECOMMENDED_FORMATS) }}</li>
           </ul>
         </div>
       </div>
@@ -325,12 +354,12 @@ const icons = {
       <div class="mt-6">
         <FormField
           name="summary"
-          label="Résumé professionnel"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.SUMMARY)"
           type="textarea"
           :model-value="toStringOrEmpty(localModel.summary)"
           :icon="icons.summary"
-          placeholder="Présentez-vous en quelques phrases..."
-          help-text="Résumé concis de votre profil et objectifs professionnels."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.SUMMARY)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.SUMMARY)"
           @update:model-value="handleFieldUpdate('summary', $event)"
         />
       </div>
@@ -338,66 +367,66 @@ const icons = {
     
     <!-- Section d'adresse -->
     <div class="mt-8 border-t border-neutral-700 pt-6 mb-8">
-      <h2 class="text-xl font-semibold mb-4">Adresse</h2>
+      <h2 class="text-xl font-semibold mb-4">{{ t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.LOCATION) }}</h2>
       
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField
           name="address"
-          label="Adresse"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.ADDRESS)"
           :model-value="localModel.location?.address || ''"
           :icon="icons.location"
           :error="validationState.errors['location.address']"
           :warning="validationState.warnings['location.address']"
-          placeholder="Ex: 123 Rue de Paris"
-          help-text="Votre adresse postale."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.ADDRESS)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.ADDRESS)"
           @update:model-value="handleLocationUpdate('address', $event)"
           @blur="validateField(localModel, 'location.address')"
         />
         
         <FormField
           name="postalCode"
-          label="Code Postal"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.POSTAL_CODE)"
           :model-value="localModel.location?.postalCode || ''"
           :error="validationState.errors['location.postalCode']"
           :warning="validationState.warnings['location.postalCode']"
-          placeholder="Ex: 75001"
-          help-text="Code postal de votre localité."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.POSTAL_CODE)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.POSTAL_CODE)"
           @update:model-value="handleLocationUpdate('postalCode', $event)"
           @blur="validateField(localModel, 'location.postalCode')"
         />
         
         <FormField
           name="city"
-          label="Ville"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.CITY)"
           :model-value="localModel.location?.city || ''"
           :error="validationState.errors['location.city']"
           :warning="validationState.warnings['location.city']"
-          placeholder="Ex: Paris"
-          help-text="Nom de votre ville."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.CITY)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.CITY)"
           @update:model-value="handleLocationUpdate('city', $event)"
           @blur="validateField(localModel, 'location.city')"
         />
         
         <FormField
           name="region"
-          label="Région"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.REGION)"
           :model-value="localModel.location?.region || ''"
           :error="validationState.errors['location.region']"
           :warning="validationState.warnings['location.region']"
-          placeholder="Ex: Île-de-France"
-          help-text="Votre région ou département."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.REGION)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.REGION)"
           @update:model-value="handleLocationUpdate('region', $event)"
           @blur="validateField(localModel, 'location.region')"
         />
         
         <FormField
           name="countryCode"
-          label="Code Pays"
+          :label="t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.COUNTRY_CODE)"
           :model-value="localModel.location?.countryCode || ''"
           :error="validationState.errors['location.countryCode']"
           :warning="validationState.warnings['location.countryCode']"
-          placeholder="Ex: FR"
-          help-text="Code pays ISO (ex: FR, US, CA)."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PLACEHOLDERS.COUNTRY_CODE)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT.COUNTRY_CODE)"
           @update:model-value="handleLocationUpdate('countryCode', $event)"
           @blur="validateField(localModel, 'location.countryCode')"
         />
@@ -413,113 +442,129 @@ const icons = {
                 validationState.warnings['location.city'] || 
                 validationState.warnings['location.countryCode']" 
            class="mt-4 p-3 bg-neutral-800 rounded-lg text-sm">
-        <p class="text-amber-400 pb-2">Suggestions pour l'adresse :</p>
+        <p class="text-amber-400 pb-2">{{ t(TRANSLATION_KEYS.RESUME.BASICS.ADDRESS_SUGGESTIONS.TITLE) }}</p>
         <ul class="list-disc list-inside space-y-1 text-neutral-300">
-          <li>Assurez-vous que l'adresse est complète et correcte</li>
-          <li>Le code postal doit être au format valide pour le pays</li>
-          <li>Utilisez le nom officiel de la ville</li>
-          <li>Le code pays doit être un code ISO à 2 lettres (FR, US, CA, etc.)</li>
+          <li>{{ t(TRANSLATION_KEYS.RESUME.BASICS.ADDRESS_SUGGESTIONS.COMPLETE_ADDRESS) }}</li>
+          <li>{{ t(TRANSLATION_KEYS.RESUME.BASICS.ADDRESS_SUGGESTIONS.VALID_POSTAL_CODE) }}</li>
+          <li>{{ t(TRANSLATION_KEYS.RESUME.BASICS.ADDRESS_SUGGESTIONS.OFFICIAL_CITY_NAME) }}</li>
+          <li>{{ t(TRANSLATION_KEYS.RESUME.BASICS.ADDRESS_SUGGESTIONS.ISO_COUNTRY_CODE) }}</li>
         </ul>
       </div>
     </div>
     
-    <!-- Section pour les profils réseaux sociaux -->
-    <div class="mt-8 border-t border-neutral-700 pt-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-medium">Profils réseaux sociaux</h3>
-        <button 
-          type="button"
-          class="px-3 py-1 text-sm bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-          @click="toggleProfileForm"
-        >
-          {{ isAddingProfile ? 'Annuler' : 'Ajouter un profil' }}
-        </button>
+    <!-- Section des profils -->
+    <div class="mt-8 border-t border-neutral-700 pt-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4">{{ t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.PROFILES) }}</h2>
+      
+      <!-- Liste des profils existants -->
+      <div v-if="profiles.length > 0" class="mb-6 space-y-4">
+        <div v-for="(profile, index) in profiles" :key="index" class="bg-neutral-800 p-4 rounded-lg">
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center">
+              <span class="text-lg font-medium">{{ profile.network }}</span>
+              <span class="mx-2 text-neutral-400">•</span>
+              <span class="text-neutral-300">{{ profile.username }}</span>
+            </div>
+            <button
+              type="button"
+              class="text-red-400 hover:text-red-300 transition-colors"
+              @click="removeProfile(index)"
+            >
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.REMOVE) }}
+            </button>
+          </div>
+          <div v-if="profile.url" class="text-sm text-neutral-400">
+            <a :href="profile.url" target="_blank" rel="noopener noreferrer" class="hover:text-blue-400 transition-colors">
+              {{ profile.url }}
+            </a>
+          </div>
+        </div>
       </div>
       
       <!-- Formulaire d'ajout de profil -->
       <div v-if="isAddingProfile" class="bg-neutral-800 p-4 rounded-lg mb-4">
-        <h4 class="text-md font-medium mb-3">Nouveau profil</h4>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h3 class="text-lg font-medium mb-3">{{ t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }} {{ t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.PROFILES) }}</h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <FormField
-            name="profileNetwork"
-            label="Réseau"
-            v-model="newProfile.network"
-            :icon="icons.profile"
-            placeholder="Ex: LinkedIn"
-            help-text="Nom du réseau social."
+            name="network"
+            :label="t(TRANSLATION_KEYS.RESUME.BASICS.PROFILES.NETWORK)"
+            :model-value="newProfile.network"
             :error="profileValidationErrors.network"
+            :icon="icons.profile"
+            :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PROFILES.NETWORK_PLACEHOLDER)"
             required
+            @update:model-value="(value) => newProfile.network = value"
           />
           
           <FormField
-            name="profileUsername"
-            label="Nom d'utilisateur"
-            v-model="newProfile.username"
-            placeholder="Ex: jeandupont"
-            help-text="Votre identifiant sur ce réseau."
+            name="username"
+            :label="t(TRANSLATION_KEYS.RESUME.BASICS.PROFILES.USERNAME)"
+            :model-value="newProfile.username"
             :error="profileValidationErrors.username"
+            :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PROFILES.USERNAME_PLACEHOLDER)"
             required
+            @update:model-value="(value) => newProfile.username = value"
           />
           
           <FormField
             name="profileUrl"
-            label="URL"
+            :label="t(TRANSLATION_KEYS.RESUME.BASICS.PROFILES.URL)"
             type="url"
-            v-model="newProfile.url"
-            :icon="icons.url"
-            placeholder="Ex: https://linkedin.com/in/jeandupont"
-            help-text="Lien vers votre profil."
+            :model-value="newProfile.url"
+            :error="profileValidationErrors.url"
+            :placeholder="t(TRANSLATION_KEYS.RESUME.BASICS.PROFILES.URL_PLACEHOLDER)"
+            class="sm:col-span-2"
+            @update:model-value="(value) => newProfile.url = value"
           />
         </div>
-        <div class="mt-3 flex justify-end">
-          <button 
+        
+        <div class="flex justify-end space-x-3">
+          <button
             type="button"
-            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-            @click="addProfile()"
+            class="px-4 py-2 border border-neutral-600 rounded-md hover:bg-neutral-700 transition-colors"
+            @click="toggleProfileForm"
           >
-            Ajouter
+            {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
+          </button>
+          <button
+            type="button"
+            class="px-4 py-2 bg-blue-600 rounded-md hover:bg-blue-500 transition-colors"
+            @click="() => addProfile()"
+          >
+            {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }}
           </button>
         </div>
       </div>
       
-      <!-- Liste des profils existants -->
-      <div v-if="profiles.length > 0" class="space-y-3">
-        <div 
-          v-for="(profile, index) in profiles" 
-          :key="`profile-${index}`"
-          class="bg-neutral-900 p-3 rounded-lg flex justify-between items-center"
-        >
-          <div>
-            <span class="font-medium">{{ profile.network }}</span>
-            <span class="text-neutral-400 ml-2">@{{ profile.username }}</span>
-            <a 
-              v-if="profile.url" 
-              :href="profile.url" 
-              target="_blank" 
-              class="ml-2 text-indigo-400 hover:text-indigo-300 text-sm"
-            >
-              Voir le profil
-            </a>
-          </div>
-          <button 
-            type="button" 
-            class="text-red-500 hover:text-red-400"
-            @click="removeProfile(index)"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              <line x1="10" y1="11" x2="10" y2="17"></line>
-              <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-          </button>
-        </div>
-      </div>
-      
-      <!-- Message si aucun profil -->
-      <div v-else-if="!isAddingProfile" class="text-neutral-400 text-sm">
-        Aucun profil social ajouté. Cliquez sur "Ajouter un profil" pour en créer un.
-      </div>
+      <!-- Bouton pour afficher le formulaire d'ajout -->
+      <button
+        v-if="!isAddingProfile"
+        type="button"
+        class="flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+        @click="toggleProfileForm"
+      >
+        <span class="mr-2">+</span>
+        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }} {{ t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.PROFILES) }}
+      </button>
+    </div>
+    
+    <!-- Boutons de soumission -->
+    <div class="flex justify-end space-x-4 mt-8">
+      <button
+        type="button"
+        class="px-6 py-2 border border-neutral-600 rounded-md hover:bg-neutral-700 transition-colors"
+      >
+        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
+      </button>
+      <button
+        type="submit"
+        class="px-6 py-2 bg-blue-600 rounded-md hover:bg-blue-500 transition-colors"
+        :disabled="props.loading"
+      >
+        <span v-if="props.loading">{{ t(TRANSLATION_KEYS.COMMON.LABELS.LOADING) }}</span>
+        <span v-else>{{ t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}</span>
+      </button>
     </div>
   </Form>
 </template> 

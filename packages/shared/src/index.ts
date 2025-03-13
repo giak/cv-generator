@@ -38,4 +38,8 @@ export { zodToResult } from './utils/zod-adapter';
 
 // Constantes
 export { ERROR_CODES } from './constants/error-codes.const';
-export type { ErrorCodeType } from './constants/error-codes.const'; 
+export type { ErrorCodeType } from './constants/error-codes.const';
+
+// Internationalisation
+export { TRANSLATION_KEYS } from './i18n/keys';
+export type { TranslationKeyType } from './i18n/keys'; 

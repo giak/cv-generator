@@ -3,13 +3,31 @@
     "errors": {
       "requiredField": "Ce champ est obligatoire",
       "invalidEmail": "Adresse e-mail invalide",
-      "invalidDate": "Format de date invalide"
+      "invalidDate": "Format de date invalide",
+      "tooLong": "Ce champ dépasse la longueur maximale de {max} caractères",
+      "tooShort": "Ce champ nécessite au moins {min} caractères",
+      "futureDate": "La date ne peut pas être dans le futur",
+      "invalidFormat": "Format invalide"
     },
     "actions": {
       "save": "Enregistrer",
       "cancel": "Annuler",
       "edit": "Modifier",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "add": "Ajouter",
+      "remove": "Retirer",
+      "export": "Exporter",
+      "import": "Importer",
+      "preview": "Aperçu"
+    },
+    "labels": {
+      "yes": "Oui",
+      "no": "Non",
+      "loading": "Chargement...",
+      "success": "Succès",
+      "error": "Erreur",
+      "warning": "Avertissement",
+      "info": "Information"
     }
   },
   "resume": {
@@ -17,12 +35,202 @@
       "basics": "Informations de base",
       "work": "Expérience professionnelle",
       "education": "Formation",
-      "skills": "Compétences"
+      "skills": "Compétences",
+      "projects": "Projets",
+      "volunteer": "Bénévolat",
+      "awards": "Distinctions",
+      "publications": "Publications",
+      "languages": "Langues",
+      "interests": "Centres d'intérêt",
+      "references": "Références"
     },
-    "validation": {
-      "invalidName": "Veuillez saisir un nom valide",
-      "invalidEmail": "Veuillez saisir une adresse e-mail valide",
-      "invalidUrl": "Veuillez saisir une URL valide"
+    "basics": {
+      "labels": {
+        "name": "Nom",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "website": "Site web",
+        "location": "Localisation",
+        "summary": "Résumé",
+        "profiles": "Profils",
+        "jobTitle": "Titre professionnel",
+        "image": "Photo de profil",
+        "address": "Adresse",
+        "postalCode": "Code postal",
+        "city": "Ville",
+        "region": "Région",
+        "countryCode": "Code pays"
+      },
+      "placeholders": {
+        "name": "Entrez votre nom complet",
+        "email": "Entrez votre e-mail professionnel",
+        "phone": "Entrez votre numéro de téléphone",
+        "website": "Entrez l'URL de votre site web",
+        "summary": "Rédigez un bref résumé professionnel",
+        "jobTitle": "Ex : Développeur Web Senior",
+        "image": "Ex : https://exemple.com/photo.jpg",
+        "address": "Ex : 123 Rue Principale",
+        "postalCode": "Ex : 75001",
+        "city": "Ex : Paris",
+        "region": "Ex : Île-de-France",
+        "countryCode": "Ex : FR"
+      },
+      "helpText": {
+        "name": "Votre nom complet tel qu'il apparaîtra sur votre CV.",
+        "email": "Votre adresse e-mail professionnelle.",
+        "phone": "Votre numéro de téléphone (format international recommandé).",
+        "website": "URL de votre site web ou portfolio.",
+        "summary": "Résumé concis de votre profil et objectifs professionnels.",
+        "jobTitle": "Votre titre professionnel actuel.",
+        "image": "URL de votre photo professionnelle.",
+        "address": "Votre adresse postale.",
+        "postalCode": "Code postal de votre localité.",
+        "city": "Nom de votre ville.",
+        "region": "Votre région ou département.",
+        "countryCode": "Code ISO du pays (ex : FR, BE, CH)."
+      },
+      "validation": {
+        "missingName": "Le nom est obligatoire",
+        "missingEmail": "L'e-mail est obligatoire",
+        "invalidEmail": "Format d'e-mail invalide",
+        "personalEmail": "Envisagez d'utiliser un e-mail professionnel",
+        "missingPhone": "Le numéro de téléphone est obligatoire",
+        "invalidPhone": "Format de téléphone invalide",
+        "missingLocation": "La localisation est obligatoire",
+        "vagueLocation": "La localisation devrait être plus précise",
+        "missingSummary": "Le résumé est obligatoire",
+        "briefSummary": "Le résumé est trop court, ajoutez plus de détails"
+      },
+      "imageSuggestions": {
+        "title": "Suggestions pour l'URL de l'image :",
+        "useFullUrl": "Utilisez une URL complète (commençant par http:// ou https://)",
+        "checkPublicAccess": "Vérifiez que l'image est accessible publiquement",
+        "useProfessionalImage": "Utilisez une image professionnelle et de bonne qualité",
+        "recommendedFormats": "Les formats recommandés sont JPEG, PNG ou WebP"
+      },
+      "addressSuggestions": {
+        "title": "Suggestions pour l'adresse :",
+        "completeAddress": "Assurez-vous que l'adresse est complète et correcte",
+        "validPostalCode": "Le code postal doit être au format valide pour le pays",
+        "officialCityName": "Utilisez le nom officiel de la ville",
+        "isoCountryCode": "Le code pays doit être un code ISO à 2 lettres (FR, US, CA, etc.)"
+      },
+      "profiles": {
+        "network": "Réseau",
+        "username": "Nom d'utilisateur",
+        "url": "URL du profil",
+        "networkPlaceholder": "Ex: LinkedIn",
+        "usernamePlaceholder": "Ex: jean-dupont",
+        "urlPlaceholder": "Ex: https://linkedin.com/in/jean-dupont"
+      }
+    },
+    "work": {
+      "labels": {
+        "company": "Entreprise",
+        "position": "Poste",
+        "website": "Site web",
+        "startDate": "Date de début",
+        "endDate": "Date de fin",
+        "summary": "Résumé",
+        "highlights": "Points forts"
+      },
+      "placeholders": {
+        "company": "Entrez le nom de l'entreprise",
+        "position": "Entrez votre titre de poste",
+        "website": "Entrez le site web de l'entreprise",
+        "startDate": "AAAA-MM-JJ",
+        "endDate": "AAAA-MM-JJ (laissez vide si actuel)",
+        "summary": "Décrivez votre rôle et vos responsabilités",
+        "highlight": "Ajoutez une réalisation clé ou une responsabilité"
+      },
+      "validation": {
+        "missingCompany": "Le nom de l'entreprise est obligatoire",
+        "vaguePosition": "Le titre du poste est trop générique",
+        "missingPosition": "Le poste est obligatoire",
+        "missingStartDate": "La date de début est obligatoire",
+        "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
+        "futureDate": "La date ne peut pas être dans le futur",
+        "missingSummary": "Le résumé est obligatoire",
+        "briefDescription": "La description est trop brève, ajoutez plus de détails",
+        "missingHighlights": "Ajoutez au moins un point fort",
+        "vagueHighlights": "Les points forts devraient être plus spécifiques"
+      }
+    },
+    "education": {
+      "labels": {
+        "institution": "Établissement",
+        "area": "Domaine d'étude",
+        "studyType": "Diplôme",
+        "startDate": "Date de début",
+        "endDate": "Date de fin",
+        "gpa": "Moyenne",
+        "courses": "Cours"
+      },
+      "placeholders": {
+        "institution": "Entrez le nom de l'école ou de l'université",
+        "area": "Entrez le domaine d'étude",
+        "studyType": "Entrez le type de diplôme",
+        "startDate": "AAAA-MM-JJ",
+        "endDate": "AAAA-MM-JJ (laissez vide si actuel)",
+        "gpa": "Entrez votre moyenne",
+        "course": "Ajoutez un cours pertinent"
+      },
+      "validation": {
+        "missingInstitution": "Le nom de l'établissement est obligatoire",
+        "missingArea": "Le domaine d'étude est obligatoire",
+        "missingStudyType": "Le type de diplôme est obligatoire",
+        "missingStartDate": "La date de début est obligatoire",
+        "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
+        "missingGpa": "La moyenne est obligatoire",
+        "vagueCourses": "Les descriptions des cours devraient être plus spécifiques"
+      }
+    },
+    "skills": {
+      "labels": {
+        "name": "Nom de la compétence",
+        "level": "Niveau de maîtrise",
+        "keywords": "Mots-clés"
+      },
+      "placeholders": {
+        "name": "Entrez le nom de la compétence",
+        "level": "Sélectionnez le niveau de maîtrise",
+        "keyword": "Ajoutez un mot-clé"
+      },
+      "validation": {
+        "missingSkillName": "Le nom de la compétence est obligatoire",
+        "briefSkillName": "Le nom de la compétence est trop bref",
+        "undefinedLevel": "Le niveau de maîtrise est obligatoire",
+        "missingKeywords": "Ajoutez au moins un mot-clé",
+        "genericSkill": "La compétence est trop générique, soyez plus précis"
+      }
+    }
+  },
+  "ui": {
+    "header": {
+      "title": "CV Generator",
+      "subtitle": "Créez des CV professionnels",
+      "languageSelector": "Changer de langue"
+    },
+    "footer": {
+      "copyright": "© {year} CV Generator",
+      "version": "Version {version}",
+      "madeWith": "Fait avec ❤️"
+    },
+    "navigation": {
+      "home": "Accueil",
+      "editor": "Éditeur de CV",
+      "preview": "Aperçu",
+      "export": "Exporter",
+      "settings": "Paramètres"
+    },
+    "export": {
+      "title": "Exporter votre CV",
+      "jsonFormat": "JSON (format JSON Resume standard)",
+      "htmlFormat": "HTML",
+      "pdfFormat": "PDF",
+      "download": "Télécharger",
+      "successMessage": "Votre CV a été exporté avec succès !",
+      "errorMessage": "Une erreur est survenue lors de l'exportation de votre CV. Veuillez réessayer."
     }
   }
 } 

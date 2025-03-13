@@ -10,7 +10,7 @@ Story-2: Centralisation des clés de traduction et des messages
 
 ## Statut
 
-Draft
+In Progress
 
 ## Contexte
 
@@ -42,22 +42,22 @@ Story Points: 3
 
 ## Tâches
 
-1. - [ ] Créer la structure des clés de traduction
+1. - [x] Créer la structure des clés de traduction
 
-   1. - [ ] Définir les constantes pour les clés de traduction dans @cv-generator/shared
-   2. - [ ] Organiser les clés selon la structure des codes d'erreur existants
-   3. - [ ] Ajouter les typages TypeScript pour la sécurité des clés
+   1. - [x] Définir les constantes pour les clés de traduction dans @cv-generator/shared
+   2. - [x] Organiser les clés selon la structure des codes d'erreur existants
+   3. - [x] Ajouter les typages TypeScript pour la sécurité des clés
 
-2. - [ ] Créer les fichiers de traduction de base
+2. - [x] Créer les fichiers de traduction de base
 
-   1. - [ ] Structurer les dossiers de traduction pour français et anglais
-   2. - [ ] Créer les fichiers de traduction par domaine fonctionnel (UI, validation)
-   3. - [ ] Implémenter le chargement des traductions dans Vue I18n
+   1. - [x] Structurer les dossiers de traduction pour français et anglais
+   2. - [x] Créer les fichiers de traduction par domaine fonctionnel (UI, validation)
+   3. - [x] Implémenter le chargement des traductions dans Vue I18n
 
 3. - [ ] Extraire les messages des composants UI
-   1. - [ ] Identifier tous les textes en dur dans les composants Vue
-   2. - [ ] Créer les clés correspondantes et les fichiers de traduction
-   3. - [ ] Remplacer les textes par des appels à la fonction de traduction
+   1. - [x] Identifier tous les textes en dur dans les composants Vue
+   2. - [x] Créer les clés correspondantes et les fichiers de traduction
+   3. - [ ] Remplacer les textes par des appels à la fonction de traduction (Partiellement complété: BasicsForm.vue uniquement)
 4. - [ ] Extraire les messages des entités du domaine
 
    1. - [ ] Identifier tous les messages en dur dans les Value Objects
@@ -65,10 +65,34 @@ Story Points: 3
    3. - [ ] Créer les clés correspondantes et les fichiers de traduction
    4. - [ ] Adapter les entités pour utiliser les clés de traduction
 
-5. - [ ] Supporter l'interpolation de paramètres
-   1. - [ ] Identifier les messages nécessitant des paramètres variables
-   2. - [ ] Adapter les messages pour supporter l'interpolation
-   3. - [ ] Documenter la syntaxe d'interpolation pour les développeurs
+5. - [x] Supporter l'interpolation de paramètres
+   1. - [x] Identifier les messages nécessitant des paramètres variables
+   2. - [x] Adapter les messages pour supporter l'interpolation
+   3. - [x] Documenter la syntaxe d'interpolation pour les développeurs
+
+## État d'Avancement
+
+### Réalisations
+
+- ✅ La structure des clés de traduction a été créée dans `packages/shared/src/i18n/keys/index.ts`
+- ✅ Les fichiers de traduction en JSON ont été créés pour le français et l'anglais
+- ✅ Le chargement des traductions avec Vue I18n est fonctionnel
+- ✅ Le composant `BasicsForm.vue` a été entièrement adapté pour utiliser les clés de traduction
+- ✅ Une documentation complète de l'implémentation est disponible
+- ✅ La fonction `safeTranslate` a été créée pour gérer les cas d'erreur de traduction
+- ✅ L'interpolation de paramètres a été testée et documentée
+
+### Reste à Faire
+
+- 📌 Mettre à jour les 21 autres composants UI pour utiliser les clés de traduction (voir doc d'implémentation pour la liste)
+- 📌 Extraire les messages des entités du domaine et des Value Objects
+- 📌 Adapter les entités pour utiliser les clés de traduction
+- 📌 Effectuer des tests complets dans les deux langues supportées
+
+### Problèmes Identifiés et Résolus
+
+- ⚠️ Incohérence dans les conventions de nommage des clés entre TypeScript et JSON (capitalisation)
+- ✅ Solution: Utiliser systématiquement MAJUSCULES dans TS et camelCase dans JSON
 
 ## Principes de Développement
 
@@ -97,6 +121,19 @@ Story Points: 3
 | Explosion du nombre de clés                      | Moyenne     | Moyen  | Concevoir une structure hiérarchique et éviter la sur-spécialisation |
 | Difficulté à maintenir la cohérence des messages | Moyenne     | Élevé  | Documenter clairement la structure et les conventions de nommage     |
 | Performance du chargement des traductions        | Faible      | Moyen  | Mettre en place un chargement paresseux des fichiers de traduction   |
+
+## Documentation d'Implémentation
+
+Une documentation technique détaillée a été créée pour guider l'implémentation de cette story et servir de référence pour les futures modifications. Cette documentation inclut:
+
+- Principes de nommage et structure des clés de traduction
+- Conventions pour les fichiers JSON de traduction
+- Processus d'ajout de nouvelles clés
+- Liste de vérification pour éviter les erreurs
+- Bonnes pratiques de dépannage
+- Plan d'application à d'autres composants
+
+📄 **Document de référence**: [Documentation technique d'implémentation](../../docs/epic-5/story-2-implementation.md)
 
 ## Notes de Développement
 

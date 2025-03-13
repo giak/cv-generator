@@ -43,7 +43,11 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "tsc -p tsconfig.json"
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "build-no-clean": "tsc -p tsconfig.json --noEmitOnError",
+    "build": "tsc -p tsconfig.json --noEmitOnError --declaration --declarationDir dist --outDir dist",
+    "dev": "tsc --watch"
   },
   "dependencies": {
     "zod": "^3.22.4"

@@ -20,6 +20,12 @@ export interface ValidationErrorInterface {
   /** Message explicatif */
   message: string;
   
+  /** Clé de traduction pour l'internationalisation */
+  i18nKey?: string;
+  
+  /** Paramètres pour l'interpolation de la traduction */
+  i18nParams?: Record<string, unknown>;
+  
   /** Champ concerné par l'erreur */
   field: string;
   

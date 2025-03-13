@@ -5,6 +5,7 @@
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "declaration": true,
+    "declarationMap": true,
     "strict": true,
     "outDir": "dist",
     "rootDir": "src",
@@ -18,8 +19,14 @@
       "@cv-generator/ui": ["../ui/src"],
       "@cv-generator/ui/*": ["../ui/src/*"]
     },
-    "composite": true
+    "composite": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "emitDeclarationOnly": false,
+    "noEmit": false
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
 } 

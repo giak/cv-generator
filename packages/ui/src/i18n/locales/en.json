@@ -3,13 +3,31 @@
     "errors": {
       "requiredField": "This field is required",
       "invalidEmail": "Invalid email address",
-      "invalidDate": "Invalid date format"
+      "invalidDate": "Invalid date format",
+      "tooLong": "This field exceeds the maximum length of {max} characters",
+      "tooShort": "This field needs at least {min} characters",
+      "futureDate": "Date cannot be in the future",
+      "invalidFormat": "Invalid format"
     },
     "actions": {
       "save": "Save",
       "cancel": "Cancel",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "add": "Add",
+      "remove": "Remove",
+      "export": "Export",
+      "import": "Import",
+      "preview": "Preview"
+    },
+    "labels": {
+      "yes": "Yes",
+      "no": "No",
+      "loading": "Loading...",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning",
+      "info": "Information"
     }
   },
   "resume": {
@@ -17,12 +35,202 @@
       "basics": "Basic Information",
       "work": "Work Experience",
       "education": "Education",
-      "skills": "Skills"
+      "skills": "Skills",
+      "projects": "Projects",
+      "volunteer": "Volunteer Work",
+      "awards": "Awards",
+      "publications": "Publications",
+      "languages": "Languages",
+      "interests": "Interests",
+      "references": "References"
     },
-    "validation": {
-      "invalidName": "Please enter a valid name",
-      "invalidEmail": "Please enter a valid email address",
-      "invalidUrl": "Please enter a valid URL"
+    "basics": {
+      "labels": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "website": "Website",
+        "location": "Location",
+        "summary": "Summary",
+        "profiles": "Profiles",
+        "jobTitle": "Professional Title",
+        "image": "Profile Picture",
+        "address": "Address",
+        "postalCode": "Postal Code",
+        "city": "City",
+        "region": "Region",
+        "countryCode": "Country Code"
+      },
+      "placeholders": {
+        "name": "Enter your full name",
+        "email": "Enter your professional email",
+        "phone": "Enter your phone number",
+        "website": "Enter your website URL",
+        "summary": "Write a brief professional summary",
+        "jobTitle": "Ex: Senior Web Developer",
+        "image": "Ex: https://example.com/photo.jpg",
+        "address": "Ex: 123 Main St",
+        "postalCode": "Ex: 10001",
+        "city": "Ex: New York",
+        "region": "Ex: New York",
+        "countryCode": "Ex: US"
+      },
+      "helpText": {
+        "name": "Your full name as it will appear on your resume.",
+        "email": "Your professional email address.",
+        "phone": "Your phone number (international format recommended).",
+        "website": "URL of your website or portfolio.",
+        "summary": "Concise summary of your profile and professional goals.",
+        "jobTitle": "Your current professional title.",
+        "image": "URL of your professional photo.",
+        "address": "Your postal address.",
+        "postalCode": "Postal code of your location.",
+        "city": "Name of your city.",
+        "region": "Your region or state.",
+        "countryCode": "ISO country code (e.g., US, UK, CA)."
+      },
+      "validation": {
+        "missingName": "Name is required",
+        "missingEmail": "Email is required",
+        "invalidEmail": "Invalid email format",
+        "personalEmail": "Consider using a professional email",
+        "missingPhone": "Phone number is required",
+        "invalidPhone": "Invalid phone number format",
+        "missingLocation": "Location is required",
+        "vagueLocation": "Location should be more specific",
+        "missingSummary": "Summary is required",
+        "briefSummary": "Summary is too short, add more details"
+      },
+      "imageSuggestions": {
+        "title": "Image URL suggestions:",
+        "useFullUrl": "Use a complete URL (starting with http:// or https://)",
+        "checkPublicAccess": "Verify that the image is publicly accessible",
+        "useProfessionalImage": "Use a professional and high-quality image",
+        "recommendedFormats": "Recommended formats are JPEG, PNG or WebP"
+      },
+      "addressSuggestions": {
+        "title": "Address suggestions:",
+        "completeAddress": "Make sure the address is complete and correct",
+        "validPostalCode": "The postal code must be in a valid format for the country",
+        "officialCityName": "Use the official name of the city",
+        "isoCountryCode": "The country code must be a 2-letter ISO code (US, UK, CA, etc.)"
+      },
+      "profiles": {
+        "network": "Network",
+        "username": "Username",
+        "url": "Profile URL",
+        "networkPlaceholder": "Ex: LinkedIn",
+        "usernamePlaceholder": "Ex: john-doe",
+        "urlPlaceholder": "Ex: https://linkedin.com/in/john-doe"
+      }
+    },
+    "work": {
+      "labels": {
+        "company": "Company",
+        "position": "Position",
+        "website": "Website",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "summary": "Summary",
+        "highlights": "Highlights"
+      },
+      "placeholders": {
+        "company": "Enter company name",
+        "position": "Enter your job title",
+        "website": "Enter company website",
+        "startDate": "YYYY-MM-DD",
+        "endDate": "YYYY-MM-DD (leave empty if current)",
+        "summary": "Describe your role and responsibilities",
+        "highlight": "Add key achievement or responsibility"
+      },
+      "validation": {
+        "missingCompany": "Company name is required",
+        "vaguePosition": "Position title is too generic",
+        "missingPosition": "Position is required",
+        "missingStartDate": "Start date is required",
+        "endBeforeStart": "End date cannot be before start date",
+        "futureDate": "Date cannot be in the future",
+        "missingSummary": "Summary is required",
+        "briefDescription": "Description is too brief, add more details",
+        "missingHighlights": "Add at least one highlight",
+        "vagueHighlights": "Highlights should be more specific"
+      }
+    },
+    "education": {
+      "labels": {
+        "institution": "Institution",
+        "area": "Area of Study",
+        "studyType": "Degree",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "gpa": "GPA",
+        "courses": "Courses"
+      },
+      "placeholders": {
+        "institution": "Enter school or university name",
+        "area": "Enter field of study",
+        "studyType": "Enter degree type",
+        "startDate": "YYYY-MM-DD",
+        "endDate": "YYYY-MM-DD (leave empty if current)",
+        "gpa": "Enter your GPA",
+        "course": "Add relevant course"
+      },
+      "validation": {
+        "missingInstitution": "Institution name is required",
+        "missingArea": "Area of study is required",
+        "missingStudyType": "Degree type is required",
+        "missingStartDate": "Start date is required",
+        "endBeforeStart": "End date cannot be before start date",
+        "missingGpa": "GPA is required",
+        "vagueCourses": "Course descriptions should be more specific"
+      }
+    },
+    "skills": {
+      "labels": {
+        "name": "Skill Name",
+        "level": "Proficiency Level",
+        "keywords": "Keywords"
+      },
+      "placeholders": {
+        "name": "Enter skill name",
+        "level": "Select proficiency level",
+        "keyword": "Add keyword"
+      },
+      "validation": {
+        "missingSkillName": "Skill name is required",
+        "briefSkillName": "Skill name is too brief",
+        "undefinedLevel": "Proficiency level is required",
+        "missingKeywords": "Add at least one keyword",
+        "genericSkill": "Skill is too generic, be more specific"
+      }
+    }
+  },
+  "ui": {
+    "header": {
+      "title": "CV Generator",
+      "subtitle": "Create professional resumes",
+      "languageSelector": "Change language"
+    },
+    "footer": {
+      "copyright": "© {year} CV Generator",
+      "version": "Version {version}",
+      "madeWith": "Made with ❤️"
+    },
+    "navigation": {
+      "home": "Home",
+      "editor": "Resume Editor",
+      "preview": "Preview",
+      "export": "Export",
+      "settings": "Settings"
+    },
+    "export": {
+      "title": "Export Your Resume",
+      "jsonFormat": "JSON (Standard JSON Resume format)",
+      "htmlFormat": "HTML",
+      "pdfFormat": "PDF",
+      "download": "Download",
+      "successMessage": "Your resume has been exported successfully!",
+      "errorMessage": "There was an error exporting your resume. Please try again."
     }
   }
 } 
