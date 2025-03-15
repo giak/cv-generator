@@ -1,20 +1,20 @@
 <template>
   <Form 
     :loading="loading"
-    :title="isEditing ? 'Modifier le projet' : 'Ajouter un projet'"
-    :subtitle="isEditing ? 'Mettez à jour les informations de ce projet.' : 'Ajoutez un nouveau projet à votre CV.'"
+    :title="isEditing ? t(TRANSLATION_KEYS.RESUME.PROJECTS.FORM.EDIT_TITLE) : t(TRANSLATION_KEYS.RESUME.PROJECTS.FORM.ADD_TITLE)"
+    :subtitle="isEditing ? t(TRANSLATION_KEYS.RESUME.PROJECTS.FORM.EDIT_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.PROJECTS.FORM.ADD_SUBTITLE)"
     @submit="handleSubmit"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Champ pour le nom du projet -->
       <FormField
         name="name"
-        label="Nom du projet"
+        :label="t(TRANSLATION_KEYS.RESUME.PROJECTS.LABELS.NAME)"
         :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
-        placeholder="Portfolio, Application mobile..."
-        help-text="Nom du projet réalisé."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.PROJECTS.PLACEHOLDERS.NAME)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.PROJECTS.HELP_TEXT.NAME)"
         required
         @update:model-value="(value) => updateField('name', value)"
         @blur="validateField('name', localModel.name)"
@@ -23,12 +23,12 @@
       <!-- Champ pour l'URL -->
       <FormField
         name="url"
-        label="URL"
+        :label="t(TRANSLATION_KEYS.RESUME.PROJECTS.LABELS.URL)"
         :model-value="localModel.url || ''"
         :error="errors.url"
         :icon="icons.url"
-        placeholder="https://monprojet.com"
-        help-text="Lien vers le projet en ligne."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.PROJECTS.PLACEHOLDERS.URL)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.PROJECTS.HELP_TEXT.URL)"
         @update:model-value="(value) => updateField('url', value)"
         @blur="validateField('url', localModel.url)"
       />
@@ -36,12 +36,12 @@
       <!-- Champ pour l'entité -->
       <FormField
         name="entity"
-        label="Entité"
+        :label="t(TRANSLATION_KEYS.RESUME.PROJECTS.LABELS.ENTITY)"
         :model-value="localModel.entity || ''"
         :error="errors.entity"
         :icon="icons.entity"
-        placeholder="Université, Entreprise, Personnel..."
-        help-text="Organisation pour laquelle le projet a été réalisé."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.PROJECTS.PLACEHOLDERS.ENTITY)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.PROJECTS.HELP_TEXT.ENTITY)"
         @update:model-value="(value) => updateField('entity', value)"
         @blur="validateField('entity', localModel.entity)"
       />
@@ -49,12 +49,12 @@
       <!-- Champ pour le type -->
       <FormField
         name="type"
-        label="Type"
+        :label="t(TRANSLATION_KEYS.RESUME.PROJECTS.LABELS.TYPE)"
         :model-value="localModel.type || ''"
         :error="errors.type"
         :icon="icons.type"
-        placeholder="Application Web, Mobile, Site vitrine..."
-        help-text="Type ou catégorie du projet."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.PROJECTS.PLACEHOLDERS.TYPE)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.PROJECTS.HELP_TEXT.TYPE)"
         @update:model-value="(value) => updateField('type', value)"
         @blur="validateField('type', localModel.type)"
       />
@@ -79,12 +79,12 @@
     <div class="mt-6">
       <FormField
         name="description"
-        label="Description"
+        :label="t(TRANSLATION_KEYS.RESUME.PROJECTS.LABELS.DESCRIPTION)"
         :model-value="localModel.description || ''"
         :error="errors.description"
         :icon="icons.description"
-        placeholder="Décrivez le projet et son contexte..."
-        help-text="Description détaillée du projet."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.PROJECTS.PLACEHOLDERS.DESCRIPTION)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.PROJECTS.HELP_TEXT.DESCRIPTION)"
         textarea
         :rows="4"
         @update:model-value="(value) => updateField('description', value)"
@@ -95,8 +95,8 @@
     <!-- Champ pour les points forts / réalisations -->
     <div class="mt-6">
       <label class="block text-sm font-medium mb-1">
-        Points forts
-        <span class="text-neutral-400 font-normal ml-1">(un par ligne)</span>
+        {{ t(TRANSLATION_KEYS.RESUME.PROJECTS.LABELS.HIGHLIGHTS) }}
+        <span class="text-neutral-400 font-normal ml-1">({{ safeTranslate('resume.projects.form.onePerLine', 'un par ligne') }})</span>
       </label>
       
       <div class="flex items-start">
@@ -109,12 +109,12 @@
             v-model="highlightsText"
             rows="4"
             class="block w-full bg-neutral-800 border border-neutral-700 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500/20 p-3 text-sm"
-            placeholder="Entrez un point fort par ligne..."
+            :placeholder="t(TRANSLATION_KEYS.RESUME.PROJECTS.PLACEHOLDERS.HIGHLIGHT)"
             @blur="validateField('highlights', localModel.highlights)"
           ></textarea>
           
           <p class="mt-1 text-sm text-neutral-400">
-            Détaillez les points forts ou réalisations du projet.
+            {{ t(TRANSLATION_KEYS.RESUME.PROJECTS.HELP_TEXT.HIGHLIGHTS) }}
           </p>
           
           <p v-if="errors.highlights" class="mt-1 text-sm text-red-400">
@@ -131,7 +131,7 @@
         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
         @click="$emit('cancel')"
       >
-        Annuler
+        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
       </button>
       <button
         type="submit"
@@ -158,6 +158,8 @@ import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
 import type { ProjectInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 const props = defineProps<{
   project?: ProjectInterface
@@ -169,6 +171,25 @@ const emit = defineEmits<{
   (e: 'submit', project: ProjectInterface): void
   (e: 'cancel'): void
 }>()
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const result = t(key);
+    // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
+    if (result === key) {
+      console.warn(`Missing translation key: ${key}, using fallback`);
+      return fallback;
+    }
+    return result;
+  } catch (error) {
+    console.error(`Error translating key: ${key}`, error);
+    return fallback;
+  }
+};
 
 // État du formulaire
 const loading = ref(false)
@@ -182,7 +203,7 @@ const isEditing = computed(() => !!props.projectId || !!props.project)
 
 // Label du bouton de soumission
 const submitButtonLabel = computed(() => {
-  return isEditing.value ? 'Enregistrer' : 'Ajouter'
+  return isEditing.value ? t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) : t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD)
 })
 
 // Model wrapped in a computed to handle the case of editing
@@ -254,7 +275,7 @@ const validateDateRange = ({ startDate, endDate }: { startDate: string, endDate?
   if (endDate) validateField('endDate', endDate)
   
   if (startDate && endDate && startDate > endDate) {
-    errors.value.endDate = 'La date de fin doit être postérieure à la date de début'
+    errors.value.endDate = safeTranslate(TRANSLATION_KEYS.RESUME.PROJECTS.VALIDATION.END_BEFORE_START, 'La date de fin doit être postérieure à la date de début')
     return false
   }
   

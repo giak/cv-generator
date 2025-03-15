@@ -5,6 +5,16 @@ import { useEducationStore } from '@ui/modules/cv/presentation/stores/education'
 import { computed, onMounted, ref } from 'vue'
 import CollectionManager from '@ui/components/shared/CollectionManager.vue'
 import EducationForm from './EducationForm.vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
+
+const { t } = useI18n()
+
+// Function to safely translate with fallback
+const safeTranslate = (key: string, fallback: string) => {
+  const translation = t(key)
+  return translation === key ? fallback : translation
+}
 
 // State for managing the education list
 const educationStore = useEducationStore()
@@ -93,7 +103,7 @@ onMounted(async () => {
 
 // Format date for display
 const formatDate = (dateString?: string): string => {
-  if (!dateString) return 'Présent'
+  if (!dateString) return t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.PRESENT)
   
   try {
     const date = new Date(dateString)
@@ -233,37 +243,74 @@ const toggleSortOrder = () => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="bg-neutral-900 rounded-xl p-6">
     <CollectionManager
-      :items="displayedEducations"
-      title="Formations"
-      description="Gérez vos formations et diplômes pour votre CV"
-      addButtonText="Ajouter une formation"
-      emptyStateTitle="Aucune formation"
-      emptyStateDescription="Commencez par ajouter une formation pour enrichir votre CV."
+      :title="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.TITLE)"
+      :description="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.DESCRIPTION)"
+      :add-button-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.ADD_BUTTON)"
+      :empty-state-title="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.EMPTY_STATE_TITLE)"
+      :empty-state-description="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.EMPTY_STATE_DESCRIPTION)"
       :loading="loading"
+      :items="displayedEducations"
       @add="openAddDialog"
       @edit="openEditDialog"
       @delete="deleteEducation"
     >
-      <!-- Sorting options -->
+      <!-- Sorting Options -->
       <template #header-actions>
-        <div v-if="educations.length > 1" class="flex items-center">
+        <div class="flex items-center">
           <button 
-            type="button"
-            @click="toggleSortOrder"
-            class="flex items-center text-sm px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 transition-colors"
-            :class="{'text-indigo-300': useChronologicalSort && !isCustomOrder, 'text-neutral-400': !useChronologicalSort || isCustomOrder}"
+            @click="toggleSortOrder" 
+            class="flex items-center px-3 py-1.5 text-xs rounded-lg bg-neutral-800 hover:bg-neutral-700 transition-colors text-neutral-300"
+            :class="{ 'bg-indigo-600 hover:bg-indigo-700 text-white': useChronologicalSort }"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-              <polyline points="21 8 21 21"></polyline>
-              <polyline points="10 21 3 21 3 8"></polyline>
-              <line x1="14" y1="4" x2="14" y2="21"></line>
-              <line x1="18" y1="4" x2="18" y2="21"></line>
-              <line x1="3" y1="12" x2="10" y2="12"></line>
-              <line x1="3" y1="16" x2="10" y2="16"></line>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            {{ useChronologicalSort && !isCustomOrder ? 'Tri chronologique' : 'Ordre personnalisé' }}
+            <span>{{ safeTranslate('resume.education.list.chronologicalOrder', 'Ordre chronologique') }}</span>
+          </button>
+          
+          <button 
+            @click="toggleSortOrder" 
+            class="ml-2 flex items-center px-3 py-1.5 text-xs rounded-lg bg-neutral-800 hover:bg-neutral-700 transition-colors text-neutral-300"
+            :class="{ 'bg-indigo-600 hover:bg-indigo-700 text-white': !useChronologicalSort }"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5">
+              <line x1="4" y1="9" x2="20" y2="9"></line>
+              <line x1="4" y1="15" x2="20" y2="15"></line>
+              <line x1="10" y1="3" x2="8" y2="21"></line>
+              <line x1="16" y1="3" x2="14" y2="21"></line>
+            </svg>
+            <span>{{ safeTranslate('resume.education.list.customOrder', 'Ordre personnalisé') }}</span>
+          </button>
+        </div>
+      </template>
+      
+      <template #item-actions="{ index }">
+        <div class="flex gap-1">
+          <button 
+            @click="moveUp(index)" 
+            :disabled="index === 0 || useChronologicalSort"
+            :title="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.MOVE_UP)"
+            class="p-1.5 text-neutral-400 hover:text-white transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </button>
+          
+          <button 
+            @click="moveDown(index)" 
+            :disabled="index === displayedEducations.length - 1 || useChronologicalSort"
+            :title="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.MOVE_DOWN)"
+            class="p-1.5 text-neutral-400 hover:text-white transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
           </button>
         </div>
       </template>
@@ -295,7 +342,7 @@ const toggleSortOrder = () => {
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
               </svg>
-              Site web de l'établissement
+              {{ safeTranslate('resume.education.list.websiteLink', 'Site web de l\'établissement') }}
             </a>
           </div>
           
@@ -303,12 +350,12 @@ const toggleSortOrder = () => {
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
             </svg>
-            Résultat: {{ education.score }}
+            {{ safeTranslate('resume.education.list.resultLabel', 'Résultat') }}: {{ education.score }}
           </div>
           
           <!-- Courses -->
           <div v-if="education.courses && education.courses.length > 0" class="mt-3">
-            <h4 class="text-sm font-medium mb-2">Cours suivis:</h4>
+            <h4 class="text-sm font-medium mb-2">{{ safeTranslate('resume.education.list.coursesTitle', 'Cours suivis') }}:</h4>
             <ul class="list-disc list-inside text-sm text-neutral-300 space-y-1">
               <li v-for="(course, courseIndex) in education.courses" :key="`course-${courseIndex}`">
                 {{ course }}
@@ -318,45 +365,15 @@ const toggleSortOrder = () => {
         </div>
       </template>
       
-      <template #itemActions="{ item: education, index }">
-        <div class="flex flex-col gap-2">
-          <!-- Reorder buttons -->
-          <div class="flex gap-1">
-            <button
-              type="button"
-              @click="moveUp(index)"
-              :disabled="index === 0"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le haut"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
-            </button>
-            
-            <button
-              type="button"
-              @click="moveDown(index)"
-              :disabled="index === educations.length - 1"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le bas"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </template>
     </CollectionManager>
     
-    <!-- Performance optimization: show more/less button -->
+    <!-- Show More/Less Buttons -->
     <div v-if="hasMoreItems" class="flex justify-center mt-4">
       <button 
         @click="toggleShowAllItems" 
         class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
       >
-        <span>Voir toutes les formations ({{ sortedEducations.length }})</span>
+        <span>{{ safeTranslate('resume.education.list.showAll', 'Voir toutes les formations') }} ({{ sortedEducations.length }})</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
@@ -368,7 +385,7 @@ const toggleSortOrder = () => {
         @click="toggleShowAllItems" 
         class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
       >
-        <span>Réduire la liste</span>
+        <span>{{ safeTranslate('resume.education.list.showLess', 'Réduire la liste') }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>

@@ -2,11 +2,11 @@
   <div>
     <CollectionManager
       :items="publications"
-      title="Publications"
-      description="Gérez vos publications pour enrichir votre CV"
-      addButtonText="Ajouter une publication"
-      emptyStateTitle="Aucune publication"
-      emptyStateDescription="Vous n'avez pas encore ajouté de publications à votre CV."
+      :title="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.TITLE)"
+      :description="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.DESCRIPTION)"
+      :addButtonText="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.ADD_BUTTON)"
+      :emptyStateTitle="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.EMPTY_STATE_TITLE)"
+      :emptyStateDescription="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.EMPTY_STATE_DESCRIPTION)"
       :loading="loading.loading"
       @add="openAddDialog"
       @edit="openEditDialog"
@@ -41,12 +41,12 @@
               <polyline points="15 3 21 3 21 9"></polyline>
               <line x1="10" y1="14" x2="21" y2="3"></line>
             </svg>
-            Voir la publication
+            {{ safeTranslate('resume.publications.list.viewPublication', 'Voir la publication') }}
           </a>
         </div>
       </template>
       
-      <template #itemActions="{ item: publication, index }">
+      <template #itemActions="{ index }">
         <div class="flex flex-col gap-2">
           <!-- Reorder buttons -->
           <div class="flex gap-1">
@@ -55,7 +55,7 @@
               @click="moveUp(index)"
               :disabled="index === 0"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le haut"
+              :title="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.MOVE_UP)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
@@ -67,7 +67,7 @@
               @click="moveDown(index)"
               :disabled="index === publications.length - 1"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le bas"
+              :title="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.MOVE_DOWN)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -97,23 +97,23 @@
     <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-md">
         <div class="p-6">
-          <h3 class="text-lg font-medium text-white mb-2">Supprimer cette publication ?</h3>
+          <h3 class="text-lg font-medium text-white mb-2">{{ safeTranslate('resume.publications.form.confirmDelete', 'Supprimer cette publication ?') }}</h3>
           <p class="text-neutral-400 mb-6">
-            Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.
+            {{ safeTranslate('resume.publications.form.deleteWarning', 'Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.') }}
           </p>
           <div class="flex justify-end space-x-3">
             <button 
               @click="showDeleteConfirm = false"
               class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
             >
-              Annuler
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
             </button>
             <button 
               @click="deleteConfirmed"
               class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white"
               :disabled="loading.deleting"
             >
-              {{ loading.deleting ? 'Suppression...' : 'Supprimer' }}
+              {{ loading.deleting ? safeTranslate('resume.publications.form.deleting', 'Suppression...') : t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE) }}
             </button>
           </div>
         </div>
@@ -130,15 +130,28 @@ import type { PublicationInterface } from '@cv-generator/shared/src/types/resume
 import PublicationForm from './PublicationForm.vue'
 import CollectionManager from '@ui/components/shared/CollectionManager.vue'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
+
+// Fonction de traduction
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string) => {
+  try {
+    const translation = t(key)
+    return translation !== key ? translation : fallback
+  } catch (e) {
+    return fallback
+  }
+}
 
 // Store instance
 const publicationStore = usePublicationStore()
 
 // Set up useCollectionField for managing publications
 const { 
-  items: publications,
-  reorderItems
-} = useCollectionField<ValidatedPublication>({
+  items: publications} = useCollectionField<ValidatedPublication>({
   fieldName: 'publications',
   collection: computed(() => publicationStore.publications || []),
   updateField: () => {}, // Using the store directly

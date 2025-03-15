@@ -6,6 +6,8 @@ import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 interface Props {
   modelValue: VolunteerInterface
@@ -14,6 +16,11 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
 
 // Type-safe emits declaration
 const emit = defineEmits<{
@@ -51,7 +58,7 @@ const { errors, validateField, validateForm } = useValidation<VolunteerInterface
 // Handle adding a highlight
 const addHighlight = () => {
   if (!newHighlight.value.trim()) {
-    highlightError.value = 'Le point fort ne peut pas être vide'
+    highlightError.value = t(TRANSLATION_KEYS.RESUME.VOLUNTEER.VALIDATION.MISSING_SUMMARY, 'Le point fort ne peut pas être vide')
     return
   }
   
@@ -104,7 +111,7 @@ const validateDateRange = ({ startDate, endDate }: { startDate: string, endDate?
     validateField('endDate', endDate)
     
     if (startDate && endDate && startDate > endDate) {
-      errors.value.endDate = 'La date de fin doit être postérieure à la date de début'
+      errors.value.endDate = t(TRANSLATION_KEYS.RESUME.VOLUNTEER.VALIDATION.END_BEFORE_START, 'La date de fin doit être postérieure à la date de début')
       return false
     }
   }
@@ -126,19 +133,19 @@ const icons = {
 <template>
   <Form 
     :loading="loading"
-    :title="isNew ? 'Ajouter une expérience de bénévolat' : 'Modifier l\'expérience de bénévolat'"
-    :subtitle="isNew ? 'Décrivez votre engagement bénévole et vos contributions.' : 'Mettez à jour les détails de cette expérience.'"
+    :title="isNew ? t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.EDIT_TITLE)"
+    :subtitle="isNew ? t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.ADD_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.EDIT_SUBTITLE)"
     @submit="handleSubmit"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         name="organization"
-        label="Organisation"
+        :label="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LABELS.ORGANIZATION)"
         :model-value="localModel.organization"
         :error="errors.organization"
         :icon="icons.organization"
-        placeholder="Ex: Croix-Rouge"
-        help-text="Nom de l'organisation où vous avez effectué du bénévolat."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.PLACEHOLDERS.ORGANIZATION)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.HELP_TEXT.ORGANIZATION)"
         required
         @update:model-value="(value) => updateField('organization', value)"
         @blur="validateField('organization', localModel.organization)"
@@ -146,12 +153,12 @@ const icons = {
 
       <FormField
         name="position"
-        label="Poste / Rôle"
+        :label="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LABELS.POSITION)"
         :model-value="localModel.position"
         :error="errors.position"
         :icon="icons.position"
-        placeholder="Ex: Bénévole aux premiers secours"
-        help-text="Votre fonction ou rôle dans l'organisation."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.PLACEHOLDERS.POSITION)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.HELP_TEXT.POSITION)"
         required
         @update:model-value="(value) => updateField('position', value)"
         @blur="validateField('position', localModel.position)"
@@ -161,12 +168,12 @@ const icons = {
         <FormField
           name="url"
           type="url"
-          label="Site Web"
+          :label="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LABELS.WEBSITE)"
           :model-value="localModel.url || ''"
           :error="errors.url"
           :icon="icons.url"
-          placeholder="Ex: https://organisation.com"
-          help-text="Site web de l'organisation (optionnel)."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.PLACEHOLDERS.WEBSITE)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.HELP_TEXT.WEBSITE)"
           @update:model-value="(value) => updateField('url', value)"
           @blur="validateField('url', localModel.url)"
         />
@@ -182,9 +189,9 @@ const icons = {
           :start-date-icon="icons.date"
           :end-date-icon="icons.date"
           :required="true"
-          :start-date-help-text="'Date à laquelle vous avez commencé le bénévolat.'"
-          :end-date-help-text="'Date de fin (laisser vide si en cours).'"
-          :currently-active-label="'Bénévolat en cours'"
+          :start-date-help-text="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.HELP_TEXT.START_DATE)"
+          :end-date-help-text="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.HELP_TEXT.END_DATE)"
+          :currently-active-label="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.PRESENT)"
           @update:start-date="(value) => updateField('startDate', value)"
           @update:end-date="(value) => updateField('endDate', value)"
           @update:is-currently-active="handleCurrentlyVolunteeringChange"
@@ -197,12 +204,13 @@ const icons = {
       <div class="col-span-1 md:col-span-2">
         <FormField
           name="summary"
-          label="Résumé"
+          :label="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LABELS.SUMMARY)"
           :model-value="localModel.summary || ''"
           :error="errors.summary"
           :icon="icons.summary"
-          placeholder="Ex: Participation à des actions de terrain et sensibilisation..."
-          help-text="Décrivez brièvement vos responsabilités et activités."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.PLACEHOLDERS.SUMMARY)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.HELP_TEXT.SUMMARY)"
+          textarea
           rows="4"
           @update:model-value="(value) => updateField('summary', value)"
           @blur="validateField('summary', localModel.summary)"
@@ -214,17 +222,17 @@ const icons = {
     <div class="mt-8 border-t border-neutral-700 pt-6">
       <h3 class="text-lg font-medium mb-4 flex items-center">
         <span class="mr-2" v-html="icons.highlights"></span>
-        Points forts
+        {{ t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LABELS.HIGHLIGHTS) }}
       </h3>
       
       <div class="mb-4">
-        <label class="text-sm mb-1 block">Ajoutez des points clés de cette expérience (réalisations, contributions, etc.)</label>
+        <label class="text-sm mb-1 block">{{ t(TRANSLATION_KEYS.RESUME.VOLUNTEER.HELP_TEXT.HIGHLIGHTS) }}</label>
         
         <div class="flex">
           <input 
             v-model="newHighlight"
             type="text"
-            placeholder="Ex: Formé 20 nouveaux bénévoles"
+            :placeholder="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.PLACEHOLDERS.HIGHLIGHT)"
             class="flex-grow rounded-l bg-neutral-700 border-neutral-600 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             @keydown.enter.prevent="addHighlight"
           />
@@ -233,7 +241,7 @@ const icons = {
             class="rounded-r bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2"
             @click="addHighlight"
           >
-            Ajouter
+            {{ t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.ADD_HIGHLIGHT) }}
           </button>
         </div>
         
@@ -264,7 +272,7 @@ const icons = {
       </ul>
       
       <p v-else class="text-neutral-400 text-sm">
-        Aucun point fort ajouté. Les points forts permettent de mettre en valeur vos réalisations.
+        {{ t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.NO_HIGHLIGHTS) }}
       </p>
     </div>
 
@@ -275,13 +283,13 @@ const icons = {
         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
         @click="handleCancel"
       >
-        Annuler
+        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
       </button>
       <button 
         type="submit"
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
       >
-        {{ isNew ? 'Ajouter' : 'Enregistrer' }}
+        {{ isNew ? t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) : t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}
       </button>
     </div>
   </Form>

@@ -2,11 +2,11 @@
   <div class="space-y-6">
     <CollectionManager
       :items="displayedProjects"
-      title="Projets"
-      description="Gérez vos projets personnels et professionnels pour votre CV"
-      addButtonText="Ajouter un projet"
-      emptyStateTitle="Aucun projet"
-      emptyStateDescription="Commencez par ajouter un projet pour enrichir votre CV."
+      :title="t(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.TITLE)"
+      :description="t(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.DESCRIPTION)"
+      :addButtonText="t(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.ADD_BUTTON)"
+      :emptyStateTitle="t(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.EMPTY_STATE_TITLE)"
+      :emptyStateDescription="t(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.EMPTY_STATE_DESCRIPTION)"
       :loading="isLoading"
       @add="openAddForm"
       @edit="openEditForm"
@@ -29,7 +29,7 @@
               <line x1="3" y1="12" x2="10" y2="12"></line>
               <line x1="3" y1="16" x2="10" y2="16"></line>
             </svg>
-            {{ useChronologicalSort && !isCustomOrder ? 'Tri chronologique' : 'Ordre personnalisé' }}
+            {{ useChronologicalSort && !isCustomOrder ? safeTranslate('resume.projects.list.chronologicalOrder', 'Tri chronologique') : safeTranslate('resume.projects.list.customOrder', 'Ordre personnalisé') }}
           </button>
         </div>
       </template>
@@ -76,7 +76,7 @@
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
               </svg>
-              Voir le projet
+              {{ safeTranslate('resume.projects.list.viewProject', 'Voir le projet') }}
             </a>
           </div>
         </div>
@@ -91,7 +91,7 @@
               @click="moveUp(index)"
               :disabled="index === 0"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le haut"
+              :title="t(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.MOVE_UP)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
@@ -103,7 +103,7 @@
               @click="moveDown(index)"
               :disabled="index === projects.length - 1"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le bas"
+              :title="t(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.MOVE_DOWN)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -120,7 +120,7 @@
         @click="toggleShowAllItems" 
         class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
       >
-        <span>Voir tous les projets ({{ sortedProjects.length }})</span>
+        <span>{{ safeTranslate('resume.projects.list.showAll', 'Voir tous les projets') }} ({{ sortedProjects.length }})</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
@@ -132,7 +132,7 @@
         @click="toggleShowAllItems" 
         class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
       >
-        <span>Réduire la liste</span>
+        <span>{{ safeTranslate('resume.projects.list.showLess', 'Réduire la liste') }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
@@ -141,57 +141,50 @@
     
     <!-- Modal pour ajouter/modifier un projet -->
     <div v-if="showForm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center p-4 border-b border-neutral-700">
-          <h3 class="text-lg font-medium">
-            {{ isEditing ? 'Modifier un projet' : 'Ajouter un projet' }}
-          </h3>
-          <button 
-            @click="closeForm" 
-            class="text-neutral-400 hover:text-white"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
+      <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="p-4 sm:p-6">
           <ProjectForm
-            :project="currentProject"
-            :project-id="currentProjectId"
-            :is-loading="isFormSubmitting"
-            @submit="saveProject"
-            @cancel="closeForm"
+            v-model="currentProject"
+            :loading="isFormSubmitting"
+            :is-editing="isEditing"
+            :errors="formErrors"
+            :keys="formKeys"
+            @validate="submitForm"
+            @cancel="() => { showForm = false }"
           />
         </div>
       </div>
     </div>
     
-    <!-- Modal de confirmation de suppression -->
+    <!-- Modal pour confirmer la suppression -->
     <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-md">
-        <div class="p-6">
-          <h3 class="text-xl font-semibold mb-4">Supprimer ce projet</h3>
-          <p class="mb-6 text-neutral-300">
-            Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.
-          </p>
+      <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-lg p-6">
+        <h3 class="text-xl font-semibold mb-4">{{ safeTranslate('resume.projects.form.confirmDelete', 'Confirmer la suppression') }}</h3>
+        
+        <p class="text-neutral-300 mb-6">
+          {{ safeTranslate('resume.projects.form.deleteWarning', 'Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.') }}
+        </p>
+        
+        <div v-if="projectToDelete" class="bg-neutral-800 p-4 rounded-lg mb-6">
+          <p class="font-medium">{{ projectToDelete.name }}</p>
+          <p class="text-sm text-neutral-400 mt-1">{{ projectToDelete.description }}</p>
+        </div>
+        
+        <div class="flex justify-end gap-4">
+          <Button 
+            variant="neutral" 
+            @click="closeDeleteConfirm"
+          >
+            {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
+          </Button>
           
-          <div class="flex justify-end space-x-4">
-            <Button 
-              variant="ghost"
-              @click="closeDeleteConfirm"
-            >
-              Annuler
-            </Button>
-            <Button 
-              variant="danger"
-              :loading="isDeletingProject"
-              @click="confirmDelete"
-            >
-              Supprimer
-            </Button>
-          </div>
+          <Button 
+            variant="error" 
+            :loading="isDeletingProject"
+            @click="confirmDelete"
+          >
+            {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE) }}
+          </Button>
         </div>
       </div>
     </div>
@@ -227,6 +220,21 @@ import CollectionManager from '@ui/components/shared/CollectionManager.vue'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
 import type { ProjectInterface } from '@cv-generator/shared/src/types/resume.interface'
 import type { ProjectWithId } from '../stores/project'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
+
+// Fonction de traduction
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string) => {
+  try {
+    const translation = t(key)
+    return translation !== key ? translation : fallback
+  } catch (e) {
+    return fallback
+  }
+}
 
 // Store des projets
 const projectStore = useProjectStore()
@@ -329,6 +337,8 @@ const toggleShowAllItems = () => {
 // État du formulaire
 const isEditing = ref(false)
 const isFormSubmitting = ref(false)
+const formErrors = ref({})
+const formKeys = ref({})
 
 // État de la confirmation de suppression
 const showDeleteConfirm = ref(false)
@@ -373,56 +383,13 @@ const openAddForm = () => {
 
 // Ouvrir le formulaire d'édition
 const openEditForm = (project: ProjectWithId) => {
-  isEditing.value = true
-  currentProjectId.value = project.id
-  Object.assign(currentProject.value, project)
-  showForm.value = true
-}
-
-// Fermer le formulaire
-const closeForm = () => {
-  showForm.value = false
-  setTimeout(() => {
-    resetNewItem()
-    currentProjectId.value = null
-    isEditing.value = false
-  }, 300)
-}
-
-// Sauvegarder un projet
-const saveProject = async (project: ProjectInterface) => {
-  isFormSubmitting.value = true
-  
-  try {
-    if (isEditing.value && currentProjectId.value) {
-      // Mettre à jour le projet existant
-      const result = await projectStore.updateProject(currentProjectId.value, project)
-      
-      if (result.isValid) {
-        showToast('Projet mis à jour avec succès', 'success')
-        closeForm()
-      } else {
-        const errors = result.errors ? Object.values(result.errors).flat().join(', ') : 'Erreur de validation'
-        showToast(`Erreur lors de la mise à jour : ${errors}`, 'error')
-      }
-    } else {
-      // Ajouter un nouveau projet
-      const result = await projectStore.addProject(project)
-      
-      if (result.isValid) {
-        showToast('Projet ajouté avec succès', 'success')
-        closeForm()
-      } else {
-        const errors = result.errors ? Object.values(result.errors).flat().join(', ') : 'Erreur de validation'
-        showToast(`Erreur lors de l'ajout : ${errors}`, 'error')
-      }
-    }
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde du projet:', error)
-    showToast('Une erreur est survenue lors de la sauvegarde', 'error')
-  } finally {
-    isFormSubmitting.value = false
+  currentProject.value = {
+    ...project,
+    // Convert undefined to empty array for client-side validation
+    highlights: project.highlights || []
   }
+  isEditing.value = true
+  showForm.value = true
 }
 
 // Ouvrir la confirmation de suppression
@@ -434,9 +401,46 @@ const openDeleteConfirm = (project: ProjectWithId) => {
 // Fermer la confirmation de suppression
 const closeDeleteConfirm = () => {
   showDeleteConfirm.value = false
-  setTimeout(() => {
-    projectToDelete.value = null
-  }, 300)
+  projectToDelete.value = null
+}
+
+// Soumettre le formulaire (ajout ou modification)
+const submitForm = async () => {
+  if (!currentProject.value) return
+  
+  isFormSubmitting.value = true
+  
+  try {
+    let success = false
+    
+    if (isEditing.value) {
+      success = await projectStore.updateProject(currentProject.value.id, currentProject.value)
+      
+      if (success) {
+        showToast(safeTranslate('resume.projects.notifications.updateSuccess', 'Projet mis à jour avec succès'), 'success')
+      } else {
+        showToast(safeTranslate('resume.projects.notifications.updateError', 'Erreur lors de la mise à jour du projet'), 'error')
+      }
+    } else {
+      const newProject = await projectStore.addProject(currentProject.value as ProjectInterface)
+      
+      if (newProject) {
+        showToast(safeTranslate('resume.projects.notifications.addSuccess', 'Projet ajouté avec succès'), 'success')
+        success = true
+      } else {
+        showToast(safeTranslate('resume.projects.notifications.addError', 'Erreur lors de l\'ajout du projet'), 'error')
+      }
+    }
+    
+    if (success) {
+      showForm.value = false
+    }
+  } catch (error) {
+    console.error('Erreur lors de la soumission du formulaire:', error)
+    showToast(safeTranslate('resume.projects.notifications.formError', 'Une erreur est survenue lors de la soumission du formulaire'), 'error')
+  } finally {
+    isFormSubmitting.value = false
+  }
 }
 
 // Confirmer la suppression
@@ -449,15 +453,15 @@ const confirmDelete = async () => {
     const success = await projectStore.deleteProject(projectToDelete.value.id)
     
     if (success) {
-      showToast('Projet supprimé avec succès', 'success')
+      showToast(safeTranslate('resume.projects.notifications.deleteSuccess', 'Projet supprimé avec succès'), 'success')
     } else {
-      showToast('Erreur lors de la suppression du projet', 'error')
+      showToast(safeTranslate('resume.projects.notifications.deleteError', 'Erreur lors de la suppression du projet'), 'error')
     }
     
     closeDeleteConfirm()
   } catch (error) {
     console.error('Erreur lors de la suppression du projet:', error)
-    showToast('Une erreur est survenue lors de la suppression', 'error')
+    showToast(safeTranslate('resume.projects.notifications.deleteError', 'Une erreur est survenue lors de la suppression'), 'error')
   } finally {
     isDeletingProject.value = false
   }
@@ -500,7 +504,7 @@ const moveUp = async (index: number) => {
     await projectStore.reorderProjects(newOrder)
   } catch (error) {
     console.error('Error reordering projects:', error)
-    showToast('Erreur lors de la réorganisation des projets', 'error')
+    showToast(safeTranslate('resume.projects.notifications.reorderError', 'Erreur lors de la réorganisation des projets'), 'error')
   }
 }
 
@@ -525,7 +529,7 @@ const moveDown = async (index: number) => {
     await projectStore.reorderProjects(newOrder)
   } catch (error) {
     console.error('Error reordering projects:', error)
-    showToast('Erreur lors de la réorganisation des projets', 'error')
+    showToast(safeTranslate('resume.projects.notifications.reorderError', 'Erreur lors de la réorganisation des projets'), 'error')
   }
 }
 

@@ -2,11 +2,11 @@
   <div class="skill-list">
     <CollectionManager
       :items="skills"
-      title="Compétences"
-      description="Mettez en avant vos compétences techniques et soft skills pour vous démarquer."
-      addButtonText="Ajouter une compétence"
-      emptyStateTitle="Aucune compétence ajoutée"
-      emptyStateDescription="Ajoutez vos compétences techniques et soft skills pour valoriser votre profil et vous démarquer auprès des recruteurs."
+      :title="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.TITLE)"
+      :description="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.DESCRIPTION)"
+      :addButtonText="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.ADD_BUTTON)"
+      :emptyStateTitle="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.EMPTY_STATE_TITLE)"
+      :emptyStateDescription="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.EMPTY_STATE_DESCRIPTION)"
       :loading="loading"
       @add="openAddForm"
       @edit="openEditForm"
@@ -41,7 +41,7 @@
               @click="moveUp(index)"
               :disabled="index === 0"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le haut"
+              :title="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.MOVE_UP)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
@@ -53,7 +53,7 @@
               @click="moveDown(index)"
               :disabled="index === skills.length - 1"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le bas"
+              :title="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.MOVE_DOWN)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -88,6 +88,21 @@ import SkillForm from './SkillForm.vue'
 import { useSkillStore, type ValidatedSkill } from '@ui/modules/cv/presentation/stores/skill'
 import { SkillInterface } from '@cv-generator/shared/src/types/resume.interface'
 import CollectionManager from '@ui/components/shared/CollectionManager.vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string) => {
+  try {
+    const translation = t(key)
+    return translation !== key ? translation : fallback
+  } catch (e) {
+    return fallback
+  }
+}
 
 // Initialize skill store
 const skillStore = useSkillStore()
@@ -104,7 +119,7 @@ const currentSkill = ref<SkillInterface>({
 
 // Computed properties
 const formDialogTitle = computed(() => 
-  isNewSkill.value ? 'Ajouter une compétence' : 'Modifier la compétence'
+  isNewSkill.value ? t(TRANSLATION_KEYS.RESUME.SKILLS.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.SKILLS.FORM.EDIT_TITLE)
 )
 
 // Load skills on component mount

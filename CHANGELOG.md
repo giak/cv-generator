@@ -14,6 +14,23 @@ version: 1.1.0
 
 ### Added 🎉
 
+- Internationalisation complète des composants UI:
+  - Remplacement de tous les textes codés en dur par des clés de traduction dans 22 composants
+  - Mise en place du système de traduction robuste avec fonction `safeTranslate` pour gérer les cas d'erreur
+  - Support complet pour le français et l'anglais dans tous les composants
+  - Infrastructure complète pour les tests multilingues
+- Infrastructure de test pour l'internationalisation:
+  - Création d'un plugin de test pour Vue I18n (`i18n-plugin.ts`)
+  - Utilitaire pour tester les composants dans plusieurs langues (`language-testing.ts`)
+  - Utilitaire pour détecter les erreurs de console liées à l'i18n (`i18n-console-errors.ts`)
+  - Utilitaire pour tester le changement dynamique de langue (`i18n-e2e-test.ts`)
+  - Tests spécifiques pour les composants principaux: PersonalInfo, WorkList, ProjectList, etc.
+- Documentation technique complète pour l'internationalisation:
+
+  - Guide de référence pour l'ajout de nouvelles clés de traduction
+  - Résumé technique détaillé pour la revue de code
+  - Documentation des meilleures pratiques et standards
+
 - Refactorisation complète des composants de liste :
   - `PublicationList` : Implémentation de `CollectionManager` et `useCollectionField` avec réordonnancement
   - `CertificateList` : Implémentation de `CollectionManager` et `useCollectionField` avec réordonnancement
@@ -59,6 +76,10 @@ version: 1.1.0
   - Intégration avec Zod pour la validation de schémas
 
 ### Changed 🔄
+
+- Standardisation de l'approche d'internationalisation à travers tous les composants UI
+- Adaptation des tests existants pour prendre en compte l'internationalisation
+- Amélioration de la robustesse des composants face aux erreurs de traduction
 
 - Standardisation complète de l'interface utilisateur pour tous les composants de liste
 - Implémentation du réordonnancement pour tous les composants de liste
@@ -106,6 +127,39 @@ version: 1.1.0
   - ⏳ Intégration dans les formulaires existants
 
 ### Technical Details 🔧
+
+> 💡 **Internationalisation des Composants UI**
+
+```typescript
+// Fonction de sécurité pour les traductions manquantes
+function safeTranslate(key: string, fallback: string = ""): string {
+  const translation = t(key);
+  // Si la traduction est égale à la clé, c'est qu'elle n'existe pas
+  return translation === key ? fallback : translation;
+}
+```
+
+```typescript
+// Exemple d'utilisation des clés de traduction
+<template>
+  <h2>{{ t(TRANSLATION_KEYS.CV.LISTS.WORK.TITLE) }}</h2>
+  <p>{{ safeTranslate(TRANSLATION_KEYS.CV.LISTS.WORK.DESCRIPTION, 'Texte de secours') }}</p>
+</template>
+```
+
+```mermaid
+---
+title: Architecture des Tests d'Internationalisation
+---
+graph TD
+    A[Composant Vue] -->|Testé avec| B[Test Multilingue]
+    B -->|Utilise| C[i18n-plugin.ts]
+    B -->|Effectue| D[Tests FR/EN]
+    B -->|Vérifie| E[Absence d'erreurs]
+    B -->|Teste| F[Changement dynamique de langue]
+    C -->|Fournit| G[Messages simulés]
+    C -->|Configure| H[Instance i18n]
+```
 
 > 💡 **Epic-2 - Architectures des Composables**
 

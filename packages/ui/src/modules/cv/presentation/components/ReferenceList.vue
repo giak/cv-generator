@@ -2,9 +2,9 @@
   <div class="space-y-6">
     <div class="flex justify-between items-center mb-4">
       <div>
-        <h2 class="text-xl font-bold">Références</h2>
+        <h2 class="text-xl font-bold">{{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.TITLE) }}</h2>
         <p class="text-neutral-400 text-sm">
-          Gérez vos références professionnelles pour votre CV
+          {{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.DESCRIPTION) }}
         </p>
       </div>
       
@@ -19,7 +19,7 @@
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
         </template>
-        Ajouter une référence
+        {{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.ADD_BUTTON) }}
       </Button>
     </div>
 
@@ -29,14 +29,14 @@
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <span class="ml-3 text-neutral-400">Chargement des références...</span>
+      <span class="ml-3 text-neutral-400">{{ safeTranslate('resume.references.list.loading', 'Chargement des références...') }}</span>
     </div>
 
     <!-- État vide -->
     <EmptyState 
       v-else-if="isEmpty"
-      title="Aucune référence"
-      description="Commencez par ajouter une référence pour enrichir votre CV."
+      :title="t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.EMPTY_STATE_TITLE)"
+      :description="t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.EMPTY_STATE_DESCRIPTION)"
     >
       <template #icon>
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-12 h-12">
@@ -55,7 +55,7 @@
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
         </template>
-        Ajouter une référence
+        {{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.ADD_BUTTON) }}
       </Button>
     </EmptyState>
 
@@ -76,7 +76,7 @@
             <button
               class="p-2 text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 rounded-full transition-colors"
               @click="openEditForm(ref)"
-              title="Modifier"
+              :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.EDIT)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 20h9"></path>
@@ -86,7 +86,7 @@
             <button
               class="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-full transition-colors"
               @click="openDeleteConfirm(ref)"
-              title="Supprimer"
+              :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -105,7 +105,7 @@
       <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center p-4 border-b border-neutral-700">
           <h3 class="text-lg font-medium">
-            {{ isEditing ? 'Modifier une référence' : 'Ajouter une référence' }}
+            {{ isEditing ? t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.EDIT_TITLE) : t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.ADD_TITLE) }}
           </h3>
           <button 
             @click="closeForm" 
@@ -133,9 +133,9 @@
     <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-md">
         <div class="p-6">
-          <h3 class="text-xl font-semibold mb-4">Supprimer cette référence</h3>
+          <h3 class="text-xl font-semibold mb-4">{{ safeTranslate('resume.references.list.confirmDelete', 'Supprimer cette référence') }}</h3>
           <p class="mb-6 text-neutral-300">
-            Êtes-vous sûr de vouloir supprimer cette référence ? Cette action est irréversible.
+            {{ safeTranslate('resume.references.list.deleteWarning', 'Êtes-vous sûr de vouloir supprimer cette référence ? Cette action est irréversible.') }}
           </p>
           
           <div class="flex justify-end space-x-4">
@@ -143,14 +143,14 @@
               variant="ghost"
               @click="closeDeleteConfirm"
             >
-              Annuler
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
             </Button>
             <Button 
               variant="danger"
               :loading="isDeletingReference"
               @click="confirmDelete"
             >
-              Supprimer
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE) }}
             </Button>
           </div>
         </div>
@@ -180,7 +180,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useReferenceStore } from '../stores/reference';
 import ReferenceForm from './ReferenceForm.vue';
 import Button from '@ui/components/shared/Button.vue';
@@ -188,6 +188,21 @@ import Card from '@ui/components/shared/Card.vue';
 import EmptyState from '@ui/components/shared/EmptyState.vue';
 import type { ReferenceInterface } from '@cv-generator/shared/src/types/resume.interface';
 import type { ReferenceWithId } from '../stores/reference';
+import { useI18n } from 'vue-i18n';
+import { TRANSLATION_KEYS } from '@cv-generator/shared';
+
+// Initialisation de i18n
+const { t } = useI18n();
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string) => {
+  try {
+    const translation = t(key);
+    return translation !== key ? translation : fallback;
+  } catch (e) {
+    return fallback;
+  }
+};
 
 // Store des références
 const referenceStore = useReferenceStore();
@@ -261,16 +276,16 @@ const saveReference = async (reference: ReferenceInterface) => {
   try {
     if (isEditing.value && currentReferenceId.value) {
       await referenceStore.updateReference(currentReferenceId.value, reference);
-      showToast('Référence mise à jour avec succès', 'success');
+      showToast(safeTranslate('resume.references.notifications.updateSuccess', 'Référence mise à jour avec succès'), 'success');
     } else {
       await referenceStore.addReference(reference);
-      showToast('Référence ajoutée avec succès', 'success');
+      showToast(safeTranslate('resume.references.notifications.addSuccess', 'Référence ajoutée avec succès'), 'success');
     }
     
     closeForm();
   } catch (error) {
     console.error('Erreur lors de la sauvegarde de la référence:', error);
-    showToast('Erreur lors de la sauvegarde de la référence', 'error');
+    showToast(safeTranslate('resume.references.notifications.saveError', 'Erreur lors de la sauvegarde de la référence'), 'error');
   } finally {
     isFormSubmitting.value = false;
   }
@@ -298,11 +313,11 @@ const confirmDelete = async () => {
   
   try {
     await referenceStore.deleteReference(referenceToDelete.value.id);
-    showToast('Référence supprimée avec succès', 'success');
+    showToast(safeTranslate('resume.references.notifications.deleteSuccess', 'Référence supprimée avec succès'), 'success');
     closeDeleteConfirm();
   } catch (error) {
     console.error('Erreur lors de la suppression de la référence:', error);
-    showToast('Erreur lors de la suppression de la référence', 'error');
+    showToast(safeTranslate('resume.references.notifications.deleteError', 'Erreur lors de la suppression de la référence'), 'error');
   } finally {
     isDeletingReference.value = false;
   }

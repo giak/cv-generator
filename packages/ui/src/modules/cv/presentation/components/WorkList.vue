@@ -2,9 +2,24 @@
 import type { WorkWithId } from '@ui/modules/cv/presentation/stores/work'
 import type { WorkInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { useWorkStore } from '@ui/modules/cv/presentation/stores/work'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import CollectionManager from '@ui/components/shared/CollectionManager.vue'
 import WorkForm from './WorkForm.vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string) => {
+  try {
+    const translation = t(key)
+    return translation !== key ? translation : fallback
+  } catch (e) {
+    return fallback
+  }
+}
 
 // State for managing the work list
 const workStore = useWorkStore()
@@ -96,7 +111,7 @@ onMounted(async () => {
 
 // Format date for display
 const formatDate = (dateString?: string): string => {
-  if (!dateString) return 'Présent'
+  if (!dateString) return t(TRANSLATION_KEYS.RESUME.WORK.LIST.PRESENT, 'Présent')
   
   const date = new Date(dateString)
   const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' }
@@ -217,11 +232,11 @@ const toggleSortOrder = () => {
   <div class="space-y-6">
     <CollectionManager
       :items="displayedWorks"
-      title="Expériences Professionnelles"
-      description="Gérez vos expériences professionnelles pour votre CV"
-      addButtonText="Ajouter une expérience"
-      emptyStateTitle="Aucune expérience professionnelle"
-      emptyStateDescription="Commencez par ajouter une expérience professionnelle pour enrichir votre CV."
+      :title="t(TRANSLATION_KEYS.RESUME.WORK.LIST.TITLE)"
+      :description="t(TRANSLATION_KEYS.RESUME.WORK.LIST.DESCRIPTION)"
+      :addButtonText="t(TRANSLATION_KEYS.RESUME.WORK.LIST.ADD_BUTTON)"
+      :emptyStateTitle="t(TRANSLATION_KEYS.RESUME.WORK.LIST.EMPTY_STATE_TITLE)"
+      :emptyStateDescription="t(TRANSLATION_KEYS.RESUME.WORK.LIST.EMPTY_STATE_DESCRIPTION)"
       :loading="loading"
       @add="openAddDialog"
       @edit="openEditDialog"
@@ -244,7 +259,7 @@ const toggleSortOrder = () => {
               <line x1="3" y1="12" x2="10" y2="12"></line>
               <line x1="3" y1="16" x2="10" y2="16"></line>
             </svg>
-            {{ useChronologicalSort && !isCustomOrder ? 'Tri chronologique' : 'Ordre personnalisé' }}
+            {{ useChronologicalSort && !isCustomOrder ? safeTranslate('resume.work.list.chronologicalOrder', 'Tri chronologique') : safeTranslate('resume.work.list.customOrder', 'Ordre personnalisé') }}
           </button>
         </div>
       </template>
@@ -296,7 +311,7 @@ const toggleSortOrder = () => {
               @click="moveUp(index)"
               :disabled="index === 0"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le haut"
+              :title="t(TRANSLATION_KEYS.RESUME.WORK.LIST.MOVE_UP)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
@@ -308,7 +323,7 @@ const toggleSortOrder = () => {
               @click="moveDown(index)"
               :disabled="index === works.length - 1"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le bas"
+              :title="t(TRANSLATION_KEYS.RESUME.WORK.LIST.MOVE_DOWN)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -325,7 +340,7 @@ const toggleSortOrder = () => {
         @click="toggleShowAllItems" 
         class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
       >
-        <span>Voir toutes les expériences ({{ sortedWorks.length }})</span>
+        <span>{{ safeTranslate('resume.work.list.showAll', 'Voir toutes les expériences') }} ({{ sortedWorks.length }})</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
@@ -337,7 +352,7 @@ const toggleSortOrder = () => {
         @click="toggleShowAllItems" 
         class="flex items-center px-4 py-2 text-sm bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors text-neutral-300"
       >
-        <span>Réduire la liste</span>
+        <span>{{ safeTranslate('resume.work.list.showLess', 'Réduire la liste') }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>

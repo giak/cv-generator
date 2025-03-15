@@ -1,20 +1,20 @@
 <template>
   <Form 
     :loading="loading"
-    :title="isNew ? 'Ajouter une compétence' : 'Modifier la compétence'"
-    :subtitle="isNew ? 'Détaillez vos compétences techniques et soft skills.' : 'Mettez à jour les détails de cette compétence.'"
+    :title="isNew ? t(TRANSLATION_KEYS.RESUME.SKILLS.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.SKILLS.FORM.EDIT_TITLE)"
+    :subtitle="isNew ? t(TRANSLATION_KEYS.RESUME.SKILLS.FORM.ADD_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.SKILLS.FORM.EDIT_SUBTITLE)"
     @submit="handleSubmit"
     @cancel="handleCancel"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         name="name"
-        label="Nom de la compétence"
+        :label="t(TRANSLATION_KEYS.RESUME.SKILLS.LABELS.NAME)"
         :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
-        placeholder="Ex: JavaScript"
-        help-text="Nom de la compétence ou technologie."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.SKILLS.PLACEHOLDERS.NAME)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.SKILLS.HELP_TEXT.NAME)"
         required
         @update:model-value="(value) => updateField('name', value)"
         @blur="validateField('name', localModel.name)"
@@ -22,12 +22,12 @@
 
       <FormField
         name="level"
-        label="Niveau de maîtrise"
+        :label="t(TRANSLATION_KEYS.RESUME.SKILLS.LABELS.LEVEL)"
         :model-value="localModel.level || ''"
         :error="errors.level"
         :icon="icons.level"
-        placeholder="Ex: Expert, Intermédiaire, Débutant"
-        help-text="Votre niveau de maîtrise de cette compétence (optionnel)."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.SKILLS.PLACEHOLDERS.LEVEL)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.SKILLS.HELP_TEXT.LEVEL)"
         @update:model-value="(value) => updateField('level', value)"
         @blur="validateField('level', localModel.level)"
       />
@@ -37,17 +37,17 @@
     <div class="mt-8 border-t border-neutral-700 pt-6">
       <h3 class="text-lg font-medium mb-4 flex items-center">
         <span class="mr-2" v-html="icons.keywords"></span>
-        Mots-clés
+        {{ t(TRANSLATION_KEYS.RESUME.SKILLS.LABELS.KEYWORDS) }}
       </h3>
       
       <div class="mb-4">
-        <label class="text-sm mb-1 block">Ajoutez des mots-clés pour préciser cette compétence</label>
+        <label class="text-sm mb-1 block">{{ t(TRANSLATION_KEYS.RESUME.SKILLS.FORM.KEYWORDS_DESCRIPTION) }}</label>
         
         <div class="flex">
           <input 
             v-model="newKeyword"
             type="text"
-            placeholder="Ex: React, TypeScript, Node.js"
+            :placeholder="t(TRANSLATION_KEYS.RESUME.SKILLS.PLACEHOLDERS.KEYWORD)"
             class="flex-grow rounded-l bg-neutral-700 border-neutral-600 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             @keydown.enter.prevent="addKeyword"
           />
@@ -56,7 +56,7 @@
             class="rounded-r bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             @click="addKeyword"
           >
-            Ajouter
+            {{ t(TRANSLATION_KEYS.RESUME.SKILLS.FORM.ADD_KEYWORD) }}
           </button>
         </div>
         <p v-if="keywordError" class="text-red-500 text-sm mt-1">{{ keywordError }}</p>
@@ -75,7 +75,7 @@
               type="button"
               class="text-neutral-400 hover:text-white focus:outline-none"
               @click="removeKeyword(index)"
-              aria-label="Supprimer ce mot-clé"
+              :aria-label="t(TRANSLATION_KEYS.COMMON.ACTIONS.REMOVE)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
                 <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
@@ -85,7 +85,7 @@
         </div>
       </div>
       <div v-else class="mt-4 text-neutral-400 italic">
-        Aucun mot-clé ajouté. Utilisez le champ ci-dessus pour ajouter des mots-clés pertinents.
+        {{ t(TRANSLATION_KEYS.RESUME.SKILLS.FORM.NO_KEYWORDS) }}
       </div>
     </div>
   </Form>
@@ -98,6 +98,8 @@ import FormField from '@ui/components/shared/form/FormField.vue'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 interface Props {
   modelValue: SkillInterface
@@ -114,6 +116,25 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const result = t(key);
+    // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
+    if (result === key) {
+      console.warn(`Missing translation key: ${key}, using fallback`);
+      return fallback;
+    }
+    return result;
+  } catch (error) {
+    console.error(`Error translating key: ${key}`, error);
+    return fallback;
+  }
+};
+
 // Create a computed model value for useFormModel
 const modelValue = computed<SkillInterface>(() => props.modelValue)
 
@@ -124,7 +145,7 @@ const keywordError = ref('')
 // Use the new composables
 const { localModel, updateField } = useFormModel<SkillInterface>({
   modelValue,
-  emit: (event, value) => emit('update:modelValue', value),
+  emit: (_event, value) => emit('update:modelValue', value),
   defaultValues: {
     name: '',
     level: '',
@@ -139,7 +160,7 @@ const { errors, validateField, validateForm } = useValidation<SkillInterface>(un
 // Handle adding a keyword
 const addKeyword = () => {
   if (!newKeyword.value.trim()) {
-    keywordError.value = 'Le mot-clé ne peut pas être vide'
+    keywordError.value = safeTranslate(TRANSLATION_KEYS.RESUME.SKILLS.VALIDATION.EMPTY_KEYWORD, 'Le mot-clé ne peut pas être vide')
     return
   }
   

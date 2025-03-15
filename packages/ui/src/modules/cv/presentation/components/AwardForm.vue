@@ -5,6 +5,8 @@ import FormField from '@ui/components/shared/form/FormField.vue'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 interface Props {
   modelValue: AwardInterface
@@ -20,6 +22,25 @@ const emit = defineEmits<{
   (e: 'validate'): void
   (e: 'cancel'): void
 }>()
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const result = t(key);
+    // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
+    if (result === key) {
+      console.warn(`Missing translation key: ${key}, using fallback`);
+      return fallback;
+    }
+    return result;
+  } catch (error) {
+    console.error(`Error translating key: ${key}`, error);
+    return fallback;
+  }
+};
 
 // Setup form model using useFormModel composable
 const { 
@@ -78,19 +99,19 @@ const icons = {
 <template>
   <Form 
     :loading="loading"
-    :title="isNew ? 'Ajouter un prix ou une distinction' : 'Modifier le prix ou la distinction'"
-    :subtitle="isNew ? 'Détaillez les prix et distinctions que vous avez reçus.' : 'Mettez à jour les détails de ce prix ou distinction.'"
+    :title="isNew ? t(TRANSLATION_KEYS.RESUME.AWARDS.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.AWARDS.FORM.EDIT_TITLE)"
+    :subtitle="isNew ? t(TRANSLATION_KEYS.RESUME.AWARDS.FORM.ADD_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.AWARDS.FORM.EDIT_SUBTITLE)"
     @submit="handleSubmit"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         name="title"
-        label="Titre du prix"
+        :label="t(TRANSLATION_KEYS.RESUME.AWARDS.LABELS.TITLE)"
         :model-value="localModel.title"
         :error="errors.title"
         :icon="icons.title"
-        placeholder="Ex: Employé du mois"
-        help-text="Nom ou titre du prix ou de la distinction reçue."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.AWARDS.PLACEHOLDERS.TITLE)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.AWARDS.HELP_TEXT.TITLE)"
         required
         @update:model-value="handleFieldUpdate('title', $event)"
         @blur="validateField('title', localModel.title)"
@@ -98,12 +119,12 @@ const icons = {
 
       <FormField
         name="awarder"
-        label="Décerné par"
+        :label="t(TRANSLATION_KEYS.RESUME.AWARDS.LABELS.AWARDER)"
         :model-value="localModel.awarder"
         :error="errors.awarder"
         :icon="icons.awarder"
-        placeholder="Ex: Entreprise XYZ"
-        help-text="Organisation ou personne ayant décerné le prix."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.AWARDS.PLACEHOLDERS.AWARDER)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.AWARDS.HELP_TEXT.AWARDER)"
         required
         @update:model-value="handleFieldUpdate('awarder', $event)"
         @blur="validateField('awarder', localModel.awarder)"
@@ -111,11 +132,11 @@ const icons = {
 
       <FormField
         name="date"
-        label="Date d'obtention"
+        :label="t(TRANSLATION_KEYS.RESUME.AWARDS.LABELS.DATE)"
         :model-value="localModel.date"
         :error="errors.date"
         :icon="icons.date"
-        help-text="Date à laquelle vous avez reçu ce prix."
+        :help-text="t(TRANSLATION_KEYS.RESUME.AWARDS.HELP_TEXT.DATE)"
         required
         @update:model-value="handleFieldUpdate('date', $event)"
         @blur="validateField('date', localModel.date)"
@@ -126,12 +147,12 @@ const icons = {
     <div class="mt-6">
       <FormField
         name="summary"
-        label="Description"
+        :label="t(TRANSLATION_KEYS.RESUME.AWARDS.LABELS.SUMMARY)"
         :model-value="localModel.summary || ''"
         :error="errors.summary"
         :icon="icons.summary"
-        placeholder="Ex: Reconnaissance pour l'excellence dans le développement de solutions innovantes..."
-        help-text="Brève description du prix et des raisons pour lesquelles il vous a été décerné."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.AWARDS.PLACEHOLDERS.SUMMARY)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.AWARDS.HELP_TEXT.SUMMARY)"
         textarea
         rows="4"
         @update:model-value="handleFieldUpdate('summary', $event)"
@@ -146,13 +167,13 @@ const icons = {
         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
         @click="handleCancel"
       >
-        Annuler
+        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
       </button>
       <button 
         type="submit"
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
       >
-        {{ isNew ? 'Ajouter' : 'Enregistrer' }}
+        {{ isNew ? t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) : t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}
       </button>
     </div>
   </Form>

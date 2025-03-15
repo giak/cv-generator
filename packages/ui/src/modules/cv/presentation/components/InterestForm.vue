@@ -1,20 +1,20 @@
 <template>
   <Form 
     :loading="loading"
-    :title="isEditing ? 'Modifier l\'intérêt' : 'Ajouter un intérêt'"
-    :subtitle="isEditing ? 'Mettez à jour les informations de cet intérêt.' : 'Ajoutez un nouvel intérêt à votre CV.'"
+    :title="isEditing ? t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.EDIT_TITLE) : t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.ADD_TITLE)"
+    :subtitle="isEditing ? t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.EDIT_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.ADD_SUBTITLE)"
     @submit="saveInterest"
   >
     <div class="grid grid-cols-1 gap-6">
       <!-- Champ pour le nom de l'intérêt -->
       <FormField
         name="name"
-        label="Intérêt"
+        :label="t(TRANSLATION_KEYS.RESUME.INTERESTS.LABELS.NAME)"
         :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.interest"
-        placeholder="Programmation, Photographie, Voyages..."
-        help-text="Nom de l'intérêt ou de l'activité."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.INTERESTS.PLACEHOLDERS.NAME)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.INTERESTS.HELP_TEXT.NAME)"
         required
         @update:model-value="(value) => form.name = value"
         @blur="validateField('name', form.name)"
@@ -22,7 +22,7 @@
       
       <!-- Champ pour les mots-clés -->
       <div>
-        <label class="block text-sm font-medium text-neutral-200 mb-1">Mots-clés</label>
+        <label class="block text-sm font-medium text-neutral-200 mb-1">{{ t(TRANSLATION_KEYS.RESUME.INTERESTS.LABELS.KEYWORDS) }}</label>
         <div class="flex flex-wrap gap-2 mb-2">
           <div 
             v-for="(keyword, index) in (localModel.keywords || [])" 
@@ -46,10 +46,10 @@
         <div class="flex">
           <FormField
             name="newKeyword"
-            label="Nouveau mot-clé"
+            :label="t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.KEYWORDS_SECTION)"
             :model-value="newKeyword"
             :icon="icons.keyword"
-            placeholder="Ajouter un mot-clé..."
+            :placeholder="t(TRANSLATION_KEYS.RESUME.INTERESTS.PLACEHOLDERS.KEYWORD)"
             class="flex-grow"
             @update:model-value="(value) => newKeyword = value"
             @keydown.enter.prevent="addKeyword"
@@ -59,11 +59,11 @@
             class="ml-2 px-3 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
             @click="addKeyword"
           >
-            Ajouter
+            {{ t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.ADD_KEYWORD) }}
           </button>
         </div>
         <p class="text-neutral-400 text-xs mt-1">
-          Appuyez sur Entrée ou cliquez sur Ajouter pour ajouter un mot-clé.
+          {{ t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.KEYWORDS_DESCRIPTION) }}
         </p>
         <p v-if="errors.keywords" class="text-error-500 text-xs mt-1">
           {{ errors.keywords }}
@@ -78,7 +78,7 @@
         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
         @click="cancel"
       >
-        Annuler
+        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
       </button>
       <button
         type="submit"
@@ -87,10 +87,10 @@
       >
         <span v-if="isSubmitting" class="flex items-center">
           <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-          {{ isEditing ? 'Mettre à jour' : 'Ajouter' }}
+          {{ isEditing ? t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) : t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }}
         </span>
         <span v-else>
-          {{ isEditing ? 'Enregistrer' : 'Ajouter' }}
+          {{ isEditing ? t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) : t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }}
         </span>
       </button>
     </div>
@@ -105,6 +105,8 @@ import { useInterestStore } from '../stores/interest'
 import type { InterestInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 // Props
 const props = defineProps<{
@@ -116,6 +118,11 @@ const emit = defineEmits<{
   (e: 'saved'): void
   (e: 'cancelled'): void
 }>()
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
 
 // Store
 const interestStore = useInterestStore()
@@ -143,9 +150,7 @@ const modelValue = computed<InterestInterface>(() => {
 // Form model
 const { 
   localModel, 
-  updateField,
-  updateModel
-} = useFormModel<InterestInterface>({
+  updateField} = useFormModel<InterestInterface>({
   modelValue,
   emit: () => {}, // We don't emit updates directly to parent
   defaultValues: {
@@ -153,6 +158,9 @@ const {
     keywords: []
   }
 })
+
+// Alias to support the existing code
+const form = localModel
 
 // Form validation
 const { 

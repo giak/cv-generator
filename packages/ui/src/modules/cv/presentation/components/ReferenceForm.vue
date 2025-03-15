@@ -1,20 +1,20 @@
 <template>
   <Form 
     :loading="loading"
-    :title="isEditing ? 'Modifier la référence' : 'Ajouter une référence'"
-    :subtitle="isEditing ? 'Mettez à jour les informations de cette référence.' : 'Ajoutez une nouvelle référence à votre CV.'"
+    :title="isEditing ? t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.EDIT_TITLE) : t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.ADD_TITLE)"
+    :subtitle="isEditing ? t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.EDIT_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.ADD_SUBTITLE)"
     @submit="handleSubmit"
   >
     <div class="grid grid-cols-1 gap-6">
       <!-- Champ pour le nom -->
       <FormField
         name="name"
-        label="Nom"
+        :label="t(TRANSLATION_KEYS.RESUME.REFERENCES.LABELS.NAME)"
         :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
-        placeholder="John Doe, Jane Smith..."
-        help-text="Nom de la personne qui vous recommande."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.REFERENCES.PLACEHOLDERS.NAME)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.REFERENCES.HELP_TEXT.NAME)"
         required
         @update:model-value="(value) => updateField('name', value)"
         @blur="validateField('name', localModel.name)"
@@ -23,12 +23,12 @@
       <!-- Champ pour le témoignage -->
       <FormField
         name="reference"
-        label="Témoignage"
+        :label="t(TRANSLATION_KEYS.RESUME.REFERENCES.LABELS.REFERENCE)"
         :model-value="localModel.reference"
         :error="errors.reference"
         :icon="icons.reference"
-        placeholder="Entrez le témoignage de cette personne..."
-        help-text="Le témoignage professionnel de cette personne."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.REFERENCES.PLACEHOLDERS.REFERENCE)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.REFERENCES.HELP_TEXT.REFERENCE)"
         required
         textarea
         :rows="4"
@@ -44,7 +44,7 @@
         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
         @click="$emit('cancel')"
       >
-        Annuler
+        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
       </button>
       <button
         type="submit"
@@ -70,6 +70,8 @@ import FormField from '@ui/components/shared/form/FormField.vue'
 import type { ReferenceInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 const props = defineProps<{
   reference?: ReferenceInterface
@@ -82,13 +84,18 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+
 // État du formulaire
 const loading = ref(false)
 const isEditing = computed(() => !!props.referenceId || !!props.reference)
 
 // Label du bouton de soumission
 const submitButtonLabel = computed(() => {
-  return isEditing.value ? 'Enregistrer' : 'Ajouter'
+  return isEditing.value ? t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) : t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD)
 })
 
 // Modèle initial
@@ -113,7 +120,7 @@ const { localModel, updateField } = useFormModel<ReferenceInterface>({
 })
 
 // Utilisation du composable useValidation
-const { errors, validateField, validateForm, isValid } = useValidation<ReferenceInterface>(undefined, {
+const { errors, validateField, validateForm } = useValidation<ReferenceInterface>(undefined, {
   requiredFields: ['name', 'reference']
 })
 

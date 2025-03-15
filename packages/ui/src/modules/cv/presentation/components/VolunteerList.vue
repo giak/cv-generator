@@ -7,6 +7,21 @@ import Card from '@ui/components/shared/Card.vue'
 import Button from '@ui/components/shared/Button.vue'
 import EmptyState from '@ui/components/shared/EmptyState.vue'
 import VolunteerForm from './VolunteerForm.vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
+
+// Initialisation de i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string) => {
+  try {
+    const translation = t(key)
+    return translation !== key ? translation : fallback
+  } catch (e) {
+    return fallback
+  }
+}
 
 // State for managing the volunteer list
 const volunteerStore = useVolunteerStore()
@@ -31,7 +46,7 @@ onMounted(async () => {
 
 // Format date for display
 const formatDate = (dateString?: string): string => {
-  if (!dateString) return 'Présent'
+  if (!dateString) return t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.PRESENT)
   
   const date = new Date(dateString)
   const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' }
@@ -87,7 +102,7 @@ const saveVolunteer = async () => {
 const deleteVolunteer = async (index: number) => {
   if (!volunteers.value[index]) return
   
-  if (confirm('Êtes-vous sûr de vouloir supprimer cette expérience de bénévolat ?')) {
+  if (confirm(safeTranslate('resume.volunteer.list.deleteConfirmation', 'Êtes-vous sûr de vouloir supprimer cette expérience de bénévolat ?'))) {
     try {
       const volunteerId = volunteers.value[index].id
       await volunteerStore.deleteVolunteer(volunteerId)
@@ -138,7 +153,7 @@ const moveDown = async (index: number) => {
 <template>
   <div class="volunteer-list">
     <div class="flex justify-between mb-6">
-      <h2 class="text-xl font-semibold">Expériences de Bénévolat</h2>
+      <h2 class="text-xl font-semibold">{{ t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.TITLE) }}</h2>
       <Button
         variant="primary"
         size="md"
@@ -151,16 +166,16 @@ const moveDown = async (index: number) => {
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
         </template>
-        Ajouter une expérience
+        {{ t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.ADD_BUTTON) }}
       </Button>
     </div>
     
     <!-- Empty state when no volunteer experiences are available -->
     <EmptyState
       v-if="!loading && (!volunteers || volunteers.length === 0)"
-      title="Aucune expérience de bénévolat"
-      description="Ajoutez vos expériences de bénévolat pour enrichir votre CV."
-      actionLabel="Ajouter une expérience"
+      :title="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.EMPTY_STATE_TITLE)"
+      :description="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.EMPTY_STATE_DESCRIPTION)"
+      :actionLabel="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.ADD_BUTTON)"
       @action="openAddDialog"
     >
       <template #icon>
@@ -233,7 +248,7 @@ const moveDown = async (index: number) => {
                 @click="moveUp(index)"
                 :disabled="index === 0"
                 class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-                title="Déplacer vers le haut"
+                :title="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.MOVE_UP)"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="18 15 12 9 6 15"></polyline>
@@ -245,7 +260,7 @@ const moveDown = async (index: number) => {
                 @click="moveDown(index)"
                 :disabled="index === volunteers.length - 1"
                 class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-                title="Déplacer vers le bas"
+                :title="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.MOVE_DOWN)"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 12 15 18 9"></polyline>
@@ -258,7 +273,7 @@ const moveDown = async (index: number) => {
               type="button"
               @click="openEditDialog(volunteer, index)"
               class="p-1 rounded text-neutral-400 hover:bg-primary-500/20 hover:text-primary-400 transition-colors"
-              title="Modifier"
+              :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.EDIT)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -270,7 +285,7 @@ const moveDown = async (index: number) => {
               type="button"
               @click="deleteVolunteer(index)"
               class="p-1 rounded text-neutral-400 hover:bg-error-500/20 hover:text-error-400 transition-colors"
-              title="Supprimer"
+              :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"></polyline>

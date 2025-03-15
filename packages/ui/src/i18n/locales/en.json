@@ -132,7 +132,8 @@
         "startDate": "Start Date",
         "endDate": "End Date",
         "summary": "Summary",
-        "highlights": "Highlights"
+        "highlights": "Highlights",
+        "currentPosition": "Current Position"
       },
       "placeholders": {
         "company": "Enter company name",
@@ -142,6 +143,15 @@
         "endDate": "YYYY-MM-DD (leave empty if current)",
         "summary": "Describe your role and responsibilities",
         "highlight": "Add key achievement or responsibility"
+      },
+      "helpText": {
+        "company": "Name of the company or organization where you worked.",
+        "position": "Your job title or role at this company.",
+        "website": "The company's official website URL.",
+        "startDate": "When you started working at this position.",
+        "endDate": "When you left this position (leave empty if current).",
+        "summary": "Brief description of your responsibilities and role.",
+        "highlights": "Key achievements, projects, or responsibilities."
       },
       "validation": {
         "missingCompany": "Company name is required",
@@ -154,6 +164,26 @@
         "briefDescription": "Description is too brief, add more details",
         "missingHighlights": "Add at least one highlight",
         "vagueHighlights": "Highlights should be more specific"
+      },
+      "form": {
+        "addTitle": "Add Work Experience",
+        "editTitle": "Edit Work Experience",
+        "addSubtitle": "Add details about your work history and professional experience.",
+        "editSubtitle": "Update details about this work experience.",
+        "highlightsSection": "Highlights",
+        "highlightsDescription": "Add key achievements, responsibilities, or notable projects",
+        "noHighlights": "No highlights added. Use the field above to add key achievements or responsibilities.",
+        "addHighlight": "Add Highlight"
+      },
+      "list": {
+        "title": "Work Experience",
+        "description": "Add your professional experience to highlight your career progression.",
+        "addButton": "Add Work Experience",
+        "emptyStateTitle": "No work experience added",
+        "emptyStateDescription": "Add your professional history to showcase your skills and expertise.",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "present": "Present"
       }
     },
     "education": {
@@ -175,6 +205,15 @@
         "gpa": "Enter your GPA",
         "course": "Add relevant course"
       },
+      "helpText": {
+        "institution": "Name of the educational institution you attended.",
+        "area": "Your field of study or major.",
+        "studyType": "Type of degree or certification obtained.",
+        "startDate": "When you started your studies.",
+        "endDate": "When you completed your studies (leave empty if ongoing).",
+        "gpa": "Your grade point average or equivalent.",
+        "courses": "Relevant courses you completed during your studies."
+      },
       "validation": {
         "missingInstitution": "Institution name is required",
         "missingArea": "Area of study is required",
@@ -183,6 +222,26 @@
         "endBeforeStart": "End date cannot be before start date",
         "missingGpa": "GPA is required",
         "vagueCourses": "Course descriptions should be more specific"
+      },
+      "form": {
+        "addTitle": "Add Education",
+        "editTitle": "Edit Education",
+        "addSubtitle": "Add details about your educational background and academic achievements.",
+        "editSubtitle": "Update details about this educational experience.",
+        "coursesSection": "Courses",
+        "coursesDescription": "Add relevant courses you completed during your studies",
+        "noCourses": "No courses added. Use the field above to add relevant courses.",
+        "addCourse": "Add Course"
+      },
+      "list": {
+        "title": "Education",
+        "description": "Showcase your academic background and educational qualifications.",
+        "addButton": "Add Education",
+        "emptyStateTitle": "No education added",
+        "emptyStateDescription": "Add your educational background to highlight your academic achievements.",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "present": "Present"
       }
     },
     "skills": {
@@ -196,12 +255,400 @@
         "level": "Select proficiency level",
         "keyword": "Add keyword"
       },
+      "helpText": {
+        "name": "Name of the skill or technology you're proficient in.",
+        "level": "Your level of proficiency (e.g., Beginner, Intermediate, Expert).",
+        "keywords": "Specific technologies, tools, or applications related to this skill."
+      },
       "validation": {
         "missingSkillName": "Skill name is required",
         "briefSkillName": "Skill name is too brief",
         "undefinedLevel": "Proficiency level is required",
         "missingKeywords": "Add at least one keyword",
-        "genericSkill": "Skill is too generic, be more specific"
+        "genericSkill": "Skill is too generic, be more specific",
+        "emptyKeyword": "Keyword cannot be empty"
+      },
+      "form": {
+        "addTitle": "Add Skill",
+        "editTitle": "Edit Skill",
+        "addSubtitle": "Add details about your technical and soft skills.",
+        "editSubtitle": "Update details about this skill.",
+        "keywordsSection": "Keywords",
+        "keywordsDescription": "Add specific technologies or aspects of this skill",
+        "noKeywords": "No keywords added. Use the field above to add relevant keywords.",
+        "addKeyword": "Add Keyword"
+      },
+      "list": {
+        "title": "Skills",
+        "description": "Showcase your technical and soft skills to stand out.",
+        "addButton": "Add Skill",
+        "emptyStateTitle": "No skills added",
+        "emptyStateDescription": "Add your technical and soft skills to highlight your expertise.",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
+      }
+    },
+    "projects": {
+      "labels": {
+        "name": "Project Name",
+        "description": "Description",
+        "url": "Project URL",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "entity": "Entity",
+        "type": "Project Type",
+        "highlights": "Highlights",
+        "roles": "Roles",
+        "keywords": "Keywords"
+      },
+      "placeholders": {
+        "name": "Enter project name",
+        "description": "Describe the project",
+        "url": "Enter project website or repository URL",
+        "startDate": "YYYY-MM-DD",
+        "endDate": "YYYY-MM-DD (leave empty if ongoing)",
+        "entity": "Enter company or organization name",
+        "type": "Enter project type (e.g., Web App, Mobile App)",
+        "highlight": "Add project highlight",
+        "role": "Add your role",
+        "keyword": "Add technology or skill"
+      },
+      "helpText": {
+        "name": "Name of the project you worked on.",
+        "description": "Brief description of the project's purpose and goals.",
+        "url": "Link to the project website, repository, or documentation.",
+        "startDate": "When you started working on this project.",
+        "endDate": "When you completed this project (leave empty if ongoing).",
+        "entity": "Company or organization the project was for.",
+        "type": "Category or type of project (e.g., Web App, Research).",
+        "highlights": "Key accomplishments or notable aspects of the project.",
+        "roles": "Your specific roles or responsibilities in this project.",
+        "keywords": "Technologies, tools, or methodologies used in this project."
+      },
+      "validation": {
+        "missingName": "Project name is required",
+        "missingDescription": "Project description is required",
+        "invalidUrl": "Invalid URL format",
+        "endBeforeStart": "End date cannot be before start date",
+        "futureDate": "Date cannot be in the future"
+      },
+      "form": {
+        "addTitle": "Add Project",
+        "editTitle": "Edit Project",
+        "addSubtitle": "Add details about projects you've worked on to showcase your abilities.",
+        "editSubtitle": "Update details about this project.",
+        "highlightsSection": "Highlights",
+        "highlightsDescription": "Add key features or accomplishments of this project",
+        "rolesSection": "Roles",
+        "rolesDescription": "Add your specific roles or responsibilities in this project",
+        "keywordsSection": "Technologies & Skills",
+        "keywordsDescription": "Add technologies, tools, or methodologies used",
+        "noHighlights": "No highlights added. Use the field above to add key features or accomplishments.",
+        "noRoles": "No roles added. Use the field above to add your specific roles.",
+        "noKeywords": "No technologies added. Use the field above to add relevant technologies.",
+        "addHighlight": "Add Highlight",
+        "addRole": "Add Role",
+        "addKeyword": "Add Technology"
+      },
+      "list": {
+        "title": "Projects",
+        "description": "Showcase the projects you've worked on to demonstrate your skills and experience.",
+        "addButton": "Add Project",
+        "emptyStateTitle": "No projects added",
+        "emptyStateDescription": "Add your projects to showcase your practical experience and achievements.",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
+      }
+    },
+    "publications": {
+      "labels": {
+        "name": "Publication Title",
+        "publisher": "Publisher",
+        "releaseDate": "Release Date",
+        "url": "URL",
+        "summary": "Summary"
+      },
+      "placeholders": {
+        "name": "Enter publication title",
+        "publisher": "Enter publisher name",
+        "releaseDate": "YYYY-MM-DD",
+        "url": "Enter publication URL",
+        "summary": "Describe the publication"
+      },
+      "helpText": {
+        "name": "Title of your article, paper, or book.",
+        "publisher": "Name of the journal, conference, or publisher.",
+        "releaseDate": "When the publication was released or published.",
+        "url": "Link to the publication online (if available).",
+        "summary": "Brief description of the publication's content and significance."
+      },
+      "validation": {
+        "missingName": "Publication title is required",
+        "missingPublisher": "Publisher is required",
+        "invalidDate": "Invalid date format",
+        "futureDate": "Date cannot be in the future",
+        "invalidUrl": "Invalid URL format",
+        "missingSummary": "Summary is required"
+      },
+      "form": {
+        "addTitle": "Add Publication",
+        "editTitle": "Edit Publication",
+        "addSubtitle": "Add details about articles, papers, or books you've published.",
+        "editSubtitle": "Update details about this publication."
+      },
+      "list": {
+        "title": "Publications",
+        "description": "Showcase your articles, research papers, or books to demonstrate your expertise.",
+        "addButton": "Add Publication",
+        "emptyStateTitle": "No publications added",
+        "emptyStateDescription": "Add your published works to highlight your contributions to your field.",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
+      }
+    },
+    "languages": {
+      "labels": {
+        "language": "Language",
+        "fluency": "Fluency Level"
+      },
+      "placeholders": {
+        "language": "Enter language name",
+        "fluency": "Enter fluency level"
+      },
+      "helpText": {
+        "language": "Name of the language you know.",
+        "fluency": "Your proficiency level (e.g., Native, Fluent, Intermediate)."
+      },
+      "validation": {
+        "missingLanguage": "Language name is required",
+        "missingFluency": "Fluency level is required"
+      },
+      "form": {
+        "addTitle": "Add Language",
+        "editTitle": "Edit Language",
+        "addSubtitle": "Add details about languages you speak or understand.",
+        "editSubtitle": "Update details about this language."
+      },
+      "list": {
+        "title": "Languages",
+        "description": "Showcase the languages you speak to demonstrate your communication skills.",
+        "addButton": "Add Language",
+        "emptyStateTitle": "No languages added",
+        "emptyStateDescription": "Add languages you know to highlight your communication abilities.",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
+      }
+    },
+    "interests": {
+      "labels": {
+        "name": "Interest Name",
+        "keywords": "Keywords"
+      },
+      "placeholders": {
+        "name": "Enter interest name",
+        "keyword": "Add related keyword"
+      },
+      "helpText": {
+        "name": "Name of your hobby or interest.",
+        "keywords": "Specific aspects or activities related to this interest."
+      },
+      "validation": {
+        "missingName": "Interest name is required",
+        "emptyKeyword": "Keyword cannot be empty"
+      },
+      "form": {
+        "addTitle": "Add Interest",
+        "editTitle": "Edit Interest",
+        "addSubtitle": "Add details about your hobbies and personal interests.",
+        "editSubtitle": "Update details about this interest.",
+        "keywordsSection": "Keywords",
+        "keywordsDescription": "Add specific activities or aspects related to this interest",
+        "noKeywords": "No keywords added. Use the field above to add relevant keywords.",
+        "addKeyword": "Add Keyword"
+      },
+      "list": {
+        "title": "Interests",
+        "description": "Share your hobbies and personal interests to add a human touch to your resume.",
+        "addButton": "Add Interest",
+        "emptyStateTitle": "No interests added",
+        "emptyStateDescription": "Add your hobbies and interests to show more of your personality.",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
+      }
+    },
+    "awards": {
+      "labels": {
+        "title": "Award Title",
+        "date": "Date Received",
+        "awarder": "Awarded By",
+        "summary": "Summary"
+      },
+      "placeholders": {
+        "title": "Enter award title",
+        "date": "YYYY-MM-DD",
+        "awarder": "Enter name of the awarder",
+        "summary": "Describe the award and its significance"
+      },
+      "helpText": {
+        "title": "Name or title of the award you received.",
+        "date": "When you received this award.",
+        "awarder": "Organization or entity that presented the award.",
+        "summary": "Brief description of the award and why you received it."
+      },
+      "validation": {
+        "missingTitle": "Award title is required",
+        "invalidDate": "Invalid date format",
+        "futureDate": "Date cannot be in the future",
+        "missingAwarder": "Awarder is required",
+        "missingSummary": "Summary is required"
+      },
+      "form": {
+        "addTitle": "Add Award",
+        "editTitle": "Edit Award",
+        "addSubtitle": "Add details about recognitions and awards you've received.",
+        "editSubtitle": "Update details about this award."
+      },
+      "list": {
+        "title": "Awards",
+        "description": "Showcase recognitions and honors you've received to highlight your achievements.",
+        "addButton": "Add Award",
+        "emptyStateTitle": "No awards added",
+        "emptyStateDescription": "Add awards you've received to highlight your accomplishments and recognition.",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
+      }
+    },
+    "certificates": {
+      "labels": {
+        "name": "Certificate Name",
+        "date": "Date Received",
+        "issuer": "Issuing Organization",
+        "url": "Certificate URL"
+      },
+      "placeholders": {
+        "name": "Enter certificate name",
+        "date": "YYYY-MM-DD",
+        "issuer": "Enter issuing organization",
+        "url": "Enter certificate verification URL"
+      },
+      "helpText": {
+        "name": "Name or title of the certification you earned.",
+        "date": "When you received this certification.",
+        "issuer": "Organization that issued the certification.",
+        "url": "Link to verify the certificate or learn more about it."
+      },
+      "validation": {
+        "missingName": "Certificate name is required",
+        "invalidDate": "Invalid date format",
+        "futureDate": "Date cannot be in the future",
+        "missingIssuer": "Issuer is required",
+        "invalidUrl": "Invalid URL format"
+      },
+      "form": {
+        "addTitle": "Add Certificate",
+        "editTitle": "Edit Certificate",
+        "addSubtitle": "Add details about professional certifications you've earned.",
+        "editSubtitle": "Update details about this certificate."
+      },
+      "list": {
+        "title": "Certificates",
+        "description": "Showcase your professional certifications to validate your skills and knowledge.",
+        "addButton": "Add Certificate",
+        "emptyStateTitle": "No certificates added",
+        "emptyStateDescription": "Add certifications you've earned to verify your skills and expertise.",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
+      }
+    },
+    "volunteer": {
+      "labels": {
+        "organization": "Organization",
+        "position": "Position",
+        "website": "Website",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "summary": "Summary",
+        "highlights": "Highlights"
+      },
+      "placeholders": {
+        "organization": "Enter organization name",
+        "position": "Enter your volunteer role",
+        "website": "Enter organization website",
+        "startDate": "YYYY-MM-DD",
+        "endDate": "YYYY-MM-DD (leave empty if current)",
+        "summary": "Describe your volunteer work",
+        "highlight": "Add key contribution or responsibility"
+      },
+      "helpText": {
+        "organization": "Name of the organization you volunteered with.",
+        "position": "Your role or title as a volunteer.",
+        "website": "The organization's official website URL.",
+        "startDate": "When you started volunteering with this organization.",
+        "endDate": "When you stopped volunteering (leave empty if current).",
+        "summary": "Brief description of your volunteer work and responsibilities.",
+        "highlights": "Key achievements or contributions as a volunteer."
+      },
+      "validation": {
+        "missingOrganization": "Organization name is required",
+        "missingPosition": "Position is required",
+        "invalidUrl": "Invalid URL format",
+        "missingStartDate": "Start date is required",
+        "endBeforeStart": "End date cannot be before start date",
+        "futureDate": "Date cannot be in the future",
+        "missingSummary": "Summary is required"
+      },
+      "form": {
+        "addTitle": "Add Volunteer Experience",
+        "editTitle": "Edit Volunteer Experience",
+        "addSubtitle": "Add details about your volunteer work and community involvement.",
+        "editSubtitle": "Update details about this volunteer experience.",
+        "highlightsSection": "Highlights",
+        "highlightsDescription": "Add key contributions or responsibilities",
+        "noHighlights": "No highlights added. Use the field above to add key contributions or responsibilities.",
+        "addHighlight": "Add Highlight"
+      },
+      "list": {
+        "title": "Volunteer Experience",
+        "description": "Showcase your community involvement and unpaid work to demonstrate your values.",
+        "addButton": "Add Volunteer Experience",
+        "emptyStateTitle": "No volunteer experience added",
+        "emptyStateDescription": "Add your volunteer work to show your community involvement and values.",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "present": "Present"
+      }
+    },
+    "references": {
+      "labels": {
+        "name": "Reference Name",
+        "reference": "Reference"
+      },
+      "placeholders": {
+        "name": "Enter reference name",
+        "reference": "Enter reference details or quote"
+      },
+      "helpText": {
+        "name": "Full name of the person providing the reference.",
+        "reference": "The actual reference text, quote, or contact information."
+      },
+      "validation": {
+        "missingName": "Reference name is required",
+        "missingReference": "Reference is required"
+      },
+      "form": {
+        "addTitle": "Add Reference",
+        "editTitle": "Edit Reference",
+        "addSubtitle": "Add professional references who can vouch for your skills and character.",
+        "editSubtitle": "Update details about this reference."
+      },
+      "list": {
+        "title": "References",
+        "description": "Include testimonials or contacts from people who can vouch for your work.",
+        "addButton": "Add Reference",
+        "emptyStateTitle": "No references added",
+        "emptyStateDescription": "Add references to provide external validation of your skills and character.",
+        "moveUp": "Move up",
+        "moveDown": "Move down"
       }
     }
   },
@@ -231,6 +678,15 @@
       "download": "Download",
       "successMessage": "Your resume has been exported successfully!",
       "errorMessage": "There was an error exporting your resume. Please try again."
+    },
+    "collectionManager": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "moveUp": "Move Up",
+      "moveDown": "Move Down",
+      "deleteConfirmation": "Are you sure you want to delete this item?",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
     }
   }
 } 

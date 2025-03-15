@@ -1,20 +1,20 @@
 <template>
   <Form 
     :loading="loading"
-    :title="isEditing ? 'Modifier la langue' : 'Ajouter une langue'"
-    :subtitle="isEditing ? 'Mettez à jour les informations de cette langue.' : 'Ajoutez une nouvelle langue à votre CV.'"
+    :title="isEditing ? t(TRANSLATION_KEYS.RESUME.LANGUAGES.FORM.EDIT_TITLE) : t(TRANSLATION_KEYS.RESUME.LANGUAGES.FORM.ADD_TITLE)"
+    :subtitle="isEditing ? t(TRANSLATION_KEYS.RESUME.LANGUAGES.FORM.EDIT_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.LANGUAGES.FORM.ADD_SUBTITLE)"
     @submit="saveLanguage"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Champ pour le nom de la langue -->
       <FormField
         name="language"
-        label="Langue"
+        :label="t(TRANSLATION_KEYS.RESUME.LANGUAGES.LABELS.LANGUAGE)"
         :model-value="localModel.language"
         :error="errors.language"
         :icon="icons.language"
-        placeholder="Français, Anglais, Espagnol..."
-        help-text="Nom de la langue que vous parlez."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.LANGUAGES.PLACEHOLDERS.LANGUAGE)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.LANGUAGES.HELP_TEXT.LANGUAGE)"
         required
         @update:model-value="(value) => updateField('language', value)"
         @blur="validateField('language', localModel.language)"
@@ -23,12 +23,12 @@
       <!-- Champ pour le niveau de compétence -->
       <FormField
         name="fluency"
-        label="Niveau de compétence"
+        :label="t(TRANSLATION_KEYS.RESUME.LANGUAGES.LABELS.FLUENCY)"
         :model-value="localModel.fluency"
         :error="errors.fluency"
         :icon="icons.fluency"
-        placeholder="Courant, Intermédiaire, Débutant..."
-        help-text="Votre niveau de maîtrise de cette langue."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.LANGUAGES.PLACEHOLDERS.FLUENCY)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.LANGUAGES.HELP_TEXT.FLUENCY)"
         required
         @update:model-value="(value) => updateField('fluency', value)"
         @blur="validateField('fluency', localModel.fluency)"
@@ -42,7 +42,7 @@
         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
         @click="cancel"
       >
-        Annuler
+        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
       </button>
       <button
         type="submit"
@@ -51,10 +51,10 @@
       >
         <span v-if="isSubmitting" class="flex items-center">
           <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-          {{ isEditing ? 'Mettre à jour' : 'Ajouter' }}
+          {{ isEditing ? t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) : t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }}
         </span>
         <span v-else>
-          {{ isEditing ? 'Enregistrer' : 'Ajouter' }}
+          {{ isEditing ? t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) : t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }}
         </span>
       </button>
     </div>
@@ -69,6 +69,8 @@ import { useLanguageStore } from '../stores/language'
 import type { LanguageInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 // Props
 const props = defineProps<{
@@ -80,6 +82,11 @@ const emit = defineEmits<{
   (e: 'saved'): void
   (e: 'cancelled'): void
 }>()
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
 
 // Store
 const languageStore = useLanguageStore()

@@ -6,6 +6,8 @@ import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 interface Props {
   modelValue: EducationInterface
@@ -22,12 +24,29 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const result = t(key);
+    // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
+    if (result === key) {
+      console.warn(`Missing translation key: ${key}, using fallback`);
+      return fallback;
+    }
+    return result;
+  } catch (error) {
+    console.error(`Error translating key: ${key}`, error);
+    return fallback;
+  }
+};
+
 // Setup form model using useFormModel composable
 const {
   localModel,
-  updateField,
-  updateModel
-} = useFormModel<EducationInterface>({
+  updateField} = useFormModel<EducationInterface>({
   modelValue: computed(() => props.modelValue),
   emit: (event, value) => emit(event, value),
   defaultValues: {
@@ -60,18 +79,18 @@ const {
 // Validation for courses
 const validateCourse = (course: string): boolean => {
   if (!course.trim()) {
-    courseError.value = 'Le cours ne peut pas être vide'
+    courseError.value = safeTranslate(TRANSLATION_KEYS.COMMON.ERRORS.REQUIRED_FIELD, 'Le cours ne peut pas être vide')
     return false
   }
   
   if (course.length > 100) {
-    courseError.value = 'Le cours ne peut pas dépasser 100 caractères'
+    courseError.value = safeTranslate(TRANSLATION_KEYS.COMMON.ERRORS.TOO_LONG, 'Le cours ne peut pas dépasser 100 caractères')
     return false
   }
   
   // Check for duplicates
   if (localModel.courses && localModel.courses.some(c => c.toLowerCase() === course.toLowerCase())) {
-    courseError.value = 'Ce cours existe déjà dans la liste'
+    courseError.value = safeTranslate(TRANSLATION_KEYS.RESUME.EDUCATION.VALIDATION.VAGUE_COURSES, 'Ce cours existe déjà dans la liste')
     return false
   }
   
@@ -123,7 +142,6 @@ const saveEditedCourse = () => {
   currentCourses.splice(editingCourseIndex.value, 1)
   
   // Check if the new value is valid
-  const tempCourses = [...currentCourses]
   if (!validateCourse(newCourse.value)) {
     // Restore the original array and return
     return
@@ -222,19 +240,19 @@ const icons = {
 <template>
   <Form 
     :loading="loading"
-    :title="isNew ? 'Ajouter une formation' : 'Modifier la formation'"
-    :subtitle="isNew ? 'Détaillez votre parcours éducatif et vos qualifications.' : 'Mettez à jour les détails de cette formation.'"
+    :title="isNew ? t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.EDIT_TITLE)"
+    :subtitle="isNew ? t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.ADD_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.EDIT_SUBTITLE)"
     @submit="handleSubmit"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         name="institution"
-        label="Établissement"
+        :label="t(TRANSLATION_KEYS.RESUME.EDUCATION.LABELS.INSTITUTION)"
         :model-value="localModel.institution"
         :error="errors.institution"
         :icon="icons.institution"
-        placeholder="Ex: Université de Paris"
-        help-text="Nom de l'établissement où vous avez étudié."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.INSTITUTION)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.INSTITUTION)"
         required
         @update:model-value="handleFieldUpdate('institution', $event)"
         @blur="validateField('institution', localModel.institution)"
@@ -242,12 +260,12 @@ const icons = {
 
       <FormField
         name="area"
-        label="Domaine d'étude"
+        :label="t(TRANSLATION_KEYS.RESUME.EDUCATION.LABELS.AREA)"
         :model-value="localModel.area"
         :error="errors.area"
         :icon="icons.area"
-        placeholder="Ex: Informatique"
-        help-text="Domaine ou spécialité de vos études."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.AREA)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.AREA)"
         required
         @update:model-value="handleFieldUpdate('area', $event)"
         @blur="validateField('area', localModel.area)"
@@ -255,12 +273,12 @@ const icons = {
 
       <FormField
         name="studyType"
-        label="Type de diplôme"
+        :label="t(TRANSLATION_KEYS.RESUME.EDUCATION.LABELS.STUDY_TYPE)"
         :model-value="localModel.studyType"
         :error="errors.studyType"
         :icon="icons.studyType"
-        placeholder="Ex: Master"
-        help-text="Type ou niveau de diplôme obtenu."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.STUDY_TYPE)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.STUDY_TYPE)"
         required
         @update:model-value="handleFieldUpdate('studyType', $event)"
         @blur="validateField('studyType', localModel.studyType)"
@@ -269,12 +287,12 @@ const icons = {
       <FormField
         name="url"
         type="url"
-        label="Site Web"
+        :label="t(TRANSLATION_KEYS.RESUME.WORK.LABELS.WEBSITE)"
         :model-value="localModel.url || ''"
         :error="errors.url"
         :icon="icons.url"
-        placeholder="Ex: https://universite.fr"
-        help-text="Site web de l'établissement (optionnel)."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.WORK.PLACEHOLDERS.WEBSITE)"
+        :help-text="safeTranslate('resume.education.helpText.website', 'Site web de l\'établissement (optionnel).')"
         @update:model-value="handleFieldUpdate('url', $event)"
         @blur="validateField('url', localModel.url || '')"
       />
@@ -289,9 +307,9 @@ const icons = {
           :startDateIcon="icons.date"
           :endDateIcon="icons.date"
           :required="true"
-          :startDateHelpText="'Date à laquelle vous avez commencé vos études.'"
-          :endDateHelpText="'Date de fin (laisser vide si en cours).'"
-          :currentlyActiveLabel="'Formation en cours'"
+          :startDateHelpText="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.START_DATE)"
+          :endDateHelpText="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.END_DATE)"
+          :currentlyActiveLabel="safeTranslate('resume.education.form.currentEducation', 'Formation en cours')"
           @update:startDate="handleFieldUpdate('startDate', $event)"
           @update:endDate="handleFieldUpdate('endDate', $event)"
           @update:isCurrentlyActive="handleCurrentlyStudyingChange"
@@ -302,12 +320,12 @@ const icons = {
 
       <FormField
         name="score"
-        label="Note / Distinction"
+        :label="t(TRANSLATION_KEYS.RESUME.EDUCATION.LABELS.GPA)"
         :model-value="localModel.score || ''"
         :error="errors.score"
         :icon="icons.score"
-        placeholder="Ex: Mention Bien, 16/20"
-        help-text="Résultat obtenu ou distinction honorifique (optionnel)."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.GPA)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.GPA)"
         @update:model-value="handleFieldUpdate('score', $event)"
         @blur="validateField('score', localModel.score || '')"
       />
@@ -317,19 +335,19 @@ const icons = {
     <div class="mt-8 border-t border-neutral-700 pt-6">
       <h3 class="text-lg font-medium mb-4 flex items-center">
         <span class="mr-2" v-html="icons.courses"></span>
-        Cours suivis
+        {{ t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.COURSES_SECTION) }}
       </h3>
       
       <div class="mb-4">
         <label class="text-sm mb-1 block">
-          {{ isEditingCourse ? 'Modifier le cours sélectionné' : 'Ajoutez les cours principaux ou modules suivis durant cette formation' }}
+          {{ isEditingCourse ? safeTranslate('resume.education.form.editCourse', 'Modifier le cours sélectionné') : t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.COURSES_DESCRIPTION) }}
         </label>
         
         <div class="flex">
           <input 
             v-model="newCourse"
             type="text"
-            :placeholder="isEditingCourse ? 'Modifier le cours...' : 'Ex: Algorithmes et structures de données'"
+            :placeholder="isEditingCourse ? safeTranslate('resume.education.form.editCoursePlaceholder', 'Modifier le cours...') : t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.COURSE)"
             class="flex-grow rounded-l bg-neutral-700 border-neutral-600 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             @keydown.enter.prevent="isEditingCourse ? saveEditedCourse() : addCourse()"
             @keydown.escape="isEditingCourse ? cancelEditCourse() : null"
@@ -340,7 +358,7 @@ const icons = {
             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2"
             @click="saveEditedCourse"
           >
-            Mettre à jour
+            {{ safeTranslate('resume.education.form.updateCourse', 'Mettre à jour') }}
           </button>
           <button 
             v-else
@@ -348,7 +366,7 @@ const icons = {
             class="rounded-r bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2"
             @click="addCourse"
           >
-            Ajouter
+            {{ t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.ADD_COURSE) }}
           </button>
           <button 
             v-if="isEditingCourse"
@@ -356,15 +374,15 @@ const icons = {
             class="rounded-r bg-neutral-600 hover:bg-neutral-700 text-white px-4 py-2"
             @click="cancelEditCourse"
           >
-            Annuler
+            {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
           </button>
         </div>
         
         <p v-if="courseError" class="text-red-500 text-sm mt-1">{{ courseError }}</p>
         
         <p class="text-neutral-400 text-sm mt-1">
-          <span v-if="isEditingCourse">Appuyez sur Échap pour annuler l'édition</span>
-          <span v-else>Les cours permettent de détailler les compétences acquises durant votre formation</span>
+          <span v-if="isEditingCourse">{{ safeTranslate('resume.education.form.escapeToCancel', 'Appuyez sur Échap pour annuler l\'édition') }}</span>
+          <span v-else>{{ safeTranslate('resume.education.form.coursesHelp', 'Les cours permettent de détailler les compétences acquises durant votre formation') }}</span>
         </p>
       </div>
       
@@ -384,7 +402,7 @@ const icons = {
               class="text-neutral-400 hover:text-white p-1 disabled:opacity-30"
               :disabled="index === 0"
               @click="moveCourseUp(index)"
-              title="Déplacer vers le haut"
+              :title="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.MOVE_UP)"
             >
               <span v-html="icons.moveUp"></span>
             </button>
@@ -394,7 +412,7 @@ const icons = {
               class="text-neutral-400 hover:text-white p-1 disabled:opacity-30"
               :disabled="!localModel.courses || index === localModel.courses.length - 1"
               @click="moveCourseDown(index)"
-              title="Déplacer vers le bas"
+              :title="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.MOVE_DOWN)"
             >
               <span v-html="icons.moveDown"></span>
             </button>
@@ -404,7 +422,7 @@ const icons = {
               type="button" 
               class="text-indigo-400 hover:text-indigo-300 p-1"
               @click="startEditCourse(index)"
-              title="Modifier ce cours"
+              :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.EDIT)"
             >
               <span v-html="icons.edit"></span>
             </button>
@@ -414,7 +432,7 @@ const icons = {
               type="button" 
               class="text-red-500 hover:text-red-400 p-1"
               @click="removeCourse(index)"
-              title="Supprimer ce cours"
+              :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -428,7 +446,7 @@ const icons = {
       </ul>
       
       <p v-else class="text-neutral-400 text-sm rounded-lg bg-neutral-800 p-4 flex items-center justify-center italic">
-        Aucun cours ajouté. Les cours permettent de détailler les compétences acquises durant votre formation.
+        {{ t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.NO_COURSES) }}
       </p>
     </div>
 
@@ -439,13 +457,13 @@ const icons = {
         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
         @click="handleCancel"
       >
-        Annuler
+        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
       </button>
       <button 
         type="submit"
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
       >
-        {{ isNew ? 'Ajouter' : 'Enregistrer' }}
+        {{ isNew ? t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) : t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}
       </button>
     </div>
   </Form>

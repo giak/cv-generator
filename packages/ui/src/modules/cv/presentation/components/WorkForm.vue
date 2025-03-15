@@ -6,6 +6,8 @@ import DateRangeFields from '@ui/components/shared/form/DateRangeFields.vue'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 interface Props {
   modelValue: WorkInterface
@@ -22,6 +24,25 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const result = t(key);
+    // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
+    if (result === key) {
+      console.warn(`Missing translation key: ${key}, using fallback`);
+      return fallback;
+    }
+    return result;
+  } catch (error) {
+    console.error(`Error translating key: ${key}`, error);
+    return fallback;
+  }
+};
+
 // Create a computed model value for useFormModel
 const modelValue = computed<WorkInterface>(() => props.modelValue)
 
@@ -32,7 +53,7 @@ const highlightError = ref('')
 // Use the new composables
 const { localModel, updateField } = useFormModel<WorkInterface>({
   modelValue,
-  emit: (event, value) => emit('update:modelValue', value),
+  emit: (_event, value) => emit('update:modelValue', value),
   defaultValues: {
     name: '',
     position: '',
@@ -44,14 +65,14 @@ const { localModel, updateField } = useFormModel<WorkInterface>({
   }
 })
 
-const { errors, validateField, validateForm, isValid: isFormValid } = useValidation<WorkInterface>(undefined, {
+const { errors, validateField, validateForm } = useValidation<WorkInterface>(undefined, {
   requiredFields: ['name', 'position', 'startDate']
 })
 
 // Handle adding a highlight
 const addHighlight = () => {
   if (!newHighlight.value.trim()) {
-    highlightError.value = 'Le point fort ne peut pas être vide'
+    highlightError.value = safeTranslate(TRANSLATION_KEYS.COMMON.ERRORS.REQUIRED_FIELD, 'Le point fort ne peut pas être vide')
     return
   }
   
@@ -116,7 +137,7 @@ const validateDateRange = ({ startDate, endDate }: { startDate: string, endDate?
     validateField('endDate', endDate)
     
     if (startDate && endDate && startDate > endDate) {
-      errors.value.endDate = 'La date de fin doit être postérieure à la date de début'
+      errors.value.endDate = safeTranslate(TRANSLATION_KEYS.RESUME.WORK.VALIDATION.END_BEFORE_START, 'La date de fin doit être postérieure à la date de début')
       return false
     }
   }
@@ -139,19 +160,19 @@ const icons = {
 <template>
   <Form 
     :loading="loading"
-    :title="isNew ? 'Ajouter une expérience professionnelle' : 'Modifier l\'expérience professionnelle'"
-    :subtitle="isNew ? 'Complétez les informations concernant votre expérience professionnelle.' : 'Mettez à jour les informations concernant cette expérience professionnelle.'"
+    :title="isNew ? t(TRANSLATION_KEYS.RESUME.WORK.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.WORK.FORM.EDIT_TITLE)"
+    :subtitle="isNew ? t(TRANSLATION_KEYS.RESUME.WORK.FORM.ADD_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.WORK.FORM.EDIT_SUBTITLE)"
     @submit="handleSubmit"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         name="name"
-        label="Nom de l'entreprise"
+        :label="t(TRANSLATION_KEYS.RESUME.WORK.LABELS.COMPANY)"
         :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
-        placeholder="Ex: Acme Inc."
-        help-text="Nom de l'entreprise ou de l'organisation."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.WORK.PLACEHOLDERS.COMPANY)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.WORK.HELP_TEXT.COMPANY)"
         required
         @update:model-value="(value) => updateField('name', value)"
         @blur="validateField('name', localModel.name)"
@@ -159,12 +180,12 @@ const icons = {
 
       <FormField
         name="position"
-        label="Poste occupé"
+        :label="t(TRANSLATION_KEYS.RESUME.WORK.LABELS.POSITION)"
         :model-value="localModel.position"
         :error="errors.position"
         :icon="icons.position"
-        placeholder="Ex: Développeur Full Stack"
-        help-text="Intitulé de votre poste dans cette entreprise."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.WORK.PLACEHOLDERS.POSITION)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.WORK.HELP_TEXT.POSITION)"
         required
         @update:model-value="(value) => updateField('position', value)"
         @blur="validateField('position', localModel.position)"
@@ -180,9 +201,9 @@ const icons = {
           :start-date-icon="icons.startDate"
           :end-date-icon="icons.endDate"
           :required="true"
-          :start-date-help-text="'Format: AAAA-MM-JJ (ex: 2020-01-15)'"
-          :end-date-help-text="'Laissez vide si c\'est votre emploi actuel.'"
-          :currently-active-label="'Emploi actuel'"
+          :start-date-help-text="t(TRANSLATION_KEYS.RESUME.WORK.HELP_TEXT.START_DATE)"
+          :end-date-help-text="t(TRANSLATION_KEYS.RESUME.WORK.HELP_TEXT.END_DATE)"
+          :currently-active-label="t(TRANSLATION_KEYS.RESUME.WORK.LABELS.CURRENT_POSITION)"
           @update:start-date="(value) => updateField('startDate', value)"
           @update:end-date="(value) => updateField('endDate', value)"
           @update:is-currently-active="handleCurrentPositionChange"
@@ -196,12 +217,12 @@ const icons = {
         <FormField
           name="url"
           type="url"
-          label="Site web de l'entreprise"
+          :label="t(TRANSLATION_KEYS.RESUME.WORK.LABELS.WEBSITE)"
           :model-value="localModel.url || ''"
           :error="errors.url"
           :icon="icons.url"
-          placeholder="Ex: https://www.acme.com"
-          help-text="URL du site de l'entreprise (optionnel)."
+          :placeholder="t(TRANSLATION_KEYS.RESUME.WORK.PLACEHOLDERS.WEBSITE)"
+          :help-text="t(TRANSLATION_KEYS.RESUME.WORK.HELP_TEXT.WEBSITE)"
           @update:model-value="(value) => updateField('url', value)"
           @blur="validateField('url', localModel.url)"
         />
@@ -211,12 +232,12 @@ const icons = {
     <div class="mt-6">
       <FormField
         name="summary"
-        label="Résumé de l'expérience"
+        :label="t(TRANSLATION_KEYS.RESUME.WORK.LABELS.SUMMARY)"
         :model-value="localModel.summary || ''"
         :error="errors.summary"
         :icon="icons.summary"
-        placeholder="Décrivez brièvement vos responsabilités et accomplissements..."
-        help-text="Un résumé concis de votre rôle et de vos responsabilités."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.WORK.PLACEHOLDERS.SUMMARY)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.WORK.HELP_TEXT.SUMMARY)"
         @update:model-value="(value) => updateField('summary', value)"
         @blur="validateField('summary', localModel.summary)"
       />
@@ -224,9 +245,9 @@ const icons = {
     
     <!-- Section pour les points forts (highlights) -->
     <div class="mt-6">
-      <h3 class="block mb-1.5 text-xs font-medium text-neutral-300 tracking-wide">Points forts</h3>
+      <h3 class="block mb-1.5 text-xs font-medium text-neutral-300 tracking-wide">{{ t(TRANSLATION_KEYS.RESUME.WORK.LABELS.HIGHLIGHTS) }}</h3>
       <p class="text-xs text-neutral-400 mb-4">
-        Ajoutez les points clés de cette expérience (compétences acquises, réalisations, responsabilités).
+        {{ t(TRANSLATION_KEYS.RESUME.WORK.FORM.HIGHLIGHTS_DESCRIPTION) }}
       </p>
       
       <!-- Liste des points forts existants -->
@@ -237,7 +258,7 @@ const icons = {
             type="button" 
             @click="removeHighlight(index)"
             class="ml-2 text-neutral-400 hover:text-error-400 focus:outline-none"
-            aria-label="Supprimer ce point fort"
+            :aria-label="t(TRANSLATION_KEYS.COMMON.ACTIONS.REMOVE)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -246,6 +267,11 @@ const icons = {
           </button>
         </li>
       </ul>
+      
+      <!-- Message si pas de points forts -->
+      <p v-else class="text-sm text-neutral-500 mb-4">
+        {{ t(TRANSLATION_KEYS.RESUME.WORK.FORM.NO_HIGHLIGHTS) }}
+      </p>
       
       <!-- Ajout d'un nouveau point fort -->
       <div class="flex items-start">
@@ -259,7 +285,7 @@ const icons = {
               v-model="newHighlight"
               type="text"
               name="new-highlight"
-              placeholder="Ajoutez un point fort..."
+              :placeholder="t(TRANSLATION_KEYS.RESUME.WORK.PLACEHOLDERS.HIGHLIGHT)"
               class="block w-full py-2.5 px-3 pl-10 text-sm leading-6 text-white bg-neutral-800 border rounded transition-all duration-200 border-neutral-700 hover:border-neutral-600 hover:bg-neutral-750 focus:border-primary-500 focus:bg-neutral-800 focus:outline-none focus:ring-1 focus:ring-primary-500/40"
               @keyup.enter="addHighlight"
             />
@@ -275,7 +301,7 @@ const icons = {
           @click="addHighlight"
           class="ml-2 px-3 py-2.5 rounded-md bg-primary-600 text-white hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-colors"
         >
-          Ajouter
+          {{ t(TRANSLATION_KEYS.RESUME.WORK.FORM.ADD_HIGHLIGHT) }}
         </button>
       </div>
     </div>
@@ -289,7 +315,7 @@ const icons = {
           :disabled="loading"
           @click="handleCancel"
         >
-          Annuler
+          {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
         </button>
         
         <button
@@ -303,7 +329,7 @@ const icons = {
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           </span>
-          {{ isNew ? 'Ajouter' : 'Enregistrer' }}
+          {{ isNew ? t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) : t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}
         </button>
       </div>
     </template>

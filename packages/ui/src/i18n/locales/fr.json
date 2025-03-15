@@ -132,7 +132,8 @@
         "startDate": "Date de début",
         "endDate": "Date de fin",
         "summary": "Résumé",
-        "highlights": "Points forts"
+        "highlights": "Points forts",
+        "currentPosition": "Poste actuel"
       },
       "placeholders": {
         "company": "Entrez le nom de l'entreprise",
@@ -142,6 +143,15 @@
         "endDate": "AAAA-MM-JJ (laissez vide si actuel)",
         "summary": "Décrivez votre rôle et vos responsabilités",
         "highlight": "Ajoutez une réalisation clé ou une responsabilité"
+      },
+      "helpText": {
+        "company": "Nom de l'entreprise ou de l'organisation où vous avez travaillé.",
+        "position": "Votre titre de poste ou rôle dans cette entreprise.",
+        "website": "URL du site web officiel de l'entreprise.",
+        "startDate": "Date à laquelle vous avez commencé à ce poste.",
+        "endDate": "Date à laquelle vous avez quitté ce poste (laissez vide si actuel).",
+        "summary": "Brève description de vos responsabilités et de votre rôle.",
+        "highlights": "Principales réalisations, projets ou responsabilités."
       },
       "validation": {
         "missingCompany": "Le nom de l'entreprise est obligatoire",
@@ -154,6 +164,26 @@
         "briefDescription": "La description est trop brève, ajoutez plus de détails",
         "missingHighlights": "Ajoutez au moins un point fort",
         "vagueHighlights": "Les points forts devraient être plus spécifiques"
+      },
+      "form": {
+        "addTitle": "Ajouter une expérience professionnelle",
+        "editTitle": "Modifier l'expérience professionnelle",
+        "addSubtitle": "Ajoutez des détails sur votre parcours professionnel et votre expérience.",
+        "editSubtitle": "Mettez à jour les détails de cette expérience professionnelle.",
+        "highlightsSection": "Points forts",
+        "highlightsDescription": "Ajoutez des réalisations clés, des responsabilités ou des projets notables",
+        "noHighlights": "Aucun point fort ajouté. Utilisez le champ ci-dessus pour ajouter des réalisations ou responsabilités clés.",
+        "addHighlight": "Ajouter un point fort"
+      },
+      "list": {
+        "title": "Expérience professionnelle",
+        "description": "Ajoutez votre expérience professionnelle pour mettre en évidence votre progression de carrière.",
+        "addButton": "Ajouter une expérience professionnelle",
+        "emptyStateTitle": "Aucune expérience professionnelle ajoutée",
+        "emptyStateDescription": "Ajoutez votre historique professionnel pour mettre en valeur vos compétences et expertise.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas",
+        "present": "Actuel"
       }
     },
     "education": {
@@ -175,6 +205,15 @@
         "gpa": "Entrez votre moyenne",
         "course": "Ajoutez un cours pertinent"
       },
+      "helpText": {
+        "institution": "Nom de l'établissement d'enseignement que vous avez fréquenté.",
+        "area": "Votre domaine d'étude ou spécialité.",
+        "studyType": "Type de diplôme ou certification obtenu.",
+        "startDate": "Date à laquelle vous avez commencé vos études.",
+        "endDate": "Date à laquelle vous avez terminé vos études (laissez vide si en cours).",
+        "gpa": "Votre moyenne générale ou équivalent.",
+        "courses": "Cours pertinents que vous avez suivis pendant vos études."
+      },
       "validation": {
         "missingInstitution": "Le nom de l'établissement est obligatoire",
         "missingArea": "Le domaine d'étude est obligatoire",
@@ -183,6 +222,26 @@
         "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
         "missingGpa": "La moyenne est obligatoire",
         "vagueCourses": "Les descriptions des cours devraient être plus spécifiques"
+      },
+      "form": {
+        "addTitle": "Ajouter une formation",
+        "editTitle": "Modifier la formation",
+        "addSubtitle": "Ajoutez des détails sur votre parcours éducatif et vos réussites académiques.",
+        "editSubtitle": "Mettez à jour les détails de cette formation.",
+        "coursesSection": "Cours",
+        "coursesDescription": "Ajoutez les cours pertinents que vous avez suivis pendant vos études",
+        "noCourses": "Aucun cours ajouté. Utilisez le champ ci-dessus pour ajouter des cours pertinents.",
+        "addCourse": "Ajouter un cours"
+      },
+      "list": {
+        "title": "Formation",
+        "description": "Présentez votre parcours académique et vos qualifications.",
+        "addButton": "Ajouter une formation",
+        "emptyStateTitle": "Aucune formation ajoutée",
+        "emptyStateDescription": "Ajoutez votre parcours éducatif pour mettre en valeur vos réussites académiques.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas",
+        "present": "En cours"
       }
     },
     "skills": {
@@ -196,12 +255,400 @@
         "level": "Sélectionnez le niveau de maîtrise",
         "keyword": "Ajoutez un mot-clé"
       },
+      "helpText": {
+        "name": "Nom de la compétence ou technologie que vous maîtrisez.",
+        "level": "Votre niveau de maîtrise (ex : Débutant, Intermédiaire, Expert).",
+        "keywords": "Technologies, outils ou applications spécifiques liés à cette compétence."
+      },
       "validation": {
         "missingSkillName": "Le nom de la compétence est obligatoire",
         "briefSkillName": "Le nom de la compétence est trop bref",
         "undefinedLevel": "Le niveau de maîtrise est obligatoire",
         "missingKeywords": "Ajoutez au moins un mot-clé",
-        "genericSkill": "La compétence est trop générique, soyez plus précis"
+        "genericSkill": "La compétence est trop générique, soyez plus précis",
+        "emptyKeyword": "Le mot-clé ne peut pas être vide"
+      },
+      "form": {
+        "addTitle": "Ajouter une compétence",
+        "editTitle": "Modifier la compétence",
+        "addSubtitle": "Ajoutez des détails sur vos compétences techniques et personnelles.",
+        "editSubtitle": "Mettez à jour les détails de cette compétence.",
+        "keywordsSection": "Mots-clés",
+        "keywordsDescription": "Ajoutez des technologies ou aspects spécifiques de cette compétence",
+        "noKeywords": "Aucun mot-clé ajouté. Utilisez le champ ci-dessus pour ajouter des mots-clés pertinents.",
+        "addKeyword": "Ajouter un mot-clé"
+      },
+      "list": {
+        "title": "Compétences",
+        "description": "Mettez en valeur vos compétences techniques et personnelles pour vous démarquer.",
+        "addButton": "Ajouter une compétence",
+        "emptyStateTitle": "Aucune compétence ajoutée",
+        "emptyStateDescription": "Ajoutez vos compétences techniques et personnelles pour mettre en valeur votre expertise.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas"
+      }
+    },
+    "projects": {
+      "labels": {
+        "name": "Nom du projet",
+        "description": "Description",
+        "url": "URL du projet",
+        "startDate": "Date de début",
+        "endDate": "Date de fin",
+        "entity": "Entité",
+        "type": "Type de projet",
+        "highlights": "Points forts",
+        "roles": "Rôles",
+        "keywords": "Mots-clés"
+      },
+      "placeholders": {
+        "name": "Entrez le nom du projet",
+        "description": "Décrivez le projet",
+        "url": "Entrez l'URL du site web ou du dépôt du projet",
+        "startDate": "AAAA-MM-JJ",
+        "endDate": "AAAA-MM-JJ (laissez vide si en cours)",
+        "entity": "Entrez le nom de l'entreprise ou de l'organisation",
+        "type": "Entrez le type de projet (ex : Application Web, Application Mobile)",
+        "highlight": "Ajoutez un point fort du projet",
+        "role": "Ajoutez votre rôle",
+        "keyword": "Ajoutez une technologie ou compétence"
+      },
+      "helpText": {
+        "name": "Nom du projet sur lequel vous avez travaillé.",
+        "description": "Brève description de l'objectif et des buts du projet.",
+        "url": "Lien vers le site web, le dépôt ou la documentation du projet.",
+        "startDate": "Date à laquelle vous avez commencé à travailler sur ce projet.",
+        "endDate": "Date à laquelle vous avez terminé ce projet (laissez vide si en cours).",
+        "entity": "Entreprise ou organisation pour laquelle le projet a été réalisé.",
+        "type": "Catégorie ou type de projet (ex : Application Web, Recherche).",
+        "highlights": "Principales réalisations ou aspects notables du projet.",
+        "roles": "Vos rôles ou responsabilités spécifiques dans ce projet.",
+        "keywords": "Technologies, outils ou méthodologies utilisés dans ce projet."
+      },
+      "validation": {
+        "missingName": "Le nom du projet est obligatoire",
+        "missingDescription": "La description du projet est obligatoire",
+        "invalidUrl": "Format d'URL invalide",
+        "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
+        "futureDate": "La date ne peut pas être dans le futur"
+      },
+      "form": {
+        "addTitle": "Ajouter un projet",
+        "editTitle": "Modifier le projet",
+        "addSubtitle": "Ajoutez des détails sur les projets sur lesquels vous avez travaillé pour montrer vos capacités.",
+        "editSubtitle": "Mettez à jour les détails de ce projet.",
+        "highlightsSection": "Points forts",
+        "highlightsDescription": "Ajoutez des fonctionnalités clés ou des réalisations de ce projet",
+        "rolesSection": "Rôles",
+        "rolesDescription": "Ajoutez vos rôles ou responsabilités spécifiques dans ce projet",
+        "keywordsSection": "Technologies & Compétences",
+        "keywordsDescription": "Ajoutez les technologies, outils ou méthodologies utilisés",
+        "noHighlights": "Aucun point fort ajouté. Utilisez le champ ci-dessus pour ajouter des fonctionnalités ou réalisations clés.",
+        "noRoles": "Aucun rôle ajouté. Utilisez le champ ci-dessus pour ajouter vos rôles spécifiques.",
+        "noKeywords": "Aucune technologie ajoutée. Utilisez le champ ci-dessus pour ajouter des technologies pertinentes.",
+        "addHighlight": "Ajouter un point fort",
+        "addRole": "Ajouter un rôle",
+        "addKeyword": "Ajouter une technologie"
+      },
+      "list": {
+        "title": "Projets",
+        "description": "Présentez les projets sur lesquels vous avez travaillé pour démontrer vos compétences et votre expérience.",
+        "addButton": "Ajouter un projet",
+        "emptyStateTitle": "Aucun projet ajouté",
+        "emptyStateDescription": "Ajoutez vos projets pour montrer votre expérience pratique et vos réalisations.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas"
+      }
+    },
+    "publications": {
+      "labels": {
+        "name": "Titre de la publication",
+        "publisher": "Éditeur",
+        "releaseDate": "Date de publication",
+        "url": "URL",
+        "summary": "Résumé"
+      },
+      "placeholders": {
+        "name": "Entrez le titre de la publication",
+        "publisher": "Entrez le nom de l'éditeur",
+        "releaseDate": "AAAA-MM-JJ",
+        "url": "Entrez l'URL de la publication",
+        "summary": "Décrivez la publication"
+      },
+      "helpText": {
+        "name": "Titre de votre article, document ou livre.",
+        "publisher": "Nom de la revue, conférence ou éditeur.",
+        "releaseDate": "Date à laquelle la publication a été publiée.",
+        "url": "Lien vers la publication en ligne (si disponible).",
+        "summary": "Brève description du contenu et de l'importance de la publication."
+      },
+      "validation": {
+        "missingName": "Le titre de la publication est obligatoire",
+        "missingPublisher": "L'éditeur est obligatoire",
+        "invalidDate": "Format de date invalide",
+        "futureDate": "La date ne peut pas être dans le futur",
+        "invalidUrl": "Format d'URL invalide",
+        "missingSummary": "Le résumé est obligatoire"
+      },
+      "form": {
+        "addTitle": "Ajouter une publication",
+        "editTitle": "Modifier la publication",
+        "addSubtitle": "Ajoutez des détails sur les articles, documents ou livres que vous avez publiés.",
+        "editSubtitle": "Mettez à jour les détails de cette publication."
+      },
+      "list": {
+        "title": "Publications",
+        "description": "Présentez vos articles, documents de recherche ou livres pour démontrer votre expertise.",
+        "addButton": "Ajouter une publication",
+        "emptyStateTitle": "Aucune publication ajoutée",
+        "emptyStateDescription": "Ajoutez vos travaux publiés pour mettre en valeur vos contributions à votre domaine.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas"
+      }
+    },
+    "languages": {
+      "labels": {
+        "language": "Langue",
+        "fluency": "Niveau de maîtrise"
+      },
+      "placeholders": {
+        "language": "Entrez le nom de la langue",
+        "fluency": "Entrez le niveau de maîtrise"
+      },
+      "helpText": {
+        "language": "Nom de la langue que vous connaissez.",
+        "fluency": "Votre niveau de maîtrise (ex : Natif, Courant, Intermédiaire)."
+      },
+      "validation": {
+        "missingLanguage": "Le nom de la langue est obligatoire",
+        "missingFluency": "Le niveau de maîtrise est obligatoire"
+      },
+      "form": {
+        "addTitle": "Ajouter une langue",
+        "editTitle": "Modifier la langue",
+        "addSubtitle": "Ajoutez des détails sur les langues que vous parlez ou comprenez.",
+        "editSubtitle": "Mettez à jour les détails de cette langue."
+      },
+      "list": {
+        "title": "Langues",
+        "description": "Présentez les langues que vous parlez pour démontrer vos compétences en communication.",
+        "addButton": "Ajouter une langue",
+        "emptyStateTitle": "Aucune langue ajoutée",
+        "emptyStateDescription": "Ajoutez les langues que vous maîtrisez pour mettre en valeur vos capacités de communication.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas"
+      }
+    },
+    "interests": {
+      "labels": {
+        "name": "Nom du centre d'intérêt",
+        "keywords": "Mots-clés"
+      },
+      "placeholders": {
+        "name": "Entrez le nom du centre d'intérêt",
+        "keyword": "Ajoutez un mot-clé associé"
+      },
+      "helpText": {
+        "name": "Nom de votre loisir ou centre d'intérêt.",
+        "keywords": "Aspects ou activités spécifiques liés à ce centre d'intérêt."
+      },
+      "validation": {
+        "missingName": "Le nom du centre d'intérêt est obligatoire",
+        "emptyKeyword": "Le mot-clé ne peut pas être vide"
+      },
+      "form": {
+        "addTitle": "Ajouter un centre d'intérêt",
+        "editTitle": "Modifier le centre d'intérêt",
+        "addSubtitle": "Ajoutez des détails sur vos loisirs et centres d'intérêt personnels.",
+        "editSubtitle": "Mettez à jour les détails de ce centre d'intérêt.",
+        "keywordsSection": "Mots-clés",
+        "keywordsDescription": "Ajoutez des activités ou aspects spécifiques liés à ce centre d'intérêt",
+        "noKeywords": "Aucun mot-clé ajouté. Utilisez le champ ci-dessus pour ajouter des mots-clés pertinents.",
+        "addKeyword": "Ajouter un mot-clé"
+      },
+      "list": {
+        "title": "Centres d'intérêt",
+        "description": "Partagez vos loisirs et centres d'intérêt personnels pour ajouter une touche humaine à votre CV.",
+        "addButton": "Ajouter un centre d'intérêt",
+        "emptyStateTitle": "Aucun centre d'intérêt ajouté",
+        "emptyStateDescription": "Ajoutez vos loisirs et centres d'intérêt pour montrer davantage votre personnalité.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas"
+      }
+    },
+    "awards": {
+      "labels": {
+        "title": "Titre de la distinction",
+        "date": "Date de réception",
+        "awarder": "Décerné par",
+        "summary": "Résumé"
+      },
+      "placeholders": {
+        "title": "Entrez le titre de la distinction",
+        "date": "AAAA-MM-JJ",
+        "awarder": "Entrez le nom du décernant",
+        "summary": "Décrivez la distinction et sa signification"
+      },
+      "helpText": {
+        "title": "Nom ou titre de la distinction que vous avez reçue.",
+        "date": "Date à laquelle vous avez reçu cette distinction.",
+        "awarder": "Organisation ou entité qui a décerné la distinction.",
+        "summary": "Brève description de la distinction et pourquoi vous l'avez reçue."
+      },
+      "validation": {
+        "missingTitle": "Le titre de la distinction est obligatoire",
+        "invalidDate": "Format de date invalide",
+        "futureDate": "La date ne peut pas être dans le futur",
+        "missingAwarder": "Le décernant est obligatoire",
+        "missingSummary": "Le résumé est obligatoire"
+      },
+      "form": {
+        "addTitle": "Ajouter une distinction",
+        "editTitle": "Modifier la distinction",
+        "addSubtitle": "Ajoutez des détails sur les reconnaissances et distinctions que vous avez reçues.",
+        "editSubtitle": "Mettez à jour les détails de cette distinction."
+      },
+      "list": {
+        "title": "Distinctions",
+        "description": "Présentez les reconnaissances et honneurs que vous avez reçus pour mettre en valeur vos réalisations.",
+        "addButton": "Ajouter une distinction",
+        "emptyStateTitle": "Aucune distinction ajoutée",
+        "emptyStateDescription": "Ajoutez les distinctions que vous avez reçues pour mettre en valeur vos accomplissements et votre reconnaissance.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas"
+      }
+    },
+    "certificates": {
+      "labels": {
+        "name": "Nom du certificat",
+        "date": "Date de réception",
+        "issuer": "Organisation émettrice",
+        "url": "URL du certificat"
+      },
+      "placeholders": {
+        "name": "Entrez le nom du certificat",
+        "date": "AAAA-MM-JJ",
+        "issuer": "Entrez l'organisation émettrice",
+        "url": "Entrez l'URL de vérification du certificat"
+      },
+      "helpText": {
+        "name": "Nom ou titre de la certification que vous avez obtenue.",
+        "date": "Date à laquelle vous avez reçu cette certification.",
+        "issuer": "Organisation qui a délivré la certification.",
+        "url": "Lien pour vérifier le certificat ou en savoir plus."
+      },
+      "validation": {
+        "missingName": "Le nom du certificat est obligatoire",
+        "invalidDate": "Format de date invalide",
+        "futureDate": "La date ne peut pas être dans le futur",
+        "missingIssuer": "L'émetteur est obligatoire",
+        "invalidUrl": "Format d'URL invalide"
+      },
+      "form": {
+        "addTitle": "Ajouter un certificat",
+        "editTitle": "Modifier le certificat",
+        "addSubtitle": "Ajoutez des détails sur les certifications professionnelles que vous avez obtenues.",
+        "editSubtitle": "Mettez à jour les détails de ce certificat."
+      },
+      "list": {
+        "title": "Certificats",
+        "description": "Présentez vos certifications professionnelles pour valider vos compétences et connaissances.",
+        "addButton": "Ajouter un certificat",
+        "emptyStateTitle": "Aucun certificat ajouté",
+        "emptyStateDescription": "Ajoutez les certifications que vous avez obtenues pour vérifier vos compétences et expertise.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas"
+      }
+    },
+    "volunteer": {
+      "labels": {
+        "organization": "Organisation",
+        "position": "Poste",
+        "website": "Site web",
+        "startDate": "Date de début",
+        "endDate": "Date de fin",
+        "summary": "Résumé",
+        "highlights": "Points forts"
+      },
+      "placeholders": {
+        "organization": "Entrez le nom de l'organisation",
+        "position": "Entrez votre rôle bénévole",
+        "website": "Entrez le site web de l'organisation",
+        "startDate": "AAAA-MM-JJ",
+        "endDate": "AAAA-MM-JJ (laissez vide si actuel)",
+        "summary": "Décrivez votre travail bénévole",
+        "highlight": "Ajoutez une contribution ou responsabilité clé"
+      },
+      "helpText": {
+        "organization": "Nom de l'organisation où vous avez fait du bénévolat.",
+        "position": "Votre rôle ou titre en tant que bénévole.",
+        "website": "URL du site web officiel de l'organisation.",
+        "startDate": "Date à laquelle vous avez commencé à faire du bénévolat avec cette organisation.",
+        "endDate": "Date à laquelle vous avez arrêté de faire du bénévolat (laissez vide si actuel).",
+        "summary": "Brève description de votre travail bénévole et de vos responsabilités.",
+        "highlights": "Principales réalisations ou contributions en tant que bénévole."
+      },
+      "validation": {
+        "missingOrganization": "Le nom de l'organisation est obligatoire",
+        "missingPosition": "Le poste est obligatoire",
+        "invalidUrl": "Format d'URL invalide",
+        "missingStartDate": "La date de début est obligatoire",
+        "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
+        "futureDate": "La date ne peut pas être dans le futur",
+        "missingSummary": "Le résumé est obligatoire"
+      },
+      "form": {
+        "addTitle": "Ajouter une expérience bénévole",
+        "editTitle": "Modifier l'expérience bénévole",
+        "addSubtitle": "Ajoutez des détails sur votre travail bénévole et votre implication communautaire.",
+        "editSubtitle": "Mettez à jour les détails de cette expérience bénévole.",
+        "highlightsSection": "Points forts",
+        "highlightsDescription": "Ajoutez des contributions ou responsabilités clés",
+        "noHighlights": "Aucun point fort ajouté. Utilisez le champ ci-dessus pour ajouter des contributions ou responsabilités clés.",
+        "addHighlight": "Ajouter un point fort"
+      },
+      "list": {
+        "title": "Expérience bénévole",
+        "description": "Présentez votre implication communautaire et votre travail non rémunéré pour démontrer vos valeurs.",
+        "addButton": "Ajouter une expérience bénévole",
+        "emptyStateTitle": "Aucune expérience bénévole ajoutée",
+        "emptyStateDescription": "Ajoutez votre travail bénévole pour montrer votre implication communautaire et vos valeurs.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas",
+        "present": "Actuel"
+      }
+    },
+    "references": {
+      "labels": {
+        "name": "Nom de la référence",
+        "reference": "Référence"
+      },
+      "placeholders": {
+        "name": "Entrez le nom de la référence",
+        "reference": "Entrez les détails ou la citation de la référence"
+      },
+      "helpText": {
+        "name": "Nom complet de la personne fournissant la référence.",
+        "reference": "Le texte de référence réel, la citation ou les coordonnées."
+      },
+      "validation": {
+        "missingName": "Le nom de la référence est obligatoire",
+        "missingReference": "La référence est obligatoire"
+      },
+      "form": {
+        "addTitle": "Ajouter une référence",
+        "editTitle": "Modifier la référence",
+        "addSubtitle": "Ajoutez des références professionnelles qui peuvent témoigner de vos compétences et de votre caractère.",
+        "editSubtitle": "Mettez à jour les détails de cette référence."
+      },
+      "list": {
+        "title": "Références",
+        "description": "Incluez des témoignages ou contacts de personnes qui peuvent garantir votre travail.",
+        "addButton": "Ajouter une référence",
+        "emptyStateTitle": "Aucune référence ajoutée",
+        "emptyStateDescription": "Ajoutez des références pour fournir une validation externe de vos compétences et de votre caractère.",
+        "moveUp": "Déplacer vers le haut",
+        "moveDown": "Déplacer vers le bas"
       }
     }
   },
@@ -231,6 +678,15 @@
       "download": "Télécharger",
       "successMessage": "Votre CV a été exporté avec succès !",
       "errorMessage": "Une erreur est survenue lors de l'exportation de votre CV. Veuillez réessayer."
+    },
+    "collectionManager": {
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "moveUp": "Déplacer vers le haut",
+      "moveDown": "Déplacer vers le bas",
+      "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
     }
   }
-} 
+}

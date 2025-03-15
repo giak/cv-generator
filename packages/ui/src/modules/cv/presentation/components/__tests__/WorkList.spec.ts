@@ -1,9 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import WorkList from '../WorkList.vue'
 import type { WorkWithId } from '@ui/modules/cv/presentation/stores/work'
-import type { WorkInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { useWorkStore } from '@ui/modules/cv/presentation/stores/work'
+import { createTestingOptions, setLocale } from '@ui/test-utils/i18n-plugin'
+
+// Pas besoin de mocker vue-i18n maintenant que nous utilisons le plugin
+// vi.mock('vue-i18n')
 
 // Mock the store
 vi.mock('@ui/modules/cv/presentation/stores/work', () => {
@@ -75,10 +79,25 @@ vi.mock('../WorkForm.vue', () => ({
 }))
 
 describe('WorkList', () => {
+  // Spy pour vérifier les erreurs de console liées aux traductions
+  let consoleErrorSpy: any
+
+  beforeEach(() => {
+    // Espionner console.error pour détecter les erreurs de traduction
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    // Réinitialiser la langue à français pour chaque test
+    setLocale('fr')
+  })
+
+  afterEach(() => {
+    // Restaurer console.error
+    consoleErrorSpy.mockRestore()
+  })
+
   it('renders the component with work items', async () => {
-    const wrapper = mount(WorkList)
+    const wrapper = mount(WorkList, createTestingOptions())
     
-    // Title is displayed
+    // Title is displayed using translation
     expect(wrapper.find('h2').text()).toBe('Expériences Professionnelles')
     
     // Work items are rendered
@@ -90,7 +109,7 @@ describe('WorkList', () => {
     expect(cards[0].text()).toContain('Senior Engineer')
     expect(cards[0].text()).toContain('Test Company 2')
     
-    // Check date formatting
+    // Check date formatting with translation for "Present"
     expect(cards[0].text()).toContain('février 2022 - Présent')
     
     // Check highlights
@@ -110,10 +129,18 @@ describe('WorkList', () => {
     // Check URL
     const url = cards[1].find('a')
     expect(url.attributes('href')).toBe('https://example.com')
+    
+    // Vérifier qu'aucune erreur de console n'a été émise concernant les traductions
+    const i18nErrors = consoleErrorSpy.mock.calls.filter((call: any[]) => 
+      call[0] && typeof call[0] === 'string' && 
+      (call[0].includes('i18n') || call[0].includes('translation') || call[0].includes('t is not a function'))
+    )
+    
+    expect(i18nErrors.length).toBe(0)
   })
   
-  it('shows add button', () => {
-    const wrapper = mount(WorkList)
+  it('shows add button with correct translation', () => {
+    const wrapper = mount(WorkList, createTestingOptions())
     const addButton = wrapper.find('.mock-button')
     
     expect(addButton.exists()).toBe(true)
@@ -121,7 +148,7 @@ describe('WorkList', () => {
   })
   
   it('shows dialog when add button is clicked', async () => {
-    const wrapper = mount(WorkList)
+    const wrapper = mount(WorkList, createTestingOptions())
     
     // Initially dialog should not be visible
     expect(wrapper.find('.fixed').exists()).toBe(false)
@@ -137,7 +164,7 @@ describe('WorkList', () => {
     expect(workForm.exists()).toBe(true)
   })
   
-  it('shows empty state when no works are available', async () => {
+  it('shows empty state with correct translations when no works are available', async () => {
     // Override the store mock for this test
     vi.mocked(useWorkStore).mockReturnValue({
       works: [],
@@ -149,11 +176,21 @@ describe('WorkList', () => {
       reorderWorks: vi.fn()
     } as any)
     
-    const wrapper = mount(WorkList)
+    const wrapper = mount(WorkList, createTestingOptions())
     
     // Empty state should be visible
     const emptyState = wrapper.find('.mock-empty-state')
     expect(emptyState.exists()).toBe(true)
+    
+    // Vérifier que les props de EmptyState contiennent les bonnes traductions
+    // Note: Nous vérifions uniquement les propriétés qui sont définies dans le mock
+    const emptyStateComponent = wrapper.findComponent({ name: 'EmptyState' })
+    expect(emptyStateComponent.props('title')).toBe('Aucune expérience professionnelle')
+    expect(emptyStateComponent.props('description')).toBe('Ajoutez des expériences professionnelles à votre CV')
+    
+    // Vérifier que le texte du bouton est présent dans le composant
+    // Note: Le texte du bouton dans l'état vide est "Ajouter" par défaut dans CollectionManager
+    expect(emptyState.text()).toContain('Ajouter')
   })
   
   it('shows loading state', async () => {
@@ -168,11 +205,30 @@ describe('WorkList', () => {
       reorderWorks: vi.fn()
     } as any)
     
-    const wrapper = mount(WorkList)
+    const wrapper = mount(WorkList, createTestingOptions())
     
     // Loading spinner should be visible
     const loadingSpinner = wrapper.find('.animate-spin')
     expect(loadingSpinner.exists()).toBe(true)
+  })
+  
+  // Test spécifique pour l'internationalisation
+  it('changes text when language changes', async () => {
+    const wrapper = mount(WorkList, createTestingOptions())
+    
+    // Vérifier le texte en français par défaut
+    expect(wrapper.find('h2').text()).toBe('Expériences Professionnelles')
+    
+    // Changer la langue du plugin vers l'anglais
+    setLocale('en')
+    await nextTick()
+    
+    // Rémonter le composant pour qu'il utilise la nouvelle langue
+    wrapper.unmount()
+    const newWrapper = mount(WorkList, createTestingOptions())
+    
+    // Vérifier que le texte a changé pour l'anglais
+    expect(newWrapper.find('h2').text()).toBe('Work Experience')
   })
 })
 

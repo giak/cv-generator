@@ -1,19 +1,19 @@
 <template>
   <Form 
     :loading="loading"
-    :title="isNew ? 'Ajouter une certification' : 'Modifier la certification'"
-    :subtitle="isNew ? 'Détaillez les certifications professionnelles que vous avez obtenues.' : 'Mettez à jour les détails de cette certification.'"
+    :title="isNew ? safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.FORM.ADD_TITLE, 'Ajouter une certification') : safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.FORM.EDIT_TITLE, 'Modifier la certification')"
+    :subtitle="isNew ? safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.FORM.ADD_SUBTITLE, 'Détaillez les certifications professionnelles que vous avez obtenues.') : safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.FORM.EDIT_SUBTITLE, 'Mettez à jour les détails de cette certification.')"
     @submit="handleSubmit"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         name="name"
-        label="Nom du certificat"
+        :label="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.LABELS.NAME, 'Nom du certificat')"
         :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
-        placeholder="Ex: AWS Certified Solutions Architect"
-        help-text="Nom ou titre de la certification obtenue."
+        :placeholder="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.PLACEHOLDERS.NAME, 'Ex: AWS Certified Solutions Architect')"
+        :help-text="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.HELP_TEXT.NAME, 'Nom ou titre de la certification obtenue.')"
         required
         @update:model-value="handleFieldUpdate('name', $event)"
         @blur="validateField('name', localModel.name)"
@@ -21,12 +21,12 @@
 
       <FormField
         name="issuer"
-        label="Organisme émetteur"
+        :label="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.LABELS.ISSUER, 'Organisme émetteur')"
         :model-value="localModel.issuer"
         :error="errors.issuer"
         :icon="icons.issuer"
-        placeholder="Ex: Amazon Web Services"
-        help-text="Organisation ayant délivré la certification."
+        :placeholder="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.PLACEHOLDERS.ISSUER, 'Ex: Amazon Web Services')"
+        :help-text="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.HELP_TEXT.ISSUER, 'Organisation ayant délivré la certification.')"
         required
         @update:model-value="handleFieldUpdate('issuer', $event)"
         @blur="validateField('issuer', localModel.issuer)"
@@ -34,11 +34,11 @@
 
       <FormField
         name="date"
-        label="Date d'obtention"
+        :label="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.LABELS.DATE, 'Date d\'obtention')"
         :model-value="localModel.date"
         :error="errors.date"
         :icon="icons.date"
-        help-text="Date à laquelle vous avez obtenu cette certification."
+        :help-text="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.HELP_TEXT.DATE, 'Date à laquelle vous avez obtenu cette certification.')"
         required
         @update:model-value="handleFieldUpdate('date', $event)"
         @blur="validateField('date', localModel.date)"
@@ -47,12 +47,12 @@
       <FormField
         name="url"
         type="url"
-        label="URL de vérification"
+        :label="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.LABELS.URL, 'URL de vérification')"
         :model-value="localModel.url || ''"
         :error="errors.url"
         :icon="icons.url"
-        placeholder="Ex: https://www.credential.net/certification/123456"
-        help-text="Lien vers la vérification en ligne de la certification (optionnel)."
+        :placeholder="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.PLACEHOLDERS.URL, 'Ex: https://www.credential.net/certification/123456')"
+        :help-text="safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.HELP_TEXT.URL, 'Lien vers la vérification en ligne de la certification (optionnel).')"
         @update:model-value="handleFieldUpdate('url', $event)"
         @blur="validateField('url', localModel.url || '')"
       />
@@ -65,13 +65,13 @@
         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
         @click="handleCancel"
       >
-        Annuler
+        {{ safeTranslate(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL, 'Annuler') }}
       </button>
       <button 
         type="submit"
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
       >
-        {{ isNew ? 'Ajouter' : 'Enregistrer' }}
+        {{ isNew ? safeTranslate(TRANSLATION_KEYS.COMMON.ACTIONS.ADD, 'Ajouter') : safeTranslate(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE, 'Enregistrer') }}
       </button>
     </div>
   </Form>
@@ -84,6 +84,8 @@ import FormField from '@ui/components/shared/form/FormField.vue'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 interface Props {
   modelValue: CertificateInterface
@@ -92,6 +94,17 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+// i18n support
+const { t } = useI18n()
+const safeTranslate = (key: string, fallback: string) => {
+  try {
+    const translation = t(key)
+    return translation !== key ? translation : fallback
+  } catch (e) {
+    return fallback
+  }
+}
 
 // Type-safe emits declaration
 const emit = defineEmits<{

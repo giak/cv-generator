@@ -1,20 +1,20 @@
 <template>
   <Form 
     :loading="loading"
-    :title="isNew ? 'Ajouter une publication' : 'Modifier la publication'"
-    :subtitle="isNew ? 'Détaillez vos publications professionnelles, livres, articles ou autres travaux publiés.' : 'Mettez à jour les détails de cette publication.'"
+    :title="isNew ? t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.FORM.EDIT_TITLE)"
+    :subtitle="isNew ? t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.FORM.ADD_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.FORM.EDIT_SUBTITLE)"
     @submit="handleSubmit"
     @cancel="handleCancel"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         name="name"
-        label="Nom de la publication"
+        :label="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LABELS.NAME)"
         :model-value="localModel.name"
         :error="errors.name"
         :icon="icons.name"
-        placeholder="Ex: Architecture moderne des applications web"
-        help-text="Titre de votre publication ou article."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.PLACEHOLDERS.NAME)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.HELP_TEXT.NAME)"
         required
         @update:model-value="(value) => handleFieldUpdate('name', value)"
         @blur="validateField('name', localModel.name)"
@@ -22,12 +22,12 @@
 
       <FormField
         name="publisher"
-        label="Éditeur"
+        :label="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LABELS.PUBLISHER)"
         :model-value="localModel.publisher"
         :error="errors.publisher"
         :icon="icons.publisher"
-        placeholder="Ex: Éditions Techniques"
-        help-text="Nom de l'éditeur ou de la plateforme de publication."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.PLACEHOLDERS.PUBLISHER)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.HELP_TEXT.PUBLISHER)"
         required
         @update:model-value="(value) => handleFieldUpdate('publisher', value)"
         @blur="validateField('publisher', localModel.publisher)"
@@ -35,11 +35,11 @@
 
       <FormField
         name="releaseDate"
-        label="Date de publication"
+        :label="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LABELS.RELEASE_DATE)"
         :model-value="localModel.releaseDate"
         :error="errors.releaseDate"
         :icon="icons.date"
-        help-text="Date à laquelle votre travail a été publié."
+        :help-text="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.HELP_TEXT.RELEASE_DATE)"
         required
         @update:model-value="(value) => handleFieldUpdate('releaseDate', value)"
         @blur="validateField('releaseDate', localModel.releaseDate)"
@@ -48,12 +48,12 @@
       <FormField
         name="url"
         type="url"
-        label="URL de la publication"
+        :label="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LABELS.URL)"
         :model-value="localModel.url"
         :error="errors.url"
         :icon="icons.url"
-        placeholder="Ex: https://exemple.com/publication"
-        help-text="Lien vers la publication en ligne (optionnel)."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.PLACEHOLDERS.URL)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.HELP_TEXT.URL)"
         @update:model-value="(value) => handleFieldUpdate('url', value)"
         @blur="validateField('url', localModel.url)"
       />
@@ -63,12 +63,12 @@
     <div class="mt-6">
       <FormField
         name="summary"
-        label="Résumé"
+        :label="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LABELS.SUMMARY)"
         :model-value="localModel.summary"
         :error="errors.summary"
         :icon="icons.description"
-        placeholder="Décrivez brièvement le contenu de votre publication..."
-        help-text="Un court résumé du contenu de votre publication (optionnel)."
+        :placeholder="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.PLACEHOLDERS.SUMMARY)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.HELP_TEXT.SUMMARY)"
         @update:model-value="(value) => handleFieldUpdate('summary', value)"
         @blur="validateField('summary', localModel.summary)"
       />
@@ -83,6 +83,8 @@ import Form from '@ui/components/shared/form/Form.vue'
 import FormField from '@ui/components/shared/form/FormField.vue'
 import { useFormModel } from '@ui/modules/cv/presentation/composables/useFormModel'
 import { useValidation } from '@ui/modules/cv/presentation/composables/useValidation'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 
 // Define a form-specific interface to handle empty string defaults for optional fields
 interface PublicationFormModel extends Omit<PublicationInterface, 'url' | 'summary'> {
@@ -102,6 +104,11 @@ const emit = defineEmits<{
   (e: 'cancel'): void
   (e: 'validate'): void
 }>()
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
 
 // Loading state
 const loading = ref(false)

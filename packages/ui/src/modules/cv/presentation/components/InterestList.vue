@@ -2,11 +2,11 @@
   <div class="space-y-6">
     <CollectionManager
       :items="interests"
-      title="Intérêts"
-      description="Gérez vos centres d'intérêt pour votre CV"
-      addButtonText="Ajouter un intérêt"
-      emptyStateTitle="Aucun intérêt"
-      emptyStateDescription="Commencez par ajouter un intérêt pour enrichir votre CV."
+      :title="t(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.TITLE)"
+      :description="t(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.DESCRIPTION)"
+      :addButtonText="t(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.ADD_BUTTON)"
+      :emptyStateTitle="t(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.EMPTY_STATE_TITLE)"
+      :emptyStateDescription="t(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.EMPTY_STATE_DESCRIPTION)"
       :loading="isLoading"
       @add="openAddModal"
       @edit="editInterest"
@@ -34,13 +34,13 @@
               </span>
             </div>
             <p v-else class="text-neutral-400 text-sm italic">
-              Aucun mot-clé
+              {{ t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.NO_KEYWORDS) }}
             </p>
           </div>
         </div>
       </template>
       
-      <template #itemActions="{ item: interest, index }">
+      <template #itemActions="{ index }">
         <div class="flex flex-col gap-2">
           <!-- Reorder buttons -->
           <div class="flex gap-1">
@@ -49,7 +49,7 @@
               @click="moveUp(index)"
               :disabled="index === 0"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le haut"
+              :title="t(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.MOVE_UP)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
@@ -61,7 +61,7 @@
               @click="moveDown(index)"
               :disabled="index === interests.length - 1"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le bas"
+              :title="t(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.MOVE_DOWN)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -77,7 +77,7 @@
       <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center p-4 border-b border-neutral-700">
           <h3 class="text-lg font-medium">
-            {{ isEditing ? 'Modifier l\'intérêt' : 'Ajouter un intérêt' }}
+            {{ isEditing ? t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.EDIT_TITLE) : t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.ADD_TITLE) }}
           </h3>
           <button 
             @click="closeModal" 
@@ -103,9 +103,9 @@
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-md">
         <div class="p-6">
-          <h3 class="text-xl font-semibold mb-4">Supprimer cet intérêt</h3>
+          <h3 class="text-xl font-semibold mb-4">{{ safeTranslate('resume.interests.list.confirmDelete', 'Supprimer cet intérêt') }}</h3>
           <p class="mb-6 text-neutral-300">
-            Êtes-vous sûr de vouloir supprimer cet intérêt ? Cette action est irréversible.
+            {{ safeTranslate('resume.interests.list.deleteWarning', 'Êtes-vous sûr de vouloir supprimer cet intérêt ? Cette action est irréversible.') }}
           </p>
           
           <div class="flex justify-end space-x-4">
@@ -113,14 +113,14 @@
               variant="ghost"
               @click="closeDeleteModal"
             >
-              Annuler
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
             </Button>
             <Button 
               variant="danger"
               :loading="isDeleting"
               @click="deleteInterest"
             >
-              Supprimer
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE) }}
             </Button>
           </div>
         </div>
@@ -157,15 +157,28 @@ import Button from '@ui/components/shared/Button.vue'
 import CollectionManager from '@ui/components/shared/CollectionManager.vue'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
 import type { ValidatedInterest } from '../stores/interest'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
+
+// Fonction de traduction
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string) => {
+  try {
+    const translation = t(key)
+    return translation !== key ? translation : fallback
+  } catch (e) {
+    return fallback
+  }
+}
 
 // Store
 const interestStore = useInterestStore()
 
 // Setup de useCollectionField pour gérer les intérêts
 const { 
-  items: interests,
-  reorderItems
-} = useCollectionField<ValidatedInterest>({
+  items: interests} = useCollectionField<ValidatedInterest>({
   fieldName: 'interests',
   collection: computed(() => interestStore.interests || []),
   updateField: () => {}, // On utilise directement le store
@@ -228,7 +241,12 @@ const closeModal = () => {
 
 // Handle interest saved event
 const onInterestSaved = () => {
-  showToast(isEditing.value ? 'Intérêt mis à jour avec succès' : 'Intérêt ajouté avec succès', 'success')
+  showToast(
+    isEditing.value 
+      ? safeTranslate('resume.interests.notifications.updateSuccess', 'Intérêt mis à jour avec succès') 
+      : safeTranslate('resume.interests.notifications.addSuccess', 'Intérêt ajouté avec succès'), 
+    'success'
+  )
   closeModal()
 }
 
@@ -254,10 +272,10 @@ const deleteInterest = async () => {
   
   try {
     await interestStore.deleteInterest(interestToDelete.value.id)
-    showToast('Intérêt supprimé avec succès', 'success')
+    showToast(safeTranslate('resume.interests.notifications.deleteSuccess', 'Intérêt supprimé avec succès'), 'success')
   } catch (error) {
     console.error('Error deleting interest:', error)
-    showToast('Erreur lors de la suppression de l\'intérêt', 'error')
+    showToast(safeTranslate('resume.interests.notifications.deleteError', 'Erreur lors de la suppression de l\'intérêt'), 'error')
   } finally {
     isDeleting.value = false
     closeDeleteModal()
@@ -281,7 +299,7 @@ const moveUp = async (index: number) => {
     await interestStore.reorderInterests(newOrder)
   } catch (error) {
     console.error('Error reordering interests:', error)
-    showToast('Erreur lors de la réorganisation des intérêts', 'error')
+    showToast(safeTranslate('resume.interests.notifications.reorderError', 'Erreur lors de la réorganisation des intérêts'), 'error')
   }
 }
 
@@ -302,7 +320,7 @@ const moveDown = async (index: number) => {
     await interestStore.reorderInterests(newOrder)
   } catch (error) {
     console.error('Error reordering interests:', error)
-    showToast('Erreur lors de la réorganisation des intérêts', 'error')
+    showToast(safeTranslate('resume.interests.notifications.reorderError', 'Erreur lors de la réorganisation des intérêts'), 'error')
   }
 }
 

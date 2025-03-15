@@ -2,11 +2,11 @@
   <div class="space-y-6">
     <CollectionManager
       :items="certificates"
-      title="Certifications"
-      description="Gérez vos certifications et diplômes professionnels"
-      addButtonText="Ajouter une certification"
-      emptyStateTitle="Aucune certification"
-      emptyStateDescription="Commencez par ajouter une certification pour enrichir votre CV."
+      :title="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.TITLE)"
+      :description="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.DESCRIPTION)"
+      :addButtonText="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.ADD_BUTTON)"
+      :emptyStateTitle="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.EMPTY_STATE_TITLE)"
+      :emptyStateDescription="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.EMPTY_STATE_DESCRIPTION)"
       :loading="loading.certificates"
       @add="openAddDialog"
       @edit="openEditDialog"
@@ -44,7 +44,7 @@
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
               </svg>
-              Voir la certification
+              {{ safeTranslate('resume.certificates.list.viewCertification', 'Voir la certification') }}
             </a>
           </div>
         </div>
@@ -59,7 +59,7 @@
               @click="moveUp(index)"
               :disabled="index === 0"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le haut"
+              :title="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.MOVE_UP)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
@@ -71,7 +71,7 @@
               @click="moveDown(index)"
               :disabled="index === certificates.length - 1"
               class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              title="Déplacer vers le bas"
+              :title="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.MOVE_DOWN)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -101,9 +101,9 @@
     <div v-if="showDeleteConfirmation" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-md">
         <div class="p-6">
-          <h3 class="text-xl font-semibold mb-4">Supprimer cette certification</h3>
+          <h3 class="text-xl font-semibold mb-4">{{ safeTranslate('resume.certificates.list.confirmDelete', 'Supprimer cette certification') }}</h3>
           <p class="mb-6 text-neutral-300">
-            Êtes-vous sûr de vouloir supprimer cette certification ? Cette action est irréversible.
+            {{ safeTranslate('resume.certificates.list.deleteWarning', 'Êtes-vous sûr de vouloir supprimer cette certification ? Cette action est irréversible.') }}
           </p>
           
           <div class="flex justify-end space-x-4">
@@ -111,14 +111,14 @@
               variant="ghost"
               @click="cancelDelete"
             >
-              Annuler
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
             </Button>
             <Button 
               variant="danger"
               :loading="loading.deleting"
               @click="deleteCertificate"
             >
-              Supprimer
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE) }}
             </Button>
           </div>
         </div>
@@ -136,6 +136,21 @@ import Button from '@ui/components/shared/Button.vue'
 import CollectionManager from '@ui/components/shared/CollectionManager.vue'
 import CertificateForm from './CertificateForm.vue'
 import { useCollectionField } from '@ui/modules/cv/presentation/composables/useCollectionField'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
+
+// Fonction de traduction
+const { t } = useI18n()
+
+// Fonction pour gérer les erreurs de traduction
+const safeTranslate = (key: string, fallback: string) => {
+  try {
+    const translation = t(key)
+    return translation !== key ? translation : fallback
+  } catch (e) {
+    return fallback
+  }
+}
 
 // State for managing the certificate list
 const certificateStore = useCertificateStore()

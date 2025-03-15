@@ -108,6 +108,15 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - Visual indicators for form completion status
   - Intuitive progress tracking across all CV sections
 
+- 🌍 **Internationalization & Multilingual Support**
+
+  - Complete UI internationalization with 22 components translated
+  - Support for English and French languages
+  - Safe translation system with fallback handling
+  - Extensible translation key structure
+  - Comprehensive testing infrastructure for multilingual validation
+  - Developer-friendly tools for adding new translations
+
 - 💾 **Data Management**
 
   - Automatic local storage backup
@@ -187,77 +196,67 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - 🔄 Optimisation pour l'expérience mobile en cours
   - ⏳ Formulaires pour les compétences (skills) et autres sections planifiés
   - ⏳ Support des sections optionnelles du standard JSON Resume
+- **Epic-5: Internationalisation & Multilinguisme** ✅ 100% Complété
+  - ✅ Internationalisation complète des 22 composants UI
+  - ✅ Support du français et de l'anglais dans l'interface
+  - ✅ Infrastructure de test complète pour validation multilingue
+  - ✅ Documentation technique et guides de référence pour l'i18n
+  - ✅ Système robuste de gestion des traductions manquantes
 - **Epic-4: Prévisualisation et exportation** ⏳ Planifié
-- **Epic-5: Optimisation ATS** ⏳ Planifié
+- **Epic-6: Optimisation ATS** ⏳ Planifié
 
-### Latest Feature: Validation System Implementation
+### Latest Feature: Internationalization & Multilingualism
 
-✨ **Recent Achievement: Standardized Validation System** ✨
+✨ **Recent Achievement: Complete UI Internationalization** ✨
 
-The application now features a robust validation system based on the Result/Option Pattern:
+The application now features a comprehensive internationalization system:
 
-- ✅ **Standardized Error Handling**:
+- ✅ **Translated Components**:
 
-  - Consistent `ResultType<T>` structure across the application
-  - Layered validation approach (Domain, Application, Presentation)
-  - Type-safe error handling with detailed error information
-  - Support for warnings alongside validation errors
+  - All 22 UI components are now fully internationalized
+  - Support for English and French languages
+  - Robust translation key structure for easy maintenance
+  - Safe translation handling with fallback mechanism
 
-- ✅ **Improved Value Objects**:
+- ✅ **Testing Infrastructure**:
 
-  - Migrated key objects: `Email`, `WorkDate`, `Phone`
-  - Backward compatibility with legacy code
-  - Standardized validation approach
-  - Comprehensive error messages with suggestions
+  - Specialized i18n testing plugin for Vue components
+  - Utilities for testing components in multiple languages
+  - Automated detection of i18n-related console errors
+  - Multilingual testing scripts for efficient validation
 
-- ✅ **Rich Error Context**:
-  - Error code catalog with standardized naming
-  - Error severity levels (error, warning, info)
-  - Field-specific validation
-  - Helpful suggestions for error resolution
-  - Support for internationalization
+- ✅ **Developer Experience**:
+  - Reference guide for adding new translation keys
+  - Standardized approach for component internationalization
+  - Comprehensive technical documentation for code review
+  - Best practices for UI text internationalization
 
 This enhancement brings several benefits:
 
-1. **Better user experience** with detailed, context-aware validation messages
-2. **Improved code quality** through standardized error handling
-3. **Enhanced type safety** with TypeScript-first approach
-4. **Simplified debugging** with consistent error structures
-5. **Progressive enhancement** with backward compatibility
+1. **Improved user experience** with native language support
+2. **Global accessibility** for French and English-speaking users
+3. **Enhanced maintainability** with centralized translation keys
+4. **Robust testing** ensuring correct translations across the application
+5. **Framework for future languages** with minimal additional effort
 
 ```typescript
-// Example: Email value object with Result Pattern
-public static create(email: string): ResultType<Email> {
-  if (!email || email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return createFailure([{
-      code: !email || email.trim() === '' ?
-        ERROR_CODES.RESUME.BASICS.MISSING_EMAIL :
-        ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
-      message: "Format email invalide",
-      field: "email",
-      severity: "error",
-      layer: ValidationLayerType.DOMAIN,
-      suggestion: "Vérifiez que votre email contient un @ et un domaine valide"
-    }]);
-  }
-
-  // Additional validation for personal vs. professional emails
-  if (isPersonalEmail(email)) {
-    return createSuccessWithWarnings(new Email(email), [{
-      code: ERROR_CODES.RESUME.BASICS.PERSONAL_EMAIL,
-      message: "Email personnel détecté",
-      field: "email",
-      severity: "warning",
-      layer: ValidationLayerType.APPLICATION,
-      suggestion: "Pour un CV professionnel, privilégiez un email professionnel ou neutre"
-    }]);
-  }
-
-  return createSuccess(new Email(email));
+// Example: Safe translation function
+function safeTranslate(key: string, fallback: string = ""): string {
+  const translation = t(key);
+  // If translation equals the key, it doesn't exist
+  return translation === key ? fallback : translation;
 }
 ```
 
-For detailed information about the validation system, check the documentation in [docs/design/message-systeme-validation.md](docs/design/message-systeme-validation.md) and [docs/design/result-pattern-impl.md](docs/design/result-pattern-impl.md).
+```typescript
+// Example: Component with i18n support
+<template>
+  <h2>{{ t(TRANSLATION_KEYS.CV.LISTS.WORK.TITLE) }}</h2>
+  <p>{{ safeTranslate(TRANSLATION_KEYS.CV.LISTS.WORK.DESCRIPTION, 'Fallback text') }}</p>
+</template>
+```
+
+For detailed information about the internationalization system, check the documentation in [docs/epic-5/i18n-reference-guide.md](docs/epic-5/i18n-reference-guide.md) and [docs/epic-5/i18n-technical-review.md](docs/epic-5/i18n-technical-review.md).
 
 ### Reusable Composables
 
@@ -926,12 +925,13 @@ Pour une liste détaillée des modifications, consultez le [CHANGELOG.md](CHANGE
 
 ### Recent Updates (v1.1.0)
 
+- **Internationalization**: Complete UI components translation with English and French support
+- **i18n Testing**: Advanced testing infrastructure for multilingual components
 - **NavigationSystem**: Completely refactored navigation with event-based architecture
 - **FormComponents**: Standardized all form components with TypeScript type safety
 - **CollectionManager**: Added unified list management with drag-and-drop support
 - **ValidationSystem**: Implemented robust Result/Option Pattern for standardized validation
 - **Performance**: Improved rendering performance for large CV collections
-- **i18n**: Enhanced internationalization support for UI elements
 
 ## License
 
