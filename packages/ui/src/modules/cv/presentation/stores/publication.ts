@@ -5,7 +5,6 @@ import { useErrorStore } from '../../../../core/stores/error'
 import { ManageResume } from '@cv-generator/core'
 import type { PublicationInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
-import { useResumeStore } from './resume'
 
 // Interface extended to include ID
 export interface PublicationWithId extends PublicationInterface {
@@ -39,7 +38,6 @@ export const usePublicationStore = defineStore('publication', () => {
   // Repository and resume manager
   const repository = new LocalStorageResumeRepository()
   const manageResume = new ManageResume(repository)
-  const resumeStore = useResumeStore()
   
   // Helper to generate a unique ID
   const generateId = () => uuidv4()

@@ -3,16 +3,46 @@
  * Implémentation utilisant le pattern ResultType standardisé
  */
 
-import { 
-  ResultType, 
-  ValidationErrorInterface,
-  ValidationLayerType,
-  createSuccess,
-  createFailure,
-  ERROR_CODES,
-  isSuccess
+import {
+    ResultType,
+    ValidationLayerType,
+    createSuccess,
+    createFailure,
+    ERROR_CODES
 } from '@cv-generator/shared';
+import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
 
+// Définition des clés de traduction spécifiques pour les dates
+// À migrer vers TRANSLATION_KEYS dans @cv-generator/shared quand possible
+const DATE_VALIDATION_KEYS = {
+  MISSING_DATE: "resume.common.validation.missingDate",
+  INVALID_DATE_FORMAT: "resume.common.validation.invalidDateFormat",
+  INVALID_DATE: "resume.common.validation.invalidDate"
+};
+
+/**
+ * Adaptateur i18n par défaut pour la compatibilité
+ * Retourne simplement la clé ou le message en dur prédéfini
+ */
+class DefaultI18nAdapter implements DomainI18nPortInterface {
+  translate(key: string, _params?: Record<string, unknown>): string {
+    // Messages par défaut pour maintenir la compatibilité avec le code existant
+    const defaultMessages: Record<string, string> = {
+      [DATE_VALIDATION_KEYS.MISSING_DATE]: "La date est requise",
+      [DATE_VALIDATION_KEYS.INVALID_DATE_FORMAT]: "La date doit être au format YYYY-MM-DD",
+      [DATE_VALIDATION_KEYS.INVALID_DATE]: "Date invalide"
+    };
+
+    return defaultMessages[key] || key;
+  }
+
+  exists(_key: string): boolean {
+    return true; // Réponse optimiste pour éviter les erreurs
+  }
+}
+
+// Instance singleton pour réutilisation
+const defaultI18nAdapter = new DefaultI18nAdapter();
 
 /**
  * Type de retour adapté pour les tests existants
@@ -32,22 +62,33 @@ type LegacyDateResult = {
 export class WorkDate {
   /**
    * Constructeur privé pour forcer l'utilisation de la méthode factory create()
+   * @param value Valeur de la date au format YYYY-MM-DD
+   * @param date Objet Date JavaScript correspondant
+   * @param i18n Interface pour l'internationalisation des messages
    */
-  private constructor(private readonly value: string, private readonly date: Date) {}
+  private constructor(
+    private readonly value: string, 
+    private readonly date: Date,
+    private readonly i18n: DomainI18nPortInterface
+  ) {}
 
   /**
    * Méthode factory compatible avec l'ancien pattern Result
    * Maintenue pour la compatibilité avec les tests existants
    * @param dateStr La date au format YYYY-MM-DD
+   * @param i18n Interface pour l'internationalisation des messages (optionnel)
    * @returns Objet au format legacy (isSuccess, isFailure, etc.)
    */
-  public static create(dateStr: string): LegacyDateResult {
+  public static create(
+    dateStr: string,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): LegacyDateResult {
     // Validation du format YYYY-MM-DD
     if (!dateStr) {
       return {
         isSuccess: false,
         isFailure: true,
-        error: 'La date est requise'
+        error: i18n.translate(DATE_VALIDATION_KEYS.MISSING_DATE)
       };
     }
 
@@ -56,7 +97,7 @@ export class WorkDate {
       return {
         isSuccess: false,
         isFailure: true,
-        error: 'La date doit être au format YYYY-MM-DD'
+        error: i18n.translate(DATE_VALIDATION_KEYS.INVALID_DATE_FORMAT)
       };
     }
 
@@ -66,12 +107,12 @@ export class WorkDate {
       return {
         isSuccess: false,
         isFailure: true,
-        error: 'Date invalide'
+        error: i18n.translate(DATE_VALIDATION_KEYS.INVALID_DATE)
       };
     }
 
     // Si toutes les validations passent, créer l'objet
-    const workDateInstance = new WorkDate(dateStr, date);
+    const workDateInstance = new WorkDate(dateStr, date, i18n);
     return {
       isSuccess: true,
       isFailure: false,
@@ -84,14 +125,19 @@ export class WorkDate {
    * Méthode factory standard pour créer une instance WorkDate avec ResultType
    * Applique les règles de validation du domaine
    * @param dateStr La date au format YYYY-MM-DD
+   * @param i18n Interface pour l'internationalisation des messages (optionnel)
    * @returns ResultType contenant soit l'objet WorkDate en cas de succès, soit les erreurs
    */
-  public static createWithResultType(dateStr: string): ResultType<WorkDate> {
+  public static createWithResultType(
+    dateStr: string,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): ResultType<WorkDate> {
     // Validation du format YYYY-MM-DD
     if (!dateStr) {
       return createFailure([{
         code: ERROR_CODES.COMMON.REQUIRED_FIELD,
-        message: "La date est requise",
+        message: i18n.translate(DATE_VALIDATION_KEYS.MISSING_DATE),
+        i18nKey: DATE_VALIDATION_KEYS.MISSING_DATE,
         field: "date",
         severity: "error",
         layer: ValidationLayerType.DOMAIN
@@ -102,7 +148,8 @@ export class WorkDate {
     if (!dateRegex.test(dateStr)) {
       return createFailure([{
         code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
-        message: "La date doit être au format YYYY-MM-DD",
+        message: i18n.translate(DATE_VALIDATION_KEYS.INVALID_DATE_FORMAT),
+        i18nKey: DATE_VALIDATION_KEYS.INVALID_DATE_FORMAT,
         field: "date",
         severity: "error",
         layer: ValidationLayerType.DOMAIN,
@@ -115,7 +162,8 @@ export class WorkDate {
     if (isNaN(date.getTime())) {
       return createFailure([{
         code: ERROR_CODES.COMMON.INVALID_FORMAT,
-        message: "Date invalide",
+        message: i18n.translate(DATE_VALIDATION_KEYS.INVALID_DATE),
+        i18nKey: DATE_VALIDATION_KEYS.INVALID_DATE,
         field: "date",
         severity: "error",
         layer: ValidationLayerType.DOMAIN,
@@ -123,7 +171,7 @@ export class WorkDate {
       }]);
     }
 
-    return createSuccess(new WorkDate(dateStr, date));
+    return createSuccess(new WorkDate(dateStr, date, i18n));
   }
 
   /**

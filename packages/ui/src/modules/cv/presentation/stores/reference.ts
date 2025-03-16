@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useErrorStore } from '../../../../core/stores/error'
-import { ManageResume } from '@cv-generator/core'
 import type { ReferenceInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
 import { v4 as uuidv4 } from 'uuid'
@@ -90,13 +88,11 @@ export const useReferenceStore = defineStore('reference', () => {
   const isEmpty = computed(() => references.value.length === 0)
   
   // Error store for handling errors
-  const errorStore = useErrorStore()
   
   // Repository and resume manager
   const repository = new LocalStorageResumeRepository()
   
   // Resume manager with repository instance
-  const manageResume = new ManageResume(repository)
   
   /**
    * Charge les références depuis le localStorage

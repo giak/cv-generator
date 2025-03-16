@@ -2,9 +2,26 @@ import { describe, it, expect } from 'vitest';
 import { BasicsValidationService } from '../basics-validation.service';
 import { isSuccess, isFailure } from '@cv-generator/shared';
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface';
+import { MockDomainI18nAdapter } from '../../../../shared/i18n/__mocks__/i18n.mock';
+import { BASICS_VALIDATION_KEYS } from '../../../domain/entities/Basics';
+import { EMAIL_VALIDATION_KEYS } from '../../../domain/value-objects/email.value-object';
+import { URL_VALIDATION_KEYS } from '../../../domain/value-objects/url.value-object';
+import { PHONE_VALIDATION_KEYS } from '../../../domain/value-objects/phone.value-object';
 
 describe('BasicsValidationService', () => {
-  const validationService = new BasicsValidationService();
+  // Create a mock i18n adapter with translations for testing
+  const mockI18n = new MockDomainI18nAdapter({
+    [BASICS_VALIDATION_KEYS.MISSING_NAME]: 'Le nom est requis',
+    [BASICS_VALIDATION_KEYS.NAME_TOO_LONG]: 'Le nom ne doit pas dépasser 100 caractères',
+    [BASICS_VALIDATION_KEYS.MISSING_EMAIL]: 'L\'email est requis',
+    [EMAIL_VALIDATION_KEYS.INVALID_EMAIL]: 'Format email invalide',
+    [EMAIL_VALIDATION_KEYS.PERSONAL_EMAIL]: 'Email personnel détecté',
+    [URL_VALIDATION_KEYS.INVALID_URL]: 'Format d\'URL invalide',
+    [PHONE_VALIDATION_KEYS.INVALID_PHONE]: 'Format de téléphone invalide'
+  });
+
+  // Create the validation service with the mock i18n adapter
+  const validationService = new BasicsValidationService(mockI18n);
   
   describe('validate', () => {
     it('should validate valid basics data', () => {
@@ -53,6 +70,7 @@ describe('BasicsValidationService', () => {
         const nameErrors = result.error.filter(e => e.field === 'name');
         expect(nameErrors.length).toBe(1);
         expect(nameErrors[0].message).toBe('Le nom est requis');
+        expect(nameErrors[0].i18nKey).toBe(BASICS_VALIDATION_KEYS.MISSING_NAME);
       }
     });
     
@@ -73,6 +91,7 @@ describe('BasicsValidationService', () => {
         const emailErrors = result.error.filter(e => e.field === 'email');
         expect(emailErrors.length).toBe(1);
         expect(emailErrors[0].message).toBe('Format email invalide');
+        expect(emailErrors[0].i18nKey).toBe(EMAIL_VALIDATION_KEYS.INVALID_EMAIL);
       }
     });
     
@@ -94,6 +113,7 @@ describe('BasicsValidationService', () => {
         const emailWarnings = result.warnings?.filter(e => e.field === 'email' && e.severity === 'warning');
         expect(emailWarnings?.length).toBe(1);
         expect(emailWarnings?.[0].message).toBe('Email personnel détecté');
+        expect(emailWarnings?.[0].i18nKey).toBe(EMAIL_VALIDATION_KEYS.PERSONAL_EMAIL);
       }
     });
     
@@ -136,6 +156,7 @@ describe('BasicsValidationService', () => {
         const urlErrors = result.error.filter(e => e.field === 'url');
         expect(urlErrors.length).toBe(1);
         expect(urlErrors[0].message).toBe("Format d'URL invalide");
+        expect(urlErrors[0].i18nKey).toBe(URL_VALIDATION_KEYS.INVALID_URL);
       }
     });
   });
@@ -173,6 +194,7 @@ describe('BasicsValidationService', () => {
       expect(isFailure(result)).toBe(true);
       if (isFailure(result)) {
         expect(result.error[0].message).toBe('Le nom est requis');
+        expect(result.error[0].i18nKey).toBe(BASICS_VALIDATION_KEYS.MISSING_NAME);
       }
     });
     

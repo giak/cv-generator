@@ -86,7 +86,7 @@ const localDisabled = computed(() => {
 const isVertical = computed(() => props.vertical);
 </script>
 
-<style lang="postcss">
+<style lang="scss">
 .tab-nav-item {
   @apply relative px-4 py-2 transition-all duration-200 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500/40;
 }

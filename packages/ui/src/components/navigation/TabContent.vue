@@ -46,7 +46,7 @@ const isActive = computed(() => {
 });
 </script>
 
-<style lang="postcss">
+<style lang="scss">
 .tab-panel {
   @apply outline-none;
 }

@@ -6,7 +6,7 @@ import type { AwardInterface } from '@cv-generator/shared/src/types/resume.inter
 import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
 import { v4 as uuidv4 } from 'uuid'
 import { useResumeStore } from './resume'
-import type { Award, AwardWithId, ValidatedAward } from '@cv-generator/core/src/modules/cv/domain/entities/Award'
+import type { AwardWithId, ValidatedAward } from '@cv-generator/core/src/modules/cv/domain/entities/Award'
 
 // Interface extended to include ID
 export interface AwardWithId extends AwardInterface {

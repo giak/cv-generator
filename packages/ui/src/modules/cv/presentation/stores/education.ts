@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useErrorStore } from '../../../../core/stores/error'
-import { ManageResume } from '@cv-generator/core'
 import type { EducationInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
 import { v4 as uuidv4 } from 'uuid'
@@ -62,7 +61,6 @@ export const useEducationStore = defineStore('education', () => {
   const repository = new LocalStorageResumeRepository()
   
   // Resume manager with repository instance
-  const manageResume = new ManageResume(repository)
   
   // Helper to generate a unique ID
   const generateId = (): string => {

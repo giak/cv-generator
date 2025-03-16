@@ -78,7 +78,7 @@ defineProps({
 defineEmits(['update:modelValue', 'confirm', 'cancel'])
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .animate-fade-in {
   animation: fadeIn 0.2s ease-out;
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch, type Component } from 'vue'
+import { onMounted, watch } from 'vue'
 import BasicsForm from '@ui/modules/cv/presentation/components/BasicsForm.vue'
 import WorkList from '@ui/modules/cv/presentation/components/WorkList.vue'
 import VolunteerList from '@ui/modules/cv/presentation/components/VolunteerList.vue'
@@ -9,7 +9,7 @@ import CertificateList from '@ui/modules/cv/presentation/components/CertificateL
 import ErrorNotification from '../components/notification/ErrorNotification.vue'
 import ToastDemo from '../components/notification/ToastDemo.vue'
 // Import layout components
-import { 
+import {
   DashboardLayout,
   UserInfo,
   SearchInput,
@@ -17,12 +17,11 @@ import {
   BreadcrumbNav
 } from '../components/layouts'
 // Import des composants de navigation
-import { 
+import {
   FormNavigation,
-  UnifiedNavigation 
+  UnifiedNavigation
 } from '../components/navigation'
 // Import des composants de statut
-import { ProgressIndicator } from '../components/status'
 import PublicationList from '@ui/modules/cv/presentation/components/PublicationList.vue'
 import SkillList from '@ui/modules/cv/presentation/components/SkillList.vue'
 import LanguageList from '@ui/modules/cv/presentation/components/LanguageList.vue'
@@ -42,24 +41,17 @@ const { resumeStore } = useStores()
 const { 
   activeComponent, 
   activeView, 
-  isSidebarOpen, 
   basics, 
   initializeBasics, 
   updateBasics, 
   saveBasics, 
-  toggleSidebar, 
   setupResizeListener 
 } = useAppState()
 const { 
-  navigationGroups, 
   breadcrumbItems, 
   handleNavigation, 
   getActiveViewTitle, 
-  getActiveViewDescription,
-  navigateToNextSection,
-  navigateToPrevSection,
-  navigateToNextIncompleteSection
-} = useNavigation({ activeView, activeComponent })
+  getActiveViewDescription} = useNavigation({ activeView, activeComponent })
 const { handleErrorAction } = useErrorHandling()
 
 // Charger le CV au montage du composant

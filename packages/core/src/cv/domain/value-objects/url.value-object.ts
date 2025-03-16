@@ -4,14 +4,49 @@
  */
 
 import {
-  ResultType,
-  ValidationErrorInterface,
-  ValidationLayerType,
-  createSuccess,
-  createFailure,
-  createSuccessWithWarnings,
-  ERROR_CODES
+    ResultType,
+    ValidationErrorInterface,
+    ValidationLayerType,
+    createSuccess,
+    createFailure,
+    createSuccessWithWarnings,
+    ERROR_CODES
 } from '@cv-generator/shared';
+import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
+
+// Définition des clés de traduction spécifiques pour les URLs
+// À migrer vers TRANSLATION_KEYS dans @cv-generator/shared quand possible
+export const URL_VALIDATION_KEYS = {
+  MISSING_URL: "resume.basics.validation.missingUrl",
+  INVALID_URL: "resume.basics.validation.invalidUrl",
+  INSECURE_URL: "resume.basics.validation.insecureUrl",
+  TEMPORARY_DOMAIN: "resume.basics.validation.temporaryDomain"
+};
+
+/**
+ * Adaptateur i18n par défaut pour la compatibilité
+ * Retourne simplement la clé ou le message en dur prédéfini
+ */
+class DefaultI18nAdapter implements DomainI18nPortInterface {
+  translate(key: string, _params?: Record<string, unknown>): string {
+    // Messages par défaut pour maintenir la compatibilité avec le code existant
+    const defaultMessages: Record<string, string> = {
+      [URL_VALIDATION_KEYS.MISSING_URL]: "L'URL est requise",
+      [URL_VALIDATION_KEYS.INVALID_URL]: "Format d'URL invalide",
+      [URL_VALIDATION_KEYS.INSECURE_URL]: "URL non sécurisée (HTTP)",
+      [URL_VALIDATION_KEYS.TEMPORARY_DOMAIN]: "Domaine temporaire ou de test détecté"
+    };
+
+    return defaultMessages[key] || key;
+  }
+
+  exists(_key: string): boolean {
+    return true; // Réponse optimiste pour éviter les erreurs
+  }
+}
+
+// Create a singleton instance of the default adapter
+const defaultI18nAdapter = new DefaultI18nAdapter();
 
 /**
  * Value Object Url
@@ -21,8 +56,12 @@ export class Url {
   /**
    * Constructeur privé pour forcer l'utilisation de la méthode create
    * @param value Valeur de l'URL
+   * @param i18n Interface pour l'internationalisation des messages
    */
-  private constructor(private readonly value: string) {}
+  private constructor(
+    private readonly value: string,
+    private readonly i18n: DomainI18nPortInterface
+  ) {}
 
   /**
    * Accesseur pour la valeur de l'URL
@@ -71,21 +110,26 @@ export class Url {
     }
     
     const secureUrl = this.value.replace(/^http:\/\//, 'https://');
-    return new Url(secureUrl);
+    return new Url(secureUrl, this.i18n);
   }
 
   /**
    * Méthode factory pour créer une instance d'URL avec ResultType
    * Applique les règles de validation du domaine
    * @param url URL à valider
+   * @param i18n Interface pour l'internationalisation des messages (optionnel)
    * @returns ResultType contenant soit l'objet Url en cas de succès, soit les erreurs
    */
-  public static create(url: string): ResultType<Url> {
+  public static create(
+    url: string,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): ResultType<Url> {
     // Cas d'une URL vide ou undefined
     if (!url || url.trim() === '') {
       return createFailure([{
         code: ERROR_CODES.COMMON.REQUIRED_FIELD,
-        message: "L'URL est requise",
+        message: i18n.translate(URL_VALIDATION_KEYS.MISSING_URL),
+        i18nKey: URL_VALIDATION_KEYS.MISSING_URL,
         field: "url",
         severity: "error",
         layer: ValidationLayerType.DOMAIN,
@@ -115,7 +159,8 @@ export class Url {
       // L'URL est invalide, retourner une erreur
       return createFailure([{
         code: ERROR_CODES.COMMON.INVALID_FORMAT,
-        message: "Format d'URL invalide",
+        message: i18n.translate(URL_VALIDATION_KEYS.INVALID_URL),
+        i18nKey: URL_VALIDATION_KEYS.INVALID_URL,
         field: "url",
         severity: "error",
         layer: ValidationLayerType.DOMAIN,
@@ -130,7 +175,8 @@ export class Url {
     if (normalizedUrl.startsWith('http://')) {
       warnings.push({
         code: ERROR_CODES.COMMON.INVALID_FORMAT,
-        message: "URL non sécurisée (HTTP)",
+        message: i18n.translate(URL_VALIDATION_KEYS.INSECURE_URL),
+        i18nKey: URL_VALIDATION_KEYS.INSECURE_URL,
         field: "url",
         severity: "warning",
         layer: ValidationLayerType.DOMAIN,
@@ -147,7 +193,8 @@ export class Url {
     if (temporaryDomains.some(tempDomain => domain.includes(tempDomain)) && warnings.length === 0) {
       warnings.push({
         code: ERROR_CODES.COMMON.INVALID_FORMAT,
-        message: "Domaine temporaire ou de test détecté",
+        message: i18n.translate(URL_VALIDATION_KEYS.TEMPORARY_DOMAIN),
+        i18nKey: URL_VALIDATION_KEYS.TEMPORARY_DOMAIN,
         field: "url",
         severity: "warning",
         layer: ValidationLayerType.DOMAIN,
@@ -157,11 +204,11 @@ export class Url {
     
     // Si des warnings ont été détectés, on retourne un succès avec warnings
     if (warnings.length > 0) {
-      return createSuccessWithWarnings(new Url(normalizedUrl), warnings);
+      return createSuccessWithWarnings(new Url(normalizedUrl, i18n), warnings);
     }
     
     // Sinon, on retourne un succès simple
-    return createSuccess(new Url(normalizedUrl));
+    return createSuccess(new Url(normalizedUrl, i18n));
   }
 
   /**

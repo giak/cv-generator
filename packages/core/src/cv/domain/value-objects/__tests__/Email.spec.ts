@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { Email } from '../email.value-object'
-import { isSuccess, isFailure } from '@cv-generator/shared'
+import { isSuccess, isFailure, TRANSLATION_KEYS } from '@cv-generator/shared'
 
 describe('Email Value Object', () => {
   describe('create', () => {
@@ -20,6 +20,7 @@ describe('Email Value Object', () => {
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
         expect(result.error[0].message).toBe('Format email invalide')
+        expect(result.error[0].i18nKey).toBe(TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.INVALID_EMAIL)
       }
     })
 
@@ -28,7 +29,8 @@ describe('Email Value Object', () => {
 
       expect(isFailure(result)).toBe(true)
       if (isFailure(result)) {
-        expect(result.error[0].message).toBe('Format email invalide')
+        expect(result.error[0].message).toBe("L'email est requis")
+        expect(result.error[0].i18nKey).toBe(TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.MISSING_EMAIL)
       }
     })
   })

@@ -10,8 +10,41 @@ import {
   createSuccess,
   createFailure,
   createSuccessWithWarnings,
-  ERROR_CODES
+  ERROR_CODES,
+  TRANSLATION_KEYS
 } from '@cv-generator/shared';
+import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
+
+// Export translation keys for email validation
+export const EMAIL_VALIDATION_KEYS = {
+  MISSING_EMAIL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.MISSING_EMAIL,
+  INVALID_EMAIL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.INVALID_EMAIL,
+  PERSONAL_EMAIL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.PERSONAL_EMAIL
+};
+
+/**
+ * Adaptateur i18n par défaut pour la compatibilité
+ * Retourne simplement la clé ou le message en dur prédéfini
+ */
+class DefaultI18nAdapter implements DomainI18nPortInterface {
+  translate(key: string, _params?: Record<string, unknown>): string {
+    // Messages par défaut pour maintenir la compatibilité avec le code existant
+    const defaultMessages: Record<string, string> = {
+      [EMAIL_VALIDATION_KEYS.MISSING_EMAIL]: "L'email est requis",
+      [EMAIL_VALIDATION_KEYS.INVALID_EMAIL]: "Format email invalide",
+      [EMAIL_VALIDATION_KEYS.PERSONAL_EMAIL]: "Email personnel détecté"
+    };
+
+    return defaultMessages[key] || key;
+  }
+
+  exists(_key: string): boolean {
+    return true; // Réponse optimiste pour éviter les erreurs
+  }
+}
+
+// Create a singleton instance of the default adapter
+const defaultI18nAdapter = new DefaultI18nAdapter();
 
 /**
  * Value Object Email
@@ -21,8 +54,12 @@ export class Email {
   /**
    * Constructeur privé pour forcer l'utilisation de la méthode create
    * @param value Valeur de l'email
+   * @param i18n Interface pour l'internationalisation des messages
    */
-  private constructor(private readonly value: string) {}
+  private constructor(
+    private readonly value: string,
+    private readonly i18n: DomainI18nPortInterface
+  ) {}
 
   /**
    * Accesseur pour la valeur de l'email
@@ -36,16 +73,31 @@ export class Email {
    * Méthode factory standard pour créer une instance d'Email avec ResultType
    * Applique les règles de validation du domaine
    * @param email Adresse email à valider
+   * @param i18n Interface pour l'internationalisation des messages (optionnel)
    * @returns ResultType contenant soit l'objet Email en cas de succès, soit les erreurs
    */
-  public static create(email: string): ResultType<Email> {
+  public static create(
+    email: string,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): ResultType<Email> {
     // Validation: Format d'email valide (incluant l'email vide)
-    if (!email || email.trim() === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || email.trim() === '') {
       return createFailure([{
-        code: !email || email.trim() === '' ? 
-          ERROR_CODES.RESUME.BASICS.MISSING_EMAIL : 
-          ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
-        message: "Format email invalide", // Message d'erreur unifié pour les tests
+        code: ERROR_CODES.RESUME.BASICS.MISSING_EMAIL,
+        message: i18n.translate(EMAIL_VALIDATION_KEYS.MISSING_EMAIL),
+        i18nKey: EMAIL_VALIDATION_KEYS.MISSING_EMAIL,
+        field: "email",
+        severity: "error",
+        layer: ValidationLayerType.DOMAIN,
+        suggestion: "Vérifiez que votre email n'est pas vide"
+      }]);
+    }
+    
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return createFailure([{
+        code: ERROR_CODES.RESUME.BASICS.INVALID_EMAIL,
+        message: i18n.translate(EMAIL_VALIDATION_KEYS.INVALID_EMAIL),
+        i18nKey: EMAIL_VALIDATION_KEYS.INVALID_EMAIL,
         field: "email",
         severity: "error",
         layer: ValidationLayerType.DOMAIN,
@@ -63,7 +115,8 @@ export class Email {
     if (personalDomains.includes(domain)) {
       errors.push({
         code: ERROR_CODES.RESUME.BASICS.PERSONAL_EMAIL,
-        message: "Email personnel détecté",
+        message: i18n.translate(EMAIL_VALIDATION_KEYS.PERSONAL_EMAIL),
+        i18nKey: EMAIL_VALIDATION_KEYS.PERSONAL_EMAIL,
         field: "email",
         severity: "warning",
         layer: ValidationLayerType.DOMAIN,
@@ -73,11 +126,11 @@ export class Email {
     
     // Si des warnings ont été détectés, on retourne un succès avec warnings
     if (errors.length > 0) {
-      return createSuccessWithWarnings(new Email(email), errors);
+      return createSuccessWithWarnings(new Email(email, i18n), errors);
     }
     
     // Sinon, on retourne un succès simple
-    return createSuccess(new Email(email));
+    return createSuccess(new Email(email, i18n));
   }
 
   /**

@@ -1,3 +1,4 @@
+import { type } from '../../../../shared/dist/index';
 <script setup lang="ts">
 interface Props {
   vertical?: boolean;
@@ -19,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 /* These styles handle the connected appearance of buttons in the group */
 :deep(button), :deep(a) {
   @apply rounded-none border-r-0 relative;

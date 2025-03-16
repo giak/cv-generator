@@ -34,10 +34,10 @@ export default {
         return h(ToastContainer, {
           position: options.position || 'top-right',
           maxToasts: options.maxToasts || 5,
-          onDismiss: (id: string) => {
+          onDismiss: () => {
             // Event handler si nécessaire
           },
-          onAction: (payload: { id: string, action: any }) => {
+          onAction: () => {
             // Event handler si nécessaire
           }
         });

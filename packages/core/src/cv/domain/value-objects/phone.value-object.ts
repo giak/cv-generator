@@ -3,15 +3,45 @@
  * Implémentation utilisant le pattern ResultType standardisé
  */
 
-import { 
-  ResultType, 
-  ValidationErrorInterface,
-  ValidationLayerType,
-  createSuccess,
-  createFailure,
-  ERROR_CODES,
-  isSuccess
+import {
+    ResultType,
+    ValidationErrorInterface,
+    ValidationLayerType,
+    createSuccess,
+    createFailure,
+    ERROR_CODES,
+    TRANSLATION_KEYS
 } from '@cv-generator/shared';
+import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
+
+// Export translation keys for phone validation
+export const PHONE_VALIDATION_KEYS = {
+  MISSING_PHONE: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.MISSING_PHONE,
+  INVALID_PHONE: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.INVALID_PHONE
+};
+
+/**
+ * Adaptateur i18n par défaut pour la compatibilité
+ * Retourne simplement la clé ou le message en dur prédéfini
+ */
+class DefaultI18nAdapter implements DomainI18nPortInterface {
+  translate(key: string, _params?: Record<string, unknown>): string {
+    // Messages par défaut pour maintenir la compatibilité avec le code existant
+    const defaultMessages: Record<string, string> = {
+      [PHONE_VALIDATION_KEYS.MISSING_PHONE]: "Format de téléphone invalide",
+      [PHONE_VALIDATION_KEYS.INVALID_PHONE]: "Format de téléphone invalide"
+    };
+
+    return defaultMessages[key] || key;
+  }
+
+  exists(_key: string): boolean {
+    return true; // Réponse optimiste pour éviter les erreurs
+  }
+}
+
+// Create a singleton instance of the default adapter
+const defaultI18nAdapter = new DefaultI18nAdapter();
 
 /**
  * Type de retour adapté pour les tests existants
@@ -32,22 +62,30 @@ export class Phone {
   /**
    * Constructeur privé pour forcer l'utilisation de la méthode create
    * @param value Valeur du numéro de téléphone (format normalisé)
+   * @param i18n Interface pour l'internationalisation des messages
    */
-  private constructor(private readonly value: string) {}
+  private constructor(
+    private readonly value: string,
+    private readonly i18n: DomainI18nPortInterface
+  ) {}
 
   /**
    * Méthode factory compatible avec l'ancien pattern Result
    * Maintenue pour la compatibilité avec les tests existants
    * @param phoneStr Numéro de téléphone à valider
+   * @param i18n Interface pour l'internationalisation des messages (optionnel)
    * @returns Objet au format legacy (isSuccess, isFailure, etc.)
    */
-  public static create(phoneStr: string): LegacyPhoneResult {
+  public static create(
+    phoneStr: string,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): LegacyPhoneResult {
     // Validation de base
     if (!phoneStr || phoneStr.trim() === '') {
       return {
         isSuccess: false,
         isFailure: true,
-        error: 'Format de téléphone invalide'
+        error: i18n.translate(PHONE_VALIDATION_KEYS.MISSING_PHONE)
       };
     }
 
@@ -58,7 +96,7 @@ export class Phone {
       return {
         isSuccess: false,
         isFailure: true,
-        error: 'Format de téléphone invalide'
+        error: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE)
       };
     }
     
@@ -67,7 +105,7 @@ export class Phone {
       return {
         isSuccess: false,
         isFailure: true,
-        error: 'Format de téléphone invalide'
+        error: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE)
       };
     }
     
@@ -78,7 +116,7 @@ export class Phone {
         return {
           isSuccess: false,
           isFailure: true,
-          error: 'Format de téléphone invalide'
+          error: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE)
         };
       }
     } 
@@ -89,7 +127,7 @@ export class Phone {
         return {
           isSuccess: false,
           isFailure: true,
-          error: 'Format de téléphone invalide'
+          error: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE)
         };
       }
     }
@@ -98,12 +136,12 @@ export class Phone {
       return {
         isSuccess: false,
         isFailure: true,
-        error: 'Format de téléphone invalide'
+        error: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE)
       };
     }
     
     // Si toutes les validations passent, créer l'objet
-    const phoneInstance = new Phone(cleanedPhone);
+    const phoneInstance = new Phone(cleanedPhone, i18n);
     return {
       isSuccess: true,
       isFailure: false,
@@ -116,14 +154,19 @@ export class Phone {
    * Méthode factory standard pour créer une instance Phone avec ResultType
    * Applique les règles de validation du domaine
    * @param phoneStr Numéro de téléphone à valider
+   * @param i18n Interface pour l'internationalisation des messages (optionnel)
    * @returns ResultType contenant soit l'objet Phone en cas de succès, soit les erreurs
    */
-  public static createWithResultType(phoneStr: string): ResultType<Phone> {
+  public static createWithResultType(
+    phoneStr: string,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): ResultType<Phone> {
     // Validation de base
     if (!phoneStr || phoneStr.trim() === '') {
       return createFailure([{
         code: ERROR_CODES.RESUME.BASICS.MISSING_PHONE,
-        message: "Format de téléphone invalide", 
+        message: i18n.translate(PHONE_VALIDATION_KEYS.MISSING_PHONE), 
+        i18nKey: PHONE_VALIDATION_KEYS.MISSING_PHONE,
         field: "phone",
         severity: "error",
         layer: ValidationLayerType.DOMAIN,
@@ -137,7 +180,8 @@ export class Phone {
     if (/[a-zA-Z]/.test(cleanedPhone)) {
       return createFailure([{
         code: ERROR_CODES.RESUME.BASICS.INVALID_PHONE,
-        message: "Format de téléphone invalide",
+        message: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE),
+        i18nKey: PHONE_VALIDATION_KEYS.INVALID_PHONE,
         field: "phone",
         severity: "error",
         layer: ValidationLayerType.DOMAIN,
@@ -149,7 +193,8 @@ export class Phone {
     if (cleanedPhone.length <= 5) {
       return createFailure([{
         code: ERROR_CODES.RESUME.BASICS.INVALID_PHONE,
-        message: "Format de téléphone invalide",
+        message: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE),
+        i18nKey: PHONE_VALIDATION_KEYS.INVALID_PHONE,
         field: "phone",
         severity: "error", 
         layer: ValidationLayerType.DOMAIN,
@@ -163,7 +208,8 @@ export class Phone {
       if (cleanedPhone.length !== 10) {
         return createFailure([{
           code: ERROR_CODES.RESUME.BASICS.INVALID_PHONE,
-          message: "Format de téléphone invalide",
+          message: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE),
+          i18nKey: PHONE_VALIDATION_KEYS.INVALID_PHONE,
           field: "phone",
           severity: "error",
           layer: ValidationLayerType.DOMAIN,
@@ -177,7 +223,8 @@ export class Phone {
       if (cleanedPhone.length < 8 || cleanedPhone.length > 15) {
         return createFailure([{
           code: ERROR_CODES.RESUME.BASICS.INVALID_PHONE,
-          message: "Format de téléphone invalide",
+          message: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE),
+          i18nKey: PHONE_VALIDATION_KEYS.INVALID_PHONE,
           field: "phone",
           severity: "error",
           layer: ValidationLayerType.DOMAIN,
@@ -189,7 +236,8 @@ export class Phone {
     else if (cleanedPhone.length < 7) {
       return createFailure([{
         code: ERROR_CODES.RESUME.BASICS.INVALID_PHONE,
-        message: "Format de téléphone invalide",
+        message: i18n.translate(PHONE_VALIDATION_KEYS.INVALID_PHONE),
+        i18nKey: PHONE_VALIDATION_KEYS.INVALID_PHONE,
         field: "phone",
         severity: "error",
         layer: ValidationLayerType.DOMAIN,
@@ -198,7 +246,7 @@ export class Phone {
     }
     
     // Si toutes les validations passent, créer l'objet
-    return createSuccess(new Phone(cleanedPhone));
+    return createSuccess(new Phone(cleanedPhone, i18n));
   }
 
   /**
@@ -249,7 +297,6 @@ export class Phone {
    * @returns true si les numéros sont identiques (ignore espaces)
    */
   public equals(other: Phone): boolean {
-    // Compare les numéros en ignorant les espaces
-    return this.value.replace(/\s/g, '') === other.value.replace(/\s/g, '');
+    return this.value === other.value;
   }
 } 

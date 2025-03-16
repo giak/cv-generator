@@ -9,10 +9,6 @@ import { useVolunteerStore } from "./volunteer"
 import { useEducationStore } from "./education"
 import { useProjectStore } from "./project"
 
-interface ResumeStoreState {
-  resume: ResumeEntity | null
-  loading: boolean
-}
 
 interface ResumeStoreActions {
   loadResume(): Promise<void>
@@ -316,25 +312,4 @@ export const useResumeStore = defineStore("cv.resume", () => {
   }
 }); 
 
-async function saveProjects() {
-  try {
-    // Get resume data from store
-    const resume = await useResumeStore().getResume()
-    const projectStore = useProjectStore()
-
-    if (resume) {
-      // Create a new resume object with updated projects
-      const updatedResume = {
-        ...resume,
-        projects: projectStore.projects.map(({ id, ...project }) => project)
-      }
-      
-      // Sauvegarder le CV complet
-      await errorStore.executeWithErrorHandling(async () => {
-        await useResumeStore().saveResume(updatedResume)
-      })
-    }
-  } catch (error) {
-    console.error('Error saving projects:', error)
-  }
-} 
+ 

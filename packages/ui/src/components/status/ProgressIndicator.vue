@@ -109,7 +109,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useFormProgress } from '../../modules/cv/presentation/composables/useFormProgress'
 
 // Fonction simple de traduction (à remplacer par vue-i18n quand disponible)

@@ -10,16 +10,47 @@ import {
   ValidationLayerType,
   createSuccess,
   createFailure,
-  createSuccessWithWarnings
+  createSuccessWithWarnings,
+  TRANSLATION_KEYS
 } from '@cv-generator/shared';
 import { Email } from '../value-objects/email.value-object';
 import { Phone } from '../value-objects/phone.value-object';
 import { Url } from '../value-objects/url.value-object';
+import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
 
 // Type for validation result
 export type BasicsValidationResultType = ResultType<BasicsInterface> & { 
   entity?: Basics 
 };
+
+// Export validation keys for Basics entity
+export const BASICS_VALIDATION_KEYS = {
+  MISSING_NAME: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.MISSING_NAME,
+  NAME_TOO_LONG: 'resume.basics.validation.nameTooLong',
+  MISSING_EMAIL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.MISSING_EMAIL
+};
+
+/**
+ * Default i18n adapter for backwards compatibility
+ */
+export class DefaultBasicsI18nAdapter implements DomainI18nPortInterface {
+  translate(key: string, _params?: Record<string, unknown>): string {
+    const defaultMessages: Record<string, string> = {
+      [BASICS_VALIDATION_KEYS.MISSING_NAME]: 'Le nom est requis',
+      [BASICS_VALIDATION_KEYS.NAME_TOO_LONG]: 'Le nom ne doit pas dépasser 100 caractères',
+      [BASICS_VALIDATION_KEYS.MISSING_EMAIL]: 'L\'email est requis',
+    };
+
+    return defaultMessages[key] || key;
+  }
+
+  exists(_key: string): boolean {
+    return true; // Optimistic response to avoid errors
+  }
+}
+
+// Create a singleton instance for default adapter
+const defaultI18nAdapter = new DefaultBasicsI18nAdapter();
 
 /**
  * Basics entity representing the personal information in a CV
@@ -44,9 +75,13 @@ export class Basics {
   /**
    * Factory method to create a validated instance of Basics
    * @param data Raw data for basic information
+   * @param i18n Internationalization adapter
    * @returns Object containing validation result and possibly the Basics instance
    */
-  static create(data: Partial<BasicsInterface>): BasicsValidationResultType {
+  static create(
+    data: Partial<BasicsInterface>, 
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): BasicsValidationResultType {
     console.log('=== Domain Layer - Basics Entity ===');
     console.log('Creating Basics from data:', data);
     
@@ -57,7 +92,8 @@ export class Basics {
     if (!data.name || data.name.trim() === '') {
       errors.push({
         code: 'missing_name',
-        message: 'Le nom est requis',
+        message: i18n.translate(BASICS_VALIDATION_KEYS.MISSING_NAME),
+        i18nKey: BASICS_VALIDATION_KEYS.MISSING_NAME,
         field: 'name',
         severity: 'error',
         layer: ValidationLayerType.DOMAIN,
@@ -66,7 +102,8 @@ export class Basics {
     } else if (data.name.length > 100) {
       errors.push({
         code: 'name_too_long',
-        message: 'Le nom ne doit pas dépasser 100 caractères',
+        message: i18n.translate(BASICS_VALIDATION_KEYS.NAME_TOO_LONG),
+        i18nKey: BASICS_VALIDATION_KEYS.NAME_TOO_LONG,
         field: 'name',
         severity: 'error',
         layer: ValidationLayerType.DOMAIN
@@ -76,7 +113,7 @@ export class Basics {
     // Validate email with Email value object
     let emailObj: Email | null = null;
     if (data.email) {
-      const emailResult = Email.create(data.email);
+      const emailResult = Email.create(data.email, i18n);
       if (!emailResult.success) {
         errors.push(...emailResult.error);
       } else {
@@ -89,7 +126,8 @@ export class Basics {
     } else {
       errors.push({
         code: 'missing_email',
-        message: 'L\'email est requis',
+        message: i18n.translate(BASICS_VALIDATION_KEYS.MISSING_EMAIL),
+        i18nKey: BASICS_VALIDATION_KEYS.MISSING_EMAIL,
         field: 'email',
         severity: 'error',
         layer: ValidationLayerType.DOMAIN,
@@ -100,7 +138,7 @@ export class Basics {
     // Validate phone with Phone value object (if provided)
     let phoneObj: Phone | null = null;
     if (data.phone) {
-      const phoneResult = Phone.createWithResultType(data.phone);
+      const phoneResult = Phone.createWithResultType(data.phone, i18n);
       if (!phoneResult.success) {
         errors.push(...phoneResult.error);
       } else {
@@ -111,7 +149,7 @@ export class Basics {
     // Validate URL with Url value object (if provided)
     let urlObj: Url | null = null;
     if (data.url) {
-      const urlResult = Url.create(data.url);
+      const urlResult = Url.create(data.url, i18n);
       if (!urlResult.success) {
         errors.push(...urlResult.error);
       } else {
@@ -126,7 +164,7 @@ export class Basics {
     // Validate image URL with Url value object (if provided)
     let imageObj: Url | null = null;
     if (data.image) {
-      const imageResult = Url.create(data.image);
+      const imageResult = Url.create(data.image, i18n);
       if (!imageResult.success) {
         errors.push(...imageResult.error);
       } else {
@@ -195,15 +233,21 @@ export class Basics {
    * Validate just one field of the Basics entity
    * @param data The basics data
    * @param field The field to validate
+   * @param i18n Internationalization adapter
    * @returns Validation result for the specific field
    */
-  static validateField(data: Partial<BasicsInterface>, field: keyof BasicsInterface): ResultType<unknown> {
+  static validateField(
+    data: Partial<BasicsInterface>, 
+    field: keyof BasicsInterface,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): ResultType<unknown> {
     switch (field) {
       case 'name':
         if (!data.name || data.name.trim() === '') {
           return createFailure([{
             code: 'missing_name',
-            message: 'Le nom est requis',
+            message: i18n.translate(BASICS_VALIDATION_KEYS.MISSING_NAME),
+            i18nKey: BASICS_VALIDATION_KEYS.MISSING_NAME,
             field: 'name',
             severity: 'error',
             layer: ValidationLayerType.DOMAIN,
@@ -212,7 +256,8 @@ export class Basics {
         } else if (data.name.length > 100) {
           return createFailure([{
             code: 'name_too_long',
-            message: 'Le nom ne doit pas dépasser 100 caractères',
+            message: i18n.translate(BASICS_VALIDATION_KEYS.NAME_TOO_LONG),
+            i18nKey: BASICS_VALIDATION_KEYS.NAME_TOO_LONG,
             field: 'name',
             severity: 'error',
             layer: ValidationLayerType.DOMAIN
@@ -224,32 +269,33 @@ export class Basics {
         if (!data.email) {
           return createFailure([{
             code: 'missing_email',
-            message: 'L\'email est requis',
+            message: i18n.translate(BASICS_VALIDATION_KEYS.MISSING_EMAIL),
+            i18nKey: BASICS_VALIDATION_KEYS.MISSING_EMAIL,
             field: 'email',
             severity: 'error',
             layer: ValidationLayerType.DOMAIN,
             suggestion: 'Veuillez fournir une adresse email valide'
           }]);
         }
-        return Email.create(data.email);
+        return Email.create(data.email, i18n);
         
       case 'phone':
         if (!data.phone) {
           return createSuccess(null);
         }
-        return Phone.createWithResultType(data.phone);
+        return Phone.createWithResultType(data.phone, i18n);
         
       case 'url':
         if (!data.url) {
           return createSuccess(null);
         }
-        return Url.create(data.url);
+        return Url.create(data.url, i18n);
         
       case 'image':
         if (!data.image) {
           return createSuccess(null);
         }
-        return Url.create(data.image);
+        return Url.create(data.image, i18n);
         
       default:
         // For other fields that don't have specific validation

@@ -84,7 +84,7 @@ provide('tabNavContext', {
 const isVertical = computed(() => props.vertical);
 </script>
 
-<style lang="postcss">
+<style lang="scss">
 .tab-container {
   @apply w-full flex;
 }

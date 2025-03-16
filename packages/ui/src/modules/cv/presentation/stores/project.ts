@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useErrorStore } from '../../../../core/stores/error'
-import { ManageResume } from '@cv-generator/core'
 import type { ProjectInterface } from '@cv-generator/shared/src/types/resume.interface'
 import { LocalStorageResumeRepository } from '@cv-generator/infrastructure/repositories/LocalStorageResumeRepository'
 import { v4 as uuidv4 } from 'uuid'
@@ -122,7 +121,6 @@ export const useProjectStore = defineStore('project', () => {
   const repository = new LocalStorageResumeRepository()
   
   // Resume manager with repository instance
-  const manageResume = new ManageResume(repository)
   
   /**
    * Charge les projets depuis le localStorage

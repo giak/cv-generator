@@ -17,7 +17,7 @@ const emit = defineEmits<{
 }>();
 
 // Handle breadcrumb click
-const handleBreadcrumbClick = (path: string | undefined, index: number) => {
+const handleBreadcrumbClick = (path: string | undefined) => {
   if (path) {
     emit('navigate', path);
   }

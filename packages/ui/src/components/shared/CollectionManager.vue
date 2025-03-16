@@ -201,7 +201,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits, withDefaults } from 'vue'
+import { ref, defineProps, defineEmits, withDefaults } from 'vue'
 import Button from './Button.vue'
 import Card from './Card.vue'
 import EmptyState from './EmptyState.vue'
@@ -350,7 +350,7 @@ const cancelDelete = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .collection-item:hover {
   @apply bg-neutral-750;
 }

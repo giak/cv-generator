@@ -178,7 +178,7 @@ const sectionPartial = computed(() => {
 })
 
 // Méthodes de traduction (utilisant les textes en dur pour simplifier)
-const t = (key: string, defaultValue: string) => defaultValue
+const t = (_key: string, defaultValue: string) => defaultValue
 
 // Fonction de navigation
 const navigateTo = (path: string) => {
