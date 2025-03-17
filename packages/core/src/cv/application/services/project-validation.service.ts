@@ -3,12 +3,12 @@
  */
 
 import {
-    ResultType,
-    ValidationErrorInterface,
-    ValidationLayerType,
-    createSuccess,
-    createFailure,
-    ERROR_CODES
+  ResultType,
+  ValidationErrorInterface,
+  ValidationLayerType,
+  createSuccess,
+  createFailure,
+  ERROR_CODES
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';

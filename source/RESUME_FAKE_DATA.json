@@ -1,0 +1,331 @@
+{
+    "basics": {
+      "name": "Marie Dubois",
+      "label": "Développeuse Full Stack Senior",
+      "image": "https://randomuser.me/api/portraits/women/42.jpg",
+      "email": "marie.dubois@exemple-pro.com",
+      "phone": "+33612345678",
+      "url": "https://mariedubois-portfolio.dev",
+      "summary": "Développeuse full stack passionnée avec 8 ans d'expérience dans la création d'applications web et mobiles innovantes. Spécialisée en Vue.js, TypeScript et architecture clean. Mentore technique et conférencière occasionnelle.",
+      "location": {
+        "address": "15 rue des Lilas",
+        "postalCode": "69003",
+        "city": "Lyon",
+        "countryCode": "FR",
+        "region": "Auvergne-Rhône-Alpes"
+      },
+      "profiles": [
+        {
+          "network": "LinkedIn",
+          "username": "mariedubois",
+          "url": "https://www.linkedin.com/in/marie-dubois-dev/",
+          "id": "profile-linkedin-1"
+        },
+        {
+          "network": "GitHub",
+          "username": "mariedubois-dev",
+          "url": "https://github.com/mariedubois-dev",
+          "id": "profile-github-1"
+        },
+        {
+          "network": "Twitter",
+          "username": "mariedubois_dev",
+          "url": "https://twitter.com/mariedubois_dev",
+          "id": "profile-twitter-1"
+        }
+      ]
+    },
+    "work": [
+      {
+        "id": "work-1",
+        "name": "TechInnovate SAS",
+        "position": "Lead Développeuse Front-End",
+        "url": "https://techinnovate.fr",
+        "startDate": "2020-03-01",
+        "endDate": "",
+        "summary": "Responsable de l'architecture front-end et de l'équipe de développement UI/UX pour une application SaaS de gestion de projet utilisée par plus de 50 000 utilisateurs.",
+        "highlights": [
+          "Migration complète de l'application de Angular vers Vue 3 avec TypeScript",
+          "Mise en place d'une architecture micro-frontend avec Module Federation",
+          "Réduction du temps de chargement initial de 65% grâce à l'optimisation des bundles",
+          "Animation d'ateliers hebdomadaires de partage de connaissances"
+        ]
+      },
+      {
+        "id": "work-2",
+        "name": "DataViz Solutions",
+        "position": "Développeuse Full Stack",
+        "url": "https://dataviz-solutions.com",
+        "startDate": "2017-09-15",
+        "endDate": "2020-02-28",
+        "summary": "Conception et développement de dashboards interactifs pour la visualisation de données complexes dans le secteur médical et pharmaceutique.",
+        "highlights": [
+          "Développement d'une librairie de visualisation de données optimisée pour les appareils mobiles",
+          "Mise en place d'une API GraphQL pour l'interrogation flexible des données",
+          "Intégration de techniques d'IA pour prédire les tendances à partir des données historiques",
+          "Participation à 3 projets clients majeurs, générant plus de 2M€ de revenus"
+        ]
+      },
+      {
+        "id": "work-3",
+        "name": "Startup Nexus",
+        "position": "Développeuse Front-End Junior",
+        "url": "https://startup-nexus.io",
+        "startDate": "2015-06-01",
+        "endDate": "2017-08-31",
+        "summary": "Développement d'interfaces utilisateur pour une plateforme d'incubation de startups en ligne.",
+        "highlights": [
+          "Collaboration avec les designers UX pour créer des interfaces intuitives",
+          "Développement de composants réutilisables en React.js",
+          "Implémentation de tests automatisés avec Jest et Testing Library",
+          "Participation au lancement réussi de la v2 de la plateforme"
+        ]
+      }
+    ],
+    "volunteer": [
+      {
+        "id": "volunteer-1",
+        "organization": "CodeForAll",
+        "position": "Mentore",
+        "url": "https://codeforall.org",
+        "startDate": "2019-01-15",
+        "endDate": "",
+        "summary": "Mentorat auprès de jeunes issus de quartiers défavorisés pour découvrir la programmation et le développement web.",
+        "highlights": [
+          "Animation d'ateliers hebdomadaires d'initiation au code",
+          "Création de matériel pédagogique adapté aux débutants",
+          "Accompagnement personnalisé de 12 étudiants dont 8 ont trouvé un emploi dans le secteur tech"
+        ]
+      },
+      {
+        "id": "volunteer-2",
+        "organization": "Association Numérique & Inclusion",
+        "position": "Développeuse bénévole",
+        "url": "https://numerique-inclusion.fr",
+        "startDate": "2018-03-10",
+        "endDate": "2022-06-30",
+        "summary": "Développement d'outils accessibles pour aider les personnes en situation de handicap à utiliser les technologies numériques.",
+        "highlights": [
+          "Création d'une extension navigateur améliorant l'accessibilité des sites",
+          "Participation à des hackathons sociaux",
+          "Organisation d'ateliers de sensibilisation aux enjeux d'accessibilité numérique"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "id": "education-1",
+        "institution": "INSA Lyon",
+        "url": "https://www.insa-lyon.fr",
+        "area": "Informatique",
+        "studyType": "Diplôme d'Ingénieur",
+        "startDate": "2012-09-01",
+        "endDate": "2015-06-30",
+        "score": "Mention Très Bien",
+        "courses": [
+          "Architectures logicielles avancées",
+          "Programmation parallèle et distribuée",
+          "Intelligence artificielle et apprentissage automatique",
+          "Sécurité des systèmes d'information",
+          "Gestion de projets agiles"
+        ]
+      },
+      {
+        "id": "education-2",
+        "institution": "IUT Lyon 1",
+        "url": "https://iut.univ-lyon1.fr",
+        "area": "Informatique",
+        "studyType": "DUT",
+        "startDate": "2010-09-01",
+        "endDate": "2012-06-30",
+        "score": "Major de promotion",
+        "courses": [
+          "Algorithmique et structures de données",
+          "Développement web",
+          "Bases de données relationnelles",
+          "Conception orientée objet"
+        ]
+      }
+    ],
+    "awards": [
+      {
+        "id": "award-1",
+        "title": "Prix de l'Innovation Technique",
+        "date": "2022-11-15",
+        "awarder": "Forum Tech Lyon",
+        "summary": "Récompense pour le développement d'une solution d'optimisation de performance basée sur l'analyse statique de code."
+      },
+      {
+        "id": "award-2",
+        "title": "Hackeuse de l'année",
+        "date": "2019-06-20",
+        "awarder": "Women in Tech France",
+        "summary": "Reconnaissance des contributions à l'écosystème open-source et des efforts pour promouvoir la diversité dans la tech."
+      }
+    ],
+    "certificates": [
+      {
+        "id": "certificate-1",
+        "name": "AWS Certified Solutions Architect",
+        "date": "2021-09-12",
+        "issuer": "Amazon Web Services",
+        "url": "https://aws.amazon.com/certification/certified-solutions-architect-associate/"
+      },
+      {
+        "id": "certificate-2",
+        "name": "Vue.js Advanced Developer",
+        "date": "2020-03-25",
+        "issuer": "Vue Mastery",
+        "url": "https://www.vuemastery.com/courses/advanced-components/"
+      },
+      {
+        "id": "certificate-3",
+        "name": "Accessibility in Web Design",
+        "date": "2019-11-30",
+        "issuer": "OpenClassrooms",
+        "url": "https://openclassrooms.com/fr/courses/6691346-concevez-des-sites-accessibles"
+      }
+    ],
+    "publications": [
+      {
+        "id": "publication-1",
+        "name": "Optimisation des performances des applications Vue.js à grande échelle",
+        "publisher": "Medium - Vue.js Developers",
+        "releaseDate": "2022-02-15",
+        "url": "https://medium.com/vuejs-developers/vue-performance-optimization",
+        "summary": "Partage d'expérience et de techniques avancées pour optimiser les performances d'applications Vue.js complexes."
+      },
+      {
+        "id": "publication-2",
+        "name": "Architecture Clean avec TypeScript: Guide pratique",
+        "publisher": "Dev.to",
+        "releaseDate": "2021-07-08",
+        "url": "https://dev.to/mariedubois/clean-architecture-with-typescript",
+        "summary": "Tutoriel détaillé sur l'implémentation d'une architecture clean dans des projets TypeScript."
+      }
+    ],
+    "skills": [
+      {
+        "id": "skill-1",
+        "name": "Front-End",
+        "level": "Expert",
+        "keywords": ["Vue.js", "TypeScript", "React", "HTML5", "CSS3", "Sass", "TailwindCSS", "Jest", "Testing Library"]
+      },
+      {
+        "id": "skill-2",
+        "name": "Back-End",
+        "level": "Confirmé",
+        "keywords": ["Node.js", "Express", "NestJS", "GraphQL", "RESTful APIs", "PostgreSQL", "MongoDB"]
+      },
+      {
+        "id": "skill-3",
+        "name": "DevOps",
+        "level": "Intermédiaire",
+        "keywords": ["Docker", "CI/CD", "GitHub Actions", "AWS", "Azure", "Monitoring", "Performance Optimization"]
+      },
+      {
+        "id": "skill-4",
+        "name": "Architecture",
+        "level": "Avancé",
+        "keywords": ["Clean Architecture", "Domain-Driven Design", "Microservices", "Event Sourcing", "CQRS"]
+      },
+      {
+        "id": "skill-5",
+        "name": "Méthodologies",
+        "level": "Expert",
+        "keywords": ["Agile", "Scrum", "Kanban", "TDD", "BDD", "Lean UX", "Design Thinking"]
+      }
+    ],
+    "languages": [
+      {
+        "id": "language-1",
+        "language": "Français",
+        "fluency": "Langue maternelle"
+      },
+      {
+        "id": "language-2",
+        "language": "Anglais",
+        "fluency": "Courant (C1)"
+      },
+      {
+        "id": "language-3",
+        "language": "Espagnol",
+        "fluency": "Intermédiaire (B1)"
+      }
+    ],
+    "interests": [
+      {
+        "id": "interest-1",
+        "name": "Open Source",
+        "keywords": ["Contribution", "GitHub", "Communauté", "Partage de connaissances"]
+      },
+      {
+        "id": "interest-2",
+        "name": "Nouvelles technologies",
+        "keywords": ["IA", "Machine Learning", "IoT", "AR/VR"]
+      },
+      {
+        "id": "interest-3",
+        "name": "Randonnée",
+        "keywords": ["Montagne", "Nature", "Plein air", "Photographie"]
+      }
+    ],
+    "references": [
+      {
+        "id": "reference-1",
+        "name": "Thomas Martin",
+        "reference": "Marie est une développeuse exceptionnelle qui allie expertise technique et vision stratégique. Sa capacité à simplifier des problèmes complexes et à guider l'équipe vers des solutions élégantes a été un atout majeur pour notre entreprise.",
+        "position": "CTO chez TechInnovate SAS"
+      },
+      {
+        "id": "reference-2",
+        "name": "Sophie Lefebvre",
+        "reference": "J'ai eu la chance de travailler avec Marie pendant trois ans. Son engagement pour la qualité du code et l'accessibilité des interfaces est admirable. Elle est également une excellente communicante et formatrice.",
+        "position": "Lead UX Designer chez DataViz Solutions"
+      }
+    ],
+    "projects": [
+      {
+        "id": "project-1",
+        "name": "Vue Component Library",
+        "startDate": "2021-04-01",
+        "endDate": "2022-01-15",
+        "description": "Bibliothèque de composants Vue.js accessible et performante, publiée en open source et utilisée par plus de 500 projets.",
+        "highlights": [
+          "Conception axée sur l'accessibilité et les performances",
+          "Documentation complète avec Storybook",
+          "Support complet TypeScript avec types génériques",
+          "Plus de 40 composants optimisés"
+        ],
+        "url": "https://github.com/mariedubois-dev/vue-component-library"
+      },
+      {
+        "id": "project-2",
+        "name": "Clean Architecture Starter",
+        "startDate": "2020-08-10",
+        "endDate": "2020-11-30",
+        "description": "Template de projet Node.js/TypeScript implémentant les principes de Clean Architecture et Domain-Driven Design.",
+        "highlights": [
+          "Séparation claire des responsabilités",
+          "Implémentation de patterns CQRS et Repository",
+          "Tests unitaires et d'intégration complets",
+          "Documentation détaillée des principes appliqués"
+        ],
+        "url": "https://github.com/mariedubois-dev/clean-architecture-starter"
+      },
+      {
+        "id": "project-3",
+        "name": "Accessibilité Web - Extension Chrome",
+        "startDate": "2019-02-15",
+        "endDate": "2019-05-30",
+        "description": "Extension navigateur qui améliore l'accessibilité des sites web pour les personnes en situation de handicap.",
+        "highlights": [
+          "Support des lecteurs d'écran",
+          "Ajustement automatique des contrastes",
+          "Navigation au clavier améliorée",
+          "Plus de 5000 utilisateurs actifs"
+        ],
+        "url": "https://chrome.google.com/webstore/detail/web-accessibility-helper/"
+      }
+    ]
+  }

@@ -2,18 +2,27 @@
  * Service de validation pour les formations (éducation)
  */
 
-import { 
-  ResultType, 
+import {
+  ResultType,
   ValidationErrorInterface,
-  ValidationLayerType, 
-  createSuccess, 
+  ValidationLayerType,
+  createSuccess,
   createFailure,
-  isSuccess,
   isFailure,
   ERROR_CODES
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';
 import { DateRange } from '../../domain/value-objects/date-range.value-object';
+import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
+
+// Export validation keys for the education validation service
+export const EDUCATION_VALIDATION_KEYS = {
+  MISSING_INSTITUTION: 'resume.education.validation.missingInstitution',
+  MISSING_AREA: 'resume.education.validation.missingArea',
+  MISSING_STUDY_TYPE: 'resume.education.validation.missingStudyType',
+  MISSING_GPA: 'resume.education.validation.missingGpa',
+  VAGUE_COURSES: 'resume.education.validation.vagueCourses'
+};
 
 /**
  * Interface pour une formation
@@ -32,6 +41,28 @@ export interface EducationInterface {
  * Service de validation pour les formations
  */
 export class EducationValidationService extends BaseValidationService<EducationInterface> {
+  private i18nAdapter: DomainI18nPortInterface;
+
+  /**
+   * Constructeur qui initialise le service avec un adaptateur i18n
+   * @param i18nAdapter Adaptateur d'internationalisation
+   */
+  constructor(i18nAdapter?: DomainI18nPortInterface) {
+    super();
+    this.i18nAdapter = i18nAdapter || this.getDefaultI18nAdapter();
+  }
+
+  /**
+   * Récupère l'adaptateur i18n par défaut
+   * @private
+   */
+  private getDefaultI18nAdapter(): DomainI18nPortInterface {
+    return {
+      translate: (key: string) => key,
+      exists: () => true
+    };
+  }
+  
   /**
    * Valide une formation complète
    * @param education Formation à valider
@@ -44,9 +75,13 @@ export class EducationValidationService extends BaseValidationService<EducationI
     if (this.isEmpty(education.institution)) {
       errors.push(this.createError(
         ERROR_CODES.RESUME.EDUCATION.MISSING_INSTITUTION,
-        "Le nom de l'établissement est requis",
+        this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.MISSING_INSTITUTION),
         "institution",
-        ValidationLayerType.DOMAIN
+        ValidationLayerType.DOMAIN,
+        "error",
+        {
+          i18nKey: EDUCATION_VALIDATION_KEYS.MISSING_INSTITUTION
+        }
       ));
     }
     
@@ -54,9 +89,13 @@ export class EducationValidationService extends BaseValidationService<EducationI
     if (this.isEmpty(education.area)) {
       errors.push(this.createError(
         ERROR_CODES.RESUME.EDUCATION.MISSING_AREA,
-        "Le domaine d'études est requis",
+        this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.MISSING_AREA),
         "area",
-        ValidationLayerType.DOMAIN
+        ValidationLayerType.DOMAIN,
+        "error",
+        {
+          i18nKey: EDUCATION_VALIDATION_KEYS.MISSING_AREA
+        }
       ));
     }
     
@@ -64,9 +103,13 @@ export class EducationValidationService extends BaseValidationService<EducationI
     if (this.isEmpty(education.studyType)) {
       errors.push(this.createError(
         ERROR_CODES.RESUME.EDUCATION.MISSING_STUDY_TYPE,
-        "Le type de diplôme est requis",
+        this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.MISSING_STUDY_TYPE),
         "studyType",
-        ValidationLayerType.DOMAIN
+        ValidationLayerType.DOMAIN,
+        "error",
+        {
+          i18nKey: EDUCATION_VALIDATION_KEYS.MISSING_STUDY_TYPE
+        }
       ));
     }
     
@@ -74,7 +117,8 @@ export class EducationValidationService extends BaseValidationService<EducationI
     const dateRangeResult = DateRange.create(
       education.startDate, 
       education.endDate, 
-      'education'
+      'education',
+      this.i18nAdapter
     );
     
     if (isFailure(dateRangeResult)) {
@@ -85,11 +129,12 @@ export class EducationValidationService extends BaseValidationService<EducationI
     if (!this.isDefined(education.gpa)) {
       errors.push(this.createError(
         ERROR_CODES.RESUME.EDUCATION.MISSING_GPA,
-        "GPA ou mention non spécifiée",
+        this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.MISSING_GPA),
         "gpa",
         ValidationLayerType.APPLICATION,
         "info",
         {
+          i18nKey: EDUCATION_VALIDATION_KEYS.MISSING_GPA,
           suggestion: "Ajoutez votre GPA ou mention pour valoriser vos résultats académiques"
         }
       ));
@@ -104,11 +149,12 @@ export class EducationValidationService extends BaseValidationService<EducationI
       if (hasVagueCourses) {
         errors.push(this.createError(
           ERROR_CODES.RESUME.EDUCATION.VAGUE_COURSES,
-          "Liste de cours trop vague",
+          this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.VAGUE_COURSES),
           "courses",
           ValidationLayerType.PRESENTATION,
           "info",
           {
+            i18nKey: EDUCATION_VALIDATION_KEYS.VAGUE_COURSES,
             suggestion: "Citez les cours les plus pertinents pour le poste visé"
           }
         ));
@@ -151,9 +197,13 @@ export class EducationValidationService extends BaseValidationService<EducationI
         if (this.isEmpty(value as string)) {
           errors.push(this.createError(
             ERROR_CODES.RESUME.EDUCATION.MISSING_INSTITUTION,
-            "Le nom de l'établissement est requis",
+            this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.MISSING_INSTITUTION),
             "institution",
-            ValidationLayerType.DOMAIN
+            ValidationLayerType.DOMAIN,
+            "error",
+            {
+              i18nKey: EDUCATION_VALIDATION_KEYS.MISSING_INSTITUTION
+            }
           ));
         }
         break;
@@ -162,9 +212,13 @@ export class EducationValidationService extends BaseValidationService<EducationI
         if (this.isEmpty(value as string)) {
           errors.push(this.createError(
             ERROR_CODES.RESUME.EDUCATION.MISSING_AREA,
-            "Le domaine d'études est requis",
+            this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.MISSING_AREA),
             "area",
-            ValidationLayerType.DOMAIN
+            ValidationLayerType.DOMAIN,
+            "error",
+            {
+              i18nKey: EDUCATION_VALIDATION_KEYS.MISSING_AREA
+            }
           ));
         }
         break;
@@ -173,9 +227,13 @@ export class EducationValidationService extends BaseValidationService<EducationI
         if (this.isEmpty(value as string)) {
           errors.push(this.createError(
             ERROR_CODES.RESUME.EDUCATION.MISSING_STUDY_TYPE,
-            "Le type de diplôme est requis",
+            this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.MISSING_STUDY_TYPE),
             "studyType",
-            ValidationLayerType.DOMAIN
+            ValidationLayerType.DOMAIN,
+            "error",
+            {
+              i18nKey: EDUCATION_VALIDATION_KEYS.MISSING_STUDY_TYPE
+            }
           ));
         }
         break;
@@ -187,7 +245,8 @@ export class EducationValidationService extends BaseValidationService<EducationI
         const dateRangeResult = DateRange.create(
           education.startDate, 
           education.endDate, 
-          'education'
+          'education',
+          this.i18nAdapter
         );
         
         if (isFailure(dateRangeResult)) {
@@ -209,11 +268,12 @@ export class EducationValidationService extends BaseValidationService<EducationI
         if (!this.isDefined(value)) {
           errors.push(this.createError(
             ERROR_CODES.RESUME.EDUCATION.MISSING_GPA,
-            "GPA ou mention non spécifiée",
+            this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.MISSING_GPA),
             "gpa",
             ValidationLayerType.APPLICATION,
             "info",
             {
+              i18nKey: EDUCATION_VALIDATION_KEYS.MISSING_GPA,
               suggestion: "Ajoutez votre GPA ou mention pour valoriser vos résultats académiques"
             }
           ));
@@ -230,11 +290,12 @@ export class EducationValidationService extends BaseValidationService<EducationI
           if (hasVagueCourses) {
             errors.push(this.createError(
               ERROR_CODES.RESUME.EDUCATION.VAGUE_COURSES,
-              "Liste de cours trop vague",
+              this.i18nAdapter.translate(EDUCATION_VALIDATION_KEYS.VAGUE_COURSES),
               "courses",
               ValidationLayerType.PRESENTATION,
               "info",
               {
+                i18nKey: EDUCATION_VALIDATION_KEYS.VAGUE_COURSES,
                 suggestion: "Citez les cours les plus pertinents pour le poste visé"
               }
             ));
@@ -257,5 +318,30 @@ export class EducationValidationService extends BaseValidationService<EducationI
     }
     
     return createSuccess(value as EducationInterface[K]);
+  }
+  
+  /**
+   * Helper pour créer une erreur i18n avec tous les champs nécessaires
+   */
+  protected createError(
+    code: string,
+    message: string,
+    field: string,
+    layer: ValidationLayerType,
+    severity: 'error' | 'warning' | 'info' = 'error',
+    options?: {
+      i18nKey?: string;
+      suggestion?: string;
+      additionalInfo?: Record<string, unknown>;
+    }
+  ): ValidationErrorInterface {
+    return {
+      code,
+      message,
+      field,
+      layer,
+      severity,
+      ...(options || {}),
+    };
   }
 } 
