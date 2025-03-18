@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+// Initialize i18n
+const { t } = useI18n();
+
+// Function to safely handle translations with fallback
+
 interface Props {
   title: string;
   description?: string;

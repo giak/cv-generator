@@ -1,6 +1,7 @@
 ---
-description: "ALWAYS use when MAKING commits or MANAGING git workflow to ENSURE consistent version control practices"
-globs: "**/.git/*"
+description: 
+globs: 
+alwaysApply: false
 ---
 ---
 title: "Standards de Commit et Push Git"

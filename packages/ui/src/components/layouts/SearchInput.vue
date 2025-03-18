@@ -1,5 +1,21 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+// Initialize i18n
+const { t } = useI18n();
+
+// Function to safely handle translations with fallback
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const translated = t(key);
+    // Check if translation exists and is not the same as the key
+    return (translated && translated !== key) ? translated : fallback;
+  } catch (error) {
+    console.warn(`Translation error for key: ${key}`, error);
+    return fallback;
+  }
+};
 
 interface Props {
   placeholder?: string;
@@ -55,7 +71,7 @@ const clearSearch = () => {
       v-if="searchQuery"
       @click="clearSearch"
       class="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors duration-200"
-      aria-label="Clear search"
+      :aria-label="safeTranslate('ui.search.clearSearch', 'Clear search')"
       data-test="clear-search-button"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">

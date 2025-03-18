@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+// Initialize i18n
+const { t } = useI18n();
+
+// Function to safely handle translations with fallback
+
 interface BreadcrumbItem {
   id: string;
   label: string;
@@ -38,7 +45,7 @@ const handleBreadcrumbClick = (path: string | undefined) => {
         <a 
           href="#" 
           class="hover:text-primary-400 transition-colors duration-200"
-          @click.prevent="handleBreadcrumbClick(item.path, index)"
+          @click.prevent="handleBreadcrumbClick(item.path)"
         >
           {{ item.label }}
         </a>

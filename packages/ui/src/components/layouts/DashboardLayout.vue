@@ -1,5 +1,21 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+// Initialize i18n
+const { t } = useI18n();
+
+// Function to safely handle translations with fallback
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const translated = t(key);
+    // Check if translation exists and is not the same as the key
+    return (translated && translated !== key) ? translated : fallback;
+  } catch (error) {
+    console.warn(`Translation error for key: ${key}`, error);
+    return fallback;
+  }
+};
 
 interface Props {
   title?: string;
@@ -55,7 +71,7 @@ const toggleSidebar = () => {
           </slot>
         </div>
         <h1 class="font-semibold text-sm tracking-wider text-white uppercase">
-          <slot name="brand-name">CV Generator</slot>
+          <slot name="brand-name">{{ safeTranslate('ui.app.brandName', 'CV Generator') }}</slot>
         </h1>
       </div>
       
@@ -80,7 +96,7 @@ const toggleSidebar = () => {
           <button 
             class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white mr-3 transition-colors duration-200 lg:hidden"
             @click="toggleSidebar"
-            aria-label="Toggle sidebar"
+            :aria-label="safeTranslate('ui.sidebar.toggle', 'Toggle sidebar')"
             data-test="toggle-sidebar"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">

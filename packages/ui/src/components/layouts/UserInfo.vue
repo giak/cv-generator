@@ -1,5 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+// Initialize i18n
+const { t } = useI18n();
+
+// Function to safely handle translations with fallback
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const translated = t(key);
+    // Check if translation exists and is not the same as the key
+    return (translated && translated !== key) ? translated : fallback;
+  } catch (error) {
+    console.warn(`Translation error for key: ${key}`, error);
+    return fallback;
+  }
+};
 
 interface Props {
   name: string;
@@ -50,7 +66,7 @@ const handleMenuClick = () => {
     <button 
       class="text-neutral-400 hover:text-white transition-colors duration-200"
       @click="handleMenuClick"
-      aria-label="User menu"
+      :aria-label="safeTranslate('ui.user.menuButton', 'User menu')"
       data-test="user-menu-button"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">

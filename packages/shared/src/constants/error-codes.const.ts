@@ -67,6 +67,9 @@ export const ERROR_CODES = {
       MISSING_KEYWORDS: "missing_keywords",
       MISSING_URL: "missing_url",
       INVALID_URL: "invalid_url",
+      INVALID_DATE_FORMAT: "invalid_date_format",
+      MISSING_ROLE: "missing_role",
+      MISSING_HIGHLIGHTS: "missing_highlights"
     },
     VOLUNTEER: {
       MISSING_ORGANIZATION: "missing_organization",

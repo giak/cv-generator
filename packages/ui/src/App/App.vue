@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { TRANSLATION_KEYS } from '@cv-generator/shared'
 import BasicsForm from '@ui/modules/cv/presentation/components/BasicsForm.vue'
 import WorkList from '@ui/modules/cv/presentation/components/WorkList.vue'
 import VolunteerList from '@ui/modules/cv/presentation/components/VolunteerList.vue'
@@ -53,6 +55,21 @@ const {
   getActiveViewTitle, 
   getActiveViewDescription} = useNavigation({ activeView, activeComponent })
 const { handleErrorAction } = useErrorHandling()
+
+// Initialize i18n
+const { t } = useI18n()
+
+// Function to safely handle translations with fallback
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const translated = t(key)
+    // Check if translation exists and is not the same as the key
+    return (translated && translated !== key) ? translated : fallback
+  } catch (error) {
+    console.warn(`Translation error for key: ${key}`, error)
+    return fallback
+  }
+}
 
 // Charger le CV au montage du composant
 onMounted(async () => {
@@ -120,8 +137,8 @@ watch(activeView, (viewId) => {
       <!-- Sidebar Footer -->
       <template #sidebar-footer>
         <UserInfo
-          name="John Doe"
-          role="Développeur"
+          :name="safeTranslate('ui.user.name', 'John Doe')"
+          :role="safeTranslate('ui.user.role', 'Développeur')"
           @menu-click="() => console.log('User menu clicked')"
         />
       </template>
@@ -137,7 +154,7 @@ watch(activeView, (viewId) => {
       <!-- Search -->
       <template #search>
         <SearchInput
-          placeholder="Rechercher..."
+          :placeholder="safeTranslate('ui.search.placeholder', 'Rechercher...')"
           @search="(query: string) => console.log('Search:', query)"
         />
       </template>
@@ -150,7 +167,7 @@ watch(activeView, (viewId) => {
             <polyline points="17 8 12 3 7 8"></polyline>
             <line x1="12" y1="3" x2="12" y2="15"></line>
           </svg>
-          Exporter CV
+          {{ safeTranslate('ui.export.button', 'Exporter CV') }}
         </button>
       </template>
       
@@ -163,7 +180,7 @@ watch(activeView, (viewId) => {
       <!-- Main Content -->
       <div v-if="activeView === 'basics'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Informations de base</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate('resume.basics.form.title', 'Informations de base') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -195,7 +212,7 @@ watch(activeView, (viewId) => {
       <!-- Work Experience View -->
       <div v-if="activeView === 'experience'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Expérience professionnelle</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.WORK.LIST.TITLE, 'Expérience professionnelle') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -222,7 +239,7 @@ watch(activeView, (viewId) => {
       <!-- Work Experience View (for when activeView is 'work') -->
       <div v-if="activeView === 'work'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Expérience professionnelle</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.WORK.LIST.TITLE, 'Expérience professionnelle') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -249,7 +266,7 @@ watch(activeView, (viewId) => {
       <!-- Volunteer Experience View -->
       <div v-if="activeView === 'volunteer'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Expérience de bénévolat</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.TITLE, 'Expérience de bénévolat') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -276,7 +293,7 @@ watch(activeView, (viewId) => {
       <!-- Education View -->
       <div v-if="activeView === 'education'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Formation</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.TITLE, 'Formation') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -303,7 +320,7 @@ watch(activeView, (viewId) => {
       <!-- Award View -->
       <div v-if="activeView === 'awards'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Prix et Distinctions</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.AWARDS.LIST.TITLE, 'Prix et Distinctions') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -330,7 +347,7 @@ watch(activeView, (viewId) => {
       <!-- Certificate View -->
       <div v-if="activeView === 'certificates'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Certifications</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.TITLE, 'Certifications') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -357,7 +374,7 @@ watch(activeView, (viewId) => {
       <!-- Publications View -->
       <div v-if="activeView === 'publications'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Publications</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.TITLE, 'Publications') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -384,7 +401,7 @@ watch(activeView, (viewId) => {
       <!-- Skills View -->
       <div v-if="activeView === 'skills'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Compétences</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.SKILLS.LIST.TITLE, 'Compétences') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -411,7 +428,7 @@ watch(activeView, (viewId) => {
       <!-- Languages View -->
       <div v-if="activeView === 'languages'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Langues</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.LANGUAGES.LIST.TITLE, 'Langues') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -438,7 +455,7 @@ watch(activeView, (viewId) => {
       <!-- Interests View -->
       <div v-if="activeView === 'interests'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Intérêts</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.TITLE, 'Intérêts') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -465,7 +482,7 @@ watch(activeView, (viewId) => {
       <!-- Projects View -->
       <div v-if="activeView === 'projects'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Projets</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.TITLE, 'Projets') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -492,7 +509,7 @@ watch(activeView, (viewId) => {
       <!-- References View -->
       <div v-if="activeView === 'references'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Références</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.TITLE, 'Références') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -519,7 +536,7 @@ watch(activeView, (viewId) => {
       <!-- Toast Demo View -->
       <div v-if="activeView === 'notifications'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">Notifications Toast</h2>
+          <h2 class="font-medium text-white">{{ safeTranslate('ui.notifications.title', 'Notifications Toast') }}</h2>
           <div>
             <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

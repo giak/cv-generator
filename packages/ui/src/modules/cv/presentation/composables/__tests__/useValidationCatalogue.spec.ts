@@ -2,36 +2,46 @@
  * Tests unitaires pour le composable useValidationCatalogue
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { ref, nextTick } from 'vue';
 import { useValidationCatalogue } from '../validation/useValidationCatalogue';
+import { ValidationLayerType } from '@cv-generator/shared';
+import type {
+  ValidationErrorInterface,
+  ValidationSeverityType,
+  HelpMessageInterface
+} from '@cv-generator/shared';
 
 describe('useValidationCatalogue', () => {
   // Données de test
-  const errorMessages = [
+  const errorMessages: ValidationErrorInterface[] = [
     { 
-      code: 'ERR1', 
-      message: 'Erreur 1', 
-      field: 'field1', 
-      severity: 'error', 
-      layer: 'domain' 
+      code: 'ERR1',
+      message: 'Erreur 1',
+      i18nKey: 'errors.test.error1',
+      field: 'field1',
+      severity: 'error' as ValidationSeverityType,
+      layer: ValidationLayerType.DOMAIN
     },
     { 
-      code: 'ERR2', 
-      message: 'Erreur 2', 
-      field: 'field2', 
-      severity: 'error', 
-      layer: 'domain' 
+      code: 'ERR2',
+      message: 'Erreur 2',
+      i18nKey: 'errors.test.error2',
+      field: 'field2',
+      severity: 'error' as ValidationSeverityType,
+      layer: ValidationLayerType.DOMAIN
     },
     { 
-      code: 'ERR3', 
-      message: 'Erreur 3', 
-      field: 'field1', 
-      severity: 'warning', 
-      layer: 'presentation' 
+      code: 'ERR3',
+      message: 'Erreur 3',
+      i18nKey: 'errors.test.error3',
+      field: 'field1',
+      severity: 'warning' as ValidationSeverityType,
+      layer: ValidationLayerType.PRESENTATION
     }
   ];
   
-  const helpMessages = [
+  const helpMessages: HelpMessageInterface[] = [
     {
       id: 'HELP1',
       title: 'Aide 1',
@@ -48,35 +58,113 @@ describe('useValidationCatalogue', () => {
     }
   ];
   
-  beforeEach(() => {
-    vi.clearAllMocks();
+  describe('i18n support', () => {
+    it('should translate error messages using i18n', () => {
+      const mockI18n = {
+        t: vi.fn((key) => `translated-${key}`),
+        locale: ref('fr')
+      };
+      
+      const { addErrorMessage, getErrorMessage } = useValidationCatalogue({
+        i18n: mockI18n
+      });
+      
+      const testError: ValidationErrorInterface = {
+        code: 'ERR1',
+        message: 'Field is required',
+        i18nKey: 'errors.required',
+        field: 'name',
+        severity: 'error' as ValidationSeverityType,
+        layer: ValidationLayerType.PRESENTATION
+      };
+      
+      addErrorMessage(testError);
+      
+      const error = getErrorMessage('ERR1');
+      expect(error?.message).toBe('translated-errors.required');
+    });
+
+    it('should use fallback when translation fails', () => {
+      const mockI18n = {
+        t: vi.fn().mockImplementation(() => ''),
+        locale: ref('fr')
+      };
+      
+      const { addErrorMessage, getErrorMessage } = useValidationCatalogue({
+        i18n: mockI18n
+      });
+      
+      const testError: ValidationErrorInterface = {
+        code: 'ERR1',
+        message: 'Invalid field',
+        i18nKey: 'errors.invalid',
+        field: 'email',
+        severity: 'error' as ValidationSeverityType,
+        layer: ValidationLayerType.PRESENTATION
+      };
+      
+      addErrorMessage(testError);
+      
+      const error = getErrorMessage('ERR1');
+      expect(error?.message).toBe('Invalid field');
+    });
+
+    it('should update messages when locale changes', async () => {
+      const locale = ref('fr');
+      const mockI18n = {
+        t: vi.fn((key) => `${locale.value}-${key}`),
+        locale
+      };
+      
+      const { addErrorMessage, getErrorMessage } = useValidationCatalogue({
+        i18n: mockI18n
+      });
+      
+      const testError: ValidationErrorInterface = {
+        code: 'ERR1',
+        message: 'Field is required',
+        i18nKey: 'errors.required',
+        field: 'name',
+        severity: 'error' as ValidationSeverityType,
+        layer: ValidationLayerType.PRESENTATION
+      };
+      
+      addErrorMessage(testError);
+      
+      expect(getErrorMessage('ERR1')?.message).toBe('fr-errors.required');
+      
+      locale.value = 'en';
+      await nextTick();
+      
+      expect(getErrorMessage('ERR1')?.message).toBe('en-errors.required');
+    });
   });
   
-  it('devrait initialiser avec des catalogues vides par défaut', () => {
+  it('should initialize with empty catalogues by default', () => {
     const { getErrorMessage, getHelpMessage } = useValidationCatalogue();
     
     expect(getErrorMessage('ERR1')).toBeUndefined();
     expect(getHelpMessage('HELP1')).toBeUndefined();
   });
   
-  it('devrait initialiser avec les messages fournis', () => {
-    const { getErrorMessage, getHelpMessage } = useValidationCatalogue(
-      errorMessages,
-      helpMessages
-    );
+  it('should initialize with provided messages', () => {
+    const { addErrorMessages, addHelpMessages, getErrorMessage, getHelpMessage } = useValidationCatalogue();
+    
+    addErrorMessages(errorMessages);
+    addHelpMessages(helpMessages);
     
     expect(getErrorMessage('ERR1')).toEqual(errorMessages[0]);
     expect(getHelpMessage('HELP1')).toEqual(helpMessages[0]);
   });
   
-  it('devrait permettre d\'ajouter des messages d\'erreur', () => {
+  it('should allow adding error messages', () => {
     const { addErrorMessage, getErrorMessage } = useValidationCatalogue();
     
     addErrorMessage(errorMessages[0]);
     expect(getErrorMessage('ERR1')).toEqual(errorMessages[0]);
   });
   
-  it('devrait permettre d\'ajouter plusieurs messages d\'erreur', () => {
+  it('should allow adding multiple error messages', () => {
     const { addErrorMessages, getErrorMessage } = useValidationCatalogue();
     
     addErrorMessages(errorMessages);
@@ -85,14 +173,14 @@ describe('useValidationCatalogue', () => {
     expect(getErrorMessage('ERR2')).toEqual(errorMessages[1]);
   });
   
-  it('devrait permettre d\'ajouter des messages d\'aide', () => {
+  it('should allow adding help messages', () => {
     const { addHelpMessage, getHelpMessage } = useValidationCatalogue();
     
     addHelpMessage(helpMessages[0]);
     expect(getHelpMessage('HELP1')).toEqual(helpMessages[0]);
   });
   
-  it('devrait permettre d\'ajouter plusieurs messages d\'aide', () => {
+  it('should allow adding multiple help messages', () => {
     const { addHelpMessages, getHelpMessage } = useValidationCatalogue();
     
     addHelpMessages(helpMessages);
@@ -101,8 +189,10 @@ describe('useValidationCatalogue', () => {
     expect(getHelpMessage('HELP2')).toEqual(helpMessages[1]);
   });
   
-  it('devrait récupérer les erreurs pour un champ spécifique', () => {
-    const { getErrorsForField } = useValidationCatalogue(errorMessages);
+  it('should get errors for a specific field', () => {
+    const { addErrorMessages, getErrorsForField } = useValidationCatalogue();
+    
+    addErrorMessages(errorMessages);
     
     const field1Errors = getErrorsForField('field1');
     const field2Errors = getErrorsForField('field2');
@@ -118,8 +208,10 @@ describe('useValidationCatalogue', () => {
     expect(field3Errors).toHaveLength(0);
   });
   
-  it('devrait récupérer les aides pour un champ spécifique', () => {
-    const { getHelpForField } = useValidationCatalogue([], helpMessages);
+  it('should get help messages for a specific field', () => {
+    const { addHelpMessages, getHelpForField } = useValidationCatalogue();
+    
+    addHelpMessages(helpMessages);
     
     const field1Help = getHelpForField('field1');
     const field2Help = getHelpForField('field2');
@@ -134,16 +226,19 @@ describe('useValidationCatalogue', () => {
     expect(field3Help).toHaveLength(0);
   });
   
-  it('devrait filtrer les messages d\'aide à afficher automatiquement', () => {
-    const { autoShowHelp } = useValidationCatalogue([], helpMessages);
+  it('should filter help messages to show automatically', () => {
+    const { addHelpMessages, autoShowHelp } = useValidationCatalogue();
+    
+    addHelpMessages(helpMessages);
     
     expect(autoShowHelp.value).toHaveLength(1);
     expect(autoShowHelp.value[0].id).toBe('HELP1');
   });
   
-  it('devrait remplacer le catalogue d\'erreurs', () => {
-    const { setErrorCatalogue, getErrorMessage } = useValidationCatalogue([errorMessages[0]]);
+  it('should replace error catalogue', () => {
+    const { addErrorMessages, setErrorCatalogue, getErrorMessage } = useValidationCatalogue();
     
+    addErrorMessages([errorMessages[0]]);
     expect(getErrorMessage('ERR1')).toBeDefined();
     expect(getErrorMessage('ERR2')).toBeUndefined();
     
@@ -153,23 +248,11 @@ describe('useValidationCatalogue', () => {
     expect(getErrorMessage('ERR2')).toBeDefined();
   });
   
-  it('devrait remplacer le catalogue d\'aide', () => {
-    const { setHelpCatalogue, getHelpMessage } = useValidationCatalogue([], [helpMessages[0]]);
+  it('should reset catalogue', () => {
+    const { addErrorMessages, addHelpMessages, resetCatalogue, getErrorMessage, getHelpMessage } = useValidationCatalogue();
     
-    expect(getHelpMessage('HELP1')).toBeDefined();
-    expect(getHelpMessage('HELP2')).toBeUndefined();
-    
-    setHelpCatalogue([helpMessages[1]]);
-    
-    expect(getHelpMessage('HELP1')).toBeUndefined();
-    expect(getHelpMessage('HELP2')).toBeDefined();
-  });
-  
-  it('devrait réinitialiser les catalogues', () => {
-    const { resetCatalogue, getErrorMessage, getHelpMessage } = useValidationCatalogue(
-      errorMessages,
-      helpMessages
-    );
+    addErrorMessages(errorMessages);
+    addHelpMessages(helpMessages);
     
     expect(getErrorMessage('ERR1')).toBeDefined();
     expect(getHelpMessage('HELP1')).toBeDefined();
@@ -181,7 +264,7 @@ describe('useValidationCatalogue', () => {
   });
   
   it('devrait utiliser le cache correctement', () => {
-    const { getErrorsForField } = useValidationCatalogue(errorMessages, [], { enableCache: true });
+    const { getErrorsForField } = useValidationCatalogue({ enableCache: true });
     
     // Premier appel (remplit le cache)
     const field1Errors1 = getErrorsForField('field1');
@@ -193,7 +276,7 @@ describe('useValidationCatalogue', () => {
   });
   
   it('devrait désactiver le cache si demandé', () => {
-    const { getErrorsForField } = useValidationCatalogue(errorMessages, [], { enableCache: false });
+    const { getErrorsForField } = useValidationCatalogue({ enableCache: false });
     
     // Premier appel
     const field1Errors1 = getErrorsForField('field1');
@@ -203,5 +286,18 @@ describe('useValidationCatalogue', () => {
     const field1Errors2 = getErrorsForField('field1');
     expect(field1Errors2).not.toBe(field1Errors1); // Référence différente car pas de cache
     expect(field1Errors2).toHaveLength(2); // Mais même contenu
+  });
+  
+  it('should replace help catalogue', () => {
+    const { addHelpMessages, setHelpCatalogue, getHelpMessage } = useValidationCatalogue();
+    
+    addHelpMessages([helpMessages[0]]);
+    expect(getHelpMessage('HELP1')).toBeDefined();
+    expect(getHelpMessage('HELP2')).toBeUndefined();
+    
+    setHelpCatalogue([helpMessages[1]]);
+    
+    expect(getHelpMessage('HELP1')).toBeUndefined();
+    expect(getHelpMessage('HELP2')).toBeDefined();
   });
 }); 

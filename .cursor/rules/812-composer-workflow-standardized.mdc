@@ -1,6 +1,7 @@
 ---
-description: "TOUJOURS APPLIQUER SYSTÉMATIQUEMENT lors de CHAQUE UTILISATION du composer/chat pour GARANTIR développement méthodique et efficient"
-globs: "**/*"
+description: 
+globs: 
+alwaysApply: true
 ---
 
 # 🔄 Composer Plan-Act Workflow

@@ -3,12 +3,12 @@
  */
 
 import {
-  ResultType,
-  ValidationErrorInterface,
-  ValidationLayerType,
-  createSuccess,
-  createFailure,
-  ERROR_CODES
+    ResultType,
+    ValidationErrorInterface,
+    ValidationLayerType,
+    createSuccess,
+    createFailure,
+    ERROR_CODES
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
@@ -24,8 +24,10 @@ export const PROJECT_VALIDATION_KEYS = {
   MISSING_HIGHLIGHTS: 'resume.projects.validation.missingHighlights',
   MISSING_KEYWORDS: 'resume.projects.validation.missingKeywords',
   MISSING_START_DATE: 'resume.projects.validation.missingStartDate',
-  INVALID_DATE_FORMAT: 'resume.projects.validation.invalidDateFormat'
-};
+  INVALID_DATE_FORMAT: 'resume.projects.validation.invalidDateFormat',
+  MISSING_URL: 'resume.projects.validation.missingUrl',
+  INVALID_URL: 'resume.projects.validation.invalidUrl'
+} as const;
 
 /**
  * Interface pour un projet
@@ -70,6 +72,28 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     };
   }
 
+  protected createValidationError(
+    code: string,
+    i18nKey: string,
+    field: string,
+    layer: ValidationLayerType,
+    severity: 'error' | 'warning' | 'info' = 'error',
+    options?: {
+      suggestion?: string;
+      additionalInfo?: Record<string, unknown>;
+    }
+  ): ValidationErrorInterface {
+    return {
+      code,
+      message: this.i18nAdapter.translate(i18nKey),
+      field,
+      layer,
+      severity,
+      i18nKey,
+      ...options
+    };
+  }
+
   /**
    * Valide un projet complet
    * @param project Projet à valider
@@ -78,104 +102,106 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
   public validate(project: ProjectInterface): ResultType<ProjectInterface> {
     const errors: ValidationErrorInterface[] = [];
     
-    // Validation du nom
+    // Validation du nom (erreur critique)
     if (!project.name || project.name.trim() === '') {
-      errors.push(this.createError(
+      errors.push(this.createValidationError(
         ERROR_CODES.RESUME.PROJECT.MISSING_PROJECT_NAME,
         PROJECT_VALIDATION_KEYS.MISSING_NAME,
         'name',
-        'error',
-        ValidationLayerType.DOMAIN
+        ValidationLayerType.DOMAIN,
+        'error'
       ));
     }
     
-    // Validation de la description
+    // Validation de la description (erreur critique)
     if (!project.description || project.description.trim() === '') {
-      errors.push(this.createError(
+      errors.push(this.createValidationError(
         ERROR_CODES.RESUME.PROJECT.MISSING_DESCRIPTION,
         PROJECT_VALIDATION_KEYS.MISSING_DESCRIPTION,
         'description',
-        'error',
-        ValidationLayerType.DOMAIN
-      ));
-    } else if (project.description.length < 50) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.PROJECT.BRIEF_DESCRIPTION,
-        PROJECT_VALIDATION_KEYS.VAGUE_DESCRIPTION,
-        'description',
-        'warning',
-        ValidationLayerType.APPLICATION,
-        "Ajoutez plus de détails sur le projet, ses objectifs et votre contribution"
+        ValidationLayerType.DOMAIN,
+        'error'
       ));
     }
     
-    // Validation des rôles
-    if (!project.roles || project.roles.length === 0) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.PROJECT.MISSING_ROLE,
-        PROJECT_VALIDATION_KEYS.MISSING_ROLE,
-        'roles',
-        'warning',
-        ValidationLayerType.APPLICATION,
-        "Précisez votre rôle dans ce projet (ex: 'Développeur principal', 'Chef de projet')"
-      ));
-    }
-    
-    // Validation des points forts
-    if (!project.highlights || project.highlights.length === 0) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.PROJECT.MISSING_HIGHLIGHTS,
-        PROJECT_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
-        'highlights',
-        'warning',
-        ValidationLayerType.APPLICATION,
-        "Ajoutez des points forts pour mettre en valeur vos réalisations"
-      ));
-    }
-    
-    // Validation des mots-clés
-    if (!project.keywords || project.keywords.length === 0) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.PROJECT.MISSING_KEYWORDS,
-        PROJECT_VALIDATION_KEYS.MISSING_KEYWORDS,
-        'keywords',
-        'info',
-        ValidationLayerType.PRESENTATION,
-        "Ajoutez des mots-clés pour améliorer la correspondance avec les offres d'emploi"
-      ));
-    }
-    
-    // Validation de la date de début
+    // Validation des dates (erreur critique)
     if (project.startDate !== undefined) {
       if (project.startDate.trim() === '') {
-        errors.push(this.createError(
+        errors.push(this.createValidationError(
           ERROR_CODES.RESUME.PROJECT.MISSING_START_DATE,
           PROJECT_VALIDATION_KEYS.MISSING_START_DATE,
           'startDate',
-          'warning',
-          ValidationLayerType.APPLICATION
+          ValidationLayerType.APPLICATION,
+          'warning'
         ));
       } else if (!this.isValidDateFormat(project.startDate)) {
-        errors.push(this.createError(
+        errors.push(this.createValidationError(
           ERROR_CODES.RESUME.PROJECT.INVALID_DATE_FORMAT,
           PROJECT_VALIDATION_KEYS.INVALID_DATE_FORMAT,
           'startDate',
-          'error',
           ValidationLayerType.DOMAIN,
-          "Utilisez le format YYYY-MM-DD ou YYYY-MM"
+          'error',
+          { suggestion: "Utilisez le format YYYY-MM-DD ou YYYY-MM" }
         ));
       }
     }
     
-    // Validation de la date de fin
     if (project.endDate !== undefined && project.endDate.trim() !== '' && !this.isValidDateFormat(project.endDate)) {
-      errors.push(this.createError(
+      errors.push(this.createValidationError(
         ERROR_CODES.RESUME.PROJECT.INVALID_DATE_FORMAT,
         PROJECT_VALIDATION_KEYS.INVALID_DATE_FORMAT,
         'endDate',
-        'error',
         ValidationLayerType.DOMAIN,
-        "Utilisez le format YYYY-MM-DD ou YYYY-MM"
+        'error',
+        { suggestion: "Utilisez le format YYYY-MM-DD ou YYYY-MM" }
+      ));
+    }
+    
+    // Validation de la description (warning)
+    if (project.description && project.description.length < 50) {
+      errors.push(this.createValidationError(
+        ERROR_CODES.RESUME.PROJECT.BRIEF_DESCRIPTION,
+        PROJECT_VALIDATION_KEYS.VAGUE_DESCRIPTION,
+        'description',
+        ValidationLayerType.APPLICATION,
+        'warning',
+        { suggestion: "Ajoutez plus de détails sur le projet, ses objectifs et votre contribution" }
+      ));
+    }
+    
+    // Validation des rôles (warning)
+    if (!project.roles || project.roles.length === 0) {
+      errors.push(this.createValidationError(
+        ERROR_CODES.RESUME.PROJECT.MISSING_ROLE,
+        PROJECT_VALIDATION_KEYS.MISSING_ROLE,
+        'roles',
+        ValidationLayerType.APPLICATION,
+        'warning',
+        { suggestion: "Précisez votre rôle dans ce projet (ex: 'Développeur principal', 'Chef de projet')" }
+      ));
+    }
+    
+    // Validation des points forts (warning)
+    if (!project.highlights || project.highlights.length === 0) {
+      errors.push(this.createValidationError(
+        ERROR_CODES.RESUME.PROJECT.MISSING_HIGHLIGHTS,
+        PROJECT_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
+        'highlights',
+        ValidationLayerType.APPLICATION,
+        'warning',
+        { suggestion: "Ajoutez des points forts pour mettre en valeur vos réalisations" }
+      ));
+    }
+    
+    // Validation des mots-clés (info)
+    if (!project.keywords || project.keywords.length === 0) {
+      errors.push(this.createValidationError(
+        ERROR_CODES.RESUME.PROJECT.MISSING_KEYWORDS,
+        PROJECT_VALIDATION_KEYS.MISSING_KEYWORDS,
+        'keywords',
+        ValidationLayerType.PRESENTATION,
+        'info',
+        { suggestion: "Ajoutez des mots-clés pour améliorer la correspondance avec les offres d'emploi" }
       ));
     }
     
@@ -201,72 +227,72 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     switch (fieldName) {
       case 'name':
         if (!project.name || project.name.trim() === '') {
-          errors.push(this.createError(
+          errors.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.MISSING_PROJECT_NAME,
             PROJECT_VALIDATION_KEYS.MISSING_NAME,
             'name',
-            'error',
-            ValidationLayerType.DOMAIN
+            ValidationLayerType.DOMAIN,
+            'error'
           ));
         }
         break;
         
       case 'description':
         if (!project.description || project.description.trim() === '') {
-          errors.push(this.createError(
+          errors.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.MISSING_DESCRIPTION,
             PROJECT_VALIDATION_KEYS.MISSING_DESCRIPTION,
             'description',
-            'error',
-            ValidationLayerType.DOMAIN
+            ValidationLayerType.DOMAIN,
+            'error'
           ));
         } else if (project.description.length < 50) {
-          errors.push(this.createError(
+          errors.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.BRIEF_DESCRIPTION,
             PROJECT_VALIDATION_KEYS.VAGUE_DESCRIPTION,
             'description',
-            'warning',
             ValidationLayerType.APPLICATION,
-            "Ajoutez plus de détails sur le projet, ses objectifs et votre contribution"
+            'warning',
+            { suggestion: "Ajoutez plus de détails sur le projet, ses objectifs et votre contribution" }
           ));
         }
         break;
         
       case 'roles':
         if (!project.roles || project.roles.length === 0) {
-          errors.push(this.createError(
+          errors.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.MISSING_ROLE,
             PROJECT_VALIDATION_KEYS.MISSING_ROLE,
             'roles',
-            'warning',
             ValidationLayerType.APPLICATION,
-            "Précisez votre rôle dans ce projet (ex: 'Développeur principal', 'Chef de projet')"
+            'warning',
+            { suggestion: "Précisez votre rôle dans ce projet (ex: 'Développeur principal', 'Chef de projet')" }
           ));
         }
         break;
         
       case 'highlights':
         if (!project.highlights || project.highlights.length === 0) {
-          errors.push(this.createError(
+          errors.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.MISSING_HIGHLIGHTS,
             PROJECT_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
             'highlights',
-            'warning',
             ValidationLayerType.APPLICATION,
-            "Ajoutez des points forts pour mettre en valeur vos réalisations"
+            'warning',
+            { suggestion: "Ajoutez des points forts pour mettre en valeur vos réalisations" }
           ));
         }
         break;
         
       case 'keywords':
         if (!project.keywords || project.keywords.length === 0) {
-          errors.push(this.createError(
+          errors.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.MISSING_KEYWORDS,
             PROJECT_VALIDATION_KEYS.MISSING_KEYWORDS,
             'keywords',
-            'info',
             ValidationLayerType.PRESENTATION,
-            "Ajoutez des mots-clés pour améliorer la correspondance avec les offres d'emploi"
+            'info',
+            { suggestion: "Ajoutez des mots-clés pour améliorer la correspondance avec les offres d'emploi" }
           ));
         }
         break;
@@ -274,21 +300,21 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
       case 'startDate':
         if (project.startDate !== undefined) {
           if (project.startDate.trim() === '') {
-            errors.push(this.createError(
+            errors.push(this.createValidationError(
               ERROR_CODES.RESUME.PROJECT.MISSING_START_DATE,
               PROJECT_VALIDATION_KEYS.MISSING_START_DATE,
               'startDate',
-              'warning',
-              ValidationLayerType.APPLICATION
+              ValidationLayerType.APPLICATION,
+              'warning'
             ));
           } else if (!this.isValidDateFormat(project.startDate)) {
-            errors.push(this.createError(
+            errors.push(this.createValidationError(
               ERROR_CODES.RESUME.PROJECT.INVALID_DATE_FORMAT,
               PROJECT_VALIDATION_KEYS.INVALID_DATE_FORMAT,
               'startDate',
-              'error',
               ValidationLayerType.DOMAIN,
-              "Utilisez le format YYYY-MM-DD ou YYYY-MM"
+              'error',
+              { suggestion: "Utilisez le format YYYY-MM-DD ou YYYY-MM" }
             ));
           }
         }
@@ -296,13 +322,13 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
         
       case 'endDate':
         if (project.endDate !== undefined && project.endDate.trim() !== '' && !this.isValidDateFormat(project.endDate)) {
-          errors.push(this.createError(
+          errors.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.INVALID_DATE_FORMAT,
             PROJECT_VALIDATION_KEYS.INVALID_DATE_FORMAT,
             'endDate',
-            'error',
             ValidationLayerType.DOMAIN,
-            "Utilisez le format YYYY-MM-DD ou YYYY-MM"
+            'error',
+            { suggestion: "Utilisez le format YYYY-MM-DD ou YYYY-MM" }
           ));
         }
         break;
@@ -316,45 +342,12 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
   }
 
   /**
-   * Crée une erreur de validation avec les paramètres spécifiés
-   * @param code Code d'erreur
-   * @param i18nKey Clé de traduction
-   * @param field Champ concerné
-   * @param severity Sévérité de l'erreur
-   * @param layer Couche de validation
-   * @param suggestion Suggestion optionnelle
-   * @returns Erreur de validation
-   */
-  private createError(
-    code: string,
-    i18nKey: string,
-    field: string,
-    severity: 'error' | 'warning' | 'info',
-    layer: ValidationLayerType,
-    suggestion?: string
-  ): ValidationErrorInterface {
-    return {
-      code,
-      message: this.i18nAdapter.translate(i18nKey),
-      field,
-      i18nKey,
-      severity,
-      layer,
-      suggestion
-    };
-  }
-
-  /**
    * Vérifie si une date est au format valide (YYYY-MM-DD ou YYYY-MM)
    * @param date Date à vérifier
    * @returns True si le format est valide
    */
   private isValidDateFormat(date: string): boolean {
-    // Format YYYY-MM-DD
-    const fullDateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    // Format YYYY-MM
-    const yearMonthRegex = /^\d{4}-\d{2}$/;
-    
-    return fullDateRegex.test(date) || yearMonthRegex.test(date);
+    // Accepte les formats YYYY-MM-DD et YYYY-MM
+    return /^\d{4}-\d{2}(-\d{2})?$/.test(date);
   }
 } 

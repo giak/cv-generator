@@ -150,7 +150,13 @@
 
 <script setup lang="ts">
 import { computed, markRaw, h } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useFormProgress } from '../../modules/cv/presentation/composables/useFormProgress';
+
+// Initialize i18n
+const { t } = useI18n();
+
+// Function to safely handle translations with fallback
 
 // Définition des props et événements
 interface Props {
@@ -534,9 +540,6 @@ const TrophyIcon = markRaw({
     ])
   }
 })
-
-// Fonction simple de traduction (à remplacer par vue-i18n quand disponible)
-const t = (key: string, defaultValue: string) => defaultValue
 </script>
 
 <style scoped>

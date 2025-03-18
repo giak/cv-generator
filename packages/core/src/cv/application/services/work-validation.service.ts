@@ -7,24 +7,24 @@ import {
   ValidationErrorInterface,
   ValidationLayerType,
   createSuccess,
+  createSuccessWithWarnings,
   createFailure,
-  isFailure,
-  ERROR_CODES
+  isFailure
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';
 import { DateRange } from '../../domain/value-objects/date-range.value-object';
-import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
+import { type DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
 
 // Export validation keys for the work validation service
 export const WORK_VALIDATION_KEYS = {
-  MISSING_COMPANY: 'resume.work.validation.missingCompany',
-  MISSING_POSITION: 'resume.work.validation.missingPosition',
-  VAGUE_POSITION: 'resume.work.validation.vaguePosition',
-  MISSING_SUMMARY: 'resume.work.validation.missingSummary',
-  BRIEF_DESCRIPTION: 'resume.work.validation.briefDescription',
-  MISSING_HIGHLIGHTS: 'resume.work.validation.missingHighlights',
-  VAGUE_HIGHLIGHTS: 'resume.work.validation.vagueHighlights'
-};
+  MISSING_COMPANY: 'work.validation.missing_company',
+  MISSING_POSITION: 'work.validation.missing_position',
+  VAGUE_POSITION: 'work.validation.vague_position',
+  MISSING_SUMMARY: 'work.validation.missing_summary',
+  BRIEF_DESCRIPTION: 'work.validation.brief_description',
+  MISSING_HIGHLIGHTS: 'work.validation.missing_highlights',
+  VAGUE_HIGHLIGHTS: 'work.validation.vague_highlights'
+} as const;
 
 /**
  * Interface pour une expérience professionnelle
@@ -32,11 +32,10 @@ export const WORK_VALIDATION_KEYS = {
 export interface WorkInterface {
   company: string;
   position: string;
-  startDate: string;
-  endDate?: string | null;
-  summary: string;
+  startDate?: string;
+  endDate?: string;
+  summary?: string;
   highlights?: string[];
-  website?: string;
 }
 
 /**
@@ -72,125 +71,102 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
    */
   public validate(work: WorkInterface): ResultType<WorkInterface> {
     const errors: ValidationErrorInterface[] = [];
+    const warnings: ValidationErrorInterface[] = [];
     
-    // Validation du champ company
-    if (this.isEmpty(work.company)) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.WORK.MISSING_COMPANY,
-        this.i18nAdapter.translate(WORK_VALIDATION_KEYS.MISSING_COMPANY),
-        "company",
+    // Validation du nom de l'entreprise (erreur critique)
+    if (!work.company || work.company.trim() === '') {
+      errors.push(this.createValidationError(
+        'MISSING_COMPANY',
+        WORK_VALIDATION_KEYS.MISSING_COMPANY,
+        'company',
         ValidationLayerType.DOMAIN,
-        "error",
-        {
-          i18nKey: WORK_VALIDATION_KEYS.MISSING_COMPANY
-        }
+        'error'
       ));
     }
     
-    // Validation du champ position
-    if (this.isEmpty(work.position)) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.WORK.MISSING_POSITION,
-        this.i18nAdapter.translate(WORK_VALIDATION_KEYS.MISSING_POSITION),
-        "position",
+    // Validation du poste (erreur critique)
+    if (!work.position || work.position.trim() === '') {
+      errors.push(this.createValidationError(
+        'MISSING_POSITION',
+        WORK_VALIDATION_KEYS.MISSING_POSITION,
+        'position',
         ValidationLayerType.DOMAIN,
-        "error",
-        {
-          i18nKey: WORK_VALIDATION_KEYS.MISSING_POSITION
-        }
+        'error'
       ));
-    } else if (this.hasMinLength(work.position, 2) && work.position.length < 5) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.WORK.VAGUE_POSITION,
-        this.i18nAdapter.translate(WORK_VALIDATION_KEYS.VAGUE_POSITION),
-        "position",
+    } else if (work.position.length < 5) {
+      warnings.push(this.createValidationError(
+        'VAGUE_POSITION',
+        WORK_VALIDATION_KEYS.VAGUE_POSITION,
+        'position',
         ValidationLayerType.APPLICATION,
-        "warning",
-        {
-          i18nKey: WORK_VALIDATION_KEYS.VAGUE_POSITION,
-          suggestion: "Utilisez un titre de poste précis qui reflète votre niveau de responsabilité"
-        }
+        'warning',
+        { suggestion: "Utilisez un titre de poste plus descriptif" }
       ));
     }
     
-    // Validation des dates avec le Value Object DateRange
-    const dateRangeResult = DateRange.create(work.startDate, work.endDate, 'work', this.i18nAdapter);
-    if (isFailure(dateRangeResult)) {
-      errors.push(...dateRangeResult.error);
+    // Validation des dates
+    if (work.startDate || work.endDate) {
+      const dateRangeResult = DateRange.create(
+        work.startDate || '',
+        work.endDate || '',
+        'work',
+        this.i18nAdapter
+      );
+      
+      if (isFailure(dateRangeResult)) {
+        errors.push(...dateRangeResult.error);
+      }
     }
     
-    // Validation du résumé
-    if (this.isEmpty(work.summary)) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.WORK.MISSING_SUMMARY,
-        this.i18nAdapter.translate(WORK_VALIDATION_KEYS.MISSING_SUMMARY),
-        "summary",
-        ValidationLayerType.APPLICATION,
-        "error",
-        {
-          i18nKey: WORK_VALIDATION_KEYS.MISSING_SUMMARY
-        }
+    // Validation de la description (warning)
+    if (!work.summary || work.summary.trim() === '') {
+      errors.push(this.createValidationError(
+        'MISSING_SUMMARY',
+        WORK_VALIDATION_KEYS.MISSING_SUMMARY,
+        'summary',
+        ValidationLayerType.DOMAIN,
+        'error'
       ));
-    } else if (work.summary.length < 100) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.WORK.BRIEF_DESCRIPTION,
-        this.i18nAdapter.translate(WORK_VALIDATION_KEYS.BRIEF_DESCRIPTION),
-        "summary",
+    } else if (work.summary.length < 50) {
+      warnings.push(this.createValidationError(
+        'BRIEF_DESCRIPTION',
+        WORK_VALIDATION_KEYS.BRIEF_DESCRIPTION,
+        'summary',
         ValidationLayerType.APPLICATION,
-        "warning",
-        {
-          i18nKey: WORK_VALIDATION_KEYS.BRIEF_DESCRIPTION,
-          suggestion: "Ajoutez plus de détails pour valoriser cette expérience (au moins 200 caractères recommandés)"
-        }
+        'warning',
+        { suggestion: "Ajoutez plus de détails sur vos responsabilités et réalisations" }
       ));
     }
     
-    // Validation des points forts (highlights)
+    // Validation des points forts (warning)
     if (!work.highlights || work.highlights.length === 0) {
-      errors.push(this.createError(
-        ERROR_CODES.RESUME.WORK.MISSING_HIGHLIGHTS,
-        this.i18nAdapter.translate(WORK_VALIDATION_KEYS.MISSING_HIGHLIGHTS),
-        "highlights",
+      warnings.push(this.createValidationError(
+        'MISSING_HIGHLIGHTS',
+        WORK_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
+        'highlights',
         ValidationLayerType.APPLICATION,
-        "warning",
-        {
-          i18nKey: WORK_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
-          suggestion: "Incluez 2-3 réalisations quantifiables pour valoriser cette expérience"
-        }
+        'warning',
+        { suggestion: "Ajoutez des points forts pour mettre en valeur vos réalisations" }
       ));
     } else {
-      const hasVagueHighlight = work.highlights.some(h => h.length < 30);
-      if (hasVagueHighlight) {
-        errors.push(this.createError(
-          ERROR_CODES.RESUME.WORK.VAGUE_HIGHLIGHTS,
-          this.i18nAdapter.translate(WORK_VALIDATION_KEYS.VAGUE_HIGHLIGHTS),
-          "highlights",
-          ValidationLayerType.PRESENTATION,
-          "info",
-          {
-            i18nKey: WORK_VALIDATION_KEYS.VAGUE_HIGHLIGHTS,
-            suggestion: "Quantifiez vos réalisations (%, chiffres, impact) pour plus d'impact"
-          }
+      const vagueHighlights = work.highlights.filter(h => h.length < 20);
+      if (vagueHighlights.length > 0) {
+        warnings.push(this.createValidationError(
+          'VAGUE_HIGHLIGHTS',
+          WORK_VALIDATION_KEYS.VAGUE_HIGHLIGHTS,
+          'highlights',
+          ValidationLayerType.APPLICATION,
+          'warning',
+          { suggestion: "Détaillez davantage vos réalisations" }
         ));
       }
     }
     
-    // Si des erreurs de niveau "error" sont présentes, on retourne un échec
-    if (errors.some(err => err.severity === 'error')) {
+    if (errors.length > 0) {
       return createFailure(errors);
     }
     
-    // Si seulement des warnings/infos, on retourne un succès avec les warnings
-    if (errors.length > 0) {
-      // Note: Extension du pattern Result comme dans les Value Objects
-      return {
-        success: true,
-        value: work,
-        warnings: errors
-      } as any;
-    }
-    
-    return createSuccess(work);
+    return warnings.length > 0 ? createSuccessWithWarnings(work, warnings) : createSuccess(work);
   }
   
   /**
@@ -205,171 +181,133 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
   ): ResultType<WorkInterface[K]> {
     const value = work[fieldName];
     const errors: ValidationErrorInterface[] = [];
+    const warnings: ValidationErrorInterface[] = [];
     
     switch (fieldName) {
       case 'company':
-        if (this.isEmpty(value as string)) {
-          errors.push(this.createError(
-            ERROR_CODES.RESUME.WORK.MISSING_COMPANY,
-            this.i18nAdapter.translate(WORK_VALIDATION_KEYS.MISSING_COMPANY),
-            "company",
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          errors.push(this.createValidationError(
+            'MISSING_COMPANY',
+            WORK_VALIDATION_KEYS.MISSING_COMPANY,
+            'company',
             ValidationLayerType.DOMAIN,
-            "error",
-            {
-              i18nKey: WORK_VALIDATION_KEYS.MISSING_COMPANY
-            }
+            'error'
           ));
         }
         break;
         
       case 'position':
-        if (this.isEmpty(value as string)) {
-          errors.push(this.createError(
-            ERROR_CODES.RESUME.WORK.MISSING_POSITION,
-            this.i18nAdapter.translate(WORK_VALIDATION_KEYS.MISSING_POSITION),
-            "position",
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          errors.push(this.createValidationError(
+            'MISSING_POSITION',
+            WORK_VALIDATION_KEYS.MISSING_POSITION,
+            'position',
             ValidationLayerType.DOMAIN,
-            "error",
-            {
-              i18nKey: WORK_VALIDATION_KEYS.MISSING_POSITION
-            }
+            'error'
           ));
-        } else if (this.hasMinLength(value as string, 2) && (value as string).length < 5) {
-          errors.push(this.createError(
-            ERROR_CODES.RESUME.WORK.VAGUE_POSITION,
-            this.i18nAdapter.translate(WORK_VALIDATION_KEYS.VAGUE_POSITION),
-            "position",
+        } else if (typeof value === 'string' && value.length < 5) {
+          warnings.push(this.createValidationError(
+            'VAGUE_POSITION',
+            WORK_VALIDATION_KEYS.VAGUE_POSITION,
+            'position',
             ValidationLayerType.APPLICATION,
-            "warning",
-            {
-              i18nKey: WORK_VALIDATION_KEYS.VAGUE_POSITION,
-              suggestion: "Utilisez un titre de poste précis qui reflète votre niveau de responsabilité"
-            }
+            'warning',
+            { suggestion: "Utilisez un titre de poste plus descriptif" }
           ));
         }
         break;
         
       case 'startDate':
       case 'endDate':
-        // Pour ces champs, on utilise directement le Value Object DateRange
-        // On le fait ensemble car les dates sont liées
         const dateRangeResult = DateRange.create(
-          work.startDate, 
-          work.endDate, 
+          work.startDate || '',
+          work.endDate || '',
           'work',
           this.i18nAdapter
         );
         
         if (isFailure(dateRangeResult)) {
-          // On filtre les erreurs pour ne garder que celles du champ spécifié
-          const fieldErrors = dateRangeResult.error.filter(
-            err => err.field === fieldName
-          );
-          
-          if (fieldErrors.length > 0) {
-            errors.push(...fieldErrors);
-          }
+          errors.push(...dateRangeResult.error.filter(e => e.field === fieldName));
         }
         break;
         
       case 'summary':
-        if (this.isEmpty(value as string)) {
-          errors.push(this.createError(
-            ERROR_CODES.RESUME.WORK.MISSING_SUMMARY,
-            this.i18nAdapter.translate(WORK_VALIDATION_KEYS.MISSING_SUMMARY),
-            "summary",
-            ValidationLayerType.APPLICATION,
-            "error",
-            {
-              i18nKey: WORK_VALIDATION_KEYS.MISSING_SUMMARY
-            }
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          errors.push(this.createValidationError(
+            'MISSING_SUMMARY',
+            WORK_VALIDATION_KEYS.MISSING_SUMMARY,
+            'summary',
+            ValidationLayerType.DOMAIN,
+            'error'
           ));
-        } else if ((value as string).length < 100) {
-          errors.push(this.createError(
-            ERROR_CODES.RESUME.WORK.BRIEF_DESCRIPTION,
-            this.i18nAdapter.translate(WORK_VALIDATION_KEYS.BRIEF_DESCRIPTION),
-            "summary",
+        } else if (typeof value === 'string' && value.length < 50) {
+          warnings.push(this.createValidationError(
+            'BRIEF_DESCRIPTION',
+            WORK_VALIDATION_KEYS.BRIEF_DESCRIPTION,
+            'summary',
             ValidationLayerType.APPLICATION,
-            "warning",
-            {
-              i18nKey: WORK_VALIDATION_KEYS.BRIEF_DESCRIPTION,
-              suggestion: "Ajoutez plus de détails pour valoriser cette expérience (au moins 200 caractères recommandés)"
-            }
+            'warning',
+            { suggestion: "Ajoutez plus de détails sur vos responsabilités et réalisations" }
           ));
         }
         break;
         
       case 'highlights':
         const highlights = value as string[] | undefined;
-        if (!highlights || highlights.length === 0) {
-          errors.push(this.createError(
-            ERROR_CODES.RESUME.WORK.MISSING_HIGHLIGHTS,
-            this.i18nAdapter.translate(WORK_VALIDATION_KEYS.MISSING_HIGHLIGHTS),
-            "highlights",
+        if (!highlights || !Array.isArray(highlights) || highlights.length === 0) {
+          warnings.push(this.createValidationError(
+            'MISSING_HIGHLIGHTS',
+            WORK_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
+            'highlights',
             ValidationLayerType.APPLICATION,
-            "warning",
-            {
-              i18nKey: WORK_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
-              suggestion: "Incluez 2-3 réalisations quantifiables pour valoriser cette expérience"
-            }
+            'warning',
+            { suggestion: "Ajoutez des points forts pour mettre en valeur vos réalisations" }
           ));
         } else {
-          const hasVagueHighlight = highlights.some(h => h.length < 30);
-          if (hasVagueHighlight) {
-            errors.push(this.createError(
-              ERROR_CODES.RESUME.WORK.VAGUE_HIGHLIGHTS,
-              this.i18nAdapter.translate(WORK_VALIDATION_KEYS.VAGUE_HIGHLIGHTS),
-              "highlights",
-              ValidationLayerType.PRESENTATION,
-              "info",
-              {
-                i18nKey: WORK_VALIDATION_KEYS.VAGUE_HIGHLIGHTS,
-                suggestion: "Quantifiez vos réalisations (%, chiffres, impact) pour plus d'impact"
-              }
+          const vagueHighlights = highlights.filter(h => h.length < 20);
+          if (vagueHighlights.length > 0) {
+            warnings.push(this.createValidationError(
+              'VAGUE_HIGHLIGHTS',
+              WORK_VALIDATION_KEYS.VAGUE_HIGHLIGHTS,
+              'highlights',
+              ValidationLayerType.APPLICATION,
+              'warning',
+              { suggestion: "Détaillez davantage vos réalisations" }
             ));
           }
         }
         break;
     }
     
-    if (errors.some(err => err.severity === 'error')) {
+    if (errors.length > 0) {
       return createFailure(errors);
     }
     
-    if (errors.length > 0) {
-      // Extension du pattern Result
-      return {
-        success: true,
-        value: value as WorkInterface[K],
-        warnings: errors
-      } as any;
-    }
-    
-    return createSuccess(value as WorkInterface[K]);
+    return warnings.length > 0 ? createSuccessWithWarnings(value as WorkInterface[K], warnings) : createSuccess(value as WorkInterface[K]);
   }
   
   /**
    * Helper pour créer une erreur i18n avec tous les champs nécessaires
    */
-  protected createError(
+  protected createValidationError(
     code: string,
-    message: string,
+    i18nKey: string,
     field: string,
     layer: ValidationLayerType,
     severity: 'error' | 'warning' | 'info' = 'error',
     options?: {
-      i18nKey?: string;
       suggestion?: string;
       additionalInfo?: Record<string, unknown>;
     }
   ): ValidationErrorInterface {
     return {
       code,
-      message,
+      message: this.i18nAdapter.translate(i18nKey),
       field,
       layer,
       severity,
-      ...(options || {}),
+      i18nKey,
+      ...options
     };
   }
 } 

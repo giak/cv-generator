@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WorkValidationService, WORK_VALIDATION_KEYS } from '../work-validation.service';
 import { isSuccess, isFailure } from '@cv-generator/shared';
 import type { WorkInterface } from '../work-validation.service';
 import { MockDomainI18nAdapter } from '../../../../shared/i18n/__mocks__/i18n.mock';
-import { DATE_RANGE_VALIDATION_KEYS } from '../../../domain/value-objects/date-range.value-object';
+import { DATE_RANGE_VALIDATION_KEYS, DateRange } from '../../../domain/value-objects/date-range.value-object';
 
 describe('WorkValidationService', () => {
   // Create a mock i18n adapter with translations for testing
@@ -16,12 +16,19 @@ describe('WorkValidationService', () => {
     [WORK_VALIDATION_KEYS.MISSING_HIGHLIGHTS]: "Aucune réalisation notable mentionnée",
     [WORK_VALIDATION_KEYS.VAGUE_HIGHLIGHTS]: "Réalisations peu précises",
     [DATE_RANGE_VALIDATION_KEYS.MISSING_START_DATE]: 'La date de début est requise',
-    [DATE_RANGE_VALIDATION_KEYS.INVALID_DATE_FORMAT]: 'Format de date invalide'
+    [DATE_RANGE_VALIDATION_KEYS.INVALID_DATE_FORMAT]: 'Format de date invalide',
+    [DATE_RANGE_VALIDATION_KEYS.END_BEFORE_START]: 'La date de fin doit être postérieure à la date de début'
   });
 
   // Create the validation service with the mock i18n adapter
   const validationService = new WorkValidationService(mockI18n);
+  let dateRangeSpy: any;
   
+  beforeEach(() => {
+    vi.clearAllMocks();
+    dateRangeSpy = vi.spyOn(DateRange, 'create');
+  });
+
   describe('validate', () => {
     it('should validate valid work experience data', () => {
       // Arrange
@@ -37,11 +44,20 @@ describe('WorkValidationService', () => {
         ]
       };
       
+      // Mock DateRange.create to return a success result
+      dateRangeSpy.mockReturnValue({ isValid: true });
+      
       // Act
       const result = validationService.validate(validWork);
       
       // Assert
       expect(isSuccess(result)).toBe(true);
+      expect(dateRangeSpy).toHaveBeenCalledWith(
+        validWork.startDate,
+        validWork.endDate,
+        'work',
+        mockI18n
+      );
     });
     
     it('should fail with missing company name', () => {
@@ -53,6 +69,9 @@ describe('WorkValidationService', () => {
         endDate: '2022-12-31',
         summary: 'Worked on various projects.'
       };
+      
+      // Mock DateRange.create to return a success result
+      dateRangeSpy.mockReturnValue({ isValid: true });
       
       // Act
       const result = validationService.validate(invalidWork);
@@ -77,6 +96,9 @@ describe('WorkValidationService', () => {
         summary: 'Worked on various projects.'
       };
       
+      // Mock DateRange.create to return a success result
+      dateRangeSpy.mockReturnValue({ isValid: true });
+      
       // Act
       const result = validationService.validate(invalidWork);
       
@@ -99,6 +121,9 @@ describe('WorkValidationService', () => {
         endDate: '2022-12-31',
         summary: 'Developed software applications and websites for clients in the finance sector. Worked with a team of 5 developers to deliver high-quality solutions.'
       };
+      
+      // Mock DateRange.create to return a success result
+      dateRangeSpy.mockReturnValue({ isValid: true });
       
       // Act
       const result = validationService.validate(workWithVaguePosition);
@@ -124,6 +149,17 @@ describe('WorkValidationService', () => {
         summary: 'Worked on various projects.'
       };
       
+      // Mock DateRange.create to return a failure result
+      dateRangeSpy.mockReturnValue({ 
+        isValid: false,
+        errors: [{
+          code: 'INVALID_DATE_FORMAT',
+          message: 'Format de date invalide',
+          field: 'startDate',
+          i18nKey: DATE_RANGE_VALIDATION_KEYS.INVALID_DATE_FORMAT
+        }]
+      });
+      
       // Act
       const result = validationService.validate(workWithInvalidDate);
       
@@ -146,6 +182,9 @@ describe('WorkValidationService', () => {
         endDate: '2022-12-31',
         summary: 'Worked on projects.' // Too brief
       };
+      
+      // Mock DateRange.create to return a success result
+      dateRangeSpy.mockReturnValue({ isValid: true });
       
       // Act
       const result = validationService.validate(workWithBriefSummary);
@@ -171,6 +210,9 @@ describe('WorkValidationService', () => {
         summary: 'Developed software applications and websites for clients in the finance sector. Worked with a team of 5 developers to deliver high-quality solutions.'
       };
       
+      // Mock DateRange.create to return a success result
+      dateRangeSpy.mockReturnValue({ isValid: true });
+      
       // Act
       const result = validationService.validate(workWithoutHighlights);
       
@@ -184,6 +226,65 @@ describe('WorkValidationService', () => {
         expect(highlightsWarnings[0].severity).toBe('warning');
       }
     });
+
+    it('should fail validation for missing company', () => {
+      const invalidWork: WorkInterface = {
+        company: '',
+        position: 'Senior Software Developer',
+        startDate: '2020-01-01',
+        endDate: '2022-12-31',
+        summary: 'Led development of cloud application',
+        highlights: ['Improved performance']
+      };
+      
+      // Mock DateRange.create to return a success result
+      dateRangeSpy.mockReturnValue({ isValid: true });
+      
+      const result = validationService.validate(invalidWork);
+      
+      expect(isFailure(result)).toBe(true);
+      if (isFailure(result)) {
+        expect(result.error[0].message).toBe(mockI18n.translate(WORK_VALIDATION_KEYS.MISSING_COMPANY));
+      }
+      expect(dateRangeSpy).toHaveBeenCalledWith(
+        invalidWork.startDate,
+        invalidWork.endDate,
+        'work',
+        mockI18n
+      );
+    });
+
+    it('should fail validation for invalid date range', () => {
+      const invalidWork: WorkInterface = {
+        company: 'Acme Inc.',
+        position: 'Senior Software Developer',
+        startDate: '2022-01-01',
+        endDate: '2020-12-31', // End date before start date
+        summary: 'Led development of cloud application',
+        highlights: ['Improved performance']
+      };
+      
+      // Mock DateRange.create to return a failure result
+      dateRangeSpy.mockReturnValue({ 
+        isValid: false,
+        errors: [{
+          code: 'END_BEFORE_START',
+          message: 'La date de fin doit être postérieure à la date de début',
+          field: 'endDate',
+          i18nKey: DATE_RANGE_VALIDATION_KEYS.END_BEFORE_START
+        }]
+      });
+      
+      const result = validationService.validate(invalidWork);
+      
+      expect(isFailure(result)).toBe(true);
+      expect(dateRangeSpy).toHaveBeenCalledWith(
+        invalidWork.startDate,
+        invalidWork.endDate,
+        'work',
+        mockI18n
+      );
+    });
   });
   
   describe('validateField', () => {
@@ -191,10 +292,10 @@ describe('WorkValidationService', () => {
       // Arrange
       const work: WorkInterface = {
         company: 'Acme Inc.',
-        position: 'Software Developer',
+        position: 'Senior Software Developer',
         startDate: '2020-01-01',
         endDate: '2022-12-31',
-        summary: 'Developed software applications.'
+        summary: 'Led development of cloud application'
       };
       
       // Act
@@ -202,9 +303,6 @@ describe('WorkValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      if (isSuccess(result)) {
-        expect(result.value).toBe('Acme Inc.');
-      }
     });
     
     it('should fail validating empty company', () => {

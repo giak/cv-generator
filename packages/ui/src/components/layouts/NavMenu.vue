@@ -1,4 +1,21 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+// Initialize i18n
+const { t } = useI18n();
+
+// Function to safely handle translations with fallback
+const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
+  try {
+    const translated = t(key);
+    // Check if translation exists and is not the same as the key
+    return (translated && translated !== key) ? translated : fallback;
+  } catch (error) {
+    console.warn(`Translation error for key: ${key}`, error);
+    return fallback;
+  }
+};
+
 interface NavItem {
   id: string;
   label: string;
@@ -34,7 +51,7 @@ const handleNavClick = (path: string | undefined) => {
 </script>
 
 <template>
-  <nav class="nav-menu" aria-label="Main Navigation" data-test="nav-menu">
+  <nav class="nav-menu" :aria-label="safeTranslate('ui.navigation.mainNav', 'Main Navigation')" data-test="nav-menu">
     <div
       v-for="group in groups"
       :key="group.id"

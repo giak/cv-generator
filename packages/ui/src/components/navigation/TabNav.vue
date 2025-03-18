@@ -28,6 +28,12 @@
 
 <script setup lang="ts">
 import { provide, ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+// Initialize i18n
+const { t } = useI18n();
+
+// Function to safely handle translations with fallback
 
 export interface TabNavProps {
   modelValue?: string | number;

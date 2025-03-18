@@ -125,7 +125,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useFormProgress } from '../../modules/cv/presentation/composables/useFormProgress'
+
+// Initialize i18n
+const { t } = useI18n()
 
 const props = defineProps({
   currentSection: {
@@ -176,9 +180,6 @@ const sectionComplete = computed(() => {
 const sectionPartial = computed(() => {
   return currentSectionStatus.value?.isPartial || false
 })
-
-// Méthodes de traduction (utilisant les textes en dur pour simplifier)
-const t = (_key: string, defaultValue: string) => defaultValue
 
 // Fonction de navigation
 const navigateTo = (path: string) => {

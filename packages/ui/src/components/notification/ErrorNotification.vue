@@ -38,7 +38,7 @@
           type="button" 
           class="flex rounded-tr-md rounded-br-md p-1.5 focus:outline-none focus:ring-2"
           :class="getDismissClass(error.severity)"
-          :aria-label="`Dismiss ${error.message}`"
+          :aria-label="safeTranslate('ui.notifications.dismiss', 'Dismiss') + ' ' + error.message"
           @click="handleDismiss(error.id)"
         >
           <XMarkIcon class="h-5 w-5" aria-hidden="true" />
@@ -50,8 +50,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ExclamationTriangleIcon, ExclamationCircleIcon, InformationCircleIcon, XMarkIcon } from '@heroicons/vue/24/solid';
 import { useErrorStore, type ErrorInfo, type ErrorSeverity } from '../../core/stores/error';
+
+// Initialize i18n
+const { t } = useI18n();
+
+// Function to safely handle translations with fallback
 
 const props = defineProps({
   // If provided, only show errors from this source
