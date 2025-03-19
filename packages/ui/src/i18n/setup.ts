@@ -72,9 +72,16 @@ const i18n = createI18n({
 
 /**
  * Returns the i18n instance for the application.
+ * Initializes the locale based on preferences or detection.
  * @returns Configured Vue I18n instance
  */
 export function setupI18n() {
+  // Obtenir la locale initiale (localStorage ou détection navigateur)
+  const initialLocale = getInitialLocale();
+  
+  // Définir la locale sur l'instance i18n
+  i18n.global.locale.value = initialLocale;
+  
   return i18n;
 }
 

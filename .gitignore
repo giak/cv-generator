@@ -63,6 +63,12 @@ Thumbs.db
 .tscache/
 tsconfig.tsbuildinfo
 
+# Fichiers de déclaration générés automatiquement pour les fichiers de configuration
+**/vite.config.d.ts
+**/vitest.config.d.ts
+**/tailwind.config.d.ts
+**/postcss.config.d.ts
+
 # Environment
 .env
 .env.*

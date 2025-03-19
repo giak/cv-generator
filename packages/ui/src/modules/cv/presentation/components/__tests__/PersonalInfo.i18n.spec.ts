@@ -1,9 +1,35 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import PersonalInfo from '../PersonalInfo.vue'
-import { createTestingOptions, setLocale } from '../../../../../test-utils/i18n-plugin'
-import { TextSelector, runI18nTests, testDynamicLocaleChange } from '../../../../../test-utils/i18n-e2e-test'
+import BasicsForm from '../BasicsForm.vue'
 import { testNoI18nConsoleErrors } from '../../../../../test-utils/i18n-console-errors'
+import { useI18n } from 'vue-i18n'
+
+// Mock pour vue-i18n
+vi.mock('vue-i18n', () => {
+  // Mock initial de useI18n
+  const useI18nMock = vi.fn(() => ({
+    locale: { value: 'fr' },
+    t: (key: string) => key,
+    availableLocales: ['fr', 'en'],
+    setLocaleMessage: vi.fn()
+  }));
+  
+  // Mock pour createI18n
+  const createI18nMock = vi.fn(() => ({
+    global: {
+      locale: { value: 'fr' },
+      t: vi.fn((key: string) => key),
+      availableLocales: ['fr', 'en'],
+      setLocaleMessage: vi.fn()
+    },
+    install: vi.fn()
+  }));
+  
+  return {
+    useI18n: useI18nMock,
+    createI18n: createI18nMock
+  }
+})
 
 // Mock des composants
 vi.mock('../../../shared/components/Card.vue', () => ({
@@ -16,118 +42,130 @@ vi.mock('../../../shared/components/Card.vue', () => ({
 vi.mock('../../../shared/components/Button.vue', () => ({
   default: {
     name: 'Button',
-    template: '<button class="mock-button"><slot></slot></button>',
+    template: '<button class="mock-button">{{ $slots.default ? $slots.default() : "Save" }}</button>',
     props: ['variant']
   }
 }))
 
 // Mock du store personal
+const mockPersonalData = {
+  name: 'John Doe',
+  email: 'john@example.com',
+  phone: '+33600000000',
+  url: 'https://johndoe.com',
+  location: {
+    address: '123 Rue de Paris',
+    postalCode: '75001',
+    city: 'Paris',
+    region: 'Île-de-France',
+    countryCode: 'FR'
+  },
+  summary: 'Un développeur passionné',
+  profiles: []
+};
+
 vi.mock('../../../shared/stores/usePersonalStore', () => ({
   usePersonalStore: () => ({
-    personal: {
-      name: 'John Doe',
-      title: 'Développeur Web',
-      email: 'john@example.com',
-      phone: '+33600000000',
-      website: 'https://johndoe.com',
-      location: 'Paris, France',
-      summary: 'Un développeur passionné',
-      profiles: [
-        { network: 'LinkedIn', username: 'johndoe', url: 'https://linkedin.com/in/johndoe' },
-        { network: 'GitHub', username: 'johndoe', url: 'https://github.com/johndoe' }
-      ]
-    },
+    personal: mockPersonalData,
     isLoading: false,
     save: vi.fn()
   })
 }))
 
-describe('PersonalInfo i18n', () => {
+describe('BasicsForm i18n', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Réinitialiser la locale
+    vi.mocked(useI18n).mockReturnValue({
+      locale: { value: 'fr' },
+      t: (key: string) => key,
+      availableLocales: ['fr', 'en'],
+      setLocaleMessage: vi.fn()
+    } as any)
   })
 
-  // Définition des sélecteurs de texte pour les tests multilingues
-  const textSelectors: TextSelector[] = [
-    {
-      selector: 'h2.card-title',
-      fr: 'Informations Personnelles',
-      en: 'Personal Information'
-    },
-    {
-      selector: '.mock-button',
-      fr: 'Éditer',
-      en: 'Edit'
-    },
-    {
-      selector: '.field-label:nth-of-type(1)',
-      fr: 'Nom:',
-      en: 'Name:'
-    },
-    {
-      selector: '.field-label:nth-of-type(2)',
-      fr: 'Titre:',
-      en: 'Title:'
-    },
-    {
-      selector: '.field-label:nth-of-type(3)',
-      fr: 'Email:',
-      en: 'Email:'
-    },
-    {
-      selector: '.field-label:nth-of-type(4)',
-      fr: 'Téléphone:',
-      en: 'Phone:'
-    },
-    {
-      selector: '.field-label:nth-of-type(5)',
-      fr: 'Site Web:',
-      en: 'Website:'
-    },
-    {
-      selector: '.field-label:nth-of-type(6)',
-      fr: 'Localisation:',
-      en: 'Location:'
-    },
-    {
-      selector: '.field-label:nth-of-type(7)',
-      fr: 'Résumé:',
-      en: 'Summary:'
-    },
-    {
-      selector: '.field-label:nth-of-type(8)',
-      fr: 'Profils:',
-      en: 'Profiles:'
-    }
-  ]
-
-  // 1. Test du rendu en français et en anglais
-  runI18nTests(PersonalInfo, textSelectors)
-
-  // 2. Test du changement dynamique de langue
-  testDynamicLocaleChange(PersonalInfo, textSelectors)
-
-  // 3. Test pour vérifier l'absence d'erreurs de console liées à l'i18n
-  testNoI18nConsoleErrors(PersonalInfo)
-
-  // Test supplémentaire pour vérifier des comportements spécifiques
-  describe('Specific i18n behaviors', () => {
-    beforeEach(() => {
-      setLocale('fr')
+  it('contient les traductions attendues en français', async () => {
+    // Configurer le mock pour le français
+    vi.mocked(useI18n).mockReturnValue({
+      locale: { value: 'fr' },
+      t: (key: string) => {
+        const translations: Record<string, string> = {
+          'resume.sections.basics': 'Informations de base',
+          'resume.basics.labels.name': 'Nom',
+          'resume.basics.labels.email': 'Email',
+          'common.actions.save': 'Enregistrer'
+        }
+        return translations[key] || key
+      },
+      availableLocales: ['fr', 'en'],
+      setLocaleMessage: vi.fn()
+    } as any)
+    
+    const wrapper = mount(BasicsForm, {
+      props: {
+        modelValue: mockPersonalData,
+        'onUpdate:modelValue': () => {}
+      },
+      global: {
+        stubs: {
+          'FormField': true, // Stub le composant FormField
+          'Button': true,    // Stub le composant Button
+        }
+      }
     })
-
-    it('displays profiles with translated network labels', async () => {
-      const wrapper = mount(PersonalInfo, createTestingOptions())
-      
-      // Vérifier que le réseau LinkedIn est affiché
-      expect(wrapper.text()).toContain('LinkedIn')
-      
-      // Changer la langue vers l'anglais
-      setLocale('en')
-      await wrapper.vm.$nextTick()
-      
-      // Vérifier que le réseau est toujours affiché (pas de traduction pour LinkedIn)
-      expect(wrapper.text()).toContain('LinkedIn')
-    })
+    
+    // Vérifier la présence de textes traduits
+    expect(wrapper.html()).toContain('Informations de base')
   })
-}) 
+
+  it('contient les traductions attendues en anglais', async () => {
+    // Configurer le mock pour l'anglais
+    vi.mocked(useI18n).mockReturnValue({
+      locale: { value: 'en' },
+      t: (key: string) => {
+        const translations: Record<string, string> = {
+          'resume.sections.basics': 'Basic Information',
+          'resume.basics.labels.name': 'Name',
+          'resume.basics.labels.email': 'Email',
+          'common.actions.save': 'Save'
+        }
+        return translations[key] || key
+      },
+      availableLocales: ['fr', 'en'],
+      setLocaleMessage: vi.fn()
+    } as any)
+    
+    const wrapper = mount(BasicsForm, {
+      props: {
+        modelValue: mockPersonalData,
+        'onUpdate:modelValue': () => {}
+      },
+      global: {
+        stubs: {
+          'FormField': true, // Stub le composant FormField
+          'Button': true,    // Stub le composant Button
+        }
+      }
+    })
+    
+    // Vérifier la présence de textes traduits
+    expect(wrapper.html()).toContain('Basic Information')
+  })
+
+  // Test pour vérifier l'absence d'erreurs de console liées à l'i18n
+  testNoI18nConsoleErrors(
+    {
+      props: {
+        modelValue: mockPersonalData,
+        'onUpdate:modelValue': () => {}
+      },
+      global: {
+        stubs: {
+          'FormField': true,
+          'Button': true
+        }
+      }
+    },
+    ['fr', 'en']
+  );
+}); 

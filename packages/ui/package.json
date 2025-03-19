@@ -31,7 +31,9 @@
     "test": "vitest",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
-    "lint": "biome check ."
+    "lint": "biome check .",
+    "test:i18n": "vitest run i18n",
+    "validate:i18n": "node scripts/run-i18n-validation.mjs"
   },
   "dependencies": {
     "@cv-generator/core": "workspace:*",
