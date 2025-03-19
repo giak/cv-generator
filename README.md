@@ -1,7 +1,7 @@
 ---
 title: CV Generator
 author: Giak
-date: 2025-03-06
+date: 2025-03-10
 status: active
 version: 1.1.0
 ---
@@ -14,8 +14,9 @@ version: 1.1.0
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![JSON Resume](https://img.shields.io/badge/JSON%20Resume-Compatible-orange.svg)](https://jsonresume.org/)
 [![Status](https://img.shields.io/badge/Status-Active-green)](https://github.com/giak/cv-generator)
+[![Languages](https://img.shields.io/badge/Languages-EN%20|%20FR-blue.svg)](docs/epic-5/i18n-reference-guide.md)
 
-> 💡 **Modern CV builder with full [JSON Resume](https://jsonresume.org/) standard support, real-time validation, and multiple export formats**
+> 💡 **Modern CV builder with full [JSON Resume](https://jsonresume.org/) standard support, real-time validation, multiple export formats, and multilingual interface**
 
 ![CV Generator Preview](docs/assets/preview.png)
 
@@ -38,7 +39,7 @@ pnpm dev
 - [Tech Stack](#tech-stack)
 - [Current Status](#current-status)
   - [Implementation Progress](#implementation-progress)
-  - [Latest Feature: Validation System Implementation](#latest-feature-validation-system-implementation)
+  - [Latest Feature: Internationalization & Multilingualism](#latest-feature-internationalization--multilingualism)
   - [Reusable Composables](#reusable-composables)
 - [Architecture](#architecture)
   - [Key Principles](#key-principles)
@@ -56,6 +57,7 @@ pnpm dev
   - [Editing CV Sections](#editing-cv-sections)
   - [Exporting Your CV](#exporting-your-cv)
   - [Importing Existing Data](#importing-existing-data)
+  - [Changing Language](#changing-language)
 - [Project Structure](#project-structure)
 - [Development](#development)
   - [Testing Strategy](#testing-strategy)
@@ -82,11 +84,11 @@ CV Generator is a modern web application that helps you create professional CVs 
 
 ### Problem Statement
 
-Managing and updating CVs in various formats can be challenging and time-consuming. Traditional word processors lack standardization and make it difficult to maintain consistent formatting across different versions.
+Managing and updating CVs in various formats can be challenging and time-consuming. Traditional word processors lack standardization and make it difficult to maintain consistent formatting across different versions. Additionally, language barriers can limit the reach of your CV in international job markets.
 
 ### Solution
 
-CV Generator provides a structured, standardized approach to CV creation using the JSON Resume format ([https://jsonresume.org/schema/](https://jsonresume.org/schema/)), combined with a modern, intuitive interface and real-time preview capabilities. The application ensures your CV data is always compliant with the standard, enabling interoperability with other tools in the JSON Resume ecosystem.
+CV Generator provides a structured, standardized approach to CV creation using the JSON Resume format ([https://jsonresume.org/schema/](https://jsonresume.org/schema/)), combined with a modern, intuitive interface and real-time preview capabilities. The application ensures your CV data is always compliant with the standard, enabling interoperability with other tools in the JSON Resume ecosystem. With full multilingual support, you can easily create and manage CVs in different languages to target international employers.
 
 ## Features
 
@@ -111,11 +113,13 @@ CV Generator provides a structured, standardized approach to CV creation using t
 - 🌍 **Internationalization & Multilingual Support**
 
   - Complete UI internationalization with 22 components translated
-  - Support for English and French languages
+  - Support for English and French languages with easy switching
+  - Robust validation messages in multiple languages
   - Safe translation system with fallback handling
-  - Extensible translation key structure
+  - Extensible translation key structure for adding new languages
   - Comprehensive testing infrastructure for multilingual validation
   - Developer-friendly tools for adding new translations
+  - Reactive updates when changing language in real-time
 
 - 💾 **Data Management**
 
@@ -129,6 +133,7 @@ CV Generator provides a structured, standardized approach to CV creation using t
 
   - Robust Result/Option Pattern implementation
   - Multi-layer validation (Domain, Application, Presentation)
+  - Multilingual validation messages with i18n support
   - Comprehensive error catalog with standardized codes
   - Detailed validation messages with helpful suggestions
   - Warning support for non-blocking validation issues
@@ -164,6 +169,7 @@ CV Generator provides a structured, standardized approach to CV creation using t
 | Zod          | 3.22+   | Schema validation and runtime type checking     | Type inference, custom validations                  |
 | pnpm         | 10+     | Package manager with monorepo workspace support | Efficient disk usage, workspaces, speed             |
 | Vue Router   | 4.2+    | Client-side routing and navigation              | Seamless SPA transitions, lazy loading              |
+| Vue I18n     | 9.2+    | Internationalization solution for Vue           | Multilingual support, message format, pluralization |
 | Mermaid      | 10.x+   | Diagrams and visualization                      | Documentation, architecture visualization           |
 
 ## Current Status
@@ -197,11 +203,13 @@ CV Generator provides a structured, standardized approach to CV creation using t
   - ⏳ Formulaires pour les compétences (skills) et autres sections planifiés
   - ⏳ Support des sections optionnelles du standard JSON Resume
 - **Epic-5: Internationalisation & Multilinguisme** ✅ 100% Complété
-  - ✅ Internationalisation complète des 22 composants UI
-  - ✅ Support du français et de l'anglais dans l'interface
-  - ✅ Infrastructure de test complète pour validation multilingue
-  - ✅ Documentation technique et guides de référence pour l'i18n
-  - ✅ Système robuste de gestion des traductions manquantes
+  - ✅ Architecture i18n (100%)
+  - ✅ Clés de traduction centralisées (100%)
+  - ✅ Adaptation des composants Value Objects et services (100%)
+  - ✅ Adaptation des composables UI comme useValidationResult (100%)
+  - ✅ Support complet pour français et anglais (100%)
+  - ✅ Tests multilingues (100%)
+  - ✅ Documentation technique complète (100%)
 - **Epic-4: Prévisualisation et exportation** ⏳ Planifié
 - **Epic-6: Optimisation ATS** ⏳ Planifié
 
@@ -217,6 +225,13 @@ The application now features a comprehensive internationalization system:
   - Support for English and French languages
   - Robust translation key structure for easy maintenance
   - Safe translation handling with fallback mechanism
+
+- ✅ **Internationalized Validation**:
+
+  - Adapted composables (`useValidationResult`, `useValidationCatalogue`) for i18n
+  - Multilingual validation messages with interpolation support
+  - Reactive updates when language changes
+  - Preserved compatibility with existing API
 
 - ✅ **Testing Infrastructure**:
 
@@ -254,6 +269,26 @@ function safeTranslate(key: string, fallback: string = ""): string {
   <h2>{{ t(TRANSLATION_KEYS.CV.LISTS.WORK.TITLE) }}</h2>
   <p>{{ safeTranslate(TRANSLATION_KEYS.CV.LISTS.WORK.DESCRIPTION, 'Fallback text') }}</p>
 </template>
+```
+
+```typescript
+// Example: Internationalized validation with useValidationResult
+const { allErrors, setResult } = useValidationResult(null, {
+  i18n: {
+    t: i18n.t,
+    locale: ref(i18n.locale)
+  }
+});
+
+// ValidationErrorInterface with i18n support
+{
+  field: 'email',
+  message: 'Invalid email',
+  code: 'EMAIL_INVALID',
+  severity: 'error',
+  i18nKey: 'validation.email.invalid', // Will be translated
+  layer: ValidationLayerType.PRESENTATION
+}
 ```
 
 For detailed information about the internationalization system, check the documentation in [docs/epic-5/i18n-reference-guide.md](docs/epic-5/i18n-reference-guide.md) and [docs/epic-5/i18n-technical-review.md](docs/epic-5/i18n-technical-review.md).
@@ -619,6 +654,16 @@ The section automatically organizes entries in reverse chronological order (most
 3. Review and confirm the imported data
 4. Make any necessary adjustments
 
+### Changing Language
+
+1. Click on the language selector in the top navigation bar
+2. Choose your preferred language (English or French)
+3. The entire interface including validation messages will update immediately
+4. Your CV data remains unchanged - only the UI language changes
+5. You can switch languages at any time without losing your work
+
+![Changing Language](docs/assets/language-switch.gif)
+
 ## Project Structure
 
 ```
@@ -657,6 +702,9 @@ cv-generator/
 │   │   ├── src/
 │   │   │   ├── types/           # Shared TypeScript types
 │   │   │   ├── utils/           # Shared utilities
+│   │   │   ├── i18n/            # Internationalization resources
+│   │   │   │   ├── locales/      # Language files (en, fr)
+│   │   │   │   └── keys/         # Translation key constants
 │   │   │   └── constants/       # Shared constants
 │   │   └── __tests__/           # Shared module tests
 │   │
@@ -670,6 +718,7 @@ cv-generator/
 │       │   │       ├── application/# Module-specific logic
 │       │   │       └── presentation/# UI components
 │       │   ├── stores/          # Pinia stores
+│       │   ├── i18n/            # i18n plugin configuration
 │       │   └── types/           # UI-specific types
 │       ├── e2e/                 # E2E tests
 │       └── __tests__/           # Unit tests
@@ -677,6 +726,9 @@ cv-generator/
 ├── docs/              # Project Documentation
 │   ├── architecture/  # Architecture decisions
 │   ├── api/          # API documentation
+│   ├── epic-5/       # Internationalization documentation
+│   │   ├── i18n-reference-guide.md   # Guide for adding translations
+│   │   └── i18n-technical-review.md  # Technical implementation details
 │   └── guides/       # Development guides
 │
 └── .github/          # GitHub Actions & Config
@@ -690,7 +742,7 @@ Each package has its own responsibilities:
 | -------------- | ------------------------------------- | ------------------------------------------------------- |
 | core           | Business logic and domain models      | `src/cv/domain/entities/Resume.ts`                      |
 | infrastructure | External services and persistence     | `src/repositories/LocalStorageResumeRepository.ts`      |
-| shared         | Common utilities and types            | `src/types/resume.interface.ts`                         |
+| shared         | Common utilities and types            | `src/types/resume.interface.ts`, `src/i18n/locales/`    |
 | ui             | User interface and presentation logic | `src/modules/cv/presentation/components/BasicsForm.vue` |
 
 ## Development
@@ -718,14 +770,21 @@ Our application follows a comprehensive testing approach:
   ```
 
 - **E2E Tests**: For critical user flows
+
   ```bash
   pnpm test:e2e
+  ```
+
+- **i18n Tests**: For internationalization functionality
+  ```bash
+  pnpm test:i18n
   ```
 
 Test coverage requirements:
 
 - Domain logic: 90%+ coverage
 - UI components: 80%+ coverage
+- i18n functionality: 90%+ coverage
 - Overall project: 75%+ coverage
 
 ### Code Style
@@ -792,6 +851,7 @@ NODE_ENV=production
 APP_TITLE=CV Generator
 APP_DESCRIPTION=Modern CV builder with JSON Resume support
 API_URL=https://your-api-endpoint.com/api
+DEFAULT_LOCALE=en  # Set default language
 ```
 
 ### Supported Platforms
@@ -874,9 +934,16 @@ You can run tests in a Docker environment to ensure consistent results:
    - Check for TypeScript errors: `pnpm typecheck`
 
 3. **Data Loss Issues**
+
    - Check localStorage in browser DevTools
    - Verify exports work correctly
    - Consider enabling the debug mode: `localStorage.setItem('debug', 'true')`
+
+4. **Internationalization Issues**
+   - Check browser language settings
+   - Verify translation keys exist in the locale files
+   - Clear browser cache if translations don't update
+   - Try setting language manually: `localStorage.setItem('locale', 'en')`
 
 ### Update Procedures
 
@@ -916,6 +983,12 @@ A: No, all data is stored locally in your browser. No server storage is used.
 **Q: Can I share my CV directly from the app?**  
 A: Currently, you need to export and share the file. Direct sharing is planned for a future release.
 
+**Q: How do I change the language?**  
+A: Click on the language selector in the top navigation bar and choose your preferred language (English or French).
+
+**Q: Can I add more languages?**  
+A: Yes, by adding new locale files in `packages/shared/src/i18n/locales/` and updating the language selector component.
+
 **Q: How do I report bugs or suggest features?**  
 A: Please open an issue on our [GitHub repository](https://github.com/giak/cv-generator/issues).
 
@@ -927,6 +1000,7 @@ Pour une liste détaillée des modifications, consultez le [CHANGELOG.md](CHANGE
 
 - **Internationalization**: Complete UI components translation with English and French support
 - **i18n Testing**: Advanced testing infrastructure for multilingual components
+- **Validation i18n**: Adapted composables for internationalized validation messages
 - **NavigationSystem**: Completely refactored navigation with event-based architecture
 - **FormComponents**: Standardized all form components with TypeScript type safety
 - **CollectionManager**: Added unified list management with drag-and-drop support
@@ -941,6 +1015,7 @@ Pour une liste détaillée des modifications, consultez le [CHANGELOG.md](CHANGE
 
 - [JSON Resume](https://jsonresume.org/) for the standardized format
 - [Vue.js](https://vuejs.org/) for the excellent frontend framework
+- [Vue I18n](https://vue-i18n.intlify.dev/) for the internationalization solution
 - [Vite](https://vitejs.dev/) for the blazing fast development experience
 - [Tailwind CSS](https://tailwindcss.com/) for the utility-first styling approach
 - [Zod](https://zod.dev/) for the schema validation system
@@ -948,4 +1023,4 @@ Pour une liste détaillée des modifications, consultez le [CHANGELOG.md](CHANGE
 
 ---
 
-_Last updated: March 06, 2025_
+_Last updated: March 10, 2025_

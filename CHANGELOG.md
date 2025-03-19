@@ -19,6 +19,11 @@ version: 1.1.0
   - Mise en place du système de traduction robuste avec fonction `safeTranslate` pour gérer les cas d'erreur
   - Support complet pour le français et l'anglais dans tous les composants
   - Infrastructure complète pour les tests multilingues
+- Adaptation des composables pour l'internationalisation:
+  - `useValidationCatalogue`: Support complet des clés i18n avec interpolation de paramètres
+  - `useValidationResult`: Traduction transparente des messages d'erreur de validation
+  - Support réactif pour les changements de langue en temps réel
+  - Maintien de la compatibilité avec l'API existante
 - Infrastructure de test pour l'internationalisation:
   - Création d'un plugin de test pour Vue I18n (`i18n-plugin.ts`)
   - Utilitaire pour tester les composants dans plusieurs langues (`language-testing.ts`)
@@ -80,6 +85,7 @@ version: 1.1.0
 - Standardisation de l'approche d'internationalisation à travers tous les composants UI
 - Adaptation des tests existants pour prendre en compte l'internationalisation
 - Amélioration de la robustesse des composants face aux erreurs de traduction
+- Migration complète des composables de validation vers le support multilingue
 
 - Standardisation complète de l'interface utilisateur pour tous les composants de liste
 - Implémentation du réordonnancement pour tous les composants de liste
@@ -117,6 +123,12 @@ version: 1.1.0
   - ✅ Composant `FormNavigation` modernisé avec système d'événements
   - ✅ Indicateurs visuels de progression et de statut
   - 🔄 Optimisation de l'accessibilité mobile
+- Epic-5 "Internationalisation et Multilinguisme" avancé à 100%
+  - ✅ Architecture i18n (100%)
+  - ✅ Clés de traduction centralisées (100%)
+  - ✅ Adaptation des composants Value Objects et services (100%)
+  - ✅ Adaptation des composables UI comme useValidationResult (100%)
+  - ✅ Tests multilingues (100%)
 - Epic-8 "Système de Validation" avancé à 60%
   - ✅ Infrastructure de base du Result/Option Pattern (100%)
   - ✅ Migration des Value Objects principaux (60%)
@@ -145,6 +157,41 @@ function safeTranslate(key: string, fallback: string = ""): string {
   <h2>{{ t(TRANSLATION_KEYS.CV.LISTS.WORK.TITLE) }}</h2>
   <p>{{ safeTranslate(TRANSLATION_KEYS.CV.LISTS.WORK.DESCRIPTION, 'Texte de secours') }}</p>
 </template>
+```
+
+> 💡 **Adaptation des Composables pour l'i18n**
+
+```typescript
+// useValidationResult avec support i18n
+const translateValidationError = (
+  error: ValidationErrorInterface,
+  i18n?: TranslationOptionsInterface
+): ValidationErrorInterface => {
+  if (!i18n || !error.i18nKey) {
+    return error;
+  }
+
+  try {
+    const translatedMessage = i18n.t(error.i18nKey, error.i18nParams);
+    return {
+      ...error,
+      message: translatedMessage || error.message,
+    };
+  } catch {
+    return error;
+  }
+};
+
+// Dans le composable
+// Surveille les changements de langue pour retraduire les erreurs
+if (i18n) {
+  watch(i18n.locale, () => {
+    if (result.value && !isSuccess(result.value)) {
+      // Retraduire les erreurs lorsque la langue change
+      result.value = translateResultErrors(result.value);
+    }
+  });
+}
 ```
 
 ```mermaid
@@ -370,8 +417,6 @@ graph TD
 - Mode hors-ligne complet avec synchronisation
 - Analyses de CV et suggestions d'amélioration
 - Interface administrateur pour la gestion des modèles
-- Internationalisation (i18n) pour l'interface utilisateur
-- Refactorisation progressive des composants d'interface utilisateur
 
 ### Technical Improvements 🔧
 

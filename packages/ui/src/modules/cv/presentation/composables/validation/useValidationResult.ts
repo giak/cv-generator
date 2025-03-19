@@ -3,6 +3,7 @@
  * 
  * Composable Vue pour manipuler les résultats de validation basés sur le pattern Result/Option.
  * Ce composable facilite l'intégration des objets ResultType dans les composants Vue.
+ * Support l'internationalisation (i18n) pour les messages d'erreur.
  */
 
 import {
@@ -10,6 +11,7 @@ import {
   computed,
   Ref,
   ComputedRef,
+  watch,
 } from 'vue';
 
 // Using type imports to avoid runtime dependencies
@@ -44,6 +46,21 @@ const getErrorsForField = (
   return errors.filter(err => err.field === fieldName);
 };
 
+/**
+ * Interface pour les options de traduction
+ */
+interface TranslationOptionsInterface {
+  /**
+   * Fonction de traduction qui traduit une clé en message
+   */
+  t: (key: string, params?: Record<string, any>) => string;
+  
+  /**
+   * Locale actuelle (réactive)
+   */
+  locale: Ref<string>;
+}
+
 export interface ValidationResultOptionsInterface {
   /**
    * Activation du mode debug (logs supplémentaires)
@@ -55,6 +72,11 @@ export interface ValidationResultOptionsInterface {
    * peut afficher des erreurs de validation
    */
   dirtyAfterMs?: number;
+
+  /**
+   * Options pour l'internationalisation
+   */
+  i18n?: TranslationOptionsInterface;
 }
 
 /**
@@ -147,6 +169,40 @@ export interface UseValidationResultReturnInterface<T> {
 }
 
 /**
+ * Traduit un message d'erreur de validation en utilisant les options i18n
+ * si une clé i18n est présente
+ */
+const translateValidationError = (
+  error: ValidationErrorInterface,
+  i18n?: TranslationOptionsInterface
+): ValidationErrorInterface => {
+  if (!i18n || !error.i18nKey) {
+    return error;
+  }
+  
+  try {
+    const translatedMessage = i18n.t(error.i18nKey, error.i18nParams);
+    return {
+      ...error,
+      message: translatedMessage || error.message
+    };
+  } catch {
+    return error;
+  }
+};
+
+/**
+ * Traduit un tableau de messages d'erreur de validation
+ */
+const translateValidationErrors = (
+  errors: ValidationErrorInterface[],
+  i18n?: TranslationOptionsInterface
+): ValidationErrorInterface[] => {
+  if (!i18n) return errors;
+  return errors.map(error => translateValidationError(error, i18n));
+};
+
+/**
  * useValidationResult - Composable pour gérer les résultats de validation
  * 
  * Ce composable permet de:
@@ -154,15 +210,17 @@ export interface UseValidationResultReturnInterface<T> {
  * - Extraire les erreurs et avertissements du résultat
  * - Gérer l'état de validation par champ (dirty, errors, warnings)
  * - Vérifier la validité globale du résultat
+ * - Traduire les messages d'erreur avec i18n en utilisant les clés de traduction
  * 
  * @param initialResult Résultat initial de validation (optionnel)
+ * @param options Options de configuration (debug, dirtyAfterMs, i18n)
  * @returns Méthodes et propriétés pour gérer le résultat de validation
  */
 export function useValidationResult<T>(
   initialResult: FormValidationResultType<T> | null = null,
   options: ValidationResultOptionsInterface = {}
 ): UseValidationResultReturnInterface<T> {
-  const { debug = false, dirtyAfterMs = 500 } = options;
+  const { debug = false, i18n } = options;
   
   // État principal - le résultat de validation
   const result = ref<FormValidationResultType<T> | null>(initialResult) as Ref<FormValidationResultType<T> | null>;
@@ -171,11 +229,30 @@ export function useValidationResult<T>(
   const dirtyFields = ref<Set<string>>(new Set());
   
   // Compteurs pour les métriques de performance
-  let validationCount = 0;
-  let validationTime = 0;
   
   // Map des états de champs pour le suivi
   const fieldStates = new Map<string, ValidationFieldState>();
+  
+  /**
+   * Traduit les erreurs dans un résultat de validation
+   */
+  const translateResultErrors = (validationResult: FormValidationResultType<T>): FormValidationResultType<T> => {
+    if (!i18n || isSuccess(validationResult)) return validationResult;
+    
+    // Utiliser une assertion de type sécurisée pour un résultat d'échec
+    const failureResult = validationResult as FailureType<ValidationErrorInterface[]>;
+    
+    if (!failureResult.error) return validationResult;
+    
+    // Traduire les erreurs
+    const translatedErrors = translateValidationErrors(failureResult.error, i18n);
+    
+    // Retourner une nouvelle instance avec les erreurs traduites
+    return {
+      success: false,
+      error: translatedErrors
+    } as FormValidationResultType<T>;
+  };
   
   // Mise à jour du résultat de validation
   const setResult = (newResult: FormValidationResultType<T>): void => {
@@ -186,8 +263,11 @@ export function useValidationResult<T>(
       console.groupEnd();
     }
     
+    // Traduire les messages d'erreur si nécessaire
+    const translatedResult = translateResultErrors(newResult);
+    
     // Conversion explicite pour assurer la compatibilité des types
-    result.value = newResult as FormValidationResultType<T>;
+    result.value = translatedResult as FormValidationResultType<T>;
   };
   
   // Réinitialisation du résultat
@@ -219,7 +299,8 @@ export function useValidationResult<T>(
     if (isSuccess(result.value)) {
       // Pour les résultats de succès, récupérer les warnings du champ warnings
       const successResult = result.value as SuccessType<T>;
-      return successResult.warnings || [];
+      const warnings = successResult.warnings || [];
+      return i18n ? translateValidationErrors(warnings, i18n) : warnings;
     } else {
       // Pour les résultats d'échec, filtrer les erreurs avec severity === 'warning'
       const failureResult = result.value as FailureType<ValidationErrorInterface[]>;
@@ -282,7 +363,8 @@ export function useValidationResult<T>(
     const isDirty = ref(false);
     const errors = computed<ValidationErrorInterface[]>(() => {
       if (!result.value || isSuccess(result.value)) return [];
-      return getErrorsForField(result.value, fieldName) as ValidationErrorInterface[];
+      const fieldErrors = getErrorsForField(result.value, fieldName) as ValidationErrorInterface[];
+      return fieldErrors;
     });
     
     const firstErrorMessage = computed<string>(() => {
@@ -340,6 +422,16 @@ export function useValidationResult<T>(
     validationCount: 0,
     validationTime: 0
   };
+  
+  // Surveille les changements de langue pour retraduire les erreurs
+  if (i18n) {
+    watch(i18n.locale, () => {
+      if (result.value && !isSuccess(result.value)) {
+        // Retraduire les erreurs lorsque la langue change
+        result.value = translateResultErrors(result.value);
+      }
+    });
+  }
   
   return {
     result,
