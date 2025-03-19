@@ -122,6 +122,10 @@
         "networkPlaceholder": "Ex: LinkedIn",
         "usernamePlaceholder": "Ex: john-doe",
         "urlPlaceholder": "Ex: https://linkedin.com/in/john-doe"
+      },
+      "form": {
+        "title": "Basic Information",
+        "subtitle": "General information about you"
       }
     },
     "work": {
@@ -668,7 +672,18 @@
       "editor": "Resume Editor",
       "preview": "Preview",
       "export": "Export",
-      "settings": "Settings"
+      "settings": "Settings",
+      "progress": "Progress",
+      "requiredSections": "Required sections",
+      "next": "Next",
+      "continueWith": "Continue with",
+      "sectionComplete": "Section complete",
+      "sectionIncomplete": "Section incomplete",
+      "sectionPartial": "Section partially complete",
+      "nextSection": "Next section",
+      "previousSection": "Previous section",
+      "nextIncompleteSection": "Next incomplete section",
+      "mainNav": "Main Navigation"
     },
     "export": {
       "title": "Export Your Resume",
@@ -677,7 +692,8 @@
       "pdfFormat": "PDF",
       "download": "Download",
       "successMessage": "Your resume has been exported successfully!",
-      "errorMessage": "There was an error exporting your resume. Please try again."
+      "errorMessage": "There was an error exporting your resume. Please try again.",
+      "button": "Export CV"
     },
     "collectionManager": {
       "edit": "Edit",
@@ -687,6 +703,20 @@
       "deleteConfirmation": "Are you sure you want to delete this item?",
       "confirm": "Confirm",
       "cancel": "Cancel"
+    },
+    "app": {
+      "brandName": "CV Generator"
+    },
+    "user": {
+      "name": "John Doe",
+      "role": "Web Developer",
+      "menuButton": "User menu"
+    },
+    "sidebar": {
+      "toggle": "Toggle sidebar"
+    },
+    "search": {
+      "placeholder": "Search..."
     }
   }
 } 

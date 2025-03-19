@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import LanguageSelector from '../navigation/LanguageSelector.vue';
 
 // Initialize i18n
 const { t } = useI18n();
@@ -22,9 +23,14 @@ const props = defineProps<Props>();
         <p v-if="description" class="text-sm text-neutral-400">{{ description }}</p>
       </div>
       
-      <!-- Action buttons slot -->
-      <div v-if="$slots.actions" class="mt-4 md:mt-0 flex items-center space-x-3">
-        <slot name="actions"></slot>
+      <div class="flex items-center space-x-4">
+        <!-- Language selector -->
+        <LanguageSelector />
+        
+        <!-- Action buttons slot -->
+        <div v-if="$slots.actions" class="mt-4 md:mt-0 flex items-center space-x-3">
+          <slot name="actions"></slot>
+        </div>
       </div>
     </div>
     

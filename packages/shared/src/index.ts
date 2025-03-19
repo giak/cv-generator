@@ -42,4 +42,10 @@ export type { ErrorCodeType } from './constants/error-codes.const';
 
 // Internationalisation
 export { TRANSLATION_KEYS } from './i18n/keys';
-export type { TranslationKeyType } from './i18n/keys'; 
+export type { TranslationKeyType } from './i18n/keys';
+export { 
+  SUPPORTED_LOCALES, 
+  DEFAULT_LOCALE, 
+  LOCALE_NAMES 
+} from './i18n/constants/supported-locales';
+export type { SupportedLocale } from './i18n/constants/supported-locales'; 

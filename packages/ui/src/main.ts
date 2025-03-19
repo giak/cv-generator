@@ -4,8 +4,8 @@ import AppComponent from './App/App.vue'
 import './assets/styles/main.scss'
 import ToastPlugin from './plugins/toast'
 import { i18nPlugin } from './i18n/plugin'
-import { loadLocaleMessages } from './i18n/setup'
-import { DEFAULT_LOCALE } from '@cv-generator/shared/i18n/constants/supported-locales'
+import { loadLocaleMessages, getInitialLocale, preloadDefaultMessages } from './i18n/setup'
+import { DEFAULT_LOCALE } from '@cv-generator/shared'
 
 // Configuration du gestionnaire d'erreurs global
 const configureErrorHandling = (app: VueApp<Element>) => {
@@ -40,7 +40,7 @@ const configureErrorHandling = (app: VueApp<Element>) => {
   }
 };
 
-// Créer l'application
+// Création de l'application
 const app = createApp(AppComponent)
 configureErrorHandling(app)
 app.use(createPinia())
@@ -50,14 +50,42 @@ app.use(ToastPlugin, {
 })
 app.use(i18nPlugin)
 
-// Attendre que les traductions soient chargées avant de monter l'application
-loadLocaleMessages(DEFAULT_LOCALE)
-  .then(() => {
-    console.log('Locale messages loaded, mounting app')
-    app.mount('#app')
-  })
-  .catch(error => {
-    console.error('Failed to load locale messages:', error)
-    // Monter l'application même en cas d'erreur pour ne pas bloquer l'utilisateur
-    app.mount('#app')
-  })
+// Fonction pour initialiser et monter l'application de manière sécurisée
+const initializeApp = async () => {
+  console.log('Initializing application...');
+  
+  try {
+    // 1. Précharger les messages par défaut (pour garantir une fallback)
+    await preloadDefaultMessages();
+    
+    // 2. Détecter la langue et charger les messages correspondants
+    const detectedLocale = getInitialLocale();
+    console.log(`Detected locale: ${detectedLocale}`);
+    
+    if (detectedLocale !== DEFAULT_LOCALE) {
+      try {
+        await loadLocaleMessages(detectedLocale);
+        console.log(`Successfully loaded messages for ${detectedLocale}`);
+      } catch (error) {
+        console.error(`Failed to load messages for ${detectedLocale}, using default locale`, error);
+        // Pas besoin de charger à nouveau les messages par défaut car ils ont été préchargés
+      }
+    }
+    
+    // 3. Monter l'application
+    console.log('Mounting application...');
+    app.mount('#app');
+    console.log('Application mounted successfully');
+    
+  } catch (error) {
+    console.error('Critical error during app initialization:', error);
+    
+    // En cas d'erreur critique, monter quand même l'application
+    // pour permettre à l'utilisateur d'interagir avec l'interface
+    console.warn('Mounting application despite initialization errors');
+    app.mount('#app');
+  }
+};
+
+// Lancer l'initialisation de l'application
+initializeApp();

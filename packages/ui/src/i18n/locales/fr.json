@@ -122,6 +122,10 @@
         "networkPlaceholder": "Ex: LinkedIn",
         "usernamePlaceholder": "Ex: jean-dupont",
         "urlPlaceholder": "Ex: https://linkedin.com/in/jean-dupont"
+      },
+      "form": {
+        "title": "Informations de base",
+        "subtitle": "Informations générales vous concernant"
       }
     },
     "work": {
@@ -183,7 +187,11 @@
         "emptyStateDescription": "Ajoutez votre historique professionnel pour mettre en valeur vos compétences et expertise.",
         "moveUp": "Déplacer vers le haut",
         "moveDown": "Déplacer vers le bas",
-        "present": "Actuel"
+        "present": "Actuel",
+        "chronologicalOrder": "Tri chronologique",
+        "customOrder": "Ordre personnalisé",
+        "showAll": "Voir toutes les expériences",
+        "showLess": "Réduire la liste"
       }
     },
     "education": {
@@ -212,7 +220,8 @@
         "startDate": "Date à laquelle vous avez commencé vos études.",
         "endDate": "Date à laquelle vous avez terminé vos études (laissez vide si en cours).",
         "gpa": "Votre moyenne générale ou équivalent.",
-        "courses": "Cours pertinents que vous avez suivis pendant vos études."
+        "courses": "Cours pertinents que vous avez suivis pendant vos études.",
+        "website": "URL du site web de l'établissement d'enseignement."
       },
       "validation": {
         "missingInstitution": "Le nom de l'établissement est obligatoire",
@@ -231,7 +240,13 @@
         "coursesSection": "Cours",
         "coursesDescription": "Ajoutez les cours pertinents que vous avez suivis pendant vos études",
         "noCourses": "Aucun cours ajouté. Utilisez le champ ci-dessus pour ajouter des cours pertinents.",
-        "addCourse": "Ajouter un cours"
+        "addCourse": "Ajouter un cours",
+        "currentEducation": "Formation en cours",
+        "coursesHelp": "Les cours permettent de détailler les compétences acquises durant votre formation",
+        "editCourse": "Modifier le cours sélectionné",
+        "editCoursePlaceholder": "Modifier le cours...",
+        "updateCourse": "Mettre à jour",
+        "escapeToCancel": "Appuyez sur Échap pour annuler l'édition"
       },
       "list": {
         "title": "Formation",
@@ -241,7 +256,22 @@
         "emptyStateDescription": "Ajoutez votre parcours éducatif pour mettre en valeur vos réussites académiques.",
         "moveUp": "Déplacer vers le haut",
         "moveDown": "Déplacer vers le bas",
-        "present": "En cours"
+        "present": "En cours",
+        "websiteLink": "Site web de l'établissement",
+        "resultLabel": "Résultat",
+        "coursesTitle": "Cours suivis",
+        "chronologicalOrder": "Ordre chronologique",
+        "customOrder": "Ordre personnalisé",
+        "showAll": "Voir toutes les formations",
+        "showLess": "Réduire la liste"
+      },
+      "notifications": {
+        "addSuccess": "Formation ajoutée avec succès",
+        "updateSuccess": "Formation mise à jour avec succès",
+        "deleteSuccess": "Formation supprimée avec succès",
+        "deleteError": "Erreur lors de la suppression de la formation",
+        "reorderError": "Erreur lors de la réorganisation des formations",
+        "saveError": "Erreur lors de la sauvegarde de la formation"
       }
     },
     "skills": {
@@ -348,7 +378,10 @@
         "noKeywords": "Aucune technologie ajoutée. Utilisez le champ ci-dessus pour ajouter des technologies pertinentes.",
         "addHighlight": "Ajouter un point fort",
         "addRole": "Ajouter un rôle",
-        "addKeyword": "Ajouter une technologie"
+        "addKeyword": "Ajouter une technologie",
+        "onePerLine": "un par ligne",
+        "confirmDelete": "Confirmer la suppression",
+        "deleteWarning": "Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible."
       },
       "list": {
         "title": "Projets",
@@ -357,7 +390,22 @@
         "emptyStateTitle": "Aucun projet ajouté",
         "emptyStateDescription": "Ajoutez vos projets pour montrer votre expérience pratique et vos réalisations.",
         "moveUp": "Déplacer vers le haut",
-        "moveDown": "Déplacer vers le bas"
+        "moveDown": "Déplacer vers le bas",
+        "chronologicalOrder": "Tri chronologique",
+        "customOrder": "Ordre personnalisé",
+        "viewProject": "Voir le projet",
+        "showAll": "Voir tous les projets",
+        "showLess": "Réduire la liste"
+      },
+      "notifications": {
+        "addSuccess": "Projet ajouté avec succès",
+        "updateSuccess": "Projet mis à jour avec succès",
+        "updateError": "Erreur lors de la mise à jour du projet",
+        "addError": "Erreur lors de l'ajout du projet",
+        "formError": "Une erreur est survenue lors de la soumission du formulaire",
+        "deleteSuccess": "Projet supprimé avec succès",
+        "deleteError": "Erreur lors de la suppression du projet",
+        "reorderError": "Erreur lors de la réorganisation des projets"
       }
     },
     "publications": {
@@ -394,7 +442,10 @@
         "addTitle": "Ajouter une publication",
         "editTitle": "Modifier la publication",
         "addSubtitle": "Ajoutez des détails sur les articles, documents ou livres que vous avez publiés.",
-        "editSubtitle": "Mettez à jour les détails de cette publication."
+        "editSubtitle": "Mettez à jour les détails de cette publication.",
+        "confirmDelete": "Supprimer cette publication ?",
+        "deleteWarning": "Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.",
+        "deleting": "Suppression..."
       },
       "list": {
         "title": "Publications",
@@ -403,7 +454,8 @@
         "emptyStateTitle": "Aucune publication ajoutée",
         "emptyStateDescription": "Ajoutez vos travaux publiés pour mettre en valeur vos contributions à votre domaine.",
         "moveUp": "Déplacer vers le haut",
-        "moveDown": "Déplacer vers le bas"
+        "moveDown": "Déplacer vers le bas",
+        "viewPublication": "Voir la publication"
       }
     },
     "languages": {
@@ -436,7 +488,16 @@
         "emptyStateTitle": "Aucune langue ajoutée",
         "emptyStateDescription": "Ajoutez les langues que vous maîtrisez pour mettre en valeur vos capacités de communication.",
         "moveUp": "Déplacer vers le haut",
-        "moveDown": "Déplacer vers le bas"
+        "moveDown": "Déplacer vers le bas",
+        "confirmDelete": "Supprimer cette langue",
+        "deleteWarning": "Êtes-vous sûr de vouloir supprimer cette langue ? Cette action est irréversible."
+      },
+      "notifications": {
+        "addSuccess": "Langue ajoutée avec succès",
+        "updateSuccess": "Langue mise à jour avec succès",
+        "deleteSuccess": "Langue supprimée avec succès",
+        "deleteError": "Erreur lors de la suppression de la langue",
+        "reorderError": "Erreur lors de la réorganisation des langues"
       }
     },
     "interests": {
@@ -473,7 +534,16 @@
         "emptyStateTitle": "Aucun centre d'intérêt ajouté",
         "emptyStateDescription": "Ajoutez vos loisirs et centres d'intérêt pour montrer davantage votre personnalité.",
         "moveUp": "Déplacer vers le haut",
-        "moveDown": "Déplacer vers le bas"
+        "moveDown": "Déplacer vers le bas",
+        "confirmDelete": "Supprimer cet intérêt",
+        "deleteWarning": "Êtes-vous sûr de vouloir supprimer cet intérêt ? Cette action est irréversible."
+      },
+      "notifications": {
+        "addSuccess": "Intérêt ajouté avec succès",
+        "updateSuccess": "Intérêt mis à jour avec succès",
+        "deleteSuccess": "Intérêt supprimé avec succès",
+        "deleteError": "Erreur lors de la suppression de l'intérêt",
+        "reorderError": "Erreur lors de la réorganisation des intérêts"
       }
     },
     "awards": {
@@ -515,7 +585,9 @@
         "emptyStateTitle": "Aucune distinction ajoutée",
         "emptyStateDescription": "Ajoutez les distinctions que vous avez reçues pour mettre en valeur vos accomplissements et votre reconnaissance.",
         "moveUp": "Déplacer vers le haut",
-        "moveDown": "Déplacer vers le bas"
+        "moveDown": "Déplacer vers le bas",
+        "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce prix ou cette distinction ?",
+        "awardedBy": "Décerné par"
       }
     },
     "certificates": {
@@ -557,7 +629,10 @@
         "emptyStateTitle": "Aucun certificat ajouté",
         "emptyStateDescription": "Ajoutez les certifications que vous avez obtenues pour vérifier vos compétences et expertise.",
         "moveUp": "Déplacer vers le haut",
-        "moveDown": "Déplacer vers le bas"
+        "moveDown": "Déplacer vers le bas",
+        "viewCertification": "Voir la certification",
+        "confirmDelete": "Supprimer cette certification",
+        "deleteWarning": "Êtes-vous sûr de vouloir supprimer cette certification ? Cette action est irréversible."
       }
     },
     "volunteer": {
@@ -615,7 +690,8 @@
         "emptyStateDescription": "Ajoutez votre travail bénévole pour montrer votre implication communautaire et vos valeurs.",
         "moveUp": "Déplacer vers le haut",
         "moveDown": "Déplacer vers le bas",
-        "present": "Actuel"
+        "present": "Actuel",
+        "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cette expérience de bénévolat ?"
       }
     },
     "references": {
@@ -648,9 +724,37 @@
         "emptyStateTitle": "Aucune référence ajoutée",
         "emptyStateDescription": "Ajoutez des références pour fournir une validation externe de vos compétences et de votre caractère.",
         "moveUp": "Déplacer vers le haut",
-        "moveDown": "Déplacer vers le bas"
+        "moveDown": "Déplacer vers le bas",
+        "loading": "Chargement des références...",
+        "confirmDelete": "Supprimer cette référence",
+        "deleteWarning": "Êtes-vous sûr de vouloir supprimer cette référence ? Cette action est irréversible."
+      },
+      "notifications": {
+        "addSuccess": "Référence ajoutée avec succès",
+        "updateSuccess": "Référence mise à jour avec succès",
+        "deleteSuccess": "Référence supprimée avec succès",
+        "deleteError": "Erreur lors de la suppression de la référence",
+        "saveError": "Erreur lors de la sauvegarde de la référence"
       }
     }
+  },
+  "navigation": {
+    "home": "Accueil",
+    "editor": "Éditeur de CV",
+    "preview": "Aperçu",
+    "export": "Exporter",
+    "settings": "Paramètres",
+    "progress": "Progression",
+    "requiredSections": "Sections requises",
+    "next": "Suivant",
+    "continueWith": "Continuer avec",
+    "sectionComplete": "Section complétée",
+    "sectionIncomplete": "Section incomplète",
+    "sectionPartial": "Section partiellement complète",
+    "nextSection": "Section suivante",
+    "previousSection": "Section précédente",
+    "nextIncompleteSection": "Prochaine section incomplète",
+    "mainNav": "Navigation principale"
   },
   "ui": {
     "header": {
@@ -668,7 +772,18 @@
       "editor": "Éditeur de CV",
       "preview": "Aperçu",
       "export": "Exporter",
-      "settings": "Paramètres"
+      "settings": "Paramètres",
+      "progress": "Progression",
+      "requiredSections": "Sections requises",
+      "next": "Suivant",
+      "continueWith": "Continuer avec",
+      "sectionComplete": "Section complétée",
+      "sectionIncomplete": "Section incomplète",
+      "sectionPartial": "Section partiellement complète",
+      "nextSection": "Section suivante",
+      "previousSection": "Section précédente",
+      "nextIncompleteSection": "Prochaine section incomplète",
+      "mainNav": "Navigation principale"
     },
     "export": {
       "title": "Exporter votre CV",
@@ -677,7 +792,8 @@
       "pdfFormat": "PDF",
       "download": "Télécharger",
       "successMessage": "Votre CV a été exporté avec succès !",
-      "errorMessage": "Une erreur est survenue lors de l'exportation de votre CV. Veuillez réessayer."
+      "errorMessage": "Une erreur est survenue lors de l'exportation de votre CV. Veuillez réessayer.",
+      "button": "Exporter le CV"
     },
     "collectionManager": {
       "edit": "Modifier",
@@ -687,6 +803,24 @@
       "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cet élément ?",
       "confirm": "Confirmer",
       "cancel": "Annuler"
+    },
+    "app": {
+      "brandName": "CV Generator"
+    },
+    "user": {
+      "name": "John Doe",
+      "role": "Développeur Web",
+      "menuButton": "Menu utilisateur"
+    },
+    "sidebar": {
+      "toggle": "Basculer la barre latérale"
+    },
+    "search": {
+      "placeholder": "Rechercher..."
+    },
+    "notifications": {
+      "title": "Notifications Toast",
+      "dismiss": "Fermer"
     }
   }
 }
