@@ -2,53 +2,47 @@
 
 This directory contains utility scripts for the CV Generator project.
 
-## Translation Workflow Script
+## Translation Management Script
 
-### i18n-workflow.js
+### i18n-guardian.js
 
-The `i18n-workflow.js` script is a tool for managing translations, built on top of the `vue-i18n-extract` library. It provides an interactive workflow for analyzing and fixing translation issues.
+The `i18n-guardian.js` script is an intelligent and secure system for managing translations in the CV Generator project. It provides a robust approach to detecting, adding, and removing translation keys with built-in safeguards.
 
 #### Features
 
-- Generates a detailed report of translation issues
-- Interactively offers to add missing translation keys
-- Interactively offers to remove unused translation keys
-- Provides a summary of translation status
+- Uses 12 different patterns to accurately detect translation keys
+- Automatically creates backups before making any modifications
+- Protects essential key categories from accidental deletion
+- Provides detailed context for each detected translation key
+- Requires confirmation for potentially destructive actions
+- Generates a comprehensive analysis report
 
 #### Usage
 
 Run the script with npm/pnpm:
 
 ```bash
-pnpm i18n:workflow
+pnpm i18n:guardian
 ```
 
-## Vue-i18n-extract Integration
+The script will:
 
-The project also integrates directly with `vue-i18n-extract` for more granular control over translation management.
+1. Analyze the codebase to detect used translation keys
+2. Compare with existing translation files
+3. Identify missing and unused keys
+4. Protect essential keys based on defined patterns
+5. Generate a detailed report
+6. Prompt for confirmation before making changes
 
-### Available Commands
+## Translation Backup
 
-| Command                   | Description                                              |
-| ------------------------- | -------------------------------------------------------- |
-| `pnpm i18n:report`        | Generate a report of missing and unused translation keys |
-| `pnpm i18n:add-missing`   | Add all missing translation keys to language files       |
-| `pnpm i18n:remove-unused` | Remove all unused translation keys from language files   |
-| `pnpm i18n:cleanup`       | Both add missing and remove unused translation keys      |
+A manual backup utility is also available:
 
-### Configuration
+```bash
+pnpm i18n:backup
+```
 
-The `vue-i18n-extract` tool is configured in the `vue-i18n-extract.config.js` file at the root of the project. Key settings include:
-
-- **vueFiles**: Paths to Vue, JavaScript, and TypeScript files to scan for translation keys
-- **languageFiles**: Paths to language JSON files
-- **output**: Path to the generated report
-- **add**: Whether to automatically add missing keys (default: false)
-- **remove**: Whether to automatically remove unused keys (default: false)
-- **exclude**: Paths to exclude from analysis
-- **separator**: Separator for nested translation keys
-- **noEmptyTranslation**: Whether to prevent empty translations
-- **missingtranslationstring**: Value to use for missing translations
+This creates timestamped backups of all translation files in the `/packages/ui/src/i18n/locales/backups/` directory.
 
 ## Integration with CI/CD
 
@@ -56,7 +50,31 @@ The translation analysis tools can be integrated into CI/CD pipelines to ensure 
 
 ```yaml
 - name: Check translations
-  run: pnpm i18n:report
+  run: pnpm i18n:guardian
 ```
 
-For more information, refer to the [vue-i18n-extract documentation](https://github.com/Spittal/vue-i18n-extract).
+## Report Format
+
+The generated report at `/reports/i18n/i18n-guardian-report.json` contains:
+
+- **Summary**: Counts of used, missing, unused and protected keys
+- **Used Keys**: List of all translation keys detected in the code
+- **Missing Keys**: Keys used in code but missing from translation files
+- **Unused Keys**: Keys in translation files not detected in the code
+- **Protected Keys**: Keys protected from deletion by defined patterns
+- **Key Contexts**: File locations and surrounding code for each key
+
+## Key Protection System
+
+The script uses regular expression patterns to protect essential key categories:
+
+```javascript
+const ESSENTIAL_KEYS_PATTERNS = [
+  /^common\./,
+  /^resume\./,
+  /^ui\./,
+  /^navigation\./,
+];
+```
+
+This ensures that even if a key is not detected as used, it will be preserved if it matches these patterns.

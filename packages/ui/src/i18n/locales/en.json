@@ -100,7 +100,12 @@
         "missingLocation": "Location is required",
         "vagueLocation": "Location should be more specific",
         "missingSummary": "Summary is required",
-        "briefSummary": "Summary is too short, add more details"
+        "briefSummary": "Summary is too short, add more details",
+        "missingUrl": "[EN] missingUrl",
+        "invalidUrl": "[EN] invalidUrl",
+        "insecureUrl": "[EN] insecureUrl",
+        "temporaryDomain": "[EN] temporaryDomain",
+        "nameTooLong": "[EN] nameTooLong"
       },
       "imageSuggestions": {
         "title": "Image URL suggestions:",
@@ -168,7 +173,9 @@
         "missingSummary": "Summary is required",
         "briefDescription": "Description is too brief, add more details",
         "missingHighlights": "Add at least one highlight",
-        "vagueHighlights": "Highlights should be more specific"
+        "vagueHighlights": "Highlights should be more specific",
+        "invalidStartDate": "[EN] invalidStartDate",
+        "invalidEndDate": "[EN] invalidEndDate"
       },
       "form": {
         "addTitle": "Add Work Experience",
@@ -361,7 +368,14 @@
         "missingDescription": "Project description is required",
         "invalidUrl": "Invalid URL format",
         "endBeforeStart": "End date cannot be before start date",
-        "futureDate": "Date cannot be in the future"
+        "futureDate": "Date cannot be in the future",
+        "vagueDescription": "[EN] vagueDescription",
+        "missingRole": "[EN] missingRole",
+        "missingHighlights": "[EN] missingHighlights",
+        "missingKeywords": "[EN] missingKeywords",
+        "missingStartDate": "[EN] missingStartDate",
+        "invalidDateFormat": "[EN] invalidDateFormat",
+        "missingUrl": "[EN] missingUrl"
       },
       "form": {
         "addTitle": "Add Project",
@@ -626,7 +640,10 @@
         "missingStartDate": "Start date is required",
         "endBeforeStart": "End date cannot be before start date",
         "futureDate": "Date cannot be in the future",
-        "missingSummary": "Summary is required"
+        "missingSummary": "Summary is required",
+        "briefSummary": "[EN] briefSummary",
+        "missingHighlights": "[EN] missingHighlights",
+        "invalidDateFormat": "[EN] invalidDateFormat"
       },
       "form": {
         "addTitle": "Add Volunteer Experience",
@@ -690,6 +707,59 @@
         "deleteSuccess": "Reference deleted successfully",
         "deleteError": "Error deleting reference",
         "saveError": "Error saving reference"
+      }
+    },
+    "common": {
+      "validation": {
+        "missingDate": "[EN] missingDate",
+        "invalidDateFormat": "[EN] invalidDateFormat",
+        "invalidDate": "[EN] invalidDate"
+      }
+    },
+    "reference": {
+      "validation": {
+        "missingName": "[EN] missingName",
+        "missingReference": "[EN] missingReference",
+        "briefReference": "[EN] briefReference",
+        "missingPosition": "[EN] missingPosition",
+        "missingCompany": "[EN] missingCompany"
+      }
+    },
+    "publication": {
+      "validation": {
+        "missingName": "[EN] missingName",
+        "missingPublisher": "[EN] missingPublisher",
+        "missingReleaseDate": "[EN] missingReleaseDate",
+        "futureDate": "[EN] futureDate",
+        "missingUrl": "[EN] missingUrl",
+        "missingSummary": "[EN] missingSummary"
+      }
+    },
+    "interest": {
+      "validation": {
+        "missingName": "[EN] missingName",
+        "briefName": "[EN] briefName",
+        "missingKeywords": "[EN] missingKeywords"
+      }
+    },
+    "certificate": {
+      "validation": {
+        "missingName": "[EN] missingName",
+        "missingIssuer": "[EN] missingIssuer",
+        "missingDate": "[EN] missingDate",
+        "futureDate": "[EN] futureDate",
+        "missingUrl": "[EN] missingUrl",
+        "expiredCertification": "[EN] expiredCertification",
+        "invalidDateFormat": "[EN] invalidDateFormat"
+      }
+    },
+    "award": {
+      "validation": {
+        "missingTitle": "[EN] missingTitle",
+        "missingDate": "[EN] missingDate",
+        "missingAwarder": "[EN] missingAwarder",
+        "missingSummary": "[EN] missingSummary",
+        "futureDate": "[EN] futureDate"
       }
     }
   },
@@ -777,11 +847,29 @@
       "description": ""
     }
   },
-  "action": "",
   "progressIndicator": {
     "title": "",
     "requiredSections": "",
     "nextToComplete": "",
     "continueWith": ""
+  },
+  "work": {
+    "validation": {
+      "missing_company": "[EN] missing_company",
+      "missing_position": "[EN] missing_position",
+      "vague_position": "[EN] vague_position",
+      "missing_summary": "[EN] missing_summary",
+      "brief_description": "[EN] brief_description",
+      "missing_highlights": "[EN] missing_highlights",
+      "vague_highlights": "[EN] vague_highlights"
+    }
+  },
+  "validation": {
+    "language": {
+      "missing_language": "[EN] missing_language",
+      "missing_fluency": "[EN] missing_fluency",
+      "undefined_fluency": "[EN] undefined_fluency",
+      "redundant_language": "[EN] redundant_language"
+    }
   }
 }

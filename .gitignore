@@ -37,6 +37,9 @@ xnotes
 **/test-results/
 **/.nyc_output/
 
+# Reports
+/reports/
+
 # Build
 **/dist/
 **/.vite/

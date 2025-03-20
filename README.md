@@ -1024,3 +1024,44 @@ Pour une liste détaillée des modifications, consultez le [CHANGELOG.md](CHANGE
 ---
 
 _Last updated: March 10, 2025_
+
+## Internationalisation (i18n)
+
+### Système I18n Guardian
+
+Un système intelligent de gestion des traductions a été implémenté pour assurer la fiabilité et la sécurité des fichiers de traduction.
+
+#### Caractéristiques principales
+
+- **Détection précise** : Utilise 12 patterns différents pour détecter les clés de traduction utilisées
+- **Protection intelligente** : Système de protection pour éviter la suppression de clés essentielles
+- **Sauvegarde automatique** : Crée des backups horodatés avant chaque modification
+- **Interface interactive** : Demande confirmation avant les actions potentiellement destructives
+- **Rapport détaillé** : Génère un rapport complet sur l'état des traductions
+
+#### Utilisation
+
+```bash
+# Analyser les traductions et appliquer les modifications nécessaires
+pnpm i18n:guardian
+
+# Créer une sauvegarde manuelle des fichiers de traduction
+pnpm i18n:backup
+```
+
+#### Fonctionnalités clés
+
+1. **Sécurité renforcée** : Système de création automatique de sauvegardes avant modification
+2. **Protection des clés essentielles** : Utilisation de patterns pour protéger des catégories entières de clés
+3. **Détection de contexte** : Identifie les fichiers et lignes où chaque clé est utilisée
+4. **Confirmation multi-niveaux** : Demande une double confirmation pour les actions destructives
+5. **Visualisation claire** : Interface console avec code couleur pour une meilleure lisibilité
+6. **Rapport structuré** : Génère un rapport JSON détaillé avec toutes les informations d'analyse
+
+Le rapport généré est disponible dans le dossier `/reports/i18n/i18n-guardian-report.json` (non versionné) et contient :
+
+- Un résumé des clés utilisées, manquantes, inutilisées et protégées
+- La liste complète des clés dans chaque catégorie
+- Le contexte d'utilisation de chaque clé (fichier, ligne, extrait de code)
+
+Les sauvegardes sont stockées dans `/packages/ui/src/i18n/locales/backups/` avec un horodatage ISO.

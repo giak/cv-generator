@@ -100,7 +100,12 @@
         "missingLocation": "La localisation est obligatoire",
         "vagueLocation": "La localisation devrait être plus précise",
         "missingSummary": "Le résumé est obligatoire",
-        "briefSummary": "Le résumé est trop court, ajoutez plus de détails"
+        "briefSummary": "Le résumé est trop court, ajoutez plus de détails",
+        "missingUrl": "[FR] missingUrl",
+        "invalidUrl": "[FR] invalidUrl",
+        "insecureUrl": "[FR] insecureUrl",
+        "temporaryDomain": "[FR] temporaryDomain",
+        "nameTooLong": "[FR] nameTooLong"
       },
       "imageSuggestions": {
         "title": "Suggestions pour l'URL de l'image :",
@@ -168,7 +173,9 @@
         "missingSummary": "Le résumé est obligatoire",
         "briefDescription": "La description est trop brève, ajoutez plus de détails",
         "missingHighlights": "Ajoutez au moins un point fort",
-        "vagueHighlights": "Les points forts devraient être plus spécifiques"
+        "vagueHighlights": "Les points forts devraient être plus spécifiques",
+        "invalidStartDate": "[FR] invalidStartDate",
+        "invalidEndDate": "[FR] invalidEndDate"
       },
       "form": {
         "addTitle": "Ajouter une expérience professionnelle",
@@ -361,7 +368,14 @@
         "missingDescription": "La description du projet est obligatoire",
         "invalidUrl": "Format d'URL invalide",
         "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
-        "futureDate": "La date ne peut pas être dans le futur"
+        "futureDate": "La date ne peut pas être dans le futur",
+        "vagueDescription": "[FR] vagueDescription",
+        "missingRole": "[FR] missingRole",
+        "missingHighlights": "[FR] missingHighlights",
+        "missingKeywords": "[FR] missingKeywords",
+        "missingStartDate": "[FR] missingStartDate",
+        "invalidDateFormat": "[FR] invalidDateFormat",
+        "missingUrl": "[FR] missingUrl"
       },
       "form": {
         "addTitle": "Ajouter un projet",
@@ -671,7 +685,10 @@
         "missingStartDate": "La date de début est obligatoire",
         "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
         "futureDate": "La date ne peut pas être dans le futur",
-        "missingSummary": "Le résumé est obligatoire"
+        "missingSummary": "Le résumé est obligatoire",
+        "briefSummary": "[FR] briefSummary",
+        "missingHighlights": "[FR] missingHighlights",
+        "invalidDateFormat": "[FR] invalidDateFormat"
       },
       "form": {
         "addTitle": "Ajouter une expérience bénévole",
@@ -736,6 +753,59 @@
         "deleteSuccess": "Référence supprimée avec succès",
         "deleteError": "Erreur lors de la suppression de la référence",
         "saveError": "Erreur lors de la sauvegarde de la référence"
+      }
+    },
+    "common": {
+      "validation": {
+        "missingDate": "[FR] missingDate",
+        "invalidDateFormat": "[FR] invalidDateFormat",
+        "invalidDate": "[FR] invalidDate"
+      }
+    },
+    "reference": {
+      "validation": {
+        "missingName": "[FR] missingName",
+        "missingReference": "[FR] missingReference",
+        "briefReference": "[FR] briefReference",
+        "missingPosition": "[FR] missingPosition",
+        "missingCompany": "[FR] missingCompany"
+      }
+    },
+    "publication": {
+      "validation": {
+        "missingName": "[FR] missingName",
+        "missingPublisher": "[FR] missingPublisher",
+        "missingReleaseDate": "[FR] missingReleaseDate",
+        "futureDate": "[FR] futureDate",
+        "missingUrl": "[FR] missingUrl",
+        "missingSummary": "[FR] missingSummary"
+      }
+    },
+    "interest": {
+      "validation": {
+        "missingName": "[FR] missingName",
+        "briefName": "[FR] briefName",
+        "missingKeywords": "[FR] missingKeywords"
+      }
+    },
+    "certificate": {
+      "validation": {
+        "missingName": "[FR] missingName",
+        "missingIssuer": "[FR] missingIssuer",
+        "missingDate": "[FR] missingDate",
+        "futureDate": "[FR] futureDate",
+        "missingUrl": "[FR] missingUrl",
+        "expiredCertification": "[FR] expiredCertification",
+        "invalidDateFormat": "[FR] invalidDateFormat"
+      }
+    },
+    "award": {
+      "validation": {
+        "missingTitle": "[FR] missingTitle",
+        "missingDate": "[FR] missingDate",
+        "missingAwarder": "[FR] missingAwarder",
+        "missingSummary": "[FR] missingSummary",
+        "futureDate": "[FR] futureDate"
       }
     }
   },
@@ -823,11 +893,29 @@
       "description": ""
     }
   },
-  "action": "",
   "progressIndicator": {
     "title": "",
     "requiredSections": "",
     "nextToComplete": "",
     "continueWith": ""
+  },
+  "work": {
+    "validation": {
+      "missing_company": "[FR] missing_company",
+      "missing_position": "[FR] missing_position",
+      "vague_position": "[FR] vague_position",
+      "missing_summary": "[FR] missing_summary",
+      "brief_description": "[FR] brief_description",
+      "missing_highlights": "[FR] missing_highlights",
+      "vague_highlights": "[FR] vague_highlights"
+    }
+  },
+  "validation": {
+    "language": {
+      "missing_language": "[FR] missing_language",
+      "missing_fluency": "[FR] missing_fluency",
+      "undefined_fluency": "[FR] undefined_fluency",
+      "redundant_language": "[FR] redundant_language"
+    }
   }
 }
