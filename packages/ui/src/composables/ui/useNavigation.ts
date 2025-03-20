@@ -1,4 +1,5 @@
-import { computed, ref, watch, type Component } from 'vue'
+import { computed, ref, type Component } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useResumeStore } from '@ui/modules/cv/presentation/stores/resume'
 import { useWorkStore } from '@ui/modules/cv/presentation/stores/work'
 import { useVolunteerStore } from '@ui/modules/cv/presentation/stores/volunteer'
@@ -43,7 +44,10 @@ export function useNavigation(options: {
   activeView: ReturnType<typeof ref<string>>,
   activeComponent: ReturnType<typeof ref<Component | null>>
 }) {
-  const { activeView, activeComponent } = options
+  const { activeView } = options
+  
+  // Initialize i18n
+  const { t } = useI18n()
   
   // Initialize all needed stores
   const resumeStore = useResumeStore()
@@ -63,7 +67,7 @@ export function useNavigation(options: {
   const breadcrumbItems = ref<NavItem[]>([
     {
       id: 'home',
-      label: 'Accueil',
+      label: 'navigation.home',
       path: '#home'
     }
   ])
@@ -72,11 +76,11 @@ export function useNavigation(options: {
   const navigationGroups: NavGroup[] = [
     {
       id: 'cv',
-      title: 'Curriculum Vitae',
+      title: t('ui.navigation.groups.cv'),
       items: [
         {
           id: 'basics',
-          label: 'Informations de base',
+          label: t('resume.sections.basics'),
           path: '#basics',
           active: true,
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
@@ -86,7 +90,7 @@ export function useNavigation(options: {
         },
         {
           id: 'experience',
-          label: 'Expérience',
+          label: t('resume.sections.work'),
           path: '#experience',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
@@ -95,7 +99,7 @@ export function useNavigation(options: {
         },
         {
           id: 'volunteer',
-          label: 'Bénévolat',
+          label: t('resume.sections.volunteer'),
           path: '#volunteer',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -106,7 +110,7 @@ export function useNavigation(options: {
         },
         {
           id: 'education',
-          label: 'Formation',
+          label: t('resume.sections.education'),
           path: '#education',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <path d="M22 10v6M2 10v6M17 10a5 5 0 0 0-10 0M12 10v6M7 16h10"></path>
@@ -114,7 +118,7 @@ export function useNavigation(options: {
         },
         {
           id: 'awards',
-          label: 'Prix & Distinctions',
+          label: t('resume.sections.awards'),
           path: '#awards',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <circle cx="12" cy="8" r="7"></circle>
@@ -123,7 +127,7 @@ export function useNavigation(options: {
         },
         {
           id: 'certificates',
-          label: 'Certifications',
+          label: t('resume.sections.certificates'),
           path: '#certificates',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path>
@@ -132,7 +136,7 @@ export function useNavigation(options: {
         },
         {
           id: 'publications',
-          label: 'Publications',
+          label: t('resume.sections.publications'),
           path: '#publications',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
@@ -141,7 +145,7 @@ export function useNavigation(options: {
         },
         {
           id: 'skills',
-          label: 'Compétences',
+          label: t('resume.sections.skills'),
           path: '#skills',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
@@ -149,7 +153,7 @@ export function useNavigation(options: {
         },
         {
           id: 'languages',
-          label: 'Langues',
+          label: t('resume.sections.languages'),
           path: '#languages',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <path d="M5 7l2-2h10l2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7z"></path>
@@ -161,7 +165,7 @@ export function useNavigation(options: {
         },
         {
           id: 'interests',
-          label: 'Intérêts',
+          label: t('resume.sections.interests'),
           path: '#interests',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <circle cx="12" cy="12" r="10"></circle>
@@ -171,7 +175,7 @@ export function useNavigation(options: {
         },
         {
           id: 'projects',
-          label: 'Projets',
+          label: t('resume.sections.projects'),
           path: '#projects',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -181,7 +185,7 @@ export function useNavigation(options: {
         },
         {
           id: 'references',
-          label: 'Références',
+          label: t('resume.sections.references'),
           path: '#references',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <path d="M17 6.1H3M21 12.5H3M21 18.9H3M16 18.9L14.8 3"/>
@@ -191,11 +195,11 @@ export function useNavigation(options: {
     },
     {
       id: 'options',
-      title: 'Options',
+      title: t('ui.navigation.groups.options'),
       items: [
         {
           id: 'notifications',
-          label: 'Notifications',
+          label: t('ui.notifications.title'),
           path: '#notifications',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -204,7 +208,7 @@ export function useNavigation(options: {
         },
         {
           id: 'themes',
-          label: 'Thèmes',
+          label: t('ui.themes.title', 'Themes'),
           path: '#themes',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
@@ -212,7 +216,7 @@ export function useNavigation(options: {
         },
         {
           id: 'settings',
-          label: 'Paramètres',
+          label: t('navigation.settings'),
           path: '#settings',
           icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
                   <circle cx="12" cy="12" r="3"></circle>
@@ -238,16 +242,70 @@ export function useNavigation(options: {
     }
     
     if (navItem) {
-      // Update breadcrumbs
+      // Get the translation key based on viewId
+      let translationKey = '';
+      
+      switch (viewId) {
+        case 'basics':
+          translationKey = 'resume.sections.basics';
+          break;
+        case 'work':
+        case 'experience':
+          translationKey = 'resume.sections.work';
+          break;
+        case 'volunteer':
+          translationKey = 'resume.sections.volunteer';
+          break;
+        case 'education':
+          translationKey = 'resume.sections.education';
+          break;
+        case 'awards':
+          translationKey = 'resume.sections.awards';
+          break;
+        case 'certificates':
+          translationKey = 'resume.sections.certificates';
+          break;
+        case 'publications':
+          translationKey = 'resume.sections.publications';
+          break;
+        case 'skills':
+          translationKey = 'resume.sections.skills';
+          break;
+        case 'languages':
+          translationKey = 'resume.sections.languages';
+          break;
+        case 'interests':
+          translationKey = 'resume.sections.interests';
+          break;
+        case 'projects':
+          translationKey = 'resume.sections.projects';
+          break;
+        case 'references':
+          translationKey = 'resume.sections.references';
+          break;
+        case 'notifications':
+          translationKey = 'ui.notifications.title';
+          break;
+        case 'themes':
+          translationKey = 'ui.themes.title';
+          break;
+        case 'settings':
+          translationKey = 'navigation.settings';
+          break;
+        default:
+          translationKey = navItem.label; // Fallback to navItem.label
+      }
+      
+      // Update breadcrumbs with translation keys
       breadcrumbItems.value = [
         {
           id: 'home',
-          label: 'Accueil',
+          label: 'navigation.home',
           path: '#home'
         },
         {
           id: viewId,
-          label: navItem.label,
+          label: translationKey,
           path: navItem.path
         }
       ]
@@ -259,8 +317,7 @@ export function useNavigation(options: {
    * @param path The path to navigate to
    */
   const handleNavigation = async (path: string) => {
-    console.log(`Navigating to ${path}...`)
-    
+
     // Extract view ID from the path (remove # if present)
     const viewId = path.startsWith('#') ? path.substring(1) : path
     
@@ -279,67 +336,64 @@ export function useNavigation(options: {
    * @param viewId ID of the view to load data for
    */
   const loadDataForView = async (viewId: string) => {
-    console.log(`Loading data for ${viewId}...`)
-    
+
     try {
       switch (viewId) {
         case 'basics':
-          console.log('Loading resume data due to navigation...')
+
           await resumeStore.loadResume()
           break
         case 'experience':
         case 'work':
-          console.log('Loading work experience data due to navigation...')
+
           await workStore.loadWorks()
           break
         case 'volunteer':
-          console.log('Loading volunteer data due to navigation...')
+
           await volunteerStore.loadVolunteers()
           break
         case 'education':
-          console.log('Loading education data due to navigation...')
+
           await educationStore.loadEducation()
           break
         case 'awards':
-          console.log('Loading awards data due to navigation...')
+
           await awardStore.loadAwards()
           break
         case 'certificates':
-          console.log('Loading certificates data due to navigation...')
+
           await certificateStore.loadCertificates()
           break
         case 'publications':
-          console.log('Loading publications data due to navigation...')
+
           await publicationStore.loadPublications()
           break
         case 'skills':
-          console.log('Loading skills data due to navigation...')
+
           await skillStore.loadSkills()
           break
         case 'languages':
-          console.log('Loading languages data due to navigation...')
+
           await languageStore.loadLanguages()
           break
         case 'interests':
-          console.log('Loading interests data due to navigation...')
+
           await interestStore.loadInterests()
           break
         case 'projects':
-          console.log('Loading projects data due to navigation...')
+
           await projectStore.loadProjects()
           break
         case 'references':
-          console.log('Loading references data due to navigation...')
+
           await referenceStore.loadReferences()
           break
         case 'notifications':
-          console.log('Loading notifications data due to navigation...')
+
           // Implement notifications data loading logic
           break
       }
-    } catch (error) {
-      console.error(`Error loading data for ${viewId}:`, error)
-    }
+    } catch (error) {}
   }
   
   /**
@@ -347,43 +401,43 @@ export function useNavigation(options: {
    */
   const getActiveViewTitle = computed<string>(() => {
     if (!activeView.value || activeView.value.length === 0) {
-      return 'Vue'
+      return t('navigation.view')
     }
     
     switch (activeView.value) {
       case 'basics':
-        return 'Informations de base'
+        return t('resume.sections.basics')
       case 'work':
       case 'experience':
-        return 'Expérience professionnelle'
+        return t('resume.sections.work')
       case 'volunteer':
-        return 'Expérience de bénévolat'
+        return t('resume.sections.volunteer')
       case 'education':
-        return 'Formation'
+        return t('resume.sections.education')
       case 'awards':
-        return 'Prix et Distinctions'
+        return t('resume.sections.awards')
       case 'certificates':
-        return 'Certifications'
+        return t('resume.sections.certificates')
       case 'publications':
-        return 'Publications'
+        return t('resume.sections.publications')
       case 'skills':
-        return 'Compétences'
+        return t('resume.sections.skills')
       case 'languages':
-        return 'Langues'
+        return t('resume.sections.languages')
       case 'interests':
-        return 'Intérêts'
+        return t('resume.sections.interests')
       case 'projects':
-        return 'Projets'
+        return t('resume.sections.projects')
       case 'references':
-        return 'Références'
+        return t('resume.sections.references')
       case 'notifications':
-        return 'Notifications'
+        return t('ui.notifications.title')
       case 'themes':
-        return 'Thèmes'
+        return t('ui.themes.title', 'Themes')
       case 'settings':
-        return 'Paramètres'
+        return t('navigation.settings')
       default:
-        return 'Vue inconnue'
+        return t('navigation.unknownView', 'Unknown View')
     }
   })
 
@@ -393,46 +447,44 @@ export function useNavigation(options: {
   const getActiveViewDescription = computed<string>(() => {
     switch (activeView.value) {
       case 'basics':
-        return 'Gérez vos informations personnelles'
+        return t('resume.basics.form.subtitle')
       case 'work':
       case 'experience':
-        return 'Ajoutez votre expérience professionnelle'
+        return t('resume.work.list.description')
       case 'volunteer':
-        return 'Ajoutez votre expérience de bénévolat'
+        return t('resume.volunteer.list.description')
       case 'education':
-        return 'Ajoutez votre parcours académique'
+        return t('resume.education.list.description')
       case 'awards':
-        return 'Ajoutez vos prix et distinctions'
+        return t('resume.awards.list.description')
       case 'certificates':
-        return 'Ajoutez vos certifications'
+        return t('resume.certificates.list.description')
       case 'publications':
-        return 'Ajoutez vos publications'
+        return t('resume.publications.list.description')
       case 'skills':
-        return 'Ajoutez vos compétences'
+        return t('resume.skills.list.description')
       case 'languages':
-        return 'Ajoutez les langues que vous maîtrisez'
+        return t('resume.languages.list.description')
       case 'interests':
-        return 'Ajoutez vos centres d\'intérêt'
+        return t('resume.interests.list.description')
       case 'projects':
-        return 'Ajoutez vos projets personnels ou professionnels'
+        return t('resume.projects.list.description')
       case 'references':
-        return 'Ajoutez vos références professionnelles'
+        return t('resume.references.list.description')
       case 'notifications':
-        return 'Gérez vos notifications'
+        return t('ui.notifications.description', 'Manage your notifications')
       case 'themes':
-        return 'Personnalisez l\'apparence de l\'application'
+        return t('ui.themes.description', 'Customize the application appearance')
       case 'settings':
-        return 'Configurez les paramètres de l\'application'
+        return t('ui.settings.description', 'Configure application settings')
       default:
-        return 'Description non disponible'
+        return t('navigation.descriptionNotAvailable', 'Description not available')
     }
   })
   
   // Intégration avec le suivi de progression
   const { 
     sectionStatuses, 
-    requiredSectionsCompletion, 
-    overallProgress, 
     findNextIncompleteSection,
     getNavigationSections 
   } = useFormProgress()
@@ -518,4 +570,4 @@ export function useNavigation(options: {
     isSectionIncomplete,
     sectionStatuses
   }
-} 
+}

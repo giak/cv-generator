@@ -158,7 +158,7 @@ export async function applyAsyncValidation<T, V>(
     const result = await validate(value);
     resultRef.value = result;
   } catch (error) {
-    console.error('Error during validation:', error);
+
     resultRef.value = createFailure([{
       code: 'VALIDATION_ERROR',
       message: error instanceof Error ? error.message : 'Erreur de validation',
@@ -252,4 +252,4 @@ export function validateRelatedFields(
   }
   
   return [];
-} 
+}

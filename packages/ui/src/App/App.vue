@@ -66,7 +66,7 @@ const safeTranslate = (key: string, fallback: string = 'Translation missing') =>
     // Check if translation exists and is not the same as the key
     return (translated && translated !== key) ? translated : fallback
   } catch (error) {
-    console.warn(`Translation error for key: ${key}`, error)
+
     return fallback
   }
 }
@@ -139,7 +139,6 @@ watch(activeView, (viewId) => {
         <UserInfo
           :name="safeTranslate('ui.user.name', 'John Doe')"
           :role="safeTranslate('ui.user.role', 'Développeur')"
-          @menu-click="() => console.log('User menu clicked')"
         />
       </template>
       
@@ -147,6 +146,7 @@ watch(activeView, (viewId) => {
       <template #breadcrumb>
         <BreadcrumbNav
           :items="breadcrumbItems"
+          :translate="true"
           @navigate="handleNavigation"
         />
       </template>
@@ -155,7 +155,6 @@ watch(activeView, (viewId) => {
       <template #search>
         <SearchInput
           :placeholder="safeTranslate('ui.search.placeholder', 'Rechercher...')"
-          @search="(query: string) => console.log('Search:', query)"
         />
       </template>
       
@@ -175,6 +174,7 @@ watch(activeView, (viewId) => {
       <PageHeader
         :title="getActiveViewTitle"
         :description="getActiveViewDescription"
+        :translate="false"
       />
       
       <!-- Main Content -->
@@ -590,4 +590,4 @@ body.sidebar-open {
     pointer-events: none;
   }
 }
-</style> 
+</style>

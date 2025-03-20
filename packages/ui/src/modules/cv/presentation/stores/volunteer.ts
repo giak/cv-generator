@@ -71,8 +71,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
     loading.value = true
     
     try {
-      console.log('Loading volunteer experiences...')
-      
+
       // Create repository and load resume
       const result = await errorStore.executeWithErrorHandling(async () => {
         return await repository.load()
@@ -85,14 +84,12 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON:', error);
+
           resumeData = { volunteer: [] };
         }
         
         const volunteerData = resumeData.volunteer || []
-        
-        console.log('Loaded volunteer data:', volunteerData)
-        
+
         // Map to ValidatedVolunteer objects
         volunteers.value = volunteerData.map(vol => {
           const volunteer = vol as VolunteerWithId
@@ -114,12 +111,12 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         
         return volunteers.value
       } else {
-        console.warn('No valid resume found or no volunteer data')
+
         volunteers.value = []
         return []
       }
     } catch (error) {
-      console.error('Error loading volunteer experiences:', error)
+
       // Only add error manually if executeWithErrorHandling wasn't used
       volunteers.value = []
       return []
@@ -133,8 +130,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
     loading.value = true
     
     try {
-      console.log('Adding new volunteer experience:', volunteer)
-      
+
       if (!volunteer.organization || !volunteer.position || !volunteer.startDate) {
         throw new Error('Missing required fields')
       }
@@ -181,7 +177,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON, creating new data structure');
+
           updatedData = {
             basics: {
               name: '',
@@ -212,10 +208,9 @@ export const useVolunteerStore = defineStore('volunteer', () => {
           await repository.save(result)
           return true
         })
-        
-        console.log('Volunteer experience added successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Remove from local state on error
         volunteers.value = volunteers.value?.filter(v => v.id !== newItem.id) || null;
         
@@ -232,7 +227,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error adding volunteer experience:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -244,8 +239,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
     loading.value = true
     
     try {
-      console.log('Updating volunteer experience:', id, volunteer)
-      
+
       if (!volunteer.organization || !volunteer.position || !volunteer.startDate) {
         throw new Error('Missing required fields')
       }
@@ -293,7 +287,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON, creating new structure');
+
           resumeData = {
             basics: {
               name: '',
@@ -327,10 +321,9 @@ export const useVolunteerStore = defineStore('volunteer', () => {
           await repository.save(result)
           return true
         })
-        
-        console.log('Volunteer experience updated successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Reload volunteers on error to reset state
         await loadVolunteers();
         
@@ -347,7 +340,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error updating volunteer experience:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -359,8 +352,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
     loading.value = true
     
     try {
-      console.log('Deleting volunteer experience:', id)
-      
+
       // Update local state first
       if (volunteers.value) {
         volunteers.value = volunteers.value.filter(vol => vol.id !== id)
@@ -380,7 +372,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           return; // No volunteer data to delete
         }
         
@@ -402,10 +394,9 @@ export const useVolunteerStore = defineStore('volunteer', () => {
           await repository.save(result)
           return true
         })
-        
-        console.log('Volunteer experience deleted successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Reload volunteers on error to reset state
         await loadVolunteers();
         
@@ -422,7 +413,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error deleting volunteer experience:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -434,10 +425,9 @@ export const useVolunteerStore = defineStore('volunteer', () => {
     loading.value = true
     
     try {
-      console.log('Reordering volunteer experiences:', newOrder)
-      
+
       if (!volunteers.value || volunteers.value.length === 0) {
-        console.warn('No volunteers to reorder')
+
         return
       }
       
@@ -467,7 +457,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           return; // No volunteer data to reorder
         }
         
@@ -486,10 +476,9 @@ export const useVolunteerStore = defineStore('volunteer', () => {
           await repository.save(result)
           return true
         })
-        
-        console.log('Volunteer experiences reordered successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Reload volunteers on error to reset state
         await loadVolunteers();
         
@@ -506,7 +495,7 @@ export const useVolunteerStore = defineStore('volunteer', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error reordering volunteer experiences:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -527,4 +516,4 @@ export const useVolunteerStore = defineStore('volunteer', () => {
   }
 })
 
-export type VolunteerStore = ReturnType<typeof useVolunteerStore> 
+export type VolunteerStore = ReturnType<typeof useVolunteerStore>

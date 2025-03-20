@@ -181,12 +181,12 @@ const safeTranslate = (key: string, fallback: string = 'Translation missing') =>
     const result = t(key);
     // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
     if (result === key) {
-      console.warn(`Missing translation key: ${key}, using fallback`);
+
       return fallback;
     }
     return result;
   } catch (error) {
-    console.error(`Error translating key: ${key}`, error);
+
     return fallback;
   }
 };
@@ -331,4 +331,4 @@ const icons = {
 
 <style scoped>
 /* Les styles sont gérés par les composants partagés */
-</style> 
+</style>

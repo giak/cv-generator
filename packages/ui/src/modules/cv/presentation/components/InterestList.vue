@@ -274,7 +274,7 @@ const deleteInterest = async () => {
     await interestStore.deleteInterest(interestToDelete.value.id)
     showToast(safeTranslate('resume.interests.notifications.deleteSuccess', 'Intérêt supprimé avec succès'), 'success')
   } catch (error) {
-    console.error('Error deleting interest:', error)
+
     showToast(safeTranslate('resume.interests.notifications.deleteError', 'Erreur lors de la suppression de l\'intérêt'), 'error')
   } finally {
     isDeleting.value = false
@@ -298,7 +298,7 @@ const moveUp = async (index: number) => {
   try {
     await interestStore.reorderInterests(newOrder)
   } catch (error) {
-    console.error('Error reordering interests:', error)
+
     showToast(safeTranslate('resume.interests.notifications.reorderError', 'Erreur lors de la réorganisation des intérêts'), 'error')
   }
 }
@@ -319,7 +319,7 @@ const moveDown = async (index: number) => {
   try {
     await interestStore.reorderInterests(newOrder)
   } catch (error) {
-    console.error('Error reordering interests:', error)
+
     showToast(safeTranslate('resume.interests.notifications.reorderError', 'Erreur lors de la réorganisation des intérêts'), 'error')
   }
 }
@@ -366,4 +366,4 @@ const showToast = (message: string, type: 'success' | 'error') => {
   opacity: 0;
   transform: translateY(20px);
 }
-</style> 
+</style>

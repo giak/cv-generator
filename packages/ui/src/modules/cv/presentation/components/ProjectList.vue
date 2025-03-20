@@ -436,7 +436,7 @@ const submitForm = async () => {
       showForm.value = false
     }
   } catch (error) {
-    console.error('Erreur lors de la soumission du formulaire:', error)
+
     showToast(safeTranslate('resume.projects.notifications.formError', 'Une erreur est survenue lors de la soumission du formulaire'), 'error')
   } finally {
     isFormSubmitting.value = false
@@ -460,7 +460,7 @@ const confirmDelete = async () => {
     
     closeDeleteConfirm()
   } catch (error) {
-    console.error('Erreur lors de la suppression du projet:', error)
+
     showToast(safeTranslate('resume.projects.notifications.deleteError', 'Une erreur est survenue lors de la suppression'), 'error')
   } finally {
     isDeletingProject.value = false
@@ -503,7 +503,7 @@ const moveUp = async (index: number) => {
   try {
     await projectStore.reorderProjects(newOrder)
   } catch (error) {
-    console.error('Error reordering projects:', error)
+
     showToast(safeTranslate('resume.projects.notifications.reorderError', 'Erreur lors de la réorganisation des projets'), 'error')
   }
 }
@@ -528,7 +528,7 @@ const moveDown = async (index: number) => {
   try {
     await projectStore.reorderProjects(newOrder)
   } catch (error) {
-    console.error('Error reordering projects:', error)
+
     showToast(safeTranslate('resume.projects.notifications.reorderError', 'Erreur lors de la réorganisation des projets'), 'error')
   }
 }
@@ -574,4 +574,4 @@ const showToast = (message: string, type: 'success' | 'error' = 'success') => {
   opacity: 0;
   transform: translateY(20px);
 }
-</style> 
+</style>

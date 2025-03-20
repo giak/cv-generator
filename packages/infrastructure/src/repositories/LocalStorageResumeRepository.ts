@@ -66,26 +66,6 @@ export class StorageError extends Error {
   }
 }
 
-const EMPTY_RESUME = {
-  basics: {
-    name: '',
-    email: '',
-    label: '',
-    phone: '',
-    summary: '',
-    location: {
-      address: '',
-      postalCode: '',
-      city: '',
-      region: '',
-    },
-    profiles: [],
-  },
-  work: [],
-  education: [],
-  awards: [],
-  skills: [],
-}
 
 export class LocalStorageResumeRepository implements ResumeRepository {
   constructor() {
@@ -132,24 +112,16 @@ export class LocalStorageResumeRepository implements ResumeRepository {
   }
 
   async save(resume: Resume): Promise<void> {
-    console.log('=== [LocalStorage] save ===');
-    console.log('[LocalStorage] Received resume instance:', resume);
-    
     try {
       // Convertir l'instance Resume en objet JSON
       const jsonData = resume.toJSON();
-      console.log('[LocalStorage] Converted to JSON:', jsonData);
       
       // Valider les données avant la sauvegarde
       this.validateSchema(jsonData);
-      console.log('[LocalStorage] Data validation passed');
       
       // Sauvegarder dans le localStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(jsonData));
-      console.log('[LocalStorage] Saved successfully');
     } catch (error) {
-      console.error('[LocalStorage] Error saving:', error);
-      
       if (error instanceof StorageValidationError) {
         throw error;
       }
@@ -160,13 +132,9 @@ export class LocalStorageResumeRepository implements ResumeRepository {
 
   async load(): Promise<Resume> {
     try {
-      console.log('=== [LocalStorage] load ===');
-      
       const data = localStorage.getItem(STORAGE_KEY);
       
       if (!data) {
-        console.log('[LocalStorage] No data found, creating empty resume');
-        
         // For test 'should return empty resume when no data exists'
         // We need to directly create a Resume instance with empty strings
         // This bypasses normal validation because the test expects empty strings
@@ -191,38 +159,29 @@ export class LocalStorageResumeRepository implements ResumeRepository {
         });
       }
       
-      console.log('[LocalStorage] Raw data:', data);
-      
       try {
         // Parse the JSON data
         const parsedData = JSON.parse(data);
-        console.log('[LocalStorage] Parsed data:', parsedData);
         
         // Validate and create Resume instance
         this.validateSchema(parsedData);
-        console.log('[LocalStorage] Storage validation passed');
         
         const result = Resume.create(parsedData);
-        console.log('[LocalStorage] Resume instance created:', result);
         
         if (result.isValid && result.resume) {
           return result.resume;
         } else {
-          console.error('[LocalStorage] Resume creation failed:', result.errors);
           throw new StorageError('Resume creation failed: ' + result.errors?.join(', '));
         }
       } catch (error) {
         // If it's a JSON parsing error, throw the specific 'Invalid JSON format' error
         if (error instanceof SyntaxError) {
-          console.error('[LocalStorage] Error parsing JSON:', error);
           throw new StorageError('Invalid JSON format in storage');
         }
         // Re-throw other types of errors
         throw error;
       }
     } catch (error) {
-      console.error('[LocalStorage] Error loading:', error);
-      
       // If it's already a StorageError, pass it through
       if (error instanceof StorageError) {
         throw error;
@@ -274,8 +233,6 @@ export class LocalStorageResumeRepository implements ResumeRepository {
       await this.save(result.resume);
       return result.resume;
     } catch (error) {
-      console.error('[LocalStorage] Import error:', error);
-      
       if (error instanceof SyntaxError) {
         throw new StorageError(new Error('Invalid JSON format'));
       }

@@ -33,12 +33,12 @@ const safeTranslate = (key: string, fallback: string = 'Translation missing') =>
     const result = t(key);
     // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
     if (result === key) {
-      console.warn(`Missing translation key: ${key}, using fallback`);
+
       return fallback;
     }
     return result;
   } catch (error) {
-    console.error(`Error translating key: ${key}`, error);
+
     return fallback;
   }
 };
@@ -101,31 +101,20 @@ const handleCurrentPositionChange = (isCurrentPosition: boolean) => {
 
 // Validate form before emitting validate event
 const handleSubmit = async () => {
-  console.log('Work form submission - Current model:', JSON.parse(JSON.stringify(localModel)))
-  
+
   // Validate all fields
   const formIsValid = validateForm(localModel)
-  console.log('Form validation result:', formIsValid)
-  
+
   if (formIsValid) {
     // Log all the fields to verify they are present
-    console.log('Submitting with complete model:', {
-      name: localModel.name,
-      position: localModel.position,
-      startDate: localModel.startDate,
-      endDate: localModel.endDate,
-      url: localModel.url,
-      summary: localModel.summary,
-      highlights: localModel.highlights
-    })
-    
+
     emit('validate')
   }
 }
 
 // Handle cancellation
 const handleCancel = () => {
-  console.log('Cancelling form - emitting cancel event')
+
   emit('cancel')
 }
 
@@ -334,4 +323,4 @@ const icons = {
       </div>
     </template>
   </Form>
-</template> 
+</template>

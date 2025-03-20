@@ -104,9 +104,7 @@ const saveAward = async () => {
       await awardStore.updateAward(award.id, editingAward.value)
     }
     closeDialog()
-  } catch (error) {
-    console.error('Error saving award:', error)
-  }
+  } catch (error) {}
 }
 
 // Delete award entry
@@ -114,9 +112,7 @@ const deleteAward = async (award: AwardWithId) => {
   if (confirm(safeTranslate('resume.awards.list.confirmDelete', 'Êtes-vous sûr de vouloir supprimer ce prix ou cette distinction ?'))) {
     try {
       await awardStore.deleteAward(award.id)
-    } catch (error) {
-      console.error('Error deleting award:', error)
-    }
+    } catch (error) {}
   }
 }
 
@@ -135,9 +131,7 @@ const moveUp = async (index: number) => {
   
   try {
     await awardStore.reorderAwards(newOrder)
-  } catch (error) {
-    console.error('Error reordering awards:', error)
-  }
+  } catch (error) {}
 }
 
 // Reorder awards down
@@ -155,9 +149,7 @@ const moveDown = async (index: number) => {
   
   try {
     await awardStore.reorderAwards(newOrder)
-  } catch (error) {
-    console.error('Error reordering awards:', error)
-  }
+  } catch (error) {}
 }
 </script>
 
@@ -240,4 +232,4 @@ const moveDown = async (index: number) => {
       </div>
     </div>
   </div>
-</template> 
+</template>

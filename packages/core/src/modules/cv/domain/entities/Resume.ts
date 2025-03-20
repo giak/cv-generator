@@ -8,9 +8,6 @@ export class Resume {
   private constructor(private readonly data: ResumeInterface) {}
 
   static create(data: Partial<ResumeInterface>): ValidationResultType & { resume?: Resume } {
-    console.log('=== Domain Layer - Resume Entity ===')
-    console.log('Creating Resume from data:', data)
-    
     const errors: string[] = []
     
     // 1. Validation basique des données essentielles
@@ -84,7 +81,7 @@ export class Resume {
     
     // Si des erreurs sont présentes, retourne le résultat d'échec
     if (errors.length > 0) {
-      console.log('Validation errors:', errors)
+
       return { isValid: false, errors }
     }
     
@@ -137,7 +134,7 @@ export class Resume {
   }
 
   toJSON(): ResumeInterface {
-    console.log('=== Domain Layer - Resume.toJSON ===')
+
     const json = {
       ...this.data,
       basics: this.basics,
@@ -147,7 +144,7 @@ export class Resume {
       awards: this.awards,
       skills: this.skills
     }
-    console.log('Generated JSON:', json)
+
     return json
   }
-} 
+}

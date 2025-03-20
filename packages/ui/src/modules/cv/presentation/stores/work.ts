@@ -120,9 +120,7 @@ export const useWorkStore = defineStore('work', () => {
         
         // Mise à jour de l'état
         works.value = workEntities
-        
-        console.log('Work experiences loaded:', workEntities)
-        
+
         return workEntities
       } finally {
         loading.value = false
@@ -149,16 +147,7 @@ export const useWorkStore = defineStore('work', () => {
         }
         
         // Log all fields to ensure they're properly included
-        console.log('Adding work with all fields:', {
-          name: work.name,
-          position: work.position,
-          startDate: work.startDate,
-          endDate: work.endDate,
-          url: work.url,
-          summary: work.summary,
-          highlights: work.highlights
-        })
-        
+
         // Ensure the work object has all fields properly set
         const completeWork: WorkInterface = {
           name: work.name,
@@ -181,8 +170,7 @@ export const useWorkStore = defineStore('work', () => {
         
         // Rechargement des expériences pour refléter les changements
         await loadWorks()
-        
-        console.log('Work experience added successfully:', completeWork)
+
       } finally {
         loading.value = false
       }
@@ -219,16 +207,7 @@ export const useWorkStore = defineStore('work', () => {
         }
         
         // Log all fields to ensure they're properly included
-        console.log('Updating work with all fields:', {
-          name: work.name,
-          position: work.position,
-          startDate: work.startDate,
-          endDate: work.endDate,
-          url: work.url,
-          summary: work.summary,
-          highlights: work.highlights
-        })
-        
+
         // Ensure the work object has all fields properly set
         const completeWork: WorkWithId = {
           id: works.value[index].id, // Préservation de l'ID original
@@ -253,8 +232,7 @@ export const useWorkStore = defineStore('work', () => {
         
         // Rechargement des expériences pour refléter les changements
         await loadWorks()
-        
-        console.log('Work experience updated successfully:', index, completeWork)
+
       } finally {
         loading.value = false
       }
@@ -296,8 +274,7 @@ export const useWorkStore = defineStore('work', () => {
         
         // Rechargement des expériences pour refléter les changements
         await loadWorks()
-        
-        console.log('Work experience deleted:', index)
+
       } finally {
         loading.value = false
       }
@@ -342,8 +319,7 @@ export const useWorkStore = defineStore('work', () => {
         
         // Rechargement des expériences pour refléter les changements
         await loadWorks()
-        
-        console.log('Work experiences reordered:', newOrder)
+
       } finally {
         loading.value = false
       }
@@ -380,4 +356,4 @@ export const useWorkStore = defineStore('work', () => {
     hasFieldError,
     getFieldError
   }
-}) 
+})

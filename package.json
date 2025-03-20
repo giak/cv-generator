@@ -57,7 +57,12 @@
     "docker:ps": "docker-compose ps",
     "docker:stop": "docker-compose down",
     "docker:restart": "docker-compose restart",
-    "docker:health": "./docker-healthcheck.sh"
+    "docker:health": "./docker-healthcheck.sh",
+    "i18n:report": "vue-i18n-extract report --vueFiles='./packages/**/*.?(js|vue|ts)' --languageFiles='./packages/ui/src/i18n/locales/*.json' --output='./reports/vue-i18n-report.json' --exclude='**/node_modules/**,**/dist/**,**/.git/**,**/.vite/**,**/coverage/**,**/tests/**,**/__tests__/**'",
+    "i18n:add-missing": "vue-i18n-extract report --vueFiles='./packages/**/*.?(js|vue|ts)' --languageFiles='./packages/ui/src/i18n/locales/*.json' --output='./reports/vue-i18n-report.json' --exclude='**/node_modules/**,**/dist/**,**/.git/**,**/.vite/**,**/coverage/**,**/tests/**,**/__tests__/**' --add",
+    "i18n:remove-unused": "vue-i18n-extract report --vueFiles='./packages/**/*.?(js|vue|ts)' --languageFiles='./packages/ui/src/i18n/locales/*.json' --output='./reports/vue-i18n-report.json' --exclude='**/node_modules/**,**/dist/**,**/.git/**,**/.vite/**,**/coverage/**,**/tests/**,**/__tests__/**' --remove",
+    "i18n:cleanup": "vue-i18n-extract report --vueFiles='./packages/**/*.?(js|vue|ts)' --languageFiles='./packages/ui/src/i18n/locales/*.json' --output='./reports/vue-i18n-report.json' --exclude='**/node_modules/**,**/dist/**,**/.git/**,**/.vite/**,**/coverage/**,**/tests/**,**/__tests__/**' --add --remove",
+    "i18n:workflow": "node scripts/i18n-workflow.js"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -66,10 +71,13 @@
     "@types/uuid": "^10.0.0",
     "@vitest/coverage-v8": "3.0.7",
     "@vue/tsconfig": "^0.5.1",
+    "chalk": "^4.1.2",
+    "glob": "^10.3.10",
     "husky": "^9.1.7",
     "typescript": "~5.7.3",
     "vite": "^6.2.0",
-    "vitest": "^3.0.7"
+    "vitest": "^3.0.7",
+    "vue-i18n-extract": "^2.0.7"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [

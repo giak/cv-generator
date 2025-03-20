@@ -89,8 +89,7 @@ export const useErrorStore = defineStore('error', {
       };
       
       this.errors.push(errorWithId);
-      console.error(`[ErrorStore] Error added: ${errorWithId.message}`, errorWithId);
-      
+
       return errorWithId.id;
     },
     
@@ -143,8 +142,7 @@ export const useErrorStore = defineStore('error', {
             // Implémenter l'affichage du toast
           }
         } else {
-          console.error('[ErrorStore] ErrorMappingService not available', error);
-          
+
           // Fallback basique si le service n'est pas disponible
           this.addError({
             id: uuidv4(),
@@ -165,4 +163,4 @@ export const useErrorStore = defineStore('error', {
       }
     }
   }
-}); 
+});

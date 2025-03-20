@@ -125,12 +125,12 @@ const safeTranslate = (key: string, fallback: string = 'Translation missing') =>
     const result = t(key);
     // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
     if (result === key) {
-      console.warn(`Missing translation key: ${key}, using fallback`);
+
       return fallback;
     }
     return result;
   } catch (error) {
-    console.error(`Error translating key: ${key}`, error);
+
     return fallback;
   }
 };
@@ -181,18 +181,14 @@ const removeKeyword = (index: number) => {
 
 // Handle form submission
 const handleSubmit = async () => {
-  console.log('Skill form submission - Current model:', JSON.parse(JSON.stringify(localModel)))
-  
+
   // Validate all fields
   const formIsValid = validateForm(localModel)
-  console.log('Form validation result:', formIsValid)
-  
+
   if (formIsValid) {
     // Ensure required fields are present
     if (!localModel.name) {
-      console.error('Required fields missing:', {
-        name: !localModel.name
-      })
+
       return
     }
     
@@ -215,4 +211,4 @@ const icons = {
 
 <style scoped>
 /* Les styles sont gérés par les composants partagés */
-</style> 
+</style>

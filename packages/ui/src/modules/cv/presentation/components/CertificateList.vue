@@ -243,9 +243,7 @@ const saveCertificate = async () => {
       })
     }
     closeDialog()
-  } catch (error) {
-    console.error('Error saving certificate:', error)
-  }
+  } catch (error) {}
 }
 
 // Open delete confirmation dialog
@@ -269,9 +267,7 @@ const deleteCertificate = async () => {
   try {
     await certificateStore.deleteCertificate(certificateToDelete.value.id)
     showDeleteConfirmation.value = false
-  } catch (error) {
-    console.error('Error deleting certificate:', error)
-  }
+  } catch (error) {}
 }
 
 // Reorder certificates up
@@ -286,9 +282,7 @@ const moveUp = async (index: number) => {
     newOrder[index - 1] = temp
     
     await certificateStore.reorderCertificates(newOrder)
-  } catch (error) {
-    console.error('Error reordering certificates:', error)
-  }
+  } catch (error) {}
 }
 
 // Reorder certificates down
@@ -303,12 +297,10 @@ const moveDown = async (index: number) => {
     newOrder[index + 1] = temp
     
     await certificateStore.reorderCertificates(newOrder)
-  } catch (error) {
-    console.error('Error reordering certificates:', error)
-  }
+  } catch (error) {}
 }
 </script>
 
 <style scoped>
 /* Les styles sont gérés par les composants partagés */
-</style> 
+</style>

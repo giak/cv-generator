@@ -148,9 +148,7 @@ const loadLanguage = async () => {
     }
     
     // The modelValue computed will update the localModel automatically
-  } catch (error) {
-    console.error('Failed to load language:', error)
-  } finally {
+  } catch (error) {} finally {
     loading.value = false
   }
 }
@@ -170,9 +168,7 @@ const saveLanguage = async () => {
     }
     
     emit('saved')
-  } catch (error) {
-    console.error('Failed to save language:', error)
-  } finally {
+  } catch (error) {} finally {
     isSubmitting.value = false
   }
 }
@@ -197,4 +193,4 @@ onMounted(async () => {
 
 <style scoped>
 /* Les styles sont gérés par les composants partagés */
-</style> 
+</style>

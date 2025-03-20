@@ -19,9 +19,6 @@ import {
 import { useBasicsFormValidation } from '../composables/useBasicsFormValidation'
 
 // Debug translation keys structure
-console.log('TRANSLATION_KEYS structure:', TRANSLATION_KEYS);
-console.log('RESUME.BASICS:', TRANSLATION_KEYS.RESUME.BASICS);
-console.log('HELP_TEXT available:', TRANSLATION_KEYS.RESUME.BASICS.HELP_TEXT ? 'Yes' : 'No');
 
 // Initialize i18n
 const { t } = useI18n()
@@ -32,12 +29,12 @@ const safeTranslate = (key: string, fallback: string = 'Translation missing') =>
     const result = t(key);
     // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
     if (result === key) {
-      console.warn(`Missing translation key: ${key}, using fallback`);
+
       return fallback;
     }
     return result;
   } catch (error) {
-    console.error(`Error translating key: ${key}`, error);
+
     return fallback;
   }
 };
@@ -54,21 +51,10 @@ const startTime = performance.now()
 // Log component performance on unmount
 onMounted(() => {
   perfMeasurements.renderTime = performance.now() - startTime
-  console.log('BasicsForm mounted in', perfMeasurements.renderTime, 'ms')
-  
+
   // Clean up on component unmount
-  return () => {
-    console.log('BasicsForm Performance Metrics:', {
-      profileOperations: perfMeasurements.profileOperations,
-      validations: perfMeasurements.validations,
-      renderTime: perfMeasurements.renderTime,
-      // Include metrics from useFormModel
-      ...perfMetrics,
-      // Include metrics from useCollectionField if logging enabled
-      ...(profilesFieldMetrics || {})
-      // No validation metrics, removed to fix linter error
-    })
-  }
+  
+  
 })
 
 interface Props {
@@ -105,9 +91,7 @@ const defaultValues: Partial<BasicsInterface> = {
 const { 
   localModel, 
   updateField, 
-  updateNestedField,
-  perfMetrics
-} = useFormModel<BasicsInterface>({
+  updateNestedField} = useFormModel<BasicsInterface>({
   modelValue: computed(() => props.modelValue),
   emit: (event, value) => emit(event, value),
   defaultValues,
@@ -217,9 +201,7 @@ const {
   validationErrors: profileValidationErrors,
   addItem: addProfile,
   removeItem: removeProfile,
-  toggleAddForm: toggleProfileForm,
-  perfMetrics: profilesFieldMetrics
-} = useCollectionField<ProfileInterface>({
+  toggleAddForm: toggleProfileForm} = useCollectionField<ProfileInterface>({
   fieldName: 'profiles',
   updateField: updateProfilesField,
   collection: computed(() => localModel.profiles || []),
@@ -230,8 +212,7 @@ const {
 
 // Handle form submit
 const handleSubmit = () => {
-  console.log('Current model:', localModel)
-  
+
   // Validate the form before submitting
   const isValid = validateForm(localModel)
   
@@ -567,4 +548,4 @@ const icons = {
       </button>
     </div>
   </Form>
-</template> 
+</template>

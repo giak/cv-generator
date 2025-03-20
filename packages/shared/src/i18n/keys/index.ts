@@ -669,11 +669,22 @@ export const TRANSLATION_KEYS = {
       MADE_WITH: 'ui.footer.madeWith'
     },
     NAVIGATION: {
-      HOME: 'ui.navigation.home',
-      EDITOR: 'ui.navigation.editor',
-      PREVIEW: 'ui.navigation.preview',
-      EXPORT: 'ui.navigation.export',
-      SETTINGS: 'ui.navigation.settings'
+      HOME: 'navigation.home',
+      EDITOR: 'navigation.editor',
+      PREVIEW: 'navigation.preview',
+      EXPORT: 'navigation.export',
+      SETTINGS: 'navigation.settings',
+      PROGRESS: 'navigation.progress',
+      REQUIRED_SECTIONS: 'navigation.requiredSections',
+      NEXT: 'navigation.next',
+      CONTINUE_WITH: 'navigation.continueWith',
+      SECTION_COMPLETE: 'navigation.sectionComplete',
+      SECTION_INCOMPLETE: 'navigation.sectionIncomplete',
+      SECTION_PARTIAL: 'navigation.sectionPartial',
+      NEXT_SECTION: 'navigation.nextSection',
+      PREVIOUS_SECTION: 'navigation.previousSection',
+      NEXT_INCOMPLETE_SECTION: 'navigation.nextIncompleteSection',
+      MAIN_NAV: 'navigation.mainNav'
     },
     EXPORT: {
       TITLE: 'ui.export.title',

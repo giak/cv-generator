@@ -128,10 +128,8 @@ describe('Toast.vue', () => {
         title: '<h3 class="custom-title">Custom Title</h3>'
       }
     })
-    
-    console.log('HTML generated:', wrapper.html())
-    console.log('Title slot content:', wrapper.find('[name="title"]').exists())
-    
+
+
     expect(wrapper.find('.custom-title').exists()).toBe(true)
     expect(wrapper.find('.custom-title').text()).toBe('Custom Title')
   })

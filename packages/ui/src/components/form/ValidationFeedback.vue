@@ -34,9 +34,7 @@ const errorStore = ref<ReturnType<typeof errorStoreComposable> | null>(null);
 
 try {
   errorStore.value = errorStoreComposable();
-} catch (e) {
-  console.warn('Error store not available in testing environment');
-}
+} catch (e) {}
 
 // Logique pour récupérer le message d'erreur
 const errorMessage = computed(() => {
@@ -64,4 +62,4 @@ const getTestId = () => {
   
   return 'validation-error';
 };
-</script> 
+</script>

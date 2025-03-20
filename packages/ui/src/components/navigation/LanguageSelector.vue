@@ -136,9 +136,7 @@ async function changeLocale(newLocale: SupportedLocale): Promise<void> {
     // Sauvegarder la préférence de l'utilisateur
     try {
       localStorage.setItem(LOCALE_STORAGE_KEY, newLocale);
-    } catch (error) {
-      console.error('Failed to save locale preference:', error);
-    }
+    } catch (error) {}
     
     // Émettre un événement personnalisé pour informer l'application du changement
     const event = new CustomEvent('localeChanged', { detail: { locale: newLocale } });
@@ -348,4 +346,4 @@ onUnmounted(() => {
     font-size: 1rem;
   }
 }
-</style> 
+</style>

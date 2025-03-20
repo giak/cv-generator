@@ -11,21 +11,17 @@ export class ManageResume {
   }
 
   async createResume(data: Resume | ResumeInterface): Promise<void> {
-    console.log('=== Application Layer - ManageResume UseCase ===')
-    console.log('Received data in use case:', data)
-    console.log('Data type:', data instanceof Resume ? 'Resume instance' : 'Resume interface')
 
     let resumeInstance: Resume;
     
     if (data instanceof Resume) {
-      console.log('Using existing Resume instance')
+
       resumeInstance = data;
     } else {
-      console.log('Creating new Resume instance from data')
+
       // 1. Validation de base (syntaxique)
       const result = Resume.create(data)
-      console.log('Resume instance created:', result.resume)
-      
+
       if (!result.isValid || !result.resume) {
         throw new ValidationError(result.errors || ['Unknown validation error'])
       }
@@ -35,10 +31,9 @@ export class ManageResume {
       // 2. Validation des règles métier (sémantique)
       await this.validateBusinessRules(data)
     }
-    
-    console.log('Saving to repository...')
+
     await this.repository.save(resumeInstance)
-    console.log('Saved to repository successfully')
+
   }
   
   private async validateBusinessRules(data: ResumeInterface): Promise<void> {
@@ -90,4 +85,4 @@ export class ManageResume {
   async importResume(file: Blob): Promise<Resume> {
     return this.repository.import(file)
   }
-} 
+}

@@ -19,9 +19,7 @@ export function useErrorHandling() {
    */
   const handleErrorAction = async (error: ErrorInfo) => {
     if (!error.action) return
-    
-    console.log('Handling error action:', error.action)
-    
+
     const [storeName, methodName] = error.action.handler.split('/')
     
     // Handle Resume store actions
@@ -29,7 +27,7 @@ export function useErrorHandling() {
       switch (methodName) {
         case 'retryLastOperation':
           if (error.action.params?.operation === 'save') {
-            console.log('Retrying save operation')
+
             // Ensure we have a valid ResumeInterface object with at least the required fields
             const resumeData: ResumeInterface = resumeStore.resume || { 
               basics: {
@@ -39,12 +37,12 @@ export function useErrorHandling() {
             }
             await resumeStore.saveResume(resumeData)
           } else if (error.action.params?.operation === 'load') {
-            console.log('Retrying load operation')
+
             await resumeStore.loadResume()
           }
           break
         default:
-          console.warn('Unknown resume store method:', methodName)
+
       }
     }
     
@@ -52,11 +50,11 @@ export function useErrorHandling() {
     if (storeName === 'app') {
       switch (methodName) {
         case 'enableOfflineMode':
-          console.log('Enabling offline mode')
+
           // Implement offline mode logic
           break
         default:
-          console.warn('Unknown app method:', methodName)
+
       }
     }
     
@@ -75,4 +73,4 @@ export function useErrorHandling() {
     handleErrorAction,
     dismissAllErrors
   }
-} 
+}

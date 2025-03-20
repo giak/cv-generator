@@ -12,8 +12,6 @@ export const i18nPlugin = {
     app.use(i18n);
     
     // Charger les messages - nous ne pouvons pas attendre ici car app.use ne peut pas être async
-    loadLocaleMessages(DEFAULT_LOCALE).catch(e => {
-      console.error('Failed to load locale messages:', e);
-    });
+    loadLocaleMessages(DEFAULT_LOCALE).catch(e => {});
   }
-}; 
+};

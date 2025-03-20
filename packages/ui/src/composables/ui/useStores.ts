@@ -55,7 +55,7 @@ export function useStores() {
       await projectStore.loadProjects()
       return true
     } catch (error) {
-      console.error('Error loading all data:', error)
+
       return false
     }
   }
@@ -79,4 +79,4 @@ export function useStores() {
     // Utility methods
     loadAllData
   }
-} 
+}

@@ -210,7 +210,7 @@ export function useCollectionField<T extends Record<string, any>>(
     
     if (enableLogging && perfMetrics) {
       perfMetrics.validationOperations++
-      console.log(`Validation took ${performance.now() - startTime}ms (total: ${perfMetrics.validationOperations})`)
+
     }
     
     return result
@@ -245,9 +245,7 @@ export function useCollectionField<T extends Record<string, any>>(
     const validationResult = validateItemInternal(itemToAdd)
     
     if (isFailure(validationResult)) {
-      if (enableLogging) {
-        console.warn('Item validation failed:', validationErrors.value)
-      }
+      if (enableLogging) {}
       return
     }
     
@@ -274,7 +272,7 @@ export function useCollectionField<T extends Record<string, any>>(
     
     if (enableLogging && perfMetrics) {
       perfMetrics.addOperations++
-      console.log(`Add operation took ${performance.now() - startTime}ms (total: ${perfMetrics.addOperations})`)
+
     }
   }
   
@@ -296,9 +294,7 @@ export function useCollectionField<T extends Record<string, any>>(
     }
     
     if (index === -1) {
-      if (enableLogging) {
-        console.warn(`Item with id/index ${idOrIndex} not found`)
-      }
+      if (enableLogging) {}
       return
     }
     
@@ -310,7 +306,7 @@ export function useCollectionField<T extends Record<string, any>>(
     
     if (enableLogging && perfMetrics) {
       perfMetrics.removeOperations++
-      console.log(`Remove operation took ${performance.now() - startTime}ms (total: ${perfMetrics.removeOperations})`)
+
     }
   }
   
@@ -327,9 +323,7 @@ export function useCollectionField<T extends Record<string, any>>(
     }
     
     if (!item) {
-      if (enableLogging) {
-        console.warn(`Item with id/index ${idOrIndex} not found for editing`)
-      }
+      if (enableLogging) {}
       throw new Error(`Item with id/index ${idOrIndex} not found`)
     }
     
@@ -348,9 +342,7 @@ export function useCollectionField<T extends Record<string, any>>(
     const validationResult = validateItemInternal(updatedItem)
     
     if (isFailure(validationResult)) {
-      if (enableLogging) {
-        console.warn('Item validation failed:', validationErrors.value)
-      }
+      if (enableLogging) {}
       return
     }
     
@@ -361,9 +353,7 @@ export function useCollectionField<T extends Record<string, any>>(
     )
     
     if (index === -1) {
-      if (enableLogging) {
-        console.warn(`Item with id ${id} not found for update`)
-      }
+      if (enableLogging) {}
       return
     }
     
@@ -381,7 +371,7 @@ export function useCollectionField<T extends Record<string, any>>(
     
     if (enableLogging && perfMetrics) {
       perfMetrics.updateOperations++
-      console.log(`Update operation took ${performance.now() - startTime}ms (total: ${perfMetrics.updateOperations})`)
+
     }
   }
   
@@ -402,9 +392,7 @@ export function useCollectionField<T extends Record<string, any>>(
     
     // Check if we have the same number of items
     if (reorderedCollection.length !== currentCollection.length) {
-      if (enableLogging) {
-        console.warn('Reordering failed: not all items were found in the new order')
-      }
+      if (enableLogging) {}
       return
     }
     
@@ -429,4 +417,4 @@ export function useCollectionField<T extends Record<string, any>>(
     reorderItems,
     perfMetrics
   }
-} 
+}

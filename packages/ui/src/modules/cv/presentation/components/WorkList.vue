@@ -75,7 +75,7 @@ const sortedWorks = computed(() => {
     try {
       return new Date(dateB).getTime() - new Date(dateA).getTime();
     } catch (error) {
-      console.error('Error comparing dates:', error);
+
       return 0;
     }
   });
@@ -140,7 +140,7 @@ const openEditDialog = (work: WorkWithId) => {
 
 // Close dialog
 const closeDialog = () => {
-  console.log('Closing dialog')
+
   showDialog.value = false
   editingWorkIndex.value = null
 }
@@ -148,8 +148,7 @@ const closeDialog = () => {
 // Save work experience (add or update)
 const saveWork = async () => {
   try {
-    console.log('Saving work experience:', editingWork.value)
-    
+
     if (dialogMode.value === 'add') {
       await workStore.addWork(editingWork.value)
     } else if (dialogMode.value === 'edit' && editingWorkIndex.value !== null) {
@@ -157,9 +156,7 @@ const saveWork = async () => {
     }
     
     closeDialog()
-  } catch (error) {
-    console.error('Error saving work experience:', error)
-  }
+  } catch (error) {}
 }
 
 // Delete work experience
@@ -169,9 +166,7 @@ const deleteWork = async (work: WorkWithId) => {
     if (index !== -1) {
       await workStore.deleteWork(index)
     }
-  } catch (error) {
-    console.error('Error deleting work experience:', error)
-  }
+  } catch (error) {}
 }
 
 // Reorder work experiences
@@ -189,9 +184,7 @@ const moveUp = async (index: number) => {
   
   try {
     await workStore.reorderWorks(newOrder)
-  } catch (error) {
-    console.error('Error reordering work experiences:', error)
-  }
+  } catch (error) {}
 }
 
 const moveDown = async (index: number) => {
@@ -208,9 +201,7 @@ const moveDown = async (index: number) => {
   
   try {
     await workStore.reorderWorks(newOrder)
-  } catch (error) {
-    console.error('Error reordering work experiences:', error)
-  }
+  } catch (error) {}
 }
 
 // Toggle between chronological and custom order
@@ -374,4 +365,4 @@ const toggleSortOrder = () => {
       </div>
     </div>
   </div>
-</template> 
+</template>

@@ -284,7 +284,7 @@ const saveReference = async (reference: ReferenceInterface) => {
     
     closeForm();
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde de la référence:', error);
+
     showToast(safeTranslate('resume.references.notifications.saveError', 'Erreur lors de la sauvegarde de la référence'), 'error');
   } finally {
     isFormSubmitting.value = false;
@@ -316,7 +316,7 @@ const confirmDelete = async () => {
     showToast(safeTranslate('resume.references.notifications.deleteSuccess', 'Référence supprimée avec succès'), 'success');
     closeDeleteConfirm();
   } catch (error) {
-    console.error('Erreur lors de la suppression de la référence:', error);
+
     showToast(safeTranslate('resume.references.notifications.deleteError', 'Erreur lors de la suppression de la référence'), 'error');
   } finally {
     isDeletingReference.value = false;
@@ -364,4 +364,4 @@ const showToast = (message: string, type: 'success' | 'error') => {
   opacity: 0;
   transform: translateY(30px);
 }
-</style> 
+</style>

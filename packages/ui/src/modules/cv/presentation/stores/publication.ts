@@ -47,23 +47,20 @@ export const usePublicationStore = defineStore('publication', () => {
     loading.value.loading = true
     
     try {
-      console.log('Loading publication entries...')
-      
+
       const result = await errorStore.executeWithErrorHandling(async () => {
         return await repository.load()
       })
       
       if (!result) {
-        console.error('Failed to load resume data')
+
         return []
       }
       
       // Get publications from resume data
       const resumeData = result.toJSON()
       const resumePublications = resumeData.publications || []
-      
-      console.log(`Found ${resumePublications.length} publications in resume:`, resumePublications)
-      
+
       // Map publications to ValidatedPublication
       publications.value = resumePublications.map(publication => {
         const publicationWithId = {
@@ -83,12 +80,10 @@ export const usePublicationStore = defineStore('publication', () => {
           })
         }
       })
-      
-      console.log(`Loaded ${publications.value.length} publication entries:`, publications.value)
-      
+
       return publications.value
     } catch (error) {
-      console.error('Error loading publications:', error)
+
       errorStore.addError({
         id: uuidv4(),
         message: 'Failed to load publications',
@@ -108,8 +103,7 @@ export const usePublicationStore = defineStore('publication', () => {
     loading.value.creating = true
     
     try {
-      console.log('Adding new publication:', publication)
-      
+
       // Verify required fields
       if (!publication.name || !publication.publisher || !publication.releaseDate) {
         throw new Error('Missing required fields for publication')
@@ -155,12 +149,10 @@ export const usePublicationStore = defineStore('publication', () => {
       
       // Create updated resume and save
       await manageResume.createResume(updatedResumeData)
-      
-      console.log('Publication added successfully:', validatedPublication)
-      
+
       return validatedPublication
     } catch (error) {
-      console.error('Error adding publication:', error)
+
       errorStore.addError({
         id: uuidv4(),
         message: 'Failed to add publication',
@@ -180,8 +172,7 @@ export const usePublicationStore = defineStore('publication', () => {
     loading.value.updating = true
     
     try {
-      console.log(`Updating publication with ID ${id}:`, publicationUpdate)
-      
+
       // Find the publication to update
       const publicationIndex = publications.value.findIndex(p => p.id === id)
       
@@ -227,11 +218,9 @@ export const usePublicationStore = defineStore('publication', () => {
       
       // Create updated resume and save
       await manageResume.createResume(updatedResumeData)
-      
-      console.log('Publication updated successfully:', updatedPublication)
-      
+
     } catch (error) {
-      console.error('Error updating publication:', error)
+
       errorStore.addError({
         id: uuidv4(),
         message: 'Failed to update publication',
@@ -254,8 +243,7 @@ export const usePublicationStore = defineStore('publication', () => {
     loading.value.deleting = true
     
     try {
-      console.log(`Deleting publication with ID ${id}`)
-      
+
       // Find the publication to delete
       const publicationIndex = publications.value.findIndex(p => p.id === id)
       
@@ -287,11 +275,9 @@ export const usePublicationStore = defineStore('publication', () => {
       
       // Create updated resume and save
       await manageResume.createResume(updatedResumeData)
-      
-      console.log('Publication deleted successfully')
-      
+
     } catch (error) {
-      console.error('Error deleting publication:', error)
+
       errorStore.addError({
         id: uuidv4(),
         message: 'Failed to delete publication',
@@ -312,8 +298,7 @@ export const usePublicationStore = defineStore('publication', () => {
   // Reorder publication entries
   const reorderPublications = async (newOrder: string[]): Promise<void> => {
     try {
-      console.log('Reordering publications with new order:', newOrder)
-      
+
       // Check if the new order contains all publications
       if (newOrder.length !== publications.value.length) {
         throw new Error('New order must contain all publication IDs')
@@ -357,11 +342,9 @@ export const usePublicationStore = defineStore('publication', () => {
       
       // Create updated resume and save
       await manageResume.createResume(updatedResumeData)
-      
-      console.log('Publications reordered successfully')
-      
+
     } catch (error) {
-      console.error('Error reordering publications:', error)
+
       errorStore.addError({
         id: uuidv4(),
         message: 'Failed to reorder publications',
@@ -388,4 +371,4 @@ export const usePublicationStore = defineStore('publication', () => {
   }
 })
 
-export type PublicationStore = ReturnType<typeof usePublicationStore> 
+export type PublicationStore = ReturnType<typeof usePublicationStore>

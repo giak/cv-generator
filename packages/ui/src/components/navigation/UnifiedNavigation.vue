@@ -14,7 +14,7 @@
     <!-- En-tête avec la progression globale -->
     <div class="p-4 bg-neutral-800/50 border-b border-neutral-700">
       <div class="flex justify-between items-center mb-2">
-        <h3 class="text-sm font-medium text-neutral-200">{{ t('navigation.progress', 'Progression du CV') }}</h3>
+        <h3 class="text-sm font-medium text-neutral-200">{{ t('navigation.progress', 'Progress') }}</h3>
         <span class="text-sm font-bold text-primary-400">{{ overallProgress }}%</span>
       </div>
       
@@ -28,7 +28,7 @@
 
       <!-- Sections requises -->
       <div class="mt-2 text-xs text-neutral-400">
-        <span>{{ t('navigation.requiredSections', 'Sections requises') }} : </span>
+        <span>{{ t('navigation.requiredSections', 'Required sections') }} : </span>
         <span class="font-medium text-primary-300">
           {{ requiredSectionsCompletion.completed }}/{{ requiredSectionsCompletion.total }}
         </span>
@@ -114,7 +114,7 @@
             v-if="isNextToComplete(section.id)"
             class="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-primary-800/50 text-primary-300 font-medium"
           >
-            {{ t('navigation.next', 'Suivant') }}
+            {{ t('navigation.next', 'Next') }}
           </span>
           
           <!-- Fleche navigation -->
@@ -135,7 +135,7 @@
         @click="navigate(nextIncompleteSection.path)"
       >
         <span>
-          {{ t('navigation.continueWith', 'Continuer avec') }} {{ nextIncompleteSection.label }}
+          {{ t('navigation.continueWith', 'Continue with') }} {{ nextIncompleteSection.label }}
         </span>
         <span class="flex items-center justify-center ml-2 transition-transform duration-200 group-hover:translate-x-1">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -149,14 +149,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw, h } from 'vue';
+import { computed, markRaw, h, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFormProgress } from '../../modules/cv/presentation/composables/useFormProgress';
 
-// Initialize i18n
-const { t } = useI18n();
-
-// Function to safely handle translations with fallback
+// Initialize i18n with the locale to make the component reactive to locale changes
+const { t, locale } = useI18n();
 
 // Définition des props et événements
 interface Props {
@@ -245,6 +243,11 @@ const getIconComponent = (iconNameOrSectionId: string | undefined) => {
   
   return iconMap[iconNameOrSectionId] || null
 }
+
+// Watch for locale changes to force re-render
+watch(locale, () => {
+  // This watch will trigger a re-render when locale changes
+}, { immediate: true });
 
 // Définition des composants d'icônes inline SVG
 // Vous pouvez également utiliser une bibliothèque comme @heroicons/vue si disponible

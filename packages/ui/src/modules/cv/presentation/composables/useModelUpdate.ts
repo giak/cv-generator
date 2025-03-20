@@ -20,12 +20,10 @@ export function useModelUpdate({ emit, modelValue }: ModelUpdateOptions) {
    * @param value - New value for the field
    */
   const updateField = (field: string, value: any) => {
-    console.log(`Updating field ${field} with value: ${value}`)
-    
+
     // Get current model value
     const currentModel = modelValue.value
-    console.log('Current model before update:', currentModel)
-    
+
     // Create updated model
     const updatedModel = {
       ...currentModel,
@@ -33,7 +31,7 @@ export function useModelUpdate({ emit, modelValue }: ModelUpdateOptions) {
     }
     
     // Emit update event
-    console.log('Emitting update with data:', updatedModel)
+
     emit('update:modelValue', updatedModel)
   }
 

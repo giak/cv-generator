@@ -45,9 +45,7 @@ const hasFieldError = computed(() => {
 
 try {
   errorStore.value = errorStoreComposable();
-} catch (e) {
-  console.warn('Error store not available in testing environment');
-}
+} catch (e) {}
 
 // Variables pour suivre l'état du focus
 const isFocused = ref(false);
@@ -130,4 +128,4 @@ const hasError = computed(() => {
       </div>
     </div>
   </div>
-</template> 
+</template>

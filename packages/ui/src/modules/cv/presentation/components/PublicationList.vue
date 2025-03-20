@@ -201,7 +201,7 @@ const formatDate = (dateString: string) => {
       day: 'numeric'
     }).format(date)
   } catch (e) {
-    console.error('Error formatting date:', e)
+
     return dateString
   }
 }
@@ -256,9 +256,7 @@ const savePublication = async () => {
     }
     
     closeDialog()
-  } catch (error) {
-    console.error('Error saving publication:', error)
-  }
+  } catch (error) {}
 }
 
 // Delete publication
@@ -274,9 +272,7 @@ const deleteConfirmed = async () => {
     await publicationStore.deletePublication(publicationToDelete.value.id)
     showDeleteConfirm.value = false
     publicationToDelete.value = null
-  } catch (error) {
-    console.error('Error deleting publication:', error)
-  }
+  } catch (error) {}
 }
 
 // Reorder publications up
@@ -292,9 +288,7 @@ const moveUp = async (index: number) => {
     newOrder[index - 1] = temp
     
     await publicationStore.reorderPublications(newOrder)
-  } catch (error) {
-    console.error('Error reordering publications:', error)
-  }
+  } catch (error) {}
 }
 
 // Reorder publications down
@@ -310,9 +304,7 @@ const moveDown = async (index: number) => {
     newOrder[index + 1] = temp
     
     await publicationStore.reorderPublications(newOrder)
-  } catch (error) {
-    console.error('Error reordering publications:', error)
-  }
+  } catch (error) {}
 }
 </script>
 
@@ -327,4 +319,4 @@ const moveDown = async (index: number) => {
   opacity: 0;
   transform: translateY(20px);
 }
-</style> 
+</style>

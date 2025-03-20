@@ -124,7 +124,7 @@ export function useFormModel<T extends Record<string, any>>(
     let updateStart = 0;
     if (enableLogging) {
       updateStart = performance.now();
-      console.log('Updating local model from props:', JSON.stringify(source));
+
     }
     
     // Create a deep copy of the source to avoid reference issues
@@ -138,7 +138,7 @@ export function useFormModel<T extends Record<string, any>>(
     
     if (enableLogging && perfMetrics) {
       perfMetrics.modelUpdates++;
-      console.log(`Model update took ${performance.now() - updateStart}ms (total: ${perfMetrics.modelUpdates})`);
+
     }
   }
   
@@ -151,15 +151,15 @@ export function useFormModel<T extends Record<string, any>>(
       if (perfMetrics) {
         perfMetrics.renderTime = performance.now() - startTime
       }
-      console.log('Form model initialized in', perfMetrics?.renderTime, 'ms')
-      console.log('Initial localModel:', JSON.stringify(localModel))
+
+
     }
   })
   
   // Watch for changes to the model value from props
   watch(() => modelValue.value, (newValue) => {
     if (enableLogging) {
-      console.log('Props model changed, updating local model:', JSON.stringify(newValue))
+
     }
     updateLocalModelFromProps(newValue)
   }, { deep: true })
@@ -167,7 +167,7 @@ export function useFormModel<T extends Record<string, any>>(
   // Emit model changes to the parent component
   const emitModelUpdate = () => {
     if (enableLogging) {
-      console.log('Emitting updated model to parent:', JSON.stringify(localModel))
+
     }
     emit('update:modelValue', deepCopy(localModel as unknown as T))
   }
@@ -177,7 +177,7 @@ export function useFormModel<T extends Record<string, any>>(
     let updateStart = 0;
     if (enableLogging) {
       updateStart = performance.now();
-      console.log(`Updating field ${String(field)} with value:`, value);
+
     }
     
     // Update the local model
@@ -188,7 +188,7 @@ export function useFormModel<T extends Record<string, any>>(
     
     if (enableLogging && perfMetrics) {
       perfMetrics.fieldUpdates++;
-      console.log(`Field update took ${performance.now() - updateStart}ms (total: ${perfMetrics.fieldUpdates})`);
+
     }
   }
   
@@ -201,7 +201,7 @@ export function useFormModel<T extends Record<string, any>>(
     let updateStart = 0;
     if (enableLogging) {
       updateStart = performance.now();
-      console.log(`Updating nested field ${String(parent)}.${String(field)} with value:`, value);
+
     }
     
     // Ensure the parent object exists
@@ -217,7 +217,7 @@ export function useFormModel<T extends Record<string, any>>(
     
     if (enableLogging && perfMetrics) {
       perfMetrics.nestedUpdates++;
-      console.log(`Nested field update took ${performance.now() - updateStart}ms (total: ${perfMetrics.nestedUpdates})`);
+
     }
   }
   
@@ -226,7 +226,7 @@ export function useFormModel<T extends Record<string, any>>(
     let updateStart = 0;
     if (enableLogging) {
       updateStart = performance.now();
-      console.log('Updating entire model with:', JSON.stringify(newModel));
+
     }
     
     // Update the local model
@@ -237,14 +237,14 @@ export function useFormModel<T extends Record<string, any>>(
     
     if (enableLogging && perfMetrics) {
       perfMetrics.modelUpdates++;
-      console.log(`Full model update took ${performance.now() - updateStart}ms (total: ${perfMetrics.modelUpdates})`);
+
     }
   }
   
   // Reset the model to its default values
   const resetModel = () => {
     if (enableLogging) {
-      console.log('Resetting model to default values')
+
     }
     
     // Reset to default values

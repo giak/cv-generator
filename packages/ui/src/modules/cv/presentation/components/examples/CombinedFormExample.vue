@@ -219,10 +219,8 @@ const handleSubmit = () => {
   formValid.value = validateForm(localModel)
   
   if (formValid.value) {
-    console.log('Form submitted successfully:', localModel)
+
     emit('validate')
-  } else {
-    console.error('Form validation failed:', errors.value)
-  }
+  } else {}
 }
-</script> 
+</script>

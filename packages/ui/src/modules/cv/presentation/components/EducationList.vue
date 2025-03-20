@@ -67,7 +67,7 @@ const sortedEducations = computed(() => {
     try {
       return new Date(dateB).getTime() - new Date(dateA).getTime();
     } catch (error) {
-      console.error('Error comparing dates:', error);
+
       return 0;
     }
   });
@@ -154,22 +154,18 @@ const saveEducation = async () => {
       await educationStore.updateEducation(education.id, editingEducation.value)
     }
     closeDialog()
-  } catch (error) {
-    console.error('Error saving education:', error)
-  }
+  } catch (error) {}
 }
 
 // Delete education entry
 const deleteEducation = async (education: EducationWithId) => {
   try {
     if (!education.id) {
-      console.error('Cannot delete education without ID')
+
       return
     }
     await educationStore.deleteEducation(education.id)
-  } catch (error) {
-    console.error('Error deleting education:', error)
-  }
+  } catch (error) {}
 }
 
 // Reorder education (move up)
@@ -195,9 +191,7 @@ const moveUp = async (index: number) => {
   
   try {
     await educationStore.reorderEducation(newOrder)
-  } catch (error) {
-    console.error('Error reordering educations:', error)
-  }
+  } catch (error) {}
 }
 
 const moveDown = async (index: number) => {
@@ -222,9 +216,7 @@ const moveDown = async (index: number) => {
   
   try {
     await educationStore.reorderEducation(newOrder)
-  } catch (error) {
-    console.error('Error reordering educations:', error)
-  }
+  } catch (error) {}
 }
 
 // Toggle between chronological and custom order
@@ -407,4 +399,4 @@ const toggleSortOrder = () => {
       </div>
     </div>
   </div>
-</template> 
+</template>

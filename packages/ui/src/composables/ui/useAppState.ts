@@ -47,7 +47,7 @@ export function useAppState() {
     // Initialiser basics avec les données du store
     if (resumeStore.resume?.basics) {
       const storeBasics = resumeStore.resume.basics
-      console.log('Loading data from store:', storeBasics)
+
       Object.assign(basics, {
         name: storeBasics.name ?? '',
         email: storeBasics.email ?? '',
@@ -65,7 +65,7 @@ export function useAppState() {
         },
         profiles: storeBasics.profiles ?? []
       })
-      console.log('Loaded data into basics:', basics)
+
     }
   }
   
@@ -74,9 +74,7 @@ export function useAppState() {
    * @param value New basics data
    */
   const updateBasics = (value: BasicsInterface) => {
-    console.log('=== UI Layer - Basics Update ===')
-    console.log('Received update:', JSON.stringify(value))
-    
+
     // Mettre à jour le modèle directement
     basics.name = value.name || ''
     basics.email = value.email || ''
@@ -95,7 +93,7 @@ export function useAppState() {
       basics.location.region = value.location.region || ''
       
       // Ajout d'un log spécifique pour le countryCode
-      console.log(`Updated countryCode: '${value.location.countryCode}'`)
+
     } else if (value.location) {
       // Si basics.location est undefined mais value.location existe
       basics.location = {
@@ -111,14 +109,7 @@ export function useAppState() {
     basics.profiles = [...(value.profiles || [])]
     
     // Log complet des données, y compris les champs problématiques
-    console.log('Updated basics with ALL fields:', JSON.stringify({
-      ...basics,
-      image: basics.image,
-      location: basics.location ? {
-        ...basics.location,
-        countryCode: basics.location.countryCode
-      } : null
-    }))
+
   }
   
   /**
@@ -126,9 +117,7 @@ export function useAppState() {
    */
   const saveBasics = async () => {
     try {
-      console.log('=== UI Layer - Form Submission ===')
-      console.log('Current basics state:', JSON.parse(JSON.stringify(basics)))
-      
+
       // Créer les données du CV à sauvegarder - le store s'occupera de l'agrégation avec les autres sections
       const resumeData = {
         basics: {
@@ -137,15 +126,13 @@ export function useAppState() {
           profiles: [...(basics.profiles || [])]
         }
       }
-      
-      console.log('Basics data to save:', resumeData)
 
       // Sauvegarder les données du CV - le store s'occupera de récupérer les autres sections
       await resumeStore.saveResume(resumeData)
-      console.log('CV sauvegardé avec succès dans App.vue')
+
       return true
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error)
+
       return false
     }
   }
@@ -167,9 +154,7 @@ export function useAppState() {
   // Set up watchers
   
   // Log changes to basics
-  watch(basics, (newValue) => {
-    console.log('Basics updated:', JSON.parse(JSON.stringify(newValue)))
-  }, { deep: true })
+  watch(basics, (newValue) => {}, { deep: true })
   
   // Close sidebar when window is resized to desktop size
   const setupResizeListener = () => {
@@ -194,4 +179,4 @@ export function useAppState() {
     toggleSidebar,
     setupResizeListener
   }
-} 
+}

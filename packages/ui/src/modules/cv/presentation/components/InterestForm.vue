@@ -187,9 +187,7 @@ const loadInterest = async () => {
     }
     
     // The modelValue computed will update the localModel automatically
-  } catch (error) {
-    console.error('Failed to load interest:', error)
-  } finally {
+  } catch (error) {} finally {
     loading.value = false
   }
 }
@@ -237,9 +235,7 @@ const saveInterest = async () => {
     }
     
     emit('saved')
-  } catch (error) {
-    console.error('Failed to save interest:', error)
-  } finally {
+  } catch (error) {} finally {
     isSubmitting.value = false
   }
 }
@@ -264,4 +260,4 @@ onMounted(async () => {
 
 <style scoped>
 /* Les styles sont gérés par les composants partagés */
-</style> 
+</style>

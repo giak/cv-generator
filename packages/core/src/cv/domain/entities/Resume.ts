@@ -3,7 +3,6 @@ import type { ValidationResultType } from '@cv-generator/shared/src/types/resume
 import { Email } from '../value-objects/email.value-object'
 import { Phone } from '../value-objects/phone.value-object'
 
-
 /**
  * Resume entity representing a CV in JSON Resume format
  * Implements the JSON Resume schema: https://jsonresume.org/schema/
@@ -12,9 +11,6 @@ export class Resume {
   private constructor(private readonly data: ResumeInterface) {}
 
   static create(data: Partial<ResumeInterface>): ValidationResultType & { resume?: Resume } {
-    console.log('=== Domain Layer - Resume Entity ===')
-    console.log('Creating Resume from data:', data)
-    
     const errors: string[] = []
     
     // 1. Validation basique des données essentielles
@@ -133,7 +129,7 @@ export class Resume {
     
     // Si des erreurs sont présentes, retourne le résultat d'échec
     if (errors.length > 0) {
-      console.log('Validation errors:', errors)
+
       return { isValid: false, errors }
     }
     
@@ -211,7 +207,6 @@ export class Resume {
    * @returns ResumeInterface - A structured object that follows the JSON Resume schema
    */
   toJSON(): ResumeInterface {
-    console.log('=== Domain Layer - Resume.toJSON ===')
     const json = {
       basics: this.basics,
       ...(this.work.length > 0 && { work: this.work }),
@@ -226,7 +221,6 @@ export class Resume {
       ...(this.references.length > 0 && { references: this.references }),
       ...(this.projects.length > 0 && { projects: this.projects })
     }
-    console.log('Generated JSON:', json)
     return json
   }
-} 
+}

@@ -82,9 +82,6 @@ export class Basics {
     data: Partial<BasicsInterface>, 
     i18n: DomainI18nPortInterface = defaultI18nAdapter
   ): BasicsValidationResultType {
-    console.log('=== Domain Layer - Basics Entity ===');
-    console.log('Creating Basics from data:', data);
-    
     const errors: ValidationErrorInterface[] = [];
     const warnings: ValidationErrorInterface[] = [];
     

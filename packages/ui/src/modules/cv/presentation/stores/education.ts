@@ -72,8 +72,7 @@ export const useEducationStore = defineStore('education', () => {
     loading.value = true
     
     try {
-      console.log('Loading education entries...')
-      
+
       // Create repository and load resume
       const result = await errorStore.executeWithErrorHandling(async () => {
         return await repository.load()
@@ -86,14 +85,12 @@ export const useEducationStore = defineStore('education', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON:', error);
+
           resumeData = { education: [] };
         }
         
         const educationData = resumeData.education || []
-        
-        console.log('Loaded education data:', educationData)
-        
+
         // Map to ValidatedEducation objects
         educations.value = educationData.map(edu => {
           const education = edu as EducationWithId
@@ -116,12 +113,12 @@ export const useEducationStore = defineStore('education', () => {
         
         return educations.value
       } else {
-        console.warn('No valid resume found or no education data')
+
         educations.value = []
         return []
       }
     } catch (error) {
-      console.error('Error loading education entries:', error)
+
       educations.value = []
       return []
     } finally {
@@ -134,8 +131,7 @@ export const useEducationStore = defineStore('education', () => {
     loading.value = true
     
     try {
-      console.log('Adding new education entry:', education)
-      
+
       if (!education.institution || !education.area || !education.studyType || !education.startDate) {
         throw new Error('Missing required fields')
       }
@@ -183,7 +179,7 @@ export const useEducationStore = defineStore('education', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON, creating new data structure');
+
           updatedData = {
             basics: {
               name: '',
@@ -214,10 +210,9 @@ export const useEducationStore = defineStore('education', () => {
           await repository.save(result)
           return true
         })
-        
-        console.log('Education entry added successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Remove from local state on error
         educations.value = educations.value?.filter(e => e.id !== newItem.id) || null;
         
@@ -234,7 +229,7 @@ export const useEducationStore = defineStore('education', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error adding education entry:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -246,8 +241,7 @@ export const useEducationStore = defineStore('education', () => {
     loading.value = true
     
     try {
-      console.log('Updating education entry:', id, education)
-      
+
       if (!education.institution || !education.area || !education.studyType || !education.startDate) {
         throw new Error('Missing required fields')
       }
@@ -296,7 +290,7 @@ export const useEducationStore = defineStore('education', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON, creating new structure');
+
           resumeData = {
             basics: {
               name: '',
@@ -330,10 +324,9 @@ export const useEducationStore = defineStore('education', () => {
           await repository.save(result)
           return true
         })
-        
-        console.log('Education entry updated successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Reload education on error to reset state
         await loadEducation();
         
@@ -350,7 +343,7 @@ export const useEducationStore = defineStore('education', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error updating education entry:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -362,8 +355,7 @@ export const useEducationStore = defineStore('education', () => {
     loading.value = true
     
     try {
-      console.log('Deleting education entry:', id)
-      
+
       // Update local state first
       if (educations.value) {
         educations.value = educations.value.filter(edu => edu.id !== id)
@@ -383,7 +375,7 @@ export const useEducationStore = defineStore('education', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           return; // No education data to delete
         }
         
@@ -405,10 +397,9 @@ export const useEducationStore = defineStore('education', () => {
           await repository.save(result)
           return true
         })
-        
-        console.log('Education entry deleted successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Reload education on error to reset state
         await loadEducation();
         
@@ -425,7 +416,7 @@ export const useEducationStore = defineStore('education', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error deleting education entry:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -437,10 +428,9 @@ export const useEducationStore = defineStore('education', () => {
     loading.value = true
     
     try {
-      console.log('Reordering education entries:', newOrder)
-      
+
       if (!educations.value || educations.value.length === 0) {
-        console.warn('No education entries to reorder')
+
         return
       }
       
@@ -470,7 +460,7 @@ export const useEducationStore = defineStore('education', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           return; // No education data to reorder
         }
         
@@ -489,10 +479,9 @@ export const useEducationStore = defineStore('education', () => {
           await repository.save(result)
           return true
         })
-        
-        console.log('Education entries reordered successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Reload education on error to reset state
         await loadEducation();
         
@@ -509,7 +498,7 @@ export const useEducationStore = defineStore('education', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error reordering education entries:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -530,4 +519,4 @@ export const useEducationStore = defineStore('education', () => {
   }
 })
 
-export type EducationStore = ReturnType<typeof useEducationStore> 
+export type EducationStore = ReturnType<typeof useEducationStore>

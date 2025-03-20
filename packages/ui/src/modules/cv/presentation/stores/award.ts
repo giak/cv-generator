@@ -67,8 +67,7 @@ export const useAwardStore = defineStore('award', () => {
     loading.value = true
     
     try {
-      console.log('Loading award entries...')
-      
+
       const result = await errorStore.executeWithErrorHandling(async () => {
         return await repository.load()
       })
@@ -78,16 +77,13 @@ export const useAwardStore = defineStore('award', () => {
         let resumeData
         try {
           resumeData = result.toJSON()
-          console.log('[AwardStore] Resume data after loading:', JSON.stringify(resumeData))
-          
+
           if (!resumeData.awards) {
-            console.warn('[AwardStore] No awards found in resume data, initializing empty array')
+
             awards.value = []
             return awards.value
           }
-          
-          console.log('Loaded award data:', resumeData.awards)
-          
+
           // Map to ValidatedAward objects
           awards.value = resumeData.awards.map((award: AwardWithId) => ({
             id: award.id || generateId(),
@@ -103,21 +99,20 @@ export const useAwardStore = defineStore('award', () => {
               summary: award.summary,
             }),
           }))
-          
-          console.log('[AwardStore] Successfully loaded awards:', awards.value.length)
+
           return awards.value
         } catch (error) {
-          console.warn('Failed to convert resume to JSON:', error)
+
           awards.value = []
           return awards.value
         }
       } else {
-        console.warn('No valid resume found or no award data')
+
         awards.value = []
         return awards.value
       }
     } catch (error) {
-      console.error('Failed to load award entries:', error)
+
       errorStore.setError('Failed to load award entries')
       awards.value = []
       return awards.value
@@ -131,8 +126,7 @@ export const useAwardStore = defineStore('award', () => {
     loading.value = true
     
     try {
-      console.log('Adding new award entry:', award)
-      
+
       if (!award.title || !award.date || !award.awarder) {
         throw new Error('Missing required fields')
       }
@@ -170,8 +164,7 @@ export const useAwardStore = defineStore('award', () => {
         
         // Get current data and ensure awards array exists
         const resumeData = result.toJSON()
-        console.log('Current resume data before update:', JSON.stringify(resumeData))
-        
+
         // Créer un objet JSON mis à jour avec les nouvelles données
         const updatedResumeJson = {
           ...resumeData,
@@ -180,11 +173,10 @@ export const useAwardStore = defineStore('award', () => {
         
         // Utiliser la méthode createResume pour créer/mettre à jour l'instance
         await manageResume.createResume(updatedResumeJson)
-        
-        console.log('Award entry added successfully')
+
         return newItem
       } catch (error) {
-        console.error('Error saving to repository:', error)
+
         // Remove from local state on error
         awards.value = awards.value.filter(award => award.id !== newItem.id)
         throw error
@@ -199,8 +191,7 @@ export const useAwardStore = defineStore('award', () => {
     loading.value = true
     
     try {
-      console.log('Updating award entry:', id, updatedData)
-      
+
       if (awards.value.length > 0) {
         awards.value = awards.value.map((award: ValidatedAward) => 
           award.id === id ? { ...award, ...updatedData } : award
@@ -223,8 +214,7 @@ export const useAwardStore = defineStore('award', () => {
         
         // Get current data
         const resumeData = result.toJSON()
-        console.log('Current resume data before update:', JSON.stringify(resumeData))
-        
+
         // Create updated resume data
         const updatedResumeJson = {
           ...resumeData,
@@ -233,10 +223,9 @@ export const useAwardStore = defineStore('award', () => {
         
         // Utiliser la méthode createResume pour mettre à jour l'instance
         await manageResume.createResume(updatedResumeJson)
-        
-        console.log('Award entry updated successfully')
+
       } catch (error) {
-        console.error('Error saving to repository:', error)
+
         // Reload awards on error to reset state
         await loadAwards()
         throw error
@@ -251,8 +240,7 @@ export const useAwardStore = defineStore('award', () => {
     loading.value = true
     
     try {
-      console.log('Deleting award entry:', id)
-      
+
       const awardToDelete = awards.value.find((award: ValidatedAward) => award.id === id)
       if (!awardToDelete) {
         throw new Error('Award not found')
@@ -281,10 +269,9 @@ export const useAwardStore = defineStore('award', () => {
         
         // Utiliser la méthode createResume pour mettre à jour l'instance
         await manageResume.createResume(updatedResumeJson)
-        
-        console.log('Award entry deleted successfully')
+
       } catch (error) {
-        console.error('Error saving to repository:', error)
+
         // Restore award on error
         if (awardToDelete) {
           awards.value = [...awards.value, awardToDelete]
@@ -301,10 +288,9 @@ export const useAwardStore = defineStore('award', () => {
     loading.value = true
     
     try {
-      console.log('Reordering award entries:', newOrder)
-      
+
       if (awards.value.length === 0) {
-        console.warn('No award entries to reorder')
+
         return
       }
       
@@ -337,10 +323,9 @@ export const useAwardStore = defineStore('award', () => {
           await repository.save(result)
           return true
         })
-        
-        console.log('Award entries reordered successfully')
+
       } catch (error) {
-        console.error('Error saving to repository:', error)
+
         // Reload awards on error to reset state
         await loadAwards()
         throw error
@@ -364,4 +349,4 @@ export const useAwardStore = defineStore('award', () => {
   }
 })
 
-export type AwardStore = ReturnType<typeof useAwardStore> 
+export type AwardStore = ReturnType<typeof useAwardStore>

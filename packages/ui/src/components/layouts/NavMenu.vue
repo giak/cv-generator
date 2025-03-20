@@ -11,7 +11,7 @@ const safeTranslate = (key: string, fallback: string = 'Translation missing') =>
     // Check if translation exists and is not the same as the key
     return (translated && translated !== key) ? translated : fallback;
   } catch (error) {
-    console.warn(`Translation error for key: ${key}`, error);
+
     return fallback;
   }
 };
@@ -116,4 +116,4 @@ const handleNavClick = (path: string | undefined) => {
       </ul>
     </div>
   </nav>
-</template> 
+</template>

@@ -35,9 +35,7 @@ export class Work {
    * @returns Un objet contenant le résultat de la validation et éventuellement l'instance de Work
    */
   static create(data: Partial<WorkInterface>): WorkValidationResultType {
-    console.log('=== Domain Layer - Work Entity ===')
-    console.log('Creating Work from data:', data)
-    
+
     const errors: string[] = []
     
     // 1. Validation des champs requis
@@ -85,7 +83,7 @@ export class Work {
     
     // Si des erreurs sont présentes, retourne le résultat d'échec
     if (errors.length > 0) {
-      console.log('Validation errors:', errors)
+
       return { isValid: false, errors }
     }
     
@@ -179,8 +177,7 @@ export class Work {
    * @returns L'objet représentant l'expérience professionnelle
    */
   toJSON(): WorkInterface {
-    console.log('=== Domain Layer - Work.toJSON ===')
-    
+
     const json: WorkInterface = {
       name: this.name,
       position: this.position,
@@ -190,8 +187,7 @@ export class Work {
       ...(this.summary && { summary: this.summary }),
       ...(this.highlights.length > 0 && { highlights: this.highlights })
     }
-    
-    console.log('Generated Work JSON:', json)
+
     return json
   }
-} 
+}

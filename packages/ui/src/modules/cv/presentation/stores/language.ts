@@ -66,8 +66,7 @@ export const useLanguageStore = defineStore('language', () => {
     loading.value = true
     
     try {
-      console.log('Loading language entries...')
-      
+
       // Create repository and load resume
       const result = await errorStore.executeWithErrorHandling(async () => {
         return await repository.load()
@@ -80,14 +79,12 @@ export const useLanguageStore = defineStore('language', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON:', error);
+
           resumeData = { languages: [] };
         }
         
         const languageData = resumeData.languages || []
-        
-        console.log('Loaded language data:', languageData)
-        
+
         // Map to ValidatedLanguage objects
         languages.value = languageData.map(lang => {
           const language = lang as LanguageWithId
@@ -104,12 +101,12 @@ export const useLanguageStore = defineStore('language', () => {
         
         return languages.value
       } else {
-        console.warn('No valid resume found or no language data')
+
         languages.value = []
         return []
       }
     } catch (error) {
-      console.error('Error loading language entries:', error)
+
       languages.value = []
       return []
     } finally {
@@ -122,8 +119,7 @@ export const useLanguageStore = defineStore('language', () => {
     loading.value = true
     
     try {
-      console.log('Adding new language entry:', language)
-      
+
       if (!language.language) {
         throw new Error('Missing required field: language')
       }
@@ -165,7 +161,7 @@ export const useLanguageStore = defineStore('language', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON, creating new data structure');
+
           updatedData = {
             basics: {
               name: '',
@@ -204,10 +200,9 @@ export const useLanguageStore = defineStore('language', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Language entry added successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Remove from local state on error
         languages.value = languages.value?.filter(l => l.id !== newItem.id) || null;
         
@@ -224,7 +219,7 @@ export const useLanguageStore = defineStore('language', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error adding language entry:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -236,8 +231,7 @@ export const useLanguageStore = defineStore('language', () => {
     loading.value = true
     
     try {
-      console.log('Updating language entry:', id, language)
-      
+
       if (!language.language) {
         throw new Error('Missing required field: language')
       }
@@ -288,7 +282,7 @@ export const useLanguageStore = defineStore('language', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           throw error;
         }
         
@@ -303,7 +297,7 @@ export const useLanguageStore = defineStore('language', () => {
         if (languageIndex !== -1) {
           updatedData.languages[languageIndex] = updatedLanguage
         } else {
-          console.warn('Language not found in resume data, cannot update')
+
           throw new Error('Language not found in resume data')
         }
         
@@ -320,11 +314,9 @@ export const useLanguageStore = defineStore('language', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Language entry updated successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
-        
+
         // Reload original state on error
         await loadLanguages()
         
@@ -341,7 +333,7 @@ export const useLanguageStore = defineStore('language', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error updating language entry:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -353,8 +345,7 @@ export const useLanguageStore = defineStore('language', () => {
     loading.value = true
     
     try {
-      console.log('Deleting language entry:', id)
-      
+
       // Load current language entries if needed
       if (!languages.value) {
         await loadLanguages()
@@ -387,7 +378,7 @@ export const useLanguageStore = defineStore('language', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           throw error;
         }
         
@@ -409,11 +400,9 @@ export const useLanguageStore = defineStore('language', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Language entry deleted successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
-        
+
         // Restore original state on error
         await loadLanguages()
         
@@ -430,7 +419,7 @@ export const useLanguageStore = defineStore('language', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error deleting language entry:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -442,15 +431,14 @@ export const useLanguageStore = defineStore('language', () => {
     loading.value = true
     
     try {
-      console.log('Reordering language entries:', newOrder)
-      
+
       // Load current language entries if needed
       if (!languages.value) {
         await loadLanguages()
       }
       
       if (!languages.value || languages.value.length === 0) {
-        console.warn('No languages to reorder')
+
         return
       }
       
@@ -496,7 +484,7 @@ export const useLanguageStore = defineStore('language', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           throw error;
         }
         
@@ -546,11 +534,9 @@ export const useLanguageStore = defineStore('language', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Language entries reordered successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
-        
+
         // Reload original state on error
         await loadLanguages()
         
@@ -567,7 +553,7 @@ export const useLanguageStore = defineStore('language', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error reordering language entries:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -588,4 +574,4 @@ export const useLanguageStore = defineStore('language', () => {
   }
 })
 
-export type LanguageStore = ReturnType<typeof useLanguageStore> 
+export type LanguageStore = ReturnType<typeof useLanguageStore>

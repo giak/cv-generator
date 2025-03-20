@@ -42,7 +42,8 @@
       "publications": "Publications",
       "languages": "Languages",
       "interests": "Interests",
-      "references": "References"
+      "references": "References",
+      "certificates": "Certificates"
     },
     "basics": {
       "labels": {
@@ -187,7 +188,11 @@
         "emptyStateDescription": "Add your professional history to showcase your skills and expertise.",
         "moveUp": "Move up",
         "moveDown": "Move down",
-        "present": "Present"
+        "present": "Present",
+        "chronologicalOrder": "Chronological order",
+        "customOrder": "Custom order",
+        "showAll": "Show all experiences",
+        "showLess": "Show less"
       }
     },
     "education": {
@@ -216,7 +221,8 @@
         "startDate": "When you started your studies.",
         "endDate": "When you completed your studies (leave empty if ongoing).",
         "gpa": "Your grade point average or equivalent.",
-        "courses": "Relevant courses you completed during your studies."
+        "courses": "Relevant courses you completed during your studies.",
+        "website": "URL of the educational institution's website."
       },
       "validation": {
         "missingInstitution": "Institution name is required",
@@ -235,7 +241,13 @@
         "coursesSection": "Courses",
         "coursesDescription": "Add relevant courses you completed during your studies",
         "noCourses": "No courses added. Use the field above to add relevant courses.",
-        "addCourse": "Add Course"
+        "addCourse": "Add Course",
+        "currentEducation": "Current Education",
+        "coursesHelp": "Courses help detail the skills acquired during your education",
+        "editCourse": "Edit selected course",
+        "editCoursePlaceholder": "Edit course...",
+        "updateCourse": "Update",
+        "escapeToCancel": "Press Escape to cancel editing"
       },
       "list": {
         "title": "Education",
@@ -245,7 +257,22 @@
         "emptyStateDescription": "Add your educational background to highlight your academic achievements.",
         "moveUp": "Move up",
         "moveDown": "Move down",
-        "present": "Present"
+        "present": "Present",
+        "websiteLink": "Institution website",
+        "resultLabel": "Result",
+        "coursesTitle": "Courses taken",
+        "chronologicalOrder": "Chronological order",
+        "customOrder": "Custom order",
+        "showAll": "Show all education",
+        "showLess": "Show less"
+      },
+      "notifications": {
+        "addSuccess": "Education added successfully",
+        "updateSuccess": "Education updated successfully",
+        "deleteSuccess": "Education deleted successfully",
+        "deleteError": "Error deleting education",
+        "reorderError": "Error reordering education",
+        "saveError": "Error saving education"
       }
     },
     "skills": {
@@ -652,9 +679,40 @@
         "emptyStateTitle": "No references added",
         "emptyStateDescription": "Add references to provide external validation of your skills and character.",
         "moveUp": "Move up",
-        "moveDown": "Move down"
+        "moveDown": "Move down",
+        "loading": "Loading references...",
+        "confirmDelete": "Delete this reference",
+        "deleteWarning": "Are you sure you want to delete this reference? This action cannot be undone."
+      },
+      "notifications": {
+        "addSuccess": "Reference added successfully",
+        "updateSuccess": "Reference updated successfully",
+        "deleteSuccess": "Reference deleted successfully",
+        "deleteError": "Error deleting reference",
+        "saveError": "Error saving reference"
       }
     }
+  },
+  "navigation": {
+    "home": "Home",
+    "editor": "CV Editor",
+    "preview": "Preview",
+    "export": "Export",
+    "settings": "Settings",
+    "progress": "Progress",
+    "requiredSections": "Required Sections",
+    "next": "Next",
+    "continueWith": "Continue with",
+    "sectionComplete": "Section complete",
+    "sectionIncomplete": "Section incomplete",
+    "sectionPartial": "Partially complete section",
+    "nextSection": "Next section",
+    "previousSection": "Previous section",
+    "nextIncompleteSection": "Next incomplete section",
+    "mainNav": "Main navigation",
+    "view": "View",
+    "unknownView": "Unknown view",
+    "descriptionNotAvailable": ""
   },
   "ui": {
     "header": {
@@ -668,22 +726,10 @@
       "madeWith": "Made with ❤️"
     },
     "navigation": {
-      "home": "Home",
-      "editor": "Resume Editor",
-      "preview": "Preview",
-      "export": "Export",
-      "settings": "Settings",
-      "progress": "Progress",
-      "requiredSections": "Required sections",
-      "next": "Next",
-      "continueWith": "Continue with",
-      "sectionComplete": "Section complete",
-      "sectionIncomplete": "Section incomplete",
-      "sectionPartial": "Section partially complete",
-      "nextSection": "Next section",
-      "previousSection": "Previous section",
-      "nextIncompleteSection": "Next incomplete section",
-      "mainNav": "Main Navigation"
+      "groups": {
+        "cv": "Curriculum Vitae",
+        "options": "Options"
+      }
     },
     "export": {
       "title": "Export Your Resume",
@@ -717,6 +763,25 @@
     },
     "search": {
       "placeholder": "Search..."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "dismiss": "Dismiss",
+      "description": ""
+    },
+    "themes": {
+      "title": "Theme Settings",
+      "description": ""
+    },
+    "settings": {
+      "description": ""
     }
+  },
+  "action": "",
+  "progressIndicator": {
+    "title": "",
+    "requiredSections": "",
+    "nextToComplete": "",
+    "continueWith": ""
   }
-} 
+}

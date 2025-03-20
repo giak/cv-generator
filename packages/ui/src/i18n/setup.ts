@@ -17,9 +17,7 @@ const debugTranslations = (messages: any, pathPrefix = '') => {
     
     if (typeof value === 'object' && value !== null) {
       debugTranslations(value, currentPath);
-    } else if (typeof value === 'string') {
-      console.debug(`Translation key loaded: ${currentPath} = ${value}`);
-    }
+    } else if (typeof value === 'string') {}
   }
 };
 
@@ -39,9 +37,7 @@ export function getInitialLocale(): SupportedLocale {
       return storedLocale as SupportedLocale;
     }
   } catch (error) {
-    if (isDev) {
-      console.warn('Error accessing localStorage:', error);
-    }
+    if (isDev) {}
   }
   
   // 2. Détecter la langue du navigateur
@@ -51,9 +47,7 @@ export function getInitialLocale(): SupportedLocale {
   try {
     localStorage.setItem(LOCALE_STORAGE_KEY, detectedLocale);
   } catch (error) {
-    if (isDev) {
-      console.warn('Error saving locale to localStorage:', error);
-    }
+    if (isDev) {}
   }
   
   return detectedLocale;
@@ -95,13 +89,13 @@ export async function preloadDefaultMessages() {
   if (defaultMessagesLoaded) return;
   
   try {
-    console.log(`Preloading default messages for ${DEFAULT_LOCALE}`);
+
     const defaultMessages = await import(`./locales/${DEFAULT_LOCALE}.json`);
     i18n.global.setLocaleMessage(DEFAULT_LOCALE, defaultMessages.default);
     defaultMessagesLoaded = true;
-    console.log('Default messages preloaded successfully');
+
   } catch (error) {
-    console.error(`Failed to preload default messages for ${DEFAULT_LOCALE}:`, error);
+
     // Définir un objet de messages minimal pour éviter les erreurs
     i18n.global.setLocaleMessage(DEFAULT_LOCALE, {
       common: {
@@ -123,8 +117,7 @@ export async function preloadDefaultMessages() {
  */
 export async function loadLocaleMessages(locale: SupportedLocale) {
   try {
-    console.log(`Attempting to load messages for ${locale}`);
-    
+
     // S'assurer que les messages par défaut sont chargés d'abord
     if (!defaultMessagesLoaded && locale !== DEFAULT_LOCALE) {
       await preloadDefaultMessages();
@@ -135,7 +128,7 @@ export async function loadLocaleMessages(locale: SupportedLocale) {
     
     // Debug translations in development mode
     if (isDev) {
-      console.debug(`Messages for ${locale} loaded successfully`);
+
       debugTranslations(messages.default);
     }
     
@@ -149,14 +142,12 @@ export async function loadLocaleMessages(locale: SupportedLocale) {
     try {
       localStorage.setItem(LOCALE_STORAGE_KEY, locale);
     } catch (error) {
-      if (isDev) {
-        console.warn('Error saving locale to localStorage:', error);
-      }
+      if (isDev) {}
     }
     
     return { success: true };
   } catch (error) {
-    console.error(`Failed to load messages for ${locale}:`, error);
+
     throw error;
   }
-} 
+}

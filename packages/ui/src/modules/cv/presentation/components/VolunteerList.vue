@@ -75,7 +75,7 @@ const openEditDialog = (volunteer: VolunteerWithId, index: number) => {
 
 // Close dialog
 const closeDialog = () => {
-  console.log('Closing dialog')
+
   showDialog.value = false
   editingVolunteerIndex.value = null
 }
@@ -83,8 +83,7 @@ const closeDialog = () => {
 // Save volunteer experience (add or update)
 const saveVolunteer = async () => {
   try {
-    console.log('Saving volunteer experience:', editingVolunteer.value)
-    
+
     if (dialogMode.value === 'add') {
       await volunteerStore.addVolunteer(editingVolunteer.value)
     } else if (dialogMode.value === 'edit' && editingVolunteerIndex.value !== null && volunteers.value[editingVolunteerIndex.value]) {
@@ -93,9 +92,7 @@ const saveVolunteer = async () => {
     }
     
     closeDialog()
-  } catch (error) {
-    console.error('Error saving volunteer experience:', error)
-  }
+  } catch (error) {}
 }
 
 // Delete volunteer experience
@@ -106,9 +103,7 @@ const deleteVolunteer = async (index: number) => {
     try {
       const volunteerId = volunteers.value[index].id
       await volunteerStore.deleteVolunteer(volunteerId)
-    } catch (error) {
-      console.error('Error deleting volunteer experience:', error)
-    }
+    } catch (error) {}
   }
 }
 
@@ -126,9 +121,7 @@ const moveUp = async (index: number) => {
     currentIds[index - 1] = temp
     
     await volunteerStore.reorderVolunteers(currentIds)
-  } catch (error) {
-    console.error('Error reordering volunteer experiences:', error)
-  }
+  } catch (error) {}
 }
 
 const moveDown = async (index: number) => {
@@ -144,9 +137,7 @@ const moveDown = async (index: number) => {
     currentIds[index + 1] = temp
     
     await volunteerStore.reorderVolunteers(currentIds)
-  } catch (error) {
-    console.error('Error reordering volunteer experiences:', error)
-  }
+  } catch (error) {}
 }
 </script>
 
@@ -314,4 +305,4 @@ const moveDown = async (index: number) => {
       </div>
     </div>
   </div>
-</template> 
+</template>

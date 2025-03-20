@@ -130,9 +130,7 @@ onMounted(async () => {
 const loadSkills = async () => {
   try {
     await skillStore.loadSkills()
-  } catch (error) {
-    console.error('Failed to load skills:', error)
-  }
+  } catch (error) {}
 }
 
 // Open add form dialog
@@ -185,7 +183,7 @@ const saveSkill = async () => {
     // Reload skills to get updated data
     await loadSkills()
   } catch (error) {
-    console.error('Error saving skill:', error)
+
     // Error handling would be done here
   } finally {
     formSubmitting.value = false
@@ -199,9 +197,7 @@ const deleteSkill = async (skill: ValidatedSkill) => {
     
     // Reload skills to get updated data
     await loadSkills()
-  } catch (error) {
-    console.error('Error deleting skill:', error)
-  }
+  } catch (error) {}
 }
 
 // Reorder skills
@@ -219,9 +215,7 @@ const moveUp = async (index: number) => {
   
   try {
     await skillStore.reorderSkills(newOrder)
-  } catch (error) {
-    console.error('Error reordering skills:', error)
-  }
+  } catch (error) {}
 }
 
 const moveDown = async (index: number) => {
@@ -238,9 +232,7 @@ const moveDown = async (index: number) => {
   
   try {
     await skillStore.reorderSkills(newOrder)
-  } catch (error) {
-    console.error('Error reordering skills:', error)
-  }
+  } catch (error) {}
 }
 </script>
 
@@ -251,4 +243,4 @@ const moveDown = async (index: number) => {
 .drag-handle:active {
   @apply cursor-grabbing;
 }
-</style> 
+</style>

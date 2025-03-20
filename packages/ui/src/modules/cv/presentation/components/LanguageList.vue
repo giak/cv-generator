@@ -269,7 +269,7 @@ const deleteLanguage = async () => {
     showToast(safeTranslate('resume.languages.notifications.deleteSuccess', 'Langue supprimée avec succès'), 'success')
     closeDeleteModal()
   } catch (error) {
-    console.error('Error deleting language:', error)
+
     showToast(safeTranslate('resume.languages.notifications.deleteError', 'Erreur lors de la suppression de la langue'), 'error')
   } finally {
     isDeleting.value = false
@@ -292,7 +292,7 @@ const moveUp = async (index: number) => {
   try {
     await languageStore.reorderLanguages(newOrder)
   } catch (error) {
-    console.error('Error reordering languages:', error)
+
     showToast(safeTranslate('resume.languages.notifications.reorderError', 'Erreur lors de la réorganisation des langues'), 'error')
   }
 }
@@ -313,7 +313,7 @@ const moveDown = async (index: number) => {
   try {
     await languageStore.reorderLanguages(newOrder)
   } catch (error) {
-    console.error('Error reordering languages:', error)
+
     showToast(safeTranslate('resume.languages.notifications.reorderError', 'Erreur lors de la réorganisation des langues'), 'error')
   }
 }

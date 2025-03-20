@@ -111,10 +111,9 @@ export const useReferenceStore = defineStore('reference', () => {
       if (savedReferences) {
         references.value = JSON.parse(savedReferences)
       }
-      
-      console.log(`[ReferenceStore] ${references.value.length} références chargées`)
+
     } catch (err) {
-      console.error('[ReferenceStore] Erreur lors du chargement des références:', err)
+
       error.value = err instanceof Error ? err : new Error('Erreur inconnue lors du chargement des références')
     } finally {
       isLoading.value = false
@@ -128,10 +127,10 @@ export const useReferenceStore = defineStore('reference', () => {
     try {
       localStorage.setItem('cv_references', JSON.stringify(references.value))
       lastSaved.value = new Date()
-      console.log(`[ReferenceStore] ${references.value.length} références sauvegardées`)
+
       return true
     } catch (err) {
-      console.error('[ReferenceStore] Erreur lors de la sauvegarde des références:', err)
+
       error.value = err instanceof Error ? err : new Error('Erreur inconnue lors de la sauvegarde des références')
       return false
     }
@@ -249,4 +248,4 @@ export const useReferenceStore = defineStore('reference', () => {
     deleteReference,
     reorderReferences
   }
-}) 
+})

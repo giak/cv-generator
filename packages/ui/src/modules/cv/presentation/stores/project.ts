@@ -130,8 +130,7 @@ export const useProjectStore = defineStore('project', () => {
     error.value = null
     
     try {
-      console.log('[ProjectStore] Chargement des projets...')
-      
+
       // Utiliser le manager pour récupérer le CV complet
       const resume = await errorStore.executeWithErrorHandling(async () => {
         return await repository.load()
@@ -143,16 +142,16 @@ export const useProjectStore = defineStore('project', () => {
           ...project,
           id: uuidv4() // Ajouter un ID si non présent
         }))
-        console.log(`[ProjectStore] ${projects.value.length} projets chargés`)
+
       } else {
         projects.value = []
-        console.log('[ProjectStore] Aucun projet trouvé')
+
       }
       
       // Retourner les projets validés
       return projects.value.map(project => validateProjectData(project))
     } catch (err) {
-      console.error('[ProjectStore] Erreur lors du chargement des projets:', err)
+
       error.value = err instanceof Error ? err : new Error('Erreur inconnue lors du chargement des projets')
       return []
     } finally {
@@ -187,7 +186,7 @@ export const useProjectStore = defineStore('project', () => {
         await resumeStore.saveResume(updatedResume);
         
         // Afficher un message de succès
-        console.log('Projets enregistrés avec succès');
+
       },
       {
         showToast: true,
@@ -308,4 +307,4 @@ export const useProjectStore = defineStore('project', () => {
     deleteProject,
     reorderProjects
   }
-}) 
+})

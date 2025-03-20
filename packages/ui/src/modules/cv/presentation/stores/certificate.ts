@@ -46,16 +46,13 @@ export const useCertificateStore = defineStore('certificate', () => {
         let resumeData
         try {
           resumeData = result.toJSON()
-          console.log('[CertificateStore] Resume data after loading:', JSON.stringify(resumeData))
-          
+
           if (!resumeData.certificates) {
-            console.warn('[CertificateStore] No certificates found in resume data, initializing empty array')
+
             certificates.value = []
             return certificates.value
           }
-          
-          console.log('Loaded certificate data:', resumeData.certificates)
-          
+
           // Map to ValidatedCertificate objects
           certificates.value = resumeData.certificates.map((certificate: CertificateInterface) => ({
             id: uuidv4(),
@@ -70,16 +67,15 @@ export const useCertificateStore = defineStore('certificate', () => {
               url: certificate.url || '',
             }),
           }))
-          
-          console.log('[CertificateStore] Successfully loaded certificates:', certificates.value.length)
+
           return certificates.value
         } catch (error) {
-          console.warn('Failed to convert resume to JSON:', error)
+
           certificates.value = []
           return certificates.value
         }
       } else {
-        console.warn('No valid resume found or no certificate data')
+
         certificates.value = []
         return certificates.value
       }
@@ -93,7 +89,7 @@ export const useCertificateStore = defineStore('certificate', () => {
         source: 'ui',
         dismissed: false
       })
-      console.error('Erreur lors du chargement des certificats:', error)
+
       return []
     } finally {
       loading.value.certificates = false
@@ -151,8 +147,7 @@ export const useCertificateStore = defineStore('certificate', () => {
         
         // Get current data
         const resumeData = result.toJSON()
-        console.log('Current resume data before update:', JSON.stringify(resumeData))
-        
+
         // Create updated resume data
         const updatedResumeJson = {
           ...resumeData,
@@ -161,11 +156,10 @@ export const useCertificateStore = defineStore('certificate', () => {
         
         // Utiliser la méthode createResume pour créer/mettre à jour l'instance
         await manageResume.createResume(updatedResumeJson)
-        
-        console.log('Certificate added successfully')
+
         return newCertificate
       } catch (error) {
-        console.error('Error saving to repository:', error)
+
         // Remove from local state on error
         certificates.value = certificates.value.filter(cert => cert.id !== newCertificate.id)
         throw error
@@ -180,7 +174,7 @@ export const useCertificateStore = defineStore('certificate', () => {
         source: 'ui',
         dismissed: false
       })
-      console.error('Erreur lors de l\'ajout du certificat:', error)
+
       return null
     } finally {
       loading.value.creating = false
@@ -192,7 +186,6 @@ export const useCertificateStore = defineStore('certificate', () => {
     try {
       loading.value.updating = true
       errorStore.clearErrors()
-      console.log('Mise à jour du certificat:', certificate.id)
 
       // Validation des champs requis
       if (!certificate.name) {
@@ -252,14 +245,12 @@ export const useCertificateStore = defineStore('certificate', () => {
         
         // Utiliser la méthode createResume pour mettre à jour l'instance
         await manageResume.createResume(updatedResumeJson)
-        
-        console.log('Certificate updated successfully')
+
         return certificate
       } catch (error) {
         // Restauration de l'état précédent en cas d'erreur
         certificates.value = [...previousCertificates]
 
-        console.error('Error saving to repository:', error)
         throw error
       }
     } catch (error) {
@@ -272,7 +263,7 @@ export const useCertificateStore = defineStore('certificate', () => {
         source: 'ui',
         dismissed: false
       })
-      console.error('Erreur lors de la mise à jour du certificat:', error)
+
       return null
     } finally {
       loading.value.updating = false
@@ -284,7 +275,6 @@ export const useCertificateStore = defineStore('certificate', () => {
     try {
       loading.value.deleting = true
       errorStore.clearErrors()
-      console.log('Suppression du certificat:', id)
 
       // Vérification que le certificat existe
       const certificateToDelete = certificates.value.find(c => c.id === id)
@@ -318,14 +308,12 @@ export const useCertificateStore = defineStore('certificate', () => {
         
         // Utiliser la méthode createResume pour mettre à jour l'instance
         await manageResume.createResume(updatedResumeJson)
-        
-        console.log('Certificate deleted successfully')
+
         return true
       } catch (error) {
         // Restauration de l'état précédent en cas d'erreur
         certificates.value = [...previousCertificates]
 
-        console.error('Error saving to repository:', error)
         throw error
       }
     } catch (error) {
@@ -338,7 +326,7 @@ export const useCertificateStore = defineStore('certificate', () => {
         source: 'ui',
         dismissed: false
       })
-      console.error('Erreur lors de la suppression du certificat:', error)
+
       return false
     } finally {
       loading.value.deleting = false
@@ -382,14 +370,12 @@ export const useCertificateStore = defineStore('certificate', () => {
         
         // Utiliser la méthode createResume pour mettre à jour l'instance
         await manageResume.createResume(updatedResumeJson)
-        
-        console.log('Certificates reordered successfully')
+
         return true
       } catch (error) {
         // Restauration de l'état précédent en cas d'erreur
         certificates.value = [...previousCertificates]
 
-        console.error('Error saving to repository:', error)
         throw error
       }
     } catch (error) {
@@ -402,7 +388,7 @@ export const useCertificateStore = defineStore('certificate', () => {
         source: 'ui',
         dismissed: false
       })
-      console.error('Erreur lors de la réorganisation des certificats:', error)
+
       return false
     } finally {
       loading.value.reordering = false
@@ -418,4 +404,4 @@ export const useCertificateStore = defineStore('certificate', () => {
     deleteCertificate,
     reorderCertificates
   }
-}) 
+})

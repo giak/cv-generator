@@ -258,8 +258,8 @@ export function useValidationResult<T>(
   const setResult = (newResult: FormValidationResultType<T>): void => {
     if (debug) {
       console.group('ValidationResult: setResult');
-      console.log('Previous:', result.value);
-      console.log('New:', newResult);
+
+
       console.groupEnd();
     }
     
@@ -273,7 +273,7 @@ export function useValidationResult<T>(
   // Réinitialisation du résultat
   const resetResult = (): void => {
     if (debug) {
-      console.log('ValidationResult: resetResult');
+
     }
     
     result.value = null;

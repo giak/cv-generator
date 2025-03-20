@@ -42,7 +42,8 @@
       "publications": "Publications",
       "languages": "Langues",
       "interests": "Centres d'intérêt",
-      "references": "Références"
+      "references": "Références",
+      "certificates": "Certifications"
     },
     "basics": {
       "labels": {
@@ -754,7 +755,10 @@
     "nextSection": "Section suivante",
     "previousSection": "Section précédente",
     "nextIncompleteSection": "Prochaine section incomplète",
-    "mainNav": "Navigation principale"
+    "mainNav": "Navigation principale",
+    "view": "Vue",
+    "unknownView": "Vue inconnue",
+    "descriptionNotAvailable": ""
   },
   "ui": {
     "header": {
@@ -768,22 +772,10 @@
       "madeWith": "Fait avec ❤️"
     },
     "navigation": {
-      "home": "Accueil",
-      "editor": "Éditeur de CV",
-      "preview": "Aperçu",
-      "export": "Exporter",
-      "settings": "Paramètres",
-      "progress": "Progression",
-      "requiredSections": "Sections requises",
-      "next": "Suivant",
-      "continueWith": "Continuer avec",
-      "sectionComplete": "Section complétée",
-      "sectionIncomplete": "Section incomplète",
-      "sectionPartial": "Section partiellement complète",
-      "nextSection": "Section suivante",
-      "previousSection": "Section précédente",
-      "nextIncompleteSection": "Prochaine section incomplète",
-      "mainNav": "Navigation principale"
+      "groups": {
+        "cv": "Curriculum Vitae",
+        "options": "Options"
+      }
     },
     "export": {
       "title": "Exporter votre CV",
@@ -820,7 +812,22 @@
     },
     "notifications": {
       "title": "Notifications Toast",
-      "dismiss": "Fermer"
+      "dismiss": "Fermer",
+      "description": ""
+    },
+    "themes": {
+      "title": "Paramètres de thème",
+      "description": ""
+    },
+    "settings": {
+      "description": ""
     }
+  },
+  "action": "",
+  "progressIndicator": {
+    "title": "",
+    "requiredSections": "",
+    "nextToComplete": "",
+    "continueWith": ""
   }
 }

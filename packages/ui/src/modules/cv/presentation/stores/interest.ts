@@ -76,8 +76,7 @@ export const useInterestStore = defineStore('interest', () => {
     loading.value.interests = true
     
     try {
-      console.log('Loading interest entries...')
-      
+
       // Create repository and load resume
       const result = await errorStore.executeWithErrorHandling(async () => {
         return await repository.load()
@@ -90,14 +89,12 @@ export const useInterestStore = defineStore('interest', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON:', error);
+
           resumeData = { interests: [] };
         }
         
         const interestData = resumeData.interests || []
-        
-        console.log('Loaded interest data:', interestData)
-        
+
         // Map to ValidatedInterest objects
         interests.value = interestData.map(interest => {
           const interestWithId = interest as InterestWithId
@@ -114,12 +111,12 @@ export const useInterestStore = defineStore('interest', () => {
         
         return interests.value
       } else {
-        console.warn('No valid resume found or no interest data')
+
         interests.value = []
         return []
       }
     } catch (error) {
-      console.error('Error loading interest entries:', error)
+
       interests.value = []
       return []
     } finally {
@@ -132,8 +129,7 @@ export const useInterestStore = defineStore('interest', () => {
     loading.value.adding = true
     
     try {
-      console.log('Adding new interest entry:', interest)
-      
+
       if (!interest.name) {
         throw new Error('Missing required field: name')
       }
@@ -175,7 +171,7 @@ export const useInterestStore = defineStore('interest', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON, creating new data structure');
+
           updatedData = {
             basics: {
               name: '',
@@ -214,10 +210,9 @@ export const useInterestStore = defineStore('interest', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Interest entry added successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Remove from local state on error
         interests.value = interests.value?.filter(i => i.id !== newItem.id) || null;
         
@@ -234,7 +229,7 @@ export const useInterestStore = defineStore('interest', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error adding interest entry:', error)
+
       throw error
     } finally {
       loading.value.adding = false
@@ -246,8 +241,7 @@ export const useInterestStore = defineStore('interest', () => {
     loading.value.updating = true
     
     try {
-      console.log('Updating interest entry:', id, interest)
-      
+
       if (!interest.name) {
         throw new Error('Missing required field: name')
       }
@@ -298,7 +292,7 @@ export const useInterestStore = defineStore('interest', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           throw error;
         }
         
@@ -313,7 +307,7 @@ export const useInterestStore = defineStore('interest', () => {
         if (interestIndex !== -1) {
           updatedData.interests[interestIndex] = updatedInterest
         } else {
-          console.warn('Interest not found in resume data, cannot update')
+
           throw new Error('Interest not found in resume data')
         }
         
@@ -330,11 +324,9 @@ export const useInterestStore = defineStore('interest', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Interest entry updated successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
-        
+
         // Reload original state on error
         await loadInterests()
         
@@ -351,7 +343,7 @@ export const useInterestStore = defineStore('interest', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error updating interest entry:', error)
+
       throw error
     } finally {
       loading.value.updating = false
@@ -363,8 +355,7 @@ export const useInterestStore = defineStore('interest', () => {
     loading.value.deleting = true
     
     try {
-      console.log('Deleting interest entry:', id)
-      
+
       // Load current interest entries if needed
       if (!interests.value) {
         await loadInterests()
@@ -397,7 +388,7 @@ export const useInterestStore = defineStore('interest', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           throw error;
         }
         
@@ -419,11 +410,9 @@ export const useInterestStore = defineStore('interest', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Interest entry deleted successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
-        
+
         // Restore original state on error
         await loadInterests()
         
@@ -440,7 +429,7 @@ export const useInterestStore = defineStore('interest', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error deleting interest entry:', error)
+
       throw error
     } finally {
       loading.value.deleting = false
@@ -452,15 +441,14 @@ export const useInterestStore = defineStore('interest', () => {
     loading.value.interests = true
     
     try {
-      console.log('Reordering interest entries:', newOrder)
-      
+
       // Load current interest entries if needed
       if (!interests.value) {
         await loadInterests()
       }
       
       if (!interests.value || interests.value.length === 0) {
-        console.warn('No interests to reorder')
+
         return
       }
       
@@ -506,7 +494,7 @@ export const useInterestStore = defineStore('interest', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           throw error;
         }
         
@@ -556,11 +544,9 @@ export const useInterestStore = defineStore('interest', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Interest entries reordered successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
-        
+
         // Reload original state on error
         await loadInterests()
         
@@ -577,7 +563,7 @@ export const useInterestStore = defineStore('interest', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error reordering interest entries:', error)
+
       throw error
     } finally {
       loading.value.interests = false
@@ -598,4 +584,4 @@ export const useInterestStore = defineStore('interest', () => {
   }
 })
 
-export type InterestStore = ReturnType<typeof useInterestStore> 
+export type InterestStore = ReturnType<typeof useInterestStore>

@@ -67,8 +67,7 @@ export const useSkillStore = defineStore('skill', () => {
     loading.value = true
     
     try {
-      console.log('Loading skill entries...')
-      
+
       // Create repository and load resume
       const result = await errorStore.executeWithErrorHandling(async () => {
         return await repository.load()
@@ -81,14 +80,12 @@ export const useSkillStore = defineStore('skill', () => {
         try {
           resumeData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON:', error);
+
           resumeData = { skills: [] };
         }
         
         const skillData = resumeData.skills || []
-        
-        console.log('Loaded skill data:', skillData)
-        
+
         // Map to ValidatedSkill objects
         skills.value = skillData.map(sk => {
           const skill = sk as SkillWithId
@@ -106,12 +103,12 @@ export const useSkillStore = defineStore('skill', () => {
         
         return skills.value
       } else {
-        console.warn('No valid resume found or no skill data')
+
         skills.value = []
         return []
       }
     } catch (error) {
-      console.error('Error loading skill entries:', error)
+
       skills.value = []
       return []
     } finally {
@@ -124,8 +121,7 @@ export const useSkillStore = defineStore('skill', () => {
     loading.value = true
     
     try {
-      console.log('Adding new skill entry:', skill)
-      
+
       if (!skill.name) {
         throw new Error('Missing required field: name')
       }
@@ -168,7 +164,7 @@ export const useSkillStore = defineStore('skill', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON, creating new data structure');
+
           updatedData = {
             basics: {
               name: '',
@@ -207,10 +203,9 @@ export const useSkillStore = defineStore('skill', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Skill entry added successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
+
         // Remove from local state on error
         skills.value = skills.value?.filter(s => s.id !== newItem.id) || null;
         
@@ -227,7 +222,7 @@ export const useSkillStore = defineStore('skill', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error adding skill entry:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -239,8 +234,7 @@ export const useSkillStore = defineStore('skill', () => {
     loading.value = true
     
     try {
-      console.log('Updating skill entry:', id, skill)
-      
+
       if (!skill.name) {
         throw new Error('Missing required field: name')
       }
@@ -293,7 +287,7 @@ export const useSkillStore = defineStore('skill', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON, creating new data structure');
+
           updatedData = {
             basics: {
               name: '',
@@ -331,11 +325,9 @@ export const useSkillStore = defineStore('skill', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Skill entry updated successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
-        
+
         // Revert local state on error
         if (skills.value) {
           const oldSkills = [...skills.value];
@@ -357,7 +349,7 @@ export const useSkillStore = defineStore('skill', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error updating skill entry:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -369,8 +361,7 @@ export const useSkillStore = defineStore('skill', () => {
     loading.value = true
     
     try {
-      console.log('Deleting skill entry:', id)
-      
+
       // Load current skill entries if needed
       if (!skills.value) {
         await loadSkills()
@@ -405,7 +396,7 @@ export const useSkillStore = defineStore('skill', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           throw error;
         }
         
@@ -430,11 +421,9 @@ export const useSkillStore = defineStore('skill', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Skill entry deleted successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
-        
+
         // Restore local state on error
         if (skills.value && originalItem) {
           const restoredSkills = [...skills.value];
@@ -460,7 +449,7 @@ export const useSkillStore = defineStore('skill', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error deleting skill entry:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -472,8 +461,7 @@ export const useSkillStore = defineStore('skill', () => {
     loading.value = true
     
     try {
-      console.log('Reordering skill entries:', newOrder)
-      
+
       // Load current skill entries if needed
       if (!skills.value) {
         await loadSkills()
@@ -524,7 +512,7 @@ export const useSkillStore = defineStore('skill', () => {
         try {
           updatedData = result.toJSON();
         } catch (error) {
-          console.warn('Failed to convert resume to JSON');
+
           throw error;
         }
         
@@ -573,11 +561,9 @@ export const useSkillStore = defineStore('skill', () => {
           await repository.save(updatedResumeResult.resume);
           return true
         })
-        
-        console.log('Skill entries reordered successfully');
+
       } catch (error) {
-        console.error('Error saving to repository:', error);
-        
+
         // Restore original order on error
         skills.value = originalOrder
         
@@ -594,7 +580,7 @@ export const useSkillStore = defineStore('skill', () => {
         throw error;
       }
     } catch (error) {
-      console.error('Error reordering skill entries:', error)
+
       throw error
     } finally {
       loading.value = false
@@ -617,4 +603,4 @@ export const useSkillStore = defineStore('skill', () => {
 })
 
 // Export the type for better type safety
-export type SkillStore = ReturnType<typeof useSkillStore> 
+export type SkillStore = ReturnType<typeof useSkillStore>

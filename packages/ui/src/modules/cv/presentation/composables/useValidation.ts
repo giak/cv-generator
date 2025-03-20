@@ -145,7 +145,7 @@ export function useValidation<T extends Record<string, any>>(
       
       if (enableLogging && perfMetrics) {
         perfMetrics.validationTime += performance.now() - startTime
-        console.log(`Validation #${perfMetrics.validationCount} took ${performance.now() - startTime}ms`)
+
       }
       
       return true
@@ -157,7 +157,7 @@ export function useValidation<T extends Record<string, any>>(
       
       if (enableLogging && perfMetrics) {
         perfMetrics.validationTime += performance.now() - startTime
-        console.log(`Validation #${perfMetrics.validationCount} failed in ${performance.now() - startTime}ms`)
+
       }
       
       return false
@@ -176,7 +176,7 @@ export function useValidation<T extends Record<string, any>>(
    */
   const validateField = (field: keyof T, value: any): boolean => {
     if (enableLogging) {
-      console.log(`Validating field ${String(field)} with value:`, value)
+
     }
     
     // Check if field is required
@@ -203,7 +203,7 @@ export function useValidation<T extends Record<string, any>>(
    */
   const validateForm = (data: T): boolean => {
     if (enableLogging) {
-      console.log('Validating form with data:', data)
+
     }
     
     let isFormValid = true

@@ -9,7 +9,6 @@ import { useVolunteerStore } from "./volunteer"
 import { useEducationStore } from "./education"
 import { useProjectStore } from "./project"
 
-
 interface ResumeStoreActions {
   loadResume(): Promise<void>
   saveResume(data: ResumeInterface): Promise<void>
@@ -36,7 +35,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
   // Actions
   const actions: ResumeStoreActions = {
     async loadResume() {
-      console.log('=== [Store] loadResume ===')
+
       loading.value = true
       
       try {
@@ -45,7 +44,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
         })
         
         if (result) {
-          console.log('[Store] Loaded resume:', result)
+
           resume.value = result
         }
       } finally {
@@ -54,8 +53,7 @@ export const useResumeStore = defineStore("cv.resume", () => {
     },
 
     async saveResume(data: ResumeInterface) {
-      console.log('=== [Store] saveResume ===')
-      console.log('[Store] Received data to save:', JSON.stringify(data))
+
       loading.value = true
       
       try {
@@ -88,14 +86,9 @@ export const useResumeStore = defineStore("cv.resume", () => {
           if (rawResult) {
             // Convert resume instance to JSON
             currentData = rawResult.toJSON()
-            console.log('[Store] Loaded current resume from storage:', JSON.stringify(currentData))
-          } else {
-            console.log('[Store] No valid resume found in storage, creating new')
-          }
-        } catch (error) {
-          console.error('[Store] Error loading resume from storage:', error)
-          console.log('[Store] Will proceed with empty resume')
-        }
+
+          } else {}
+        } catch (error) {}
         
         // Step 2: Load data from other stores if they're initialized
         // This ensures we have the most recent data from all sections
@@ -110,19 +103,15 @@ export const useResumeStore = defineStore("cv.resume", () => {
         if (workStore) {
           try {
             if (!workStore.works || workStore.works.length === 0) {
-              console.log('[Store] Loading work data from work store')
+
               await workStore.loadWorks()
             }
             
             if (workStore.works && workStore.works.length > 0) {
-              console.log('[Store] Using data from work store:', workStore.works.length, 'entries')
+
               workData = workStore.works.map(work => work.toJSON())
-            } else {
-              console.log('[Store] Work store has no data, using current data from storage')
-            }
-          } catch (e) {
-            console.error('[Store] Error loading work data:', e)
-          }
+            } else {}
+          } catch (e) {}
         }
         
         // Get the volunteer store instance and ensure it's loaded
@@ -130,19 +119,15 @@ export const useResumeStore = defineStore("cv.resume", () => {
         if (volunteerStore) {
           try {
             if (!volunteerStore.volunteers || volunteerStore.volunteers.length === 0) {
-              console.log('[Store] Loading volunteer data from volunteer store')
+
               await volunteerStore.loadVolunteers()
             }
             
             if (volunteerStore.volunteers && volunteerStore.volunteers.length > 0) {
-              console.log('[Store] Using data from volunteer store:', volunteerStore.volunteers.length, 'entries')
+
               volunteerData = volunteerStore.volunteers.map(volunteer => volunteer.toJSON())
-            } else {
-              console.log('[Store] Volunteer store has no data, using current data from storage')
-            }
-          } catch (e) {
-            console.error('[Store] Error loading volunteer data:', e)
-          }
+            } else {}
+          } catch (e) {}
         }
         
         // Get the education store instance and ensure it's loaded
@@ -150,25 +135,20 @@ export const useResumeStore = defineStore("cv.resume", () => {
         if (educationStore) {
           try {
             if (!educationStore.educations || educationStore.educations.length === 0) {
-              console.log('[Store] Loading education data from education store')
+
               await educationStore.loadEducation()
             }
             
             if (educationStore.educations && educationStore.educations.length > 0) {
-              console.log('[Store] Using data from education store:', educationStore.educations.length, 'entries')
-              console.log('[Store] Education data BEFORE mapping:', JSON.stringify(educationStore.educations))
+
               educationData = educationStore.educations.map(education => {
                 const mapped = education.toJSON()
-                console.log('[Store] Mapped education entry:', JSON.stringify(mapped))
+
                 return mapped
               })
-              console.log('[Store] Final education data AFTER mapping:', JSON.stringify(educationData))
-            } else {
-              console.log('[Store] Education store has no data, using current data from storage')
-            }
-          } catch (e) {
-            console.error('[Store] Error loading education data:', e)
-          }
+
+            } else {}
+          } catch (e) {}
         }
         
         // Get the project store instance and ensure it's loaded
@@ -176,19 +156,15 @@ export const useResumeStore = defineStore("cv.resume", () => {
         if (projectStore) {
           try {
             if (!projectStore.projects || projectStore.projects.length === 0) {
-              console.log('[Store] Loading project data from project store')
+
               await projectStore.loadProjects()
             }
             
             if (projectStore.projects && projectStore.projects.length > 0) {
-              console.log('[Store] Using data from project store:', projectStore.projects.length, 'entries')
+
               projectData = projectStore.projects
-            } else {
-              console.log('[Store] Project store has no data, using current data from storage')
-            }
-          } catch (e) {
-            console.error('[Store] Error loading project data:', e)
-          }
+            } else {}
+          } catch (e) {}
         }
         
         // Step 3: Create complete resume data by merging everything
@@ -230,19 +206,16 @@ export const useResumeStore = defineStore("cv.resume", () => {
           interests: currentData.interests || [],
           references: currentData.references || []
         }
-        
-        console.log('[Store] Complete aggregate data for saving:', JSON.stringify(completeData))
-        
+
         // Step 4: Save the complete resume
         await errorStore.executeWithErrorHandling(async () => {
           // Create a Resume instance with the complete data
           const resumeInstance = ResumeEntity.create(completeData)
-          console.log('[Store] Created Resume instance with ALL sections:', resumeInstance)
 
           if (resumeInstance.resume) {
             // Save the complete CV
             await useCase.createResume(resumeInstance.resume.toJSON())
-            console.log('[Store] Resume saved successfully with all sections preserved')
+
             resume.value = resumeInstance.resume
           } else {
             throw new Error('Failed to create Resume instance')
@@ -310,6 +283,4 @@ export const useResumeStore = defineStore("cv.resume", () => {
       return errorStore.getFieldError(field)
     }
   }
-}); 
-
- 
+});

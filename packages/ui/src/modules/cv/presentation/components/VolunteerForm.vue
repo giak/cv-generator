@@ -79,12 +79,10 @@ const removeHighlight = (index: number) => {
 
 // Handle form submission
 const handleSubmit = async () => {
-  console.log('Volunteer form submission - Current model:', JSON.stringify(localModel))
-  
+
   // Validate all fields
   const formIsValid = validateForm(localModel)
-  console.log('Form validation result:', formIsValid)
-  
+
   if (formIsValid) {
     emit('validate')
   }

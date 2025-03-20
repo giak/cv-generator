@@ -8,7 +8,8 @@
  * Ce composable suit la couche de présentation dans Clean Architecture.
  */
 
-import { computed, ref } from 'vue'
+import { computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useResumeStore } from '../stores/resume'
 import { useWorkStore } from '../stores/work'
 import { useEducationStore } from '../stores/education'
@@ -41,6 +42,9 @@ export interface SectionStatus {
  * @returns Fonctions et état pour la gestion de la progression
  */
 export function useFormProgress() {
+  // Initialize i18n
+  const { t, locale } = useI18n()
+  
   // Initialisation des stores
   const resumeStore = useResumeStore()
   const workStore = useWorkStore()
@@ -56,7 +60,6 @@ export function useFormProgress() {
   const referenceStore = useReferenceStore()
   
   // État pour suivre les sections essentielles
-  const essentialSections = ['basics', 'work', 'education', 'skills']
   
   /**
    * Détermine si les informations de base sont complètes
@@ -129,7 +132,7 @@ export function useFormProgress() {
     return [
       {
         id: 'basics',
-        label: 'Informations de base',
+        label: t('resume.sections.basics', 'Basic Information'),
         isRequired: true,
         isComplete: isBasicsComplete.value,
         isPartial: isBasicsPartial.value,
@@ -139,7 +142,7 @@ export function useFormProgress() {
       },
       {
         id: 'work',
-        label: 'Expérience professionnelle',
+        label: t('resume.sections.work', 'Work Experience'),
         isRequired: true,
         isComplete: hasStoreItems(workStore, 'works'),
         isPartial: false,
@@ -149,7 +152,7 @@ export function useFormProgress() {
       },
       {
         id: 'education',
-        label: 'Formation',
+        label: t('resume.sections.education', 'Education'),
         isRequired: true,
         isComplete: hasStoreItems(educationStore, 'educations'),
         isPartial: false,
@@ -159,7 +162,7 @@ export function useFormProgress() {
       },
       {
         id: 'skills',
-        label: 'Compétences',
+        label: t('resume.sections.skills', 'Skills'),
         isRequired: true,
         isComplete: hasStoreItems(skillStore, 'skills'),
         isPartial: false,
@@ -169,7 +172,7 @@ export function useFormProgress() {
       },
       {
         id: 'languages',
-        label: 'Langues',
+        label: t('resume.sections.languages', 'Languages'),
         isRequired: false,
         isComplete: hasStoreItems(languageStore, 'languages'),
         isPartial: false,
@@ -179,7 +182,7 @@ export function useFormProgress() {
       },
       {
         id: 'projects',
-        label: 'Projets',
+        label: t('resume.sections.projects', 'Projects'),
         isRequired: false,
         isComplete: hasStoreItems(projectStore, 'projects'),
         isPartial: false,
@@ -189,7 +192,7 @@ export function useFormProgress() {
       },
       {
         id: 'volunteer',
-        label: 'Bénévolat',
+        label: t('resume.sections.volunteer', 'Volunteer Work'),
         isRequired: false,
         isComplete: hasStoreItems(volunteerStore, 'volunteers'),
         isPartial: false,
@@ -199,7 +202,7 @@ export function useFormProgress() {
       },
       {
         id: 'awards',
-        label: 'Prix & Distinctions',
+        label: t('resume.sections.awards', 'Awards'),
         isRequired: false,
         isComplete: hasStoreItems(awardStore, 'awards'),
         isPartial: false,
@@ -209,7 +212,7 @@ export function useFormProgress() {
       },
       {
         id: 'certificates',
-        label: 'Certifications',
+        label: t('resume.sections.certificates', 'Certificates'),
         isRequired: false,
         isComplete: hasStoreItems(certificateStore, 'certificates'),
         isPartial: false,
@@ -219,7 +222,7 @@ export function useFormProgress() {
       },
       {
         id: 'interests',
-        label: 'Intérêts',
+        label: t('resume.sections.interests', 'Interests'),
         isRequired: false,
         isComplete: hasStoreItems(interestStore, 'interests'),
         isPartial: false,
@@ -229,7 +232,7 @@ export function useFormProgress() {
       },
       {
         id: 'publications',
-        label: 'Publications',
+        label: t('resume.sections.publications', 'Publications'),
         isRequired: false,
         isComplete: hasStoreItems(publicationStore, 'publications'),
         isPartial: false,
@@ -239,7 +242,7 @@ export function useFormProgress() {
       },
       {
         id: 'references',
-        label: 'Références',
+        label: t('resume.sections.references', 'References'),
         isRequired: false,
         isComplete: hasStoreItems(referenceStore, 'references'),
         isPartial: false,
@@ -249,6 +252,11 @@ export function useFormProgress() {
       }
     ]
   })
+  
+  // Make sectionStatuses reactive to locale changes
+  watch(locale, () => {
+    // This watch will force re-computation when locale changes
+  }, { immediate: true })
   
   /**
    * Calcule les sections requises complétées vs. totales

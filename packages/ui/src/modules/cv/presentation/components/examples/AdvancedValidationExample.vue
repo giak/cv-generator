@@ -447,10 +447,8 @@ const handleSubmit = () => {
   formValid.value = validateForm(formData.value)
   
   if (formValid.value) {
-    console.log('Form submitted successfully:', formData.value)
+
     // Here you would typically send the data to your API
-  } else {
-    console.error('Form validation failed:', errors.value)
-  }
+  } else {}
 }
-</script> 
+</script>
