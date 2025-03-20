@@ -11,13 +11,26 @@
       @add="openAddModal"
       @edit="editInterest"
       @delete="confirmDelete"
+      @reorder="handleReorder"
     >
-      <template #emptyIcon>
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-12 h-12">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
+      <template #empty-state>
+        <div class="flex flex-col items-center justify-center py-10 text-center">
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-4">
+            <path d="M48 16C29.2 16 14 31.2 14 50C14 68.8 29.2 84 48 84C66.8 84 82 68.8 82 50C82 31.2 66.8 16 48 16ZM48 20C64.6 20 78 33.4 78 50C78 66.6 64.6 80 48 80C31.4 80 18 66.6 18 50C18 33.4 31.4 20 48 20Z" fill="#4338CA"/>
+            <path d="M48 36C43.6 36 40 39.6 40 44C40 48.4 43.6 52 48 52C52.4 52 56 48.4 56 44C56 39.6 52.4 36 48 36ZM48 40C50.2 40 52 41.8 52 44C52 46.2 50.2 48 48 48C45.8 48 44 46.2 44 44C44 41.8 45.8 40 48 40Z" fill="#4338CA"/>
+            <path d="M48 56C40.2 56 34 62.2 34 70H38C38 64.4 42.4 60 48 60C53.6 60 58 64.4 58 70H62C62 62.2 55.8 56 48 56Z" fill="#4338CA"/>
+            <path d="M35 28.5C35 29.4 34.4 30 33.5 30C32.6 30 32 29.4 32 28.5C32 27.6 32.6 27 33.5 27C34.4 27 35 27.6 35 28.5Z" fill="#4338CA"/>
+            <path d="M40 28.5C40 29.4 39.4 30 38.5 30C37.6 30 37 29.4 37 28.5C37 27.6 37.6 27 38.5 27C39.4 27 40 27.6 40 28.5Z" fill="#4338CA"/>
+            <path d="M30 28.5C30 29.4 29.4 30 28.5 30C27.6 30 27 29.4 27 28.5C27 27.6 27.6 27 28.5 27C29.4 27 30 27.6 30 28.5Z" fill="#4338CA"/>
+            <path d="M65 28.5C65 29.4 64.4 30 63.5 30C62.6 30 62 29.4 62 28.5C62 27.6 62.6 27 63.5 27C64.4 27 65 27.6 65 28.5Z" fill="#4338CA"/>
+            <path d="M70 28.5C70 29.4 69.4 30 68.5 30C67.6 30 67 29.4 67 28.5C67 27.6 67.6 27 68.5 27C69.4 27 70 27.6 70 28.5Z" fill="#4338CA"/>
+            <path d="M60 28.5C60 29.4 59.4 30 58.5 30C57.6 30 57 29.4 57 28.5C57 27.6 57.6 27 58.5 27C59.4 27 60 27.6 60 28.5Z" fill="#4338CA"/>
+          </svg>
+          <h3 class="text-lg font-medium text-neutral-200 mb-1">{{ safeTranslate(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.EMPTY_STATE_TITLE, 'Aucun centre d\'intérêt ajouté') }}</h3>
+          <p class="text-sm text-neutral-400 max-w-md">
+            {{ safeTranslate(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.EMPTY_STATE_DESCRIPTION, 'Ajoutez vos centres d\'intérêt pour personnaliser votre CV et montrer votre personnalité.') }}
+          </p>
+        </div>
       </template>
       
       <template #item="{ item: interest }">
@@ -36,37 +49,6 @@
             <p v-else class="text-neutral-400 text-sm italic">
               {{ t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.NO_KEYWORDS) }}
             </p>
-          </div>
-        </div>
-      </template>
-      
-      <template #itemActions="{ index }">
-        <div class="flex flex-col gap-2">
-          <!-- Reorder buttons -->
-          <div class="flex gap-1">
-            <button
-              type="button"
-              @click="moveUp(index)"
-              :disabled="index === 0"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.MOVE_UP)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
-            </button>
-            
-            <button
-              type="button"
-              @click="moveDown(index)"
-              :disabled="index === interests.length - 1"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.MOVE_DOWN)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
           </div>
         </div>
       </template>
@@ -282,45 +264,12 @@ const deleteInterest = async () => {
   }
 }
 
-// Reorder interests up
-const moveUp = async (index: number) => {
-  if (index <= 0) return
-  
-  // Create array of indices, then map to strings
-  const indices = [...Array(interests.value.length).keys()]
-  const temp = indices[index]
-  indices[index] = indices[index - 1]
-  indices[index - 1] = temp
-  
-  // Convert to string IDs for the reorder method
-  const newOrder = indices.map(i => interests.value[i].id)
-  
+// Function to handle reordering from CollectionManager
+const handleReorder = async (newOrder: string[]) => {
   try {
     await interestStore.reorderInterests(newOrder)
   } catch (error) {
-
-    showToast(safeTranslate('resume.interests.notifications.reorderError', 'Erreur lors de la réorganisation des intérêts'), 'error')
-  }
-}
-
-// Reorder interests down
-const moveDown = async (index: number) => {
-  if (index >= interests.value.length - 1) return
-  
-  // Create array of indices, then map to strings
-  const indices = [...Array(interests.value.length).keys()]
-  const temp = indices[index]
-  indices[index] = indices[index + 1]
-  indices[index + 1] = temp
-  
-  // Convert to string IDs for the reorder method
-  const newOrder = indices.map(i => interests.value[i].id)
-  
-  try {
-    await interestStore.reorderInterests(newOrder)
-  } catch (error) {
-
-    showToast(safeTranslate('resume.interests.notifications.reorderError', 'Erreur lors de la réorganisation des intérêts'), 'error')
+    console.error('Error reordering interests:', error)
   }
 }
 

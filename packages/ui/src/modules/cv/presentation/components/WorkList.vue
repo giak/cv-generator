@@ -170,38 +170,22 @@ const deleteWork = async (work: WorkWithId) => {
 }
 
 // Reorder work experiences
-const moveUp = async (index: number) => {
-  if (index <= 0) return
-  
-  // Mark as custom order
-  isCustomOrder.value = true
-  useChronologicalSort.value = false
-  
-  const newOrder = [...Array(works.value.length).keys()]
-  const temp = newOrder[index]
-  newOrder[index] = newOrder[index - 1]
-  newOrder[index - 1] = temp
-  
+const handleReorder = async (newOrder: string[]) => {
   try {
-    await workStore.reorderWorks(newOrder)
-  } catch (error) {}
-}
-
-const moveDown = async (index: number) => {
-  if (index >= works.value.length - 1) return
-  
-  // Mark as custom order
-  isCustomOrder.value = true
-  useChronologicalSort.value = false
-  
-  const newOrder = [...Array(works.value.length).keys()]
-  const temp = newOrder[index]
-  newOrder[index] = newOrder[index + 1]
-  newOrder[index + 1] = temp
-  
-  try {
-    await workStore.reorderWorks(newOrder)
-  } catch (error) {}
+    // Mark as custom order when user manually reorders
+    isCustomOrder.value = true
+    useChronologicalSort.value = false
+    
+    // Convert string IDs to numeric indices for the store
+    const numericOrder = newOrder.map(id => {
+      const index = works.value.findIndex(work => work.id === id)
+      return index !== -1 ? index : 0 // Default to 0 if not found
+    })
+    
+    await workStore.reorderWorks(numericOrder)
+  } catch (error) {
+    console.error('Error reordering work experiences:', error)
+  }
 }
 
 // Toggle between chronological and custom order
@@ -217,21 +201,35 @@ const toggleSortOrder = () => {
   // Reset pagination when toggling sort
   showAllItems.value = false;
 }
+
+// New function to handle delete
+const confirmDeleteWork = async (work: WorkWithId) => {
+  try {
+    await deleteWork(work)
+  } catch (error) {}
+}
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="bg-neutral-900 rounded-xl">
+    <!-- Section title & description -->
+    <div class="mb-6 px-6 pt-6">
+      <h2 class="text-xl font-semibold text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.WORK.LIST.TITLE, 'Expérience professionnelle') }}</h2>
+      <p class="text-sm text-neutral-400 mt-1">
+        {{ safeTranslate('ui.work.description', 'Ajoutez votre expérience professionnelle pour mettre en évidence votre progression de carrière.') }}
+      </p>
+    </div>
+
+    <!-- Collection Manager for Work Experience -->
     <CollectionManager
       :items="displayedWorks"
-      :title="t(TRANSLATION_KEYS.RESUME.WORK.LIST.TITLE)"
-      :description="t(TRANSLATION_KEYS.RESUME.WORK.LIST.DESCRIPTION)"
-      :addButtonText="t(TRANSLATION_KEYS.RESUME.WORK.LIST.ADD_BUTTON)"
-      :emptyStateTitle="t(TRANSLATION_KEYS.RESUME.WORK.LIST.EMPTY_STATE_TITLE)"
-      :emptyStateDescription="t(TRANSLATION_KEYS.RESUME.WORK.LIST.EMPTY_STATE_DESCRIPTION)"
       :loading="loading"
+      :empty-text="safeTranslate(TRANSLATION_KEYS.RESUME.WORK.LIST.EMPTY_STATE_TITLE, 'Aucune expérience professionnelle')"
+      :add-button-text="safeTranslate(TRANSLATION_KEYS.RESUME.WORK.LIST.ADD_BUTTON, 'Ajouter une expérience professionnelle')"
       @add="openAddDialog"
       @edit="openEditDialog"
-      @delete="deleteWork"
+      @delete="confirmDeleteWork"
+      @reorder="handleReorder"
     >
       <!-- Sorting options -->
       <template #header-actions>
@@ -290,37 +288,6 @@ const toggleSortOrder = () => {
             </svg>
             {{ work.url }}
           </a>
-        </div>
-      </template>
-      
-      <template #itemActions="{ item: work, index }">
-        <div class="flex flex-col gap-2">
-          <!-- Reorder buttons -->
-          <div class="flex gap-1">
-            <button
-              type="button"
-              @click="moveUp(index)"
-              :disabled="index === 0"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.WORK.LIST.MOVE_UP)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
-            </button>
-            
-            <button
-              type="button"
-              @click="moveDown(index)"
-              :disabled="index === works.length - 1"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.WORK.LIST.MOVE_DOWN)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
         </div>
       </template>
     </CollectionManager>

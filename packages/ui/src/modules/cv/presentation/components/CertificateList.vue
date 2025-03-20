@@ -11,6 +11,7 @@
       @add="openAddDialog"
       @edit="openEditDialog"
       @delete="confirmDelete"
+      @reorder="handleReorder"
     >
       <template #emptyIcon>
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-12 h-12">
@@ -50,34 +51,77 @@
         </div>
       </template>
       
-      <template #itemActions="{ item: certificate, index }">
-        <div class="flex flex-col gap-2">
-          <!-- Reorder buttons -->
-          <div class="flex gap-1">
-            <button
-              type="button"
-              @click="moveUp(index)"
-              :disabled="index === 0"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.MOVE_UP)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
-            </button>
-            
-            <button
-              type="button"
-              @click="moveDown(index)"
-              :disabled="index === certificates.length - 1"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.MOVE_DOWN)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
+      <template #item-actions="{ item, index }">
+        <div class="flex gap-1">
+          <!-- Boutons de réorganisation (optionnels, car CollectionManager supporte déjà le drag-and-drop) -->
+          <button
+            type="button"
+            @click="moveUp(index)"
+            :disabled="index === 0"
+            class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+            :title="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.MOVE_UP)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </button>
+          
+          <button
+            type="button"
+            @click="moveDown(index)"
+            :disabled="index === certificates.length - 1"
+            class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
+            :title="t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.MOVE_DOWN)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          
+          <!-- Boutons d'édition et de suppression -->
+          <button
+            type="button"
+            @click="openEditDialog(item)"
+            class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors"
+            :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.EDIT)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          
+          <button
+            type="button"
+            @click="confirmDelete(item)"
+            class="p-1 rounded text-neutral-400 hover:bg-red-700 hover:text-white transition-colors"
+            :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+      </template>
+      
+      <!-- Empty state -->
+      <template #empty-state>
+        <div class="flex flex-col items-center justify-center py-10 text-center">
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-4">
+            <path d="M47.5454 63.2727C57.4694 63.2727 65.5454 55.1967 65.5454 45.2727C65.5454 35.3487 57.4694 27.2727 47.5454 27.2727C37.6214 27.2727 29.5454 35.3487 29.5454 45.2727C29.5454 55.1967 37.6214 63.2727 47.5454 63.2727Z" stroke="#4338CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M47.5455 54.5455C52.6775 54.5455 56.8183 50.4047 56.8183 45.2727C56.8183 40.1408 52.6775 36 47.5455 36C42.4135 36 38.2728 40.1408 38.2728 45.2727C38.2728 50.4047 42.4135 54.5455 47.5455 54.5455Z" stroke="#4338CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M38.2727 69.8182H12V76.3636C12 76.3636 18.5455 82.9091 25.0909 82.9091C31.6364 82.9091 38.2727 76.3636 38.2727 76.3636V69.8182Z" stroke="#4338CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M56.8182 69.8182H83.0909V76.3636C83.0909 76.3636 76.5454 82.9091 70 82.9091C63.4545 82.9091 56.8182 76.3636 56.8182 76.3636V69.8182Z" stroke="#4338CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M47.5454 63.2727V84" stroke="#4338CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M80 14.9091L65.5454 20L80 25.0909L85.0909 38L91.6364 25.0909L80 14.9091Z" stroke="#4338CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3 class="text-lg font-medium text-neutral-200 mb-1">{{ t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.EMPTY_STATE_TITLE) }}</h3>
+          <p class="text-sm text-neutral-400 max-w-md">
+            {{ t(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.EMPTY_STATE_DESCRIPTION) }}
+          </p>
         </div>
       </template>
     </CollectionManager>
@@ -157,9 +201,7 @@ const certificateStore = useCertificateStore()
 
 // Set up useCollectionField for managing certificates
 const { 
-  items: certificates,
-  reorderItems
-} = useCollectionField<CertificateWithId>({
+  items: certificates} = useCollectionField<CertificateWithId>({
   fieldName: 'certificates',
   collection: computed(() => certificateStore.certificates || []),
   updateField: () => {}, // Using the store directly
@@ -298,6 +340,20 @@ const moveDown = async (index: number) => {
     
     await certificateStore.reorderCertificates(newOrder)
   } catch (error) {}
+}
+
+// Function to handle reordering from CollectionManager
+const handleReorder = async (newOrder: string[]) => {
+  try {
+    // Convert string IDs to CertificateWithId objects
+    const orderedCertificates = newOrder
+      .map(id => certificates.value.find(cert => cert.id === id))
+      .filter((cert): cert is CertificateWithId => cert !== undefined)
+    
+    await certificateStore.reorderCertificates(orderedCertificates)
+  } catch (error) {
+    console.error('Error reordering certificates:', error)
+  }
 }
 </script>
 

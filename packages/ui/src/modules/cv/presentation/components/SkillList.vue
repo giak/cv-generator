@@ -1,5 +1,5 @@
 <template>
-  <div class="skill-list">
+  <div class="bg-neutral-900 rounded-xl">
     <CollectionManager
       :items="skills"
       :title="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.TITLE)"
@@ -11,6 +11,7 @@
       @add="openAddForm"
       @edit="openEditForm"
       @delete="deleteSkill"
+      @reorder="handleReorder"
     >
       <template #item="{ item: skill }">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
@@ -31,35 +32,18 @@
           </span>
         </div>
       </template>
-      
-      <template #itemActions="{ item: skill, index }">
-        <div class="flex flex-col gap-2">
-          <!-- Reorder buttons -->
-          <div class="flex gap-1">
-            <button
-              type="button"
-              @click="moveUp(index)"
-              :disabled="index === 0"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.MOVE_UP)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
-            </button>
-            
-            <button
-              type="button"
-              @click="moveDown(index)"
-              :disabled="index === skills.length - 1"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.SKILLS.LIST.MOVE_DOWN)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
+      <!-- Empty state -->
+      <template #empty-state>
+        <div class="flex flex-col items-center justify-center py-10 text-center">
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-4">
+            <path d="M48 16C29.2 16 14 31.2 14 50C14 68.8 29.2 84 48 84C66.8 84 82 68.8 82 50C82 31.2 66.8 16 48 16Z" stroke="#4338CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M48 36V64" stroke="#4338CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M34 50H62" stroke="#4338CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3 class="text-lg font-medium text-neutral-200 mb-1">{{ safeTranslate(TRANSLATION_KEYS.RESUME.SKILLS.LIST.EMPTY_STATE_TITLE, 'Aucune compétence ajoutée') }}</h3>
+          <p class="text-sm text-neutral-400 max-w-md">
+            {{ safeTranslate(TRANSLATION_KEYS.RESUME.SKILLS.LIST.EMPTY_STATE_DESCRIPTION, 'Ajoutez vos compétences pour mettre en avant votre expertise et votre savoir-faire.') }}
+          </p>
         </div>
       </template>
     </CollectionManager>
@@ -183,7 +167,6 @@ const saveSkill = async () => {
     // Reload skills to get updated data
     await loadSkills()
   } catch (error) {
-
     // Error handling would be done here
   } finally {
     formSubmitting.value = false
@@ -200,39 +183,13 @@ const deleteSkill = async (skill: ValidatedSkill) => {
   } catch (error) {}
 }
 
-// Reorder skills
-const moveUp = async (index: number) => {
-  if (index <= 0) return
-  
-  // Create array of indices, then map to strings
-  const indices = [...Array(skills.value.length).keys()]
-  const temp = indices[index]
-  indices[index] = indices[index - 1]
-  indices[index - 1] = temp
-  
-  // Convert to string IDs for the reorderSkills method
-  const newOrder = indices.map(i => skills.value[i].id)
-  
+// Handle reordering
+const handleReorder = async (newOrder: string[]) => {
   try {
     await skillStore.reorderSkills(newOrder)
-  } catch (error) {}
-}
-
-const moveDown = async (index: number) => {
-  if (index >= skills.value.length - 1) return
-  
-  // Create array of indices, then map to strings
-  const indices = [...Array(skills.value.length).keys()]
-  const temp = indices[index]
-  indices[index] = indices[index + 1]
-  indices[index + 1] = temp
-  
-  // Convert to string IDs for the reorderSkills method
-  const newOrder = indices.map(i => skills.value[i].id)
-  
-  try {
-    await skillStore.reorderSkills(newOrder)
-  } catch (error) {}
+  } catch (error) {
+    console.error('Error reordering skills:', error)
+  }
 }
 </script>
 

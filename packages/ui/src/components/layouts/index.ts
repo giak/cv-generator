@@ -6,6 +6,8 @@ export { default as BreadcrumbNav } from './BreadcrumbNav.vue';
 export { default as UserInfo } from './UserInfo.vue';
 export { default as SearchInput } from './SearchInput.vue';
 export { default as PageHeader } from './PageHeader.vue';
+export { default as SectionHeader } from './SectionHeader.vue';
+export { default as SectionWrapper } from './SectionWrapper.vue';
 
 // Types
 export interface NavItem {

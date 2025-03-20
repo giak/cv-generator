@@ -66,6 +66,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: BasicsInterface): void
   (e: 'validate'): void
+  (e: 'cancel'): void
 }>()
 
 // Default values for a new basics model
@@ -236,7 +237,12 @@ const icons = {
 </script>
 
 <template>
-  <Form @submit="handleSubmit">
+  <Form 
+    @submit="handleSubmit" 
+    @cancel="emit('cancel')" 
+    :loading="props.loading"
+    :submit-label="t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE)"
+  >
     <!-- Section d'informations personnelles -->
     <div class="mb-8">
       <h2 class="text-xl font-semibold mb-4">{{ t(TRANSLATION_KEYS.RESUME.SECTIONS.BASICS) }}</h2>
@@ -527,24 +533,6 @@ const icons = {
       >
         <span class="mr-2">+</span>
         {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }} {{ t(TRANSLATION_KEYS.RESUME.BASICS.LABELS.PROFILES) }}
-      </button>
-    </div>
-    
-    <!-- Boutons de soumission -->
-    <div class="flex justify-end space-x-4 mt-8">
-      <button
-        type="button"
-        class="px-6 py-2 border border-neutral-600 rounded-md hover:bg-neutral-700 transition-colors"
-      >
-        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
-      </button>
-      <button
-        type="submit"
-        class="px-6 py-2 bg-blue-600 rounded-md hover:bg-blue-500 transition-colors"
-        :disabled="props.loading"
-      >
-        <span v-if="props.loading">{{ t(TRANSLATION_KEYS.COMMON.LABELS.LOADING) }}</span>
-        <span v-else>{{ t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}</span>
       </button>
     </div>
   </Form>

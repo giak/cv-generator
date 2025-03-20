@@ -232,51 +232,58 @@ const toggleSortOrder = () => {
   // Reset pagination when toggling sort
   showAllItems.value = false;
 }
+
+// Function to handle reordering from CollectionManager
+const handleReorder = async (newOrder: string[]) => {
+  try {
+    // Mark as not using chronological sort when manually reordering
+    useChronologicalSort.value = false
+    
+    await educationStore.reorderEducation(newOrder)
+  } catch (error) {
+    console.error('Error reordering educations:', error)
+  }
+}
 </script>
 
 <template>
-  <div class="bg-neutral-900 rounded-xl p-6">
+  <div class="bg-neutral-900 rounded-xl">
+    <!-- Section title & description -->
+    <div class="mb-6 px-6 pt-6">
+      <h2 class="text-xl font-semibold text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.TITLE, 'Formation') }}</h2>
+      <p class="text-sm text-neutral-400 mt-1">
+        {{ safeTranslate('ui.education.description', 'Ajoutez vos diplômes et formations pour mettre en valeur votre parcours académique.') }}
+      </p>
+    </div>
+
     <CollectionManager
-      :title="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.TITLE)"
-      :description="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.DESCRIPTION)"
-      :add-button-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.ADD_BUTTON)"
-      :empty-state-title="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.EMPTY_STATE_TITLE)"
-      :empty-state-description="t(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.EMPTY_STATE_DESCRIPTION)"
-      :loading="loading"
       :items="displayedEducations"
+      :loading="loading"
+      :empty-text="safeTranslate(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.EMPTY_STATE_TITLE, 'Aucune formation')"
+      :add-button-text="safeTranslate(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.ADD_BUTTON, 'Ajouter une formation')"
       @add="openAddDialog"
       @edit="openEditDialog"
       @delete="deleteEducation"
+      @reorder="handleReorder"
     >
-      <!-- Sorting Options -->
+      <!-- Sorting options -->
       <template #header-actions>
-        <div class="flex items-center">
+        <div v-if="educations.length > 1" class="flex items-center">
           <button 
-            @click="toggleSortOrder" 
-            class="flex items-center px-3 py-1.5 text-xs rounded-lg bg-neutral-800 hover:bg-neutral-700 transition-colors text-neutral-300"
-            :class="{ 'bg-indigo-600 hover:bg-indigo-700 text-white': useChronologicalSort }"
+            type="button"
+            @click="toggleSortOrder"
+            class="flex items-center text-sm px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 transition-colors"
+            :class="{'text-primary-300': useChronologicalSort, 'text-neutral-400': !useChronologicalSort}"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <polyline points="21 8 21 21"></polyline>
+              <polyline points="10 21 3 21 3 8"></polyline>
+              <line x1="14" y1="4" x2="14" y2="21"></line>
+              <line x1="18" y1="4" x2="18" y2="21"></line>
+              <line x1="3" y1="12" x2="10" y2="12"></line>
+              <line x1="3" y1="16" x2="10" y2="16"></line>
             </svg>
-            <span>{{ safeTranslate('resume.education.list.chronologicalOrder', 'Ordre chronologique') }}</span>
-          </button>
-          
-          <button 
-            @click="toggleSortOrder" 
-            class="ml-2 flex items-center px-3 py-1.5 text-xs rounded-lg bg-neutral-800 hover:bg-neutral-700 transition-colors text-neutral-300"
-            :class="{ 'bg-indigo-600 hover:bg-indigo-700 text-white': !useChronologicalSort }"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5">
-              <line x1="4" y1="9" x2="20" y2="9"></line>
-              <line x1="4" y1="15" x2="20" y2="15"></line>
-              <line x1="10" y1="3" x2="8" y2="21"></line>
-              <line x1="16" y1="3" x2="14" y2="21"></line>
-            </svg>
-            <span>{{ safeTranslate('resume.education.list.customOrder', 'Ordre personnalisé') }}</span>
+            {{ useChronologicalSort ? safeTranslate('resume.education.list.chronologicalOrder', 'Ordre chronologique') : safeTranslate('resume.education.list.customOrder', 'Ordre personnalisé') }}
           </button>
         </div>
       </template>

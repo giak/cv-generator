@@ -9,11 +9,16 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{
   (e: 'submit'): void
+  (e: 'cancel'): void
 }>()
 
 const handleSubmit = (e: Event) => {
   e.preventDefault()
   emit('submit')
+}
+
+const handleCancel = () => {
+  emit('cancel')
 }
 </script>
 
@@ -36,6 +41,7 @@ const handleSubmit = (e: Event) => {
         type="button"
         class="px-4 py-2 mr-3 border border-neutral-600 rounded-md text-neutral-200 bg-transparent hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="loading"
+        @click="handleCancel"
       >
         Annuler
       </button>

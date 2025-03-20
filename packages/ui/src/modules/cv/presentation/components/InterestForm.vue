@@ -4,6 +4,8 @@
     :title="isEditing ? t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.EDIT_TITLE) : t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.ADD_TITLE)"
     :subtitle="isEditing ? t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.EDIT_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.INTERESTS.FORM.ADD_SUBTITLE)"
     @submit="saveInterest"
+    @cancel="cancel"
+    :submit-label="isEditing ? t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) : t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD)"
   >
     <div class="grid grid-cols-1 gap-6">
       <!-- Champ pour le nom de l'intérêt -->
@@ -69,30 +71,6 @@
           {{ errors.keywords }}
         </p>
       </div>
-    </div>
-    
-    <!-- Boutons d'action -->
-    <div class="flex justify-end space-x-4 mt-8">
-      <button
-        type="button"
-        class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
-        @click="cancel"
-      >
-        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
-      </button>
-      <button
-        type="submit"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-        :disabled="isSubmitting"
-      >
-        <span v-if="isSubmitting" class="flex items-center">
-          <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-          {{ isEditing ? t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) : t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }}
-        </span>
-        <span v-else>
-          {{ isEditing ? t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) : t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) }}
-        </span>
-      </button>
     </div>
   </Form>
 </template>

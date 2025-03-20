@@ -65,7 +65,6 @@ const {
 const newCourse = ref('')
 const courseError = ref('')
 const editingCourseIndex = ref<number | null>(null)
-const isEditingCourse = computed(() => editingCourseIndex.value !== null)
 
 // Setup form validation using useValidation composable
 const {
@@ -243,6 +242,8 @@ const icons = {
     :title="isNew ? t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.EDIT_TITLE)"
     :subtitle="isNew ? t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.ADD_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.EDIT_SUBTITLE)"
     @submit="handleSubmit"
+    @cancel="handleCancel"
+    :submit-label="isNew ? t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) : t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE)"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
@@ -254,21 +255,8 @@ const icons = {
         :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.INSTITUTION)"
         :help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.INSTITUTION)"
         required
-        @update:model-value="handleFieldUpdate('institution', $event)"
+        @update:model-value="(value) => handleFieldUpdate('institution', value)"
         @blur="validateField('institution', localModel.institution)"
-      />
-
-      <FormField
-        name="area"
-        :label="t(TRANSLATION_KEYS.RESUME.EDUCATION.LABELS.AREA)"
-        :model-value="localModel.area"
-        :error="errors.area"
-        :icon="icons.area"
-        :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.AREA)"
-        :help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.AREA)"
-        required
-        @update:model-value="handleFieldUpdate('area', $event)"
-        @blur="validateField('area', localModel.area)"
       />
 
       <FormField
@@ -280,43 +268,22 @@ const icons = {
         :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.STUDY_TYPE)"
         :help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.STUDY_TYPE)"
         required
-        @update:model-value="handleFieldUpdate('studyType', $event)"
+        @update:model-value="(value) => handleFieldUpdate('studyType', value)"
         @blur="validateField('studyType', localModel.studyType)"
       />
 
       <FormField
-        name="url"
-        type="url"
-        :label="t(TRANSLATION_KEYS.RESUME.WORK.LABELS.WEBSITE)"
-        :model-value="localModel.url || ''"
-        :error="errors.url"
-        :icon="icons.url"
-        :placeholder="t(TRANSLATION_KEYS.RESUME.WORK.PLACEHOLDERS.WEBSITE)"
-        :help-text="safeTranslate('resume.education.helpText.website', 'Site web de l\'établissement (optionnel).')"
-        @update:model-value="handleFieldUpdate('url', $event)"
-        @blur="validateField('url', localModel.url || '')"
+        name="area"
+        :label="t(TRANSLATION_KEYS.RESUME.EDUCATION.LABELS.AREA)"
+        :model-value="localModel.area"
+        :error="errors.area"
+        :icon="icons.area"
+        :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.AREA)"
+        :help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.AREA)"
+        required
+        @update:model-value="(value) => handleFieldUpdate('area', value)"
+        @blur="validateField('area', localModel.area)"
       />
-
-      <div class="col-span-1 md:col-span-2">
-        <DateRangeFields
-          :startDate="localModel.startDate"
-          :endDate="localModel.endDate || ''"
-          :isCurrentlyActive="!localModel.endDate"
-          :startDateError="errors.startDate"
-          :endDateError="errors.endDate"
-          :startDateIcon="icons.date"
-          :endDateIcon="icons.date"
-          :required="true"
-          :startDateHelpText="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.START_DATE)"
-          :endDateHelpText="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.END_DATE)"
-          :currentlyActiveLabel="safeTranslate('resume.education.form.currentEducation', 'Formation en cours')"
-          @update:startDate="handleFieldUpdate('startDate', $event)"
-          @update:endDate="handleFieldUpdate('endDate', $event)"
-          @update:isCurrentlyActive="handleCurrentlyStudyingChange"
-          @startDate-blur="validateField('startDate', $event)"
-          @endDate-blur="validateField('endDate', $event)"
-        />
-      </div>
 
       <FormField
         name="score"
@@ -326,77 +293,103 @@ const icons = {
         :icon="icons.score"
         :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.GPA)"
         :help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.GPA)"
-        @update:model-value="handleFieldUpdate('score', $event)"
-        @blur="validateField('score', localModel.score || '')"
+        @update:model-value="(value) => handleFieldUpdate('score', value)"
+        @blur="validateField('score', localModel.score)"
       />
+
+      <div class="col-span-1 md:col-span-2">
+        <FormField
+          name="url"
+          type="url"
+          :label="t(TRANSLATION_KEYS.RESUME.WORK.LABELS.WEBSITE)"
+          :model-value="localModel.url || ''"
+          :error="errors.url"
+          :icon="icons.url"
+          :placeholder="t(TRANSLATION_KEYS.RESUME.WORK.PLACEHOLDERS.WEBSITE)"
+          :help-text="safeTranslate('resume.education.helpText.website', 'Site web de l\'établissement (optionnel).')"
+          @update:model-value="(value) => handleFieldUpdate('url', value)"
+          @blur="validateField('url', localModel.url)"
+        />
+      </div>
+
+      <div class="col-span-1 md:col-span-2">
+        <DateRangeFields
+          :start-date="localModel.startDate"
+          :end-date="localModel.endDate || ''"
+          :is-currently-active="!localModel.endDate"
+          :start-date-error="errors.startDate"
+          :end-date-error="errors.endDate"
+          :start-date-icon="icons.date"
+          :end-date-icon="icons.date"
+          :required="true"
+          :start-date-help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.START_DATE)"
+          :end-date-help-text="t(TRANSLATION_KEYS.RESUME.EDUCATION.HELP_TEXT.END_DATE)"
+          :currently-active-label="safeTranslate('resume.education.form.currentEducation', 'Formation en cours')"
+          @update:start-date="(value) => handleFieldUpdate('startDate', value)"
+          @update:end-date="(value) => handleFieldUpdate('endDate', value)"
+          @update:is-currently-active="handleCurrentlyStudyingChange"
+          @start-date-blur="() => validateField('startDate', localModel.startDate)"
+          @end-date-blur="() => validateField('endDate', localModel.endDate)"
+        />
+      </div>
     </div>
 
-    <!-- Cours suivis / Courses section -->
+    <!-- Courses section -->
     <div class="mt-8 border-t border-neutral-700 pt-6">
       <h3 class="text-lg font-medium mb-4 flex items-center">
         <span class="mr-2" v-html="icons.courses"></span>
         {{ t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.COURSES_SECTION) }}
       </h3>
-      
+
       <div class="mb-4">
-        <label class="text-sm mb-1 block">
-          {{ isEditingCourse ? safeTranslate('resume.education.form.editCourse', 'Modifier le cours sélectionné') : t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.COURSES_DESCRIPTION) }}
-        </label>
+        <label class="text-sm mb-1 block">{{ t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.COURSES_DESCRIPTION) }}</label>
         
         <div class="flex">
           <input 
             v-model="newCourse"
             type="text"
-            :placeholder="isEditingCourse ? safeTranslate('resume.education.form.editCoursePlaceholder', 'Modifier le cours...') : t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.COURSE)"
+            :placeholder="t(TRANSLATION_KEYS.RESUME.EDUCATION.PLACEHOLDERS.COURSE)"
             class="flex-grow rounded-l bg-neutral-700 border-neutral-600 text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            @keydown.enter.prevent="isEditingCourse ? saveEditedCourse() : addCourse()"
-            @keydown.escape="isEditingCourse ? cancelEditCourse() : null"
+            @keydown.enter.prevent="editingCourseIndex === null ? addCourse() : saveEditedCourse()"
           />
           <button 
-            v-if="isEditingCourse"
-            type="button"
-            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2"
-            @click="saveEditedCourse"
-          >
-            {{ safeTranslate('resume.education.form.updateCourse', 'Mettre à jour') }}
-          </button>
-          <button 
-            v-else
+            v-if="editingCourseIndex === null"
             type="button"
             class="rounded-r bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2"
             @click="addCourse"
           >
             {{ t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.ADD_COURSE) }}
           </button>
-          <button 
-            v-if="isEditingCourse"
-            type="button"
-            class="rounded-r bg-neutral-600 hover:bg-neutral-700 text-white px-4 py-2"
-            @click="cancelEditCourse"
-          >
-            {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
-          </button>
+          <div v-else class="flex">
+            <button 
+              type="button"
+              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2"
+              @click="saveEditedCourse"
+            >
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}
+            </button>
+            <button 
+              type="button"
+              class="rounded-r bg-neutral-600 hover:bg-neutral-700 text-white px-4 py-2"
+              @click="cancelEditCourse"
+            >
+              {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
+            </button>
+          </div>
         </div>
         
         <p v-if="courseError" class="text-red-500 text-sm mt-1">{{ courseError }}</p>
-        
-        <p class="text-neutral-400 text-sm mt-1">
-          <span v-if="isEditingCourse">{{ safeTranslate('resume.education.form.escapeToCancel', 'Appuyez sur Échap pour annuler l\'édition') }}</span>
-          <span v-else>{{ safeTranslate('resume.education.form.coursesHelp', 'Les cours permettent de détailler les compétences acquises durant votre formation') }}</span>
-        </p>
       </div>
       
-      <!-- Liste des cours -->
+      <!-- Course list -->
       <ul v-if="localModel.courses && localModel.courses.length > 0" class="space-y-2">
         <li 
           v-for="(course, index) in localModel.courses" 
           :key="`course-${index}`"
-          class="bg-neutral-800 p-3 rounded-lg flex justify-between items-center transition-colors"
-          :class="{'bg-neutral-700': editingCourseIndex === index}"
+          class="bg-neutral-800 p-3 rounded-lg flex justify-between items-center"
         >
-          <span :class="{'font-medium text-indigo-300': editingCourseIndex === index}">{{ course }}</span>
-          <div class="flex gap-1 items-center">
-            <!-- Move Up/Down buttons -->
+          <span>{{ course }}</span>
+          <div class="flex space-x-1">
             <button 
               type="button" 
               class="text-neutral-400 hover:text-white p-1 disabled:opacity-30"
@@ -448,23 +441,6 @@ const icons = {
       <p v-else class="text-neutral-400 text-sm rounded-lg bg-neutral-800 p-4 flex items-center justify-center italic">
         {{ t(TRANSLATION_KEYS.RESUME.EDUCATION.FORM.NO_COURSES) }}
       </p>
-    </div>
-
-    <!-- Form Actions -->
-    <div class="flex justify-end space-x-4 mt-8">
-      <button 
-        type="button"
-        class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
-        @click="handleCancel"
-      >
-        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
-      </button>
-      <button 
-        type="submit"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-      >
-        {{ isNew ? t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) : t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}
-      </button>
     </div>
   </Form>
 </template>

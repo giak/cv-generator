@@ -27,20 +27,6 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 // Fonction pour gérer les erreurs de traduction
-const safeTranslate = (key: string, fallback: string = 'Translation missing') => {
-  try {
-    const result = t(key);
-    // Si la clé est retournée telle quelle, c'est qu'elle n'existe pas
-    if (result === key) {
-
-      return fallback;
-    }
-    return result;
-  } catch (error) {
-
-    return fallback;
-  }
-};
 
 // Setup form model using useFormModel composable
 const { 
@@ -102,6 +88,7 @@ const icons = {
     :title="isNew ? t(TRANSLATION_KEYS.RESUME.AWARDS.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.AWARDS.FORM.EDIT_TITLE)"
     :subtitle="isNew ? t(TRANSLATION_KEYS.RESUME.AWARDS.FORM.ADD_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.AWARDS.FORM.EDIT_SUBTITLE)"
     @submit="handleSubmit"
+    @cancel="handleCancel"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
@@ -158,23 +145,6 @@ const icons = {
         @update:model-value="handleFieldUpdate('summary', $event)"
         @blur="validateField('summary', localModel.summary || '')"
       />
-    </div>
-
-    <!-- Form Actions -->
-    <div class="flex justify-end space-x-4 mt-8">
-      <button 
-        type="button"
-        class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
-        @click="handleCancel"
-      >
-        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
-      </button>
-      <button 
-        type="submit"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-      >
-        {{ isNew ? t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) : t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}
-      </button>
     </div>
   </Form>
 </template>

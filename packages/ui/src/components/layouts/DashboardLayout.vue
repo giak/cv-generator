@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import LanguageSelector from '../navigation/LanguageSelector.vue';
 
 // Initialize i18n
 const { t } = useI18n();
@@ -23,7 +24,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: 'Dashboard',
+  title: '',
   subtitle: ''
 });
 
@@ -119,6 +120,9 @@ const toggleSidebar = () => {
         
         <!-- Header Right -->
         <div class="flex items-center space-x-3">
+          <div class="mr-2">
+            <LanguageSelector />
+          </div>
           <slot name="header-actions"></slot>
         </div>
       </header>

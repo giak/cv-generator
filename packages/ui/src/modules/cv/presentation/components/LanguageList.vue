@@ -11,11 +11,22 @@
       @add="openAddModal"
       @edit="editLanguage"
       @delete="confirmDelete"
+      @reorder="handleReorder"
     >
-      <template #emptyIcon>
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-12 h-12">
-          <path d="M2 12h20M12 2v20M4.5 9.5h3M16.5 9.5h3M5.5 14.5h4M14.5 14.5h4"></path>
-        </svg>
+      <!-- Empty state -->
+      <template #empty-state>
+        <div class="flex flex-col items-center justify-center py-10 text-center">
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-4">
+            <rect x="16" y="16" width="64" height="64" rx="32" stroke="#4338CA" stroke-width="4" />
+            <path d="M37.3333 37.3334H58.6667" stroke="#4338CA" stroke-width="4" stroke-linecap="round" />
+            <path d="M37.3333 48H58.6667" stroke="#4338CA" stroke-width="4" stroke-linecap="round" />
+            <path d="M37.3333 58.6666H53.3333" stroke="#4338CA" stroke-width="4" stroke-linecap="round" />
+          </svg>
+          <h3 class="text-lg font-medium text-neutral-200 mb-1">{{ t(TRANSLATION_KEYS.RESUME.LANGUAGES.LIST.EMPTY_STATE_TITLE) }}</h3>
+          <p class="text-sm text-neutral-400 max-w-md">
+            {{ t(TRANSLATION_KEYS.RESUME.LANGUAGES.LIST.EMPTY_STATE_DESCRIPTION) }}
+          </p>
+        </div>
       </template>
       
       <template #item="{ item: language }">
@@ -25,37 +36,6 @@
             <span class="px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 text-xs font-medium">
               {{ language.fluency }}
             </span>
-          </div>
-        </div>
-      </template>
-      
-      <template #itemActions="{ index }">
-        <div class="flex flex-col gap-2">
-          <!-- Reorder buttons -->
-          <div class="flex gap-1">
-            <button
-              type="button"
-              @click="moveUp(index)"
-              :disabled="index === 0"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.LANGUAGES.LIST.MOVE_UP)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
-            </button>
-            
-            <button
-              type="button"
-              @click="moveDown(index)"
-              :disabled="index === languages.length - 1"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.LANGUAGES.LIST.MOVE_DOWN)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
           </div>
         </div>
       </template>
@@ -276,45 +256,12 @@ const deleteLanguage = async () => {
   }
 }
 
-// Reorder languages up
-const moveUp = async (index: number) => {
-  if (index <= 0) return
-  
-  // Create array of indices, then map to strings
-  const indices = [...Array(languages.value.length).keys()]
-  const temp = indices[index]
-  indices[index] = indices[index - 1]
-  indices[index - 1] = temp
-  
-  // Convert to string IDs for the reorder method
-  const newOrder = indices.map(i => languages.value[i].id)
-  
+// Function to handle reordering from CollectionManager
+const handleReorder = async (newOrder: string[]) => {
   try {
     await languageStore.reorderLanguages(newOrder)
   } catch (error) {
-
-    showToast(safeTranslate('resume.languages.notifications.reorderError', 'Erreur lors de la réorganisation des langues'), 'error')
-  }
-}
-
-// Reorder languages down
-const moveDown = async (index: number) => {
-  if (index >= languages.value.length - 1) return
-  
-  // Create array of indices, then map to strings
-  const indices = [...Array(languages.value.length).keys()]
-  const temp = indices[index]
-  indices[index] = indices[index + 1]
-  indices[index + 1] = temp
-  
-  // Convert to string IDs for the reorder method
-  const newOrder = indices.map(i => languages.value[i].id)
-  
-  try {
-    await languageStore.reorderLanguages(newOrder)
-  } catch (error) {
-
-    showToast(safeTranslate('resume.languages.notifications.reorderError', 'Erreur lors de la réorganisation des langues'), 'error')
+    console.error('Error reordering languages:', error)
   }
 }
 

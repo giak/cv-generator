@@ -4,6 +4,8 @@
     :title="isEditing ? t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.EDIT_TITLE) : t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.ADD_TITLE)"
     :subtitle="isEditing ? t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.EDIT_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.ADD_SUBTITLE)"
     @submit="handleSubmit"
+    @cancel="$emit('cancel')"
+    :submit-label="submitButtonLabel"
   >
     <div class="grid grid-cols-1 gap-6">
       <!-- Champ pour le nom -->
@@ -35,30 +37,6 @@
         @update:model-value="(value) => updateField('reference', value)"
         @blur="validateField('reference', localModel.reference)"
       />
-    </div>
-    
-    <!-- Boutons d'action -->
-    <div class="flex justify-end space-x-4 mt-8">
-      <button
-        type="button"
-        class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
-        @click="$emit('cancel')"
-      >
-        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
-      </button>
-      <button
-        type="submit"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-        :disabled="isLoading"
-      >
-        <span v-if="isLoading" class="flex items-center">
-          <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-          {{ submitButtonLabel }}
-        </span>
-        <span v-else>
-          {{ submitButtonLabel }}
-        </span>
-      </button>
     </div>
   </Form>
 </template>

@@ -9,71 +9,44 @@
       :emptyStateDescription="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.EMPTY_STATE_DESCRIPTION)"
       :loading="loading.loading"
       @add="openAddDialog"
-      @edit="openEditDialog"
+      @edit="(item) => openEditDialog(item)"
       @delete="confirmDelete"
+      @reorder="handleReorder"
     >
       <template #emptyIcon>
-        <svg class="w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-12 h-12">
+          <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+          <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+          <path d="M2 2l7.586 7.586"></path>
+          <circle cx="11" cy="11" r="2"></circle>
         </svg>
       </template>
       
       <template #item="{ item: publication }">
-        <div>
-          <h3 class="font-medium text-white">{{ publication.name }}</h3>
-          <p class="text-sm text-neutral-400 mt-1">
-            <span>{{ publication.publisher }}</span>
-            <span class="mx-2">•</span>
-            <span>{{ formatDate(publication.releaseDate) }}</span>
-          </p>
-          <p v-if="publication.summary" class="mt-2 text-sm text-neutral-300">
-            {{ publication.summary }}
-          </p>
+        <div class="flex-grow">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+            <div>
+              <h3 class="font-semibold text-lg">{{ publication.name }}</h3>
+              <div class="text-primary-400 mb-1">{{ publication.publisher }}</div>
+              <div class="text-sm text-neutral-400 mb-2">{{ formatDate(publication.releaseDate) }}</div>
+            </div>
+          </div>
+          
+          <p v-if="publication.summary" class="text-neutral-300 mb-2">{{ publication.summary }}</p>
+          
           <a 
             v-if="publication.url" 
             :href="publication.url" 
             target="_blank" 
-            rel="noopener noreferrer" 
-            class="inline-flex items-center mt-2 text-xs text-indigo-400 hover:text-indigo-300"
+            rel="noopener noreferrer"
+            class="text-indigo-400 hover:text-indigo-300 text-sm inline-flex items-center"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-              <polyline points="15 3 21 3 21 9"></polyline>
-              <line x1="10" y1="14" x2="21" y2="3"></line>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
             </svg>
             {{ safeTranslate('resume.publications.list.viewPublication', 'Voir la publication') }}
           </a>
-        </div>
-      </template>
-      
-      <template #itemActions="{ index }">
-        <div class="flex flex-col gap-2">
-          <!-- Reorder buttons -->
-          <div class="flex gap-1">
-            <button
-              type="button"
-              @click="moveUp(index)"
-              :disabled="index === 0"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.MOVE_UP)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
-            </button>
-            
-            <button
-              type="button"
-              @click="moveDown(index)"
-              :disabled="index === publications.length - 1"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.MOVE_DOWN)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
         </div>
       </template>
     </CollectionManager>
@@ -275,34 +248,9 @@ const deleteConfirmed = async () => {
   } catch (error) {}
 }
 
-// Reorder publications up
-const moveUp = async (index: number) => {
-  if (index <= 0) return
-  
+// Function to handle reordering
+const handleReorder = async (newOrder: string[]) => {
   try {
-    // Get the IDs for reordering
-    const newOrder = [...publications.value.map(item => item.id)]
-    // Swap positions
-    const temp = newOrder[index]
-    newOrder[index] = newOrder[index - 1]
-    newOrder[index - 1] = temp
-    
-    await publicationStore.reorderPublications(newOrder)
-  } catch (error) {}
-}
-
-// Reorder publications down
-const moveDown = async (index: number) => {
-  if (index >= publications.value.length - 1) return
-  
-  try {
-    // Get the IDs for reordering
-    const newOrder = [...publications.value.map(item => item.id)]
-    // Swap positions
-    const temp = newOrder[index]
-    newOrder[index] = newOrder[index + 1]
-    newOrder[index + 1] = temp
-    
     await publicationStore.reorderPublications(newOrder)
   } catch (error) {}
 }

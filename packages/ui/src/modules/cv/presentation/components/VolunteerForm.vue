@@ -39,7 +39,7 @@ const highlightError = ref('')
 // Use the new composables
 const { localModel, updateField } = useFormModel<VolunteerInterface>({
   modelValue,
-  emit: (event, value) => emit('update:modelValue', value),
+  emit: (_event, value) => emit('update:modelValue', value),
   defaultValues: {
     organization: '',
     position: '',
@@ -134,6 +134,8 @@ const icons = {
     :title="isNew ? t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.ADD_TITLE) : t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.EDIT_TITLE)"
     :subtitle="isNew ? t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.ADD_SUBTITLE) : t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.EDIT_SUBTITLE)"
     @submit="handleSubmit"
+    @cancel="handleCancel"
+    :submit-label="isNew ? t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) : t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE)"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
@@ -272,23 +274,6 @@ const icons = {
       <p v-else class="text-neutral-400 text-sm">
         {{ t(TRANSLATION_KEYS.RESUME.VOLUNTEER.FORM.NO_HIGHLIGHTS) }}
       </p>
-    </div>
-
-    <!-- Form Actions -->
-    <div class="flex justify-end space-x-4 mt-8">
-      <button 
-        type="button"
-        class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
-        @click="handleCancel"
-      >
-        {{ t(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL) }}
-      </button>
-      <button 
-        type="submit"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-      >
-        {{ isNew ? t(TRANSLATION_KEYS.COMMON.ACTIONS.ADD) : t(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE) }}
-      </button>
     </div>
   </Form>
 </template> 

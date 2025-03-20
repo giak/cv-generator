@@ -151,6 +151,15 @@ const moveDown = async (index: number) => {
     await awardStore.reorderAwards(newOrder)
   } catch (error) {}
 }
+
+// Function to handle reordering from CollectionManager
+const handleReorder = async (newOrder: string[]) => {
+  try {
+    await awardStore.reorderAwards(newOrder)
+  } catch (error) {
+    console.error('Error reordering awards:', error)
+  }
+}
 </script>
 
 <template>
@@ -167,6 +176,7 @@ const moveDown = async (index: number) => {
       @add="openAddDialog"
       @edit="openEditDialog"
       @delete="deleteAward"
+      @reorder="handleReorder"
     >
       <template #item="{ item: award }">
         <div class="flex-grow">
@@ -188,8 +198,9 @@ const moveDown = async (index: number) => {
         </div>
       </template>
       
-      <template #itemActions="{ index }">
+      <template #item-actions="{ item, index }">
         <div class="flex gap-1">
+          <!-- Boutons de réorganisation (optionnels, car CollectionManager supporte déjà le drag-and-drop) -->
           <button
             type="button"
             @click="moveUp(index)"
@@ -211,6 +222,33 @@ const moveDown = async (index: number) => {
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          
+          <!-- Boutons d'édition et de suppression -->
+          <button
+            type="button"
+            @click="openEditDialog(item)"
+            class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors"
+            :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.EDIT)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          
+          <button
+            type="button"
+            @click="deleteAward(item)"
+            class="p-1 rounded text-neutral-400 hover:bg-red-700 hover:text-white transition-colors"
+            :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
             </svg>
           </button>
         </div>

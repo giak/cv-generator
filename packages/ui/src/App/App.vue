@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { TRANSLATION_KEYS } from '@cv-generator/shared'
 import BasicsForm from '@ui/modules/cv/presentation/components/BasicsForm.vue'
 import WorkList from '@ui/modules/cv/presentation/components/WorkList.vue'
 import VolunteerList from '@ui/modules/cv/presentation/components/VolunteerList.vue'
@@ -15,8 +14,8 @@ import {
   DashboardLayout,
   UserInfo,
   SearchInput,
-  PageHeader,
-  BreadcrumbNav
+  BreadcrumbNav,
+  SectionWrapper
 } from '../components/layouts'
 // Import des composants de navigation
 import {
@@ -51,9 +50,7 @@ const {
 } = useAppState()
 const { 
   breadcrumbItems, 
-  handleNavigation, 
-  getActiveViewTitle, 
-  getActiveViewDescription} = useNavigation({ activeView, activeComponent })
+  handleNavigation} = useNavigation({ activeView, activeComponent })
 const { handleErrorAction } = useErrorHandling()
 
 // Initialize i18n
@@ -171,387 +168,257 @@ watch(activeView, (viewId) => {
       </template>
       
       <!-- Page Header - dynamically change based on active view -->
-      <PageHeader
-        :title="getActiveViewTitle"
-        :description="getActiveViewDescription"
-        :translate="false"
-      />
+      <!-- Removing PageHeader to avoid duplicate titles -->
       
       <!-- Main Content -->
-      <div v-if="activeView === 'basics'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate('resume.basics.form.title', 'Informations de base') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'basics'"
+        current-section="basics"
+        @navigate="handleNavigation"
+        :show-actions="false"
+      >
+        <BasicsForm
+          :modelValue="basics"
+          :loading="resumeStore.loading"
+          @update:modelValue="handleBasicsUpdate"
+          @validate="handleValidate"
+        />
         
-        <div class="p-6">
-          <BasicsForm
-            :modelValue="basics"
-            :loading="resumeStore.loading"
-            @update:modelValue="handleBasicsUpdate"
-            @validate="handleValidate"
-          />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="basics"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Work Experience View -->
-      <div v-if="activeView === 'experience'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.WORK.LIST.TITLE, 'Expérience professionnelle') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper 
+        v-if="activeView === 'experience'" 
+        current-section="experience"
+        @navigate="handleNavigation"
+      >
+        <WorkList />
         
-        <div class="p-6">
-          <WorkList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="experience"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
       
       <!-- Work Experience View (for when activeView is 'work') -->
-      <div v-if="activeView === 'work'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.WORK.LIST.TITLE, 'Expérience professionnelle') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'work'"
+        current-section="work"
+        @navigate="handleNavigation"
+      >
+        <WorkList />
         
-        <div class="p-6">
-          <WorkList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="work"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Volunteer Experience View -->
-      <div v-if="activeView === 'volunteer'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.TITLE, 'Expérience de bénévolat') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'volunteer'"
+        current-section="volunteer"
+        @navigate="handleNavigation"
+      >
+        <VolunteerList />
         
-        <div class="p-6">
-          <VolunteerList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="volunteer"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Education View -->
-      <div v-if="activeView === 'education'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.EDUCATION.LIST.TITLE, 'Formation') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'education'"
+        current-section="education"
+        @navigate="handleNavigation"
+      >
+        <EducationList />
         
-        <div class="p-6">
-          <EducationList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="education"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Award View -->
-      <div v-if="activeView === 'awards'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.AWARDS.LIST.TITLE, 'Prix et Distinctions') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'awards'"
+        current-section="awards"
+        @navigate="handleNavigation"
+      >
+        <AwardList />
         
-        <div class="p-6">
-          <AwardList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="awards"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Certificate View -->
-      <div v-if="activeView === 'certificates'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.LIST.TITLE, 'Certifications') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'certificates'"
+        current-section="certificates"
+        @navigate="handleNavigation"
+      >
+        <CertificateList />
         
-        <div class="p-6">
-          <CertificateList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="certificates"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Publications View -->
-      <div v-if="activeView === 'publications'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.PUBLICATIONS.LIST.TITLE, 'Publications') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'publications'"
+        current-section="publications"
+        @navigate="handleNavigation"
+      >
+        <PublicationList />
         
-        <div class="p-6">
-          <PublicationList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="publications"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Skills View -->
-      <div v-if="activeView === 'skills'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.SKILLS.LIST.TITLE, 'Compétences') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'skills'"
+        current-section="skills"
+        @navigate="handleNavigation"
+      >
+        <SkillList />
         
-        <div class="p-6">
-          <SkillList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="skills"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Languages View -->
-      <div v-if="activeView === 'languages'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.LANGUAGES.LIST.TITLE, 'Langues') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'languages'"
+        current-section="languages"
+        @navigate="handleNavigation"
+      >
+        <LanguageList />
         
-        <div class="p-6">
-          <LanguageList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="languages"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Interests View -->
-      <div v-if="activeView === 'interests'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.INTERESTS.LIST.TITLE, 'Intérêts') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'interests'"
+        current-section="interests"
+        @navigate="handleNavigation"
+      >
+        <InterestList />
         
-        <div class="p-6">
-          <InterestList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="interests"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Projects View -->
-      <div v-if="activeView === 'projects'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.TITLE, 'Projets') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'projects'"
+        current-section="projects"
+        @navigate="handleNavigation"
+      >
+        <ProjectList />
         
-        <div class="p-6">
-          <ProjectList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="projects"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- References View -->
-      <div v-if="activeView === 'references'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.TITLE, 'Références') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
+      <SectionWrapper
+        v-if="activeView === 'references'"
+        current-section="references"
+        @navigate="handleNavigation"
+      >
+        <ReferenceList />
         
-        <div class="p-6">
-          <ReferenceList />
-          
-          <!-- Navigation entre les formulaires -->
+        <!-- Navigation entre les formulaires -->
+        <template #navigation="{ currentSection }">
           <FormNavigation 
-            current-section="references"
+            :current-section="currentSection"
             show-completion
             @navigate="handleNavigation"
           />
-        </div>
-      </div>
+        </template>
+      </SectionWrapper>
 
       <!-- Toast Demo View -->
-      <div v-if="activeView === 'notifications'" class="bg-neutral-850 rounded-md border border-neutral-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-          <h2 class="font-medium text-white">{{ safeTranslate('ui.notifications.title', 'Notifications Toast') }}</h2>
-          <div>
-            <button class="p-1.5 rounded-md text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        <div class="p-6">
-          <ToastDemo />
-        </div>
-      </div>
+      <SectionWrapper
+        v-if="activeView === 'notifications'"
+        current-section="notifications"
+        @navigate="handleNavigation"
+        :show-navigation="false"
+      >
+        <ToastDemo />
+      </SectionWrapper>
     </DashboardLayout>
   </div>
 </template>

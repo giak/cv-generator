@@ -11,6 +11,7 @@
       @add="openAddForm"
       @edit="openEditForm"
       @delete="openDeleteConfirm"
+      @reorder="handleReorder"
     >
       <!-- Sorting options -->
       <template #header-actions>
@@ -42,32 +43,50 @@
       
       <template #item="{ item: project }">
         <div class="flex-grow">
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-            <h3 class="font-semibold text-lg">{{ project.name }}</h3>
-            <div class="flex flex-wrap gap-2">
+          <div class="flex flex-col mb-2">
+            <h3 class="font-semibold text-lg mb-1">{{ project.name }}</h3>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
+              <span class="text-primary-400 font-medium">{{ formatDuration(project) }}</span>
+              <span 
+                v-if="project.entity" 
+                class="flex items-center text-neutral-400 text-sm"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                {{ project.entity }}
+              </span>
               <span v-if="project.type" class="px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 text-xs font-medium">
                 {{ project.type }}
-              </span>
-              <span v-if="project.entity" class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 text-xs font-medium">
-                {{ project.entity }}
               </span>
             </div>
           </div>
           
-          <div v-if="project.startDate || project.endDate" class="text-sm text-neutral-400 mb-2">
-            <span v-if="project.startDate">{{ formatDate(project.startDate) }}</span>
-            <span v-if="project.startDate && project.endDate"> - </span>
-            <span v-if="project.endDate">{{ formatDate(project.endDate) }}</span>
+          <div v-if="project.description" class="text-sm text-neutral-300 mb-3">
+            {{ project.description }}
           </div>
           
-          <p v-if="project.description" class="text-neutral-300 mb-2">{{ project.description }}</p>
-          
-          <div v-if="project.highlights && project.highlights.length > 0" class="mt-2">
-            <ul class="list-disc list-inside text-sm text-neutral-300 space-y-1">
-              <li v-for="(highlight, index) in project.highlights" :key="index">
+          <div v-if="project.highlights && project.highlights.length > 0" class="mb-3">
+            <ul class="list-disc list-inside space-y-1">
+              <li 
+                v-for="(highlight, index) in project.highlights" 
+                :key="index"
+                class="text-sm text-neutral-300"
+              >
                 {{ highlight }}
               </li>
             </ul>
+          </div>
+          
+          <div v-if="project.keywords && project.keywords.length > 0" class="mb-3 flex flex-wrap gap-2">
+            <span 
+              v-for="(keyword, index) in project.keywords" 
+              :key="index"
+              class="px-2 py-0.5 rounded-md bg-neutral-700 text-neutral-300 text-xs"
+            >
+              {{ keyword }}
+            </span>
           </div>
           
           <div v-if="project.url" class="mt-2">
@@ -78,37 +97,6 @@
               </svg>
               {{ safeTranslate('resume.projects.list.viewProject', 'Voir le projet') }}
             </a>
-          </div>
-        </div>
-      </template>
-      
-      <template #itemActions="{ item: project, index }">
-        <div class="flex flex-col gap-2">
-          <!-- Reorder buttons -->
-          <div class="flex gap-1">
-            <button
-              type="button"
-              @click="moveUp(index)"
-              :disabled="index === 0"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.MOVE_UP)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
-            </button>
-            
-            <button
-              type="button"
-              @click="moveDown(index)"
-              :disabled="index === projects.length - 1"
-              class="p-1 rounded text-neutral-400 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-neutral-400"
-              :title="t(TRANSLATION_KEYS.RESUME.PROJECTS.LIST.MOVE_DOWN)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
           </div>
         </div>
       </template>
@@ -254,16 +242,8 @@ const showAllItems = ref(false)
 const { 
   items: projects,
   isAddingItem: showForm,
-  editingItemId: currentProjectId,
   newItem: currentProject,
-  addItem,
-  updateItem,
-  removeItem,
-  startEditing,
-  cancelEditing,
-  resetNewItem,
-  reorderItems
-} = useCollectionField<ProjectWithId>({
+  resetNewItem} = useCollectionField<ProjectWithId>({
   fieldName: 'projects',
   collection: computed(() => projectStore.projects),
   updateField: () => {}, // On utilise directement le store
@@ -365,6 +345,26 @@ const formatDate = (dateString: string) => {
     month: 'long',
     day: 'numeric'
   }).format(date)
+}
+
+// Formater la durée d'un projet
+const formatDuration = (project: ProjectWithId): string => {
+  const hasStart = project.startDate && project.startDate.trim() !== '';
+  const hasEnd = project.endDate && project.endDate.trim() !== '';
+  
+  if (!hasStart && !hasEnd) {
+    return '';
+  }
+  
+  if (hasStart && !hasEnd) {
+    return `${formatDate(project.startDate || '')} - ${safeTranslate('resume.projects.list.present', 'Présent')}`;
+  }
+  
+  if (!hasStart && hasEnd) {
+    return `${safeTranslate('resume.projects.list.until', 'Jusqu\'au')} ${formatDate(project.endDate || '')}`;
+  }
+  
+  return `${formatDate(project.startDate || '')} - ${formatDate(project.endDate || '')}`;
 }
 
 // Chargement des projets
@@ -483,53 +483,12 @@ const toggleSortOrder = async () => {
   showAllItems.value = false;
 }
 
-// Reorder projects up
-const moveUp = async (index: number) => {
-  if (index <= 0) return
-  
-  // Mark as custom order
-  isCustomOrder.value = true
-  useChronologicalSort.value = false
-  
-  // Create array of indices, then map to strings
-  const indices = [...Array(projects.value.length).keys()]
-  const temp = indices[index]
-  indices[index] = indices[index - 1]
-  indices[index - 1] = temp
-  
-  // Convert to string IDs for the reorderProjects method
-  const newOrder = indices.map(i => projects.value[i].id)
-  
+// Fonction pour gérer la réorganisation via le CollectionManager
+const handleReorder = async (newOrder: string[]) => {
   try {
     await projectStore.reorderProjects(newOrder)
   } catch (error) {
-
-    showToast(safeTranslate('resume.projects.notifications.reorderError', 'Erreur lors de la réorganisation des projets'), 'error')
-  }
-}
-
-// Reorder projects down
-const moveDown = async (index: number) => {
-  if (index >= projects.value.length - 1) return
-  
-  // Mark as custom order
-  isCustomOrder.value = true
-  useChronologicalSort.value = false
-  
-  // Create array of indices, then map to strings
-  const indices = [...Array(projects.value.length).keys()]
-  const temp = indices[index]
-  indices[index] = indices[index + 1]
-  indices[index + 1] = temp
-  
-  // Convert to string IDs for the reorderProjects method
-  const newOrder = indices.map(i => projects.value[i].id)
-  
-  try {
-    await projectStore.reorderProjects(newOrder)
-  } catch (error) {
-
-    showToast(safeTranslate('resume.projects.notifications.reorderError', 'Erreur lors de la réorganisation des projets'), 'error')
+    console.error('Error reordering projects:', error)
   }
 }
 

@@ -4,6 +4,8 @@
     :title="isNew ? safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.FORM.ADD_TITLE, 'Ajouter une certification') : safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.FORM.EDIT_TITLE, 'Modifier la certification')"
     :subtitle="isNew ? safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.FORM.ADD_SUBTITLE, 'Détaillez les certifications professionnelles que vous avez obtenues.') : safeTranslate(TRANSLATION_KEYS.RESUME.CERTIFICATES.FORM.EDIT_SUBTITLE, 'Mettez à jour les détails de cette certification.')"
     @submit="handleSubmit"
+    @cancel="handleCancel"
+    :submit-label="isNew ? safeTranslate(TRANSLATION_KEYS.COMMON.ACTIONS.ADD, 'Ajouter') : safeTranslate(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE, 'Enregistrer')"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
@@ -56,23 +58,6 @@
         @update:model-value="handleFieldUpdate('url', $event)"
         @blur="validateField('url', localModel.url || '')"
       />
-    </div>
-
-    <!-- Form Actions -->
-    <div class="flex justify-end space-x-4 mt-8">
-      <button 
-        type="button"
-        class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-white"
-        @click="handleCancel"
-      >
-        {{ safeTranslate(TRANSLATION_KEYS.COMMON.ACTIONS.CANCEL, 'Annuler') }}
-      </button>
-      <button 
-        type="submit"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-white"
-      >
-        {{ isNew ? safeTranslate(TRANSLATION_KEYS.COMMON.ACTIONS.ADD, 'Ajouter') : safeTranslate(TRANSLATION_KEYS.COMMON.ACTIONS.SAVE, 'Enregistrer') }}
-      </button>
     </div>
   </Form>
 </template>

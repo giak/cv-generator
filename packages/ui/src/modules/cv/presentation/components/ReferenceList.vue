@@ -1,122 +1,50 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h2 class="text-xl font-bold">{{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.TITLE) }}</h2>
-        <p class="text-neutral-400 text-sm">
-          {{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.DESCRIPTION) }}
-        </p>
-      </div>
-      
-      <Button
-        @click="openAddForm"
-        variant="primary"
-        size="md"
-      >
-        <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </template>
-        {{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.ADD_BUTTON) }}
-      </Button>
+  <div class="bg-neutral-900 rounded-xl">
+    <!-- Section title & description -->
+    <div class="mb-6 px-6 pt-6">
+      <h2 class="text-xl font-semibold text-white">{{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.TITLE) }}</h2>
+      <p class="text-sm text-neutral-400 mt-1">
+        {{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.DESCRIPTION) }}
+      </p>
     </div>
 
-    <!-- État de chargement -->
-    <div v-if="isLoading" class="py-12 flex justify-center">
-      <svg class="animate-spin h-8 w-8 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      <span class="ml-3 text-neutral-400">{{ safeTranslate('resume.references.list.loading', 'Chargement des références...') }}</span>
-    </div>
-
-    <!-- État vide -->
-    <EmptyState 
-      v-else-if="isEmpty"
-      :title="t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.EMPTY_STATE_TITLE)"
-      :description="t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.EMPTY_STATE_DESCRIPTION)"
+    <CollectionManager
+      :items="references"
+      empty-text="t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.EMPTY_STATE_TITLE)"
+      add-button-text="t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.ADD_BUTTON)"
+      :loading="isLoading"
+      @add="openAddReference"
+      @edit="(item) => openEditReference(item)"
+      @delete="confirmDelete"
+      @reorder="handleReorder"
     >
-      <template #icon>
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="w-12 h-12">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
+      <!-- Empty state -->
+      <template #empty-state>
+        <div class="flex flex-col items-center justify-center py-10 text-center">
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-4">
+            <path d="M48 20C30.3269 20 16 34.3269 16 52C16 69.6731 30.3269 84 48 84C65.6731 84 80 69.6731 80 52C80 34.3269 65.6731 20 48 20Z" stroke="#4338CA" stroke-width="4"/>
+            <path d="M48 64C55.732 64 62 57.732 62 50C62 42.268 55.732 36 48 36C40.268 36 34 42.268 34 50C34 57.732 40.268 64 48 64Z" stroke="#4338CA" stroke-width="4"/>
+            <path d="M32 78.6937C34.5392 74.3137 38.2744 70.737 42.7504 68.4236C47.2264 66.1103 52.2441 65.1692 57.2208 65.7137C62.1976 66.2582 66.9065 68.2601 70.7379 71.4765C74.5694 74.6929 77.3485 78.9665 78.7064 83.7328" stroke="#4338CA" stroke-width="4"/>
+            <path d="M16 49.3125C16.5455 42.0739 19.9758 35.3566 25.5533 30.6523C31.1308 25.948 38.4105 23.6553 45.6592 24.2008C52.9078 24.7464 59.6252 28.1766 64.3294 33.7541C69.0337 39.3316 71.3264 46.6114 70.7808 53.86" stroke="#4338CA" stroke-width="4"/>
+          </svg>
+          <h3 class="text-lg font-medium text-neutral-200 mb-1">{{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.EMPTY_STATE_TITLE) }}</h3>
+          <p class="text-sm text-neutral-400 max-w-md">
+            {{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.EMPTY_STATE_DESCRIPTION) }}
+          </p>
+        </div>
       </template>
       
-      <Button 
-        variant="primary"
-        size="md"
-        @click="openAddForm"
-      >
-        <template #icon>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </template>
-        {{ t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.ADD_BUTTON) }}
-      </Button>
-    </EmptyState>
-
-    <!-- Liste des références -->
-    <TransitionGroup v-else name="list" tag="div" class="space-y-4">
-      <Card
-        v-for="ref in references"
-        :key="ref.id"
-        class="hover:border-indigo-500/50 transition-colors"
-      >
-        <div class="flex flex-col md:flex-row justify-between">
-          <div class="flex-grow">
-            <h3 class="font-semibold text-lg mb-2">{{ ref.name }}</h3>
-            <p class="text-neutral-300">{{ ref.reference }}</p>
-          </div>
-          
-          <div class="flex space-x-3 mt-4 md:mt-0">
-            <button
-              class="p-2 text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 rounded-full transition-colors"
-              @click="openEditForm(ref)"
-              :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.EDIT)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-            </button>
-            <button
-              class="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-full transition-colors"
-              @click="openDeleteConfirm(ref)"
-              :title="t(TRANSLATION_KEYS.COMMON.ACTIONS.DELETE)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                <line x1="10" y1="11" x2="10" y2="17"></line>
-                <line x1="14" y1="11" x2="14" y2="17"></line>
-              </svg>
-            </button>
-          </div>
+      <template #item="{ item: ref }">
+        <div class="flex-grow">
+          <h3 class="font-semibold text-lg mb-2">{{ ref.name }}</h3>
+          <p class="text-neutral-300">{{ ref.reference }}</p>
         </div>
-      </Card>
-    </TransitionGroup>
+      </template>
+    </CollectionManager>
     
     <!-- Modal pour ajouter/modifier une référence -->
     <div v-if="showForm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div class="bg-neutral-900 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center p-4 border-b border-neutral-700">
-          <h3 class="text-lg font-medium">
-            {{ isEditing ? t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.EDIT_TITLE) : t(TRANSLATION_KEYS.RESUME.REFERENCES.FORM.ADD_TITLE) }}
-          </h3>
-          <button 
-            @click="closeForm" 
-            class="text-neutral-400 hover:text-white"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
         <div class="p-4 sm:p-6">
           <ReferenceForm
             :reference="currentReference"
@@ -184,12 +112,11 @@ import { ref, computed, onMounted } from 'vue';
 import { useReferenceStore } from '../stores/reference';
 import ReferenceForm from './ReferenceForm.vue';
 import Button from '@ui/components/shared/Button.vue';
-import Card from '@ui/components/shared/Card.vue';
-import EmptyState from '@ui/components/shared/EmptyState.vue';
 import type { ReferenceInterface } from '@cv-generator/shared/src/types/resume.interface';
 import type { ReferenceWithId } from '../stores/reference';
 import { useI18n } from 'vue-i18n';
 import { TRANSLATION_KEYS } from '@cv-generator/shared';
+import CollectionManager from '@ui/components/shared/CollectionManager.vue';
 
 // Initialisation de i18n
 const { t } = useI18n();
@@ -210,7 +137,6 @@ const referenceStore = useReferenceStore();
 // État des références
 const references = computed(() => referenceStore.references);
 const isLoading = computed(() => referenceStore.isLoading);
-const isEmpty = computed(() => referenceStore.isEmpty);
 
 // État du formulaire
 const showForm = ref(false);
@@ -242,8 +168,17 @@ onMounted(async () => {
   }
 });
 
+// Function to handle reordering from CollectionManager
+const handleReorder = async (newOrder: string[]) => {
+  try {
+    await referenceStore.reorderReferences(newOrder)
+  } catch (error) {
+    console.error('Error reordering references:', error)
+  }
+}
+
 // Ouvrir le formulaire d'ajout
-const openAddForm = () => {
+const openAddReference = () => {
   isEditing.value = false;
   currentReference.value = {
     name: '',
@@ -254,7 +189,7 @@ const openAddForm = () => {
 };
 
 // Ouvrir le formulaire d'édition
-const openEditForm = (reference: ReferenceWithId) => {
+const openEditReference = (reference: ReferenceWithId) => {
   isEditing.value = true;
   currentReference.value = { ...reference };
   currentReferenceId.value = reference.id;
@@ -284,7 +219,6 @@ const saveReference = async (reference: ReferenceInterface) => {
     
     closeForm();
   } catch (error) {
-
     showToast(safeTranslate('resume.references.notifications.saveError', 'Erreur lors de la sauvegarde de la référence'), 'error');
   } finally {
     isFormSubmitting.value = false;
@@ -292,7 +226,7 @@ const saveReference = async (reference: ReferenceInterface) => {
 };
 
 // Ouvrir la confirmation de suppression
-const openDeleteConfirm = (reference: ReferenceWithId) => {
+const confirmDelete = (reference: ReferenceWithId) => {
   referenceToDelete.value = reference;
   showDeleteConfirm.value = true;
 };
@@ -303,24 +237,6 @@ const closeDeleteConfirm = () => {
   setTimeout(() => {
     referenceToDelete.value = null;
   }, 300);
-};
-
-// Confirmer la suppression
-const confirmDelete = async () => {
-  if (!referenceToDelete.value) return;
-  
-  isDeletingReference.value = true;
-  
-  try {
-    await referenceStore.deleteReference(referenceToDelete.value.id);
-    showToast(safeTranslate('resume.references.notifications.deleteSuccess', 'Référence supprimée avec succès'), 'success');
-    closeDeleteConfirm();
-  } catch (error) {
-
-    showToast(safeTranslate('resume.references.notifications.deleteError', 'Erreur lors de la suppression de la référence'), 'error');
-  } finally {
-    isDeletingReference.value = false;
-  }
 };
 
 // Show toast notification
@@ -343,17 +259,6 @@ const showToast = (message: string, type: 'success' | 'error') => {
 </script>
 
 <style scoped>
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.3s ease;
-}
-
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
 .toast-enter-active,
 .toast-leave-active {
   transition: all 0.3s ease;
