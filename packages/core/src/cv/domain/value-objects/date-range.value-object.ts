@@ -5,24 +5,25 @@
 
 import { z } from 'zod';
 import {
-    ResultType,
-    ValidationErrorInterface,
-    ValidationLayerType,
-    createSuccess,
-    createFailure,
-    ERROR_CODES, createSuccessWithWarnings,
-    ValidationSeverityType
+  ResultType,
+  ValidationErrorInterface,
+  ValidationLayerType,
+  createSuccess,
+  createFailure,
+  ERROR_CODES, createSuccessWithWarnings,
+  ValidationSeverityType,
+  TRANSLATION_KEYS
 } from '@cv-generator/shared';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
 
 // Définition des clés de validation pour DateRange
 export const DATE_RANGE_VALIDATION_KEYS = {
-  MISSING_START_DATE: 'resume.work.validation.missingStartDate',
-  INVALID_DATE_FORMAT: 'resume.common.validation.invalidDateFormat',
-  END_BEFORE_START: 'resume.work.validation.endBeforeStart',
-  FUTURE_DATE: 'resume.work.validation.futureDate',
-  INVALID_START_DATE: 'resume.work.validation.invalidStartDate',
-  INVALID_END_DATE: 'resume.work.validation.invalidEndDate'
+  MISSING_START_DATE: TRANSLATION_KEYS.RESUME.WORK.VALIDATION.MISSING_START_DATE,
+  INVALID_DATE_FORMAT: TRANSLATION_KEYS.COMMON.VALIDATION.INVALID_DATE_FORMAT,
+  END_BEFORE_START: TRANSLATION_KEYS.RESUME.WORK.VALIDATION.END_BEFORE_START,
+  FUTURE_DATE: TRANSLATION_KEYS.RESUME.WORK.VALIDATION.FUTURE_DATE,
+  INVALID_START_DATE: TRANSLATION_KEYS.RESUME.WORK.VALIDATION.INVALID_START_DATE,
+  INVALID_END_DATE: TRANSLATION_KEYS.RESUME.WORK.VALIDATION.INVALID_END_DATE
 };
 
 // Adaptateur i18n par défaut pour la rétrocompatibilité

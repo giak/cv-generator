@@ -505,3 +505,106 @@ Ces risques peuvent être atténués par:
 - Une approche systématique et documentée
 - Des revues de code rigoureuses
 - Une coordination étroite entre les développeurs
+
+## Internationalisation des Entités et Value Objects du Domaine
+
+En complément de l'internationalisation des composants de l'interface utilisateur, nous avons également entrepris l'extraction et la centralisation des messages en dur présents dans les entités et value objects du domaine. Cette étape était cruciale pour assurer la cohérence des messages d'erreur à travers toute l'application.
+
+### Approche Adoptée
+
+Pour les entités et value objects du domaine, nous avons suivi une approche légèrement différente de celle utilisée pour les composants UI, mais qui respecte les mêmes principes de base:
+
+1. **Centralisation des clés**: Toutes les clés de traduction sont définies dans `TRANSLATION_KEYS` dans le package shared.
+2. **Classes d'adaptateurs i18n**: Pour chaque entité ou value object, nous avons créé une classe adaptateur implémentant l'interface `DomainI18nPortInterface`.
+3. **Valeurs par défaut**: Chaque adaptateur contient des valeurs par défaut pour garantir la compatibilité avec le code existant, même en l'absence de traductions.
+4. **Injection de dépendance**: L'interface i18n est injectée dans les constructeurs des entités, permettant de passer différentes implémentations selon le contexte.
+
+### Entités et Value Objects Mis à Jour
+
+Nous avons appliqué cette approche aux composants suivants du domaine:
+
+1. **Value Objects**:
+
+   - `url.value-object.ts`: Validation d'URL (messsages pour URL manquante, invalide, non sécurisée, etc.)
+   - `date-range.value-object.ts`: Validation de plages de dates (messages pour dates manquantes, invalides, incohérentes, etc.)
+   - `work-date.value-object.ts`: Validation de dates professionnelles (format, cohérence, etc.)
+   - `email.value-object.ts`: Validation d'email (messages pour email manquant, invalide, etc.)
+   - `phone.value-object.ts`: Validation de numéros de téléphone (format, longueur, etc.)
+
+2. **Entités**:
+   - `Work.ts`: Validation des expériences professionnelles (entreprise, poste, dates, etc.)
+   - `Resume.ts`: Validation des CV complets (données de base, expériences, formation, etc.)
+
+### Structure Type d'une Mise à Jour
+
+Voici la structure type que nous avons suivie pour chaque entité ou value object:
+
+1. **Déclaration des clés de traduction**:
+
+   ```typescript
+   export const WORK_VALIDATION_KEYS = {
+     MISSING_COMPANY: TRANSLATION_KEYS.RESUME.WORK.VALIDATION.MISSING_COMPANY,
+     MISSING_POSITION: TRANSLATION_KEYS.RESUME.WORK.VALIDATION.MISSING_POSITION,
+     // ...autres clés de validation
+   };
+   ```
+
+2. **Création d'un adaptateur i18n par défaut**:
+
+   ```typescript
+   export class DefaultWorkI18nAdapter implements DomainI18nPortInterface {
+     translate(key: string, _params?: Record<string, unknown>): string {
+       const defaultMessages: Record<string, string> = {
+         [WORK_VALIDATION_KEYS.MISSING_COMPANY]:
+           "Le nom de l'entreprise est requis",
+         // ...autres messages par défaut
+       };
+       return defaultMessages[key] || key;
+     }
+     exists(_key: string): boolean {
+       return true;
+     }
+   }
+   ```
+
+3. **Modification des constructeurs pour accepter l'adaptateur i18n**:
+
+   ```typescript
+   private constructor(
+     // ...autres propriétés
+     private readonly _i18n: DomainI18nPortInterface
+   ) {}
+   ```
+
+4. **Mise à jour des méthodes factory pour utiliser les clés de traduction**:
+   ```typescript
+   static create(
+     data: Partial<WorkInterface>,
+     i18n: DomainI18nPortInterface = defaultI18nAdapter
+   ): WorkValidationResultType {
+     const errors: string[] = []
+     if (!data.name || data.name.trim().length === 0) {
+       errors.push(i18n.translate(WORK_VALIDATION_KEYS.MISSING_COMPANY))
+     }
+     // ...autres validations
+   }
+   ```
+
+### Avantages de cette Approche
+
+1. **Cohérence des messages**: Les mêmes messages d'erreur sont utilisés peu importe où ils sont générés (UI ou domaine).
+2. **Maintenabilité améliorée**: Toutes les clés sont centralisées, facilitant les modifications.
+3. **Flexibilité**: L'injection de dépendance permet d'utiliser différentes implémentations selon le contexte (tests, UI, API, etc.).
+4. **Compatibilité**: L'approche maintient la compatibilité avec le code existant grâce aux valeurs par défaut.
+
+### Impact sur les Tests
+
+Les tests ont été mis à jour pour inclure l'adaptateur i18n par défaut lorsque nécessaire, assurant ainsi que les validations continuent de fonctionner comme prévu.
+
+### Prochaines Étapes
+
+Avec cette mise à jour, toutes les entités et value objects du domaine utilisent désormais le système centralisé de clés de traduction. Pour compléter l'internationalisation complète de l'application, les étapes restantes sont:
+
+1. Finaliser la mise à jour des composants UI comme décrit précédemment
+2. Mettre à jour les messages d'erreur de l'API
+3. Créer un mécanisme pour synchroniser les traductions entre le frontend et le backend

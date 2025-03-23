@@ -10,17 +10,17 @@ import {
     createSuccess,
     createFailure,
     createSuccessWithWarnings,
-    ERROR_CODES
+    ERROR_CODES,
+    TRANSLATION_KEYS
 } from '@cv-generator/shared';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
 
 // Définition des clés de traduction spécifiques pour les URLs
-// À migrer vers TRANSLATION_KEYS dans @cv-generator/shared quand possible
 export const URL_VALIDATION_KEYS = {
-  MISSING_URL: "resume.basics.validation.missingUrl",
-  INVALID_URL: "resume.basics.validation.invalidUrl",
-  INSECURE_URL: "resume.basics.validation.insecureUrl",
-  TEMPORARY_DOMAIN: "resume.basics.validation.temporaryDomain"
+  MISSING_URL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.MISSING_URL,
+  INVALID_URL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.INVALID_URL,
+  INSECURE_URL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.INSECURE_URL,
+  TEMPORARY_DOMAIN: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.TEMPORARY_DOMAIN
 };
 
 /**

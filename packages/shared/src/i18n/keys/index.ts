@@ -33,6 +33,11 @@ export const TRANSLATION_KEYS = {
       ERROR: 'common.labels.error',
       WARNING: 'common.labels.warning',
       INFO: 'common.labels.info'
+    },
+    VALIDATION: {
+      MISSING_DATE: 'resume.common.validation.missingDate',
+      INVALID_DATE_FORMAT: 'resume.common.validation.invalidDateFormat',
+      INVALID_DATE: 'resume.common.validation.invalidDate'
     }
   },
   RESUME: {
@@ -126,7 +131,12 @@ export const TRANSLATION_KEYS = {
         MISSING_LOCATION: 'resume.basics.validation.missingLocation',
         VAGUE_LOCATION: 'resume.basics.validation.vagueLocation',
         MISSING_SUMMARY: 'resume.basics.validation.missingSummary',
-        BRIEF_SUMMARY: 'resume.basics.validation.briefSummary'
+        BRIEF_SUMMARY: 'resume.basics.validation.briefSummary',
+        MISSING_URL: 'resume.basics.validation.missingUrl',
+        INVALID_URL: 'resume.basics.validation.invalidUrl',
+        INSECURE_URL: 'resume.basics.validation.insecureUrl',
+        TEMPORARY_DOMAIN: 'resume.basics.validation.temporaryDomain',
+        MISSING_BASICS: 'resume.basics.validation.missingBasics'
       }
     },
     WORK: {
@@ -168,7 +178,11 @@ export const TRANSLATION_KEYS = {
         MISSING_SUMMARY: 'resume.work.validation.missingSummary',
         BRIEF_DESCRIPTION: 'resume.work.validation.briefDescription',
         MISSING_HIGHLIGHTS: 'resume.work.validation.missingHighlights',
-        VAGUE_HIGHLIGHTS: 'resume.work.validation.vagueHighlights'
+        VAGUE_HIGHLIGHTS: 'resume.work.validation.vagueHighlights',
+        INVALID_START_DATE: 'resume.work.validation.invalidStartDate',
+        INVALID_END_DATE: 'resume.work.validation.invalidEndDate',
+        INVALID_DATE: 'resume.work.validation.invalidDate',
+        INVALID_END_DATE_FORMAT: 'resume.work.validation.invalidEndDate'
       },
       FORM: {
         ADD_TITLE: 'resume.work.form.addTitle',
@@ -226,7 +240,9 @@ export const TRANSLATION_KEYS = {
         MISSING_START_DATE: 'resume.education.validation.missingStartDate',
         END_BEFORE_START: 'resume.education.validation.endBeforeStart',
         MISSING_GPA: 'resume.education.validation.missingGpa',
-        VAGUE_COURSES: 'resume.education.validation.vagueCourses'
+        VAGUE_COURSES: 'resume.education.validation.vagueCourses',
+        INVALID_DATE: 'resume.education.validation.invalidDate',
+        INVALID_END_DATE: 'resume.education.validation.invalidEndDate'
       },
       FORM: {
         ADD_TITLE: 'resume.education.form.addTitle',
@@ -335,7 +351,9 @@ export const TRANSLATION_KEYS = {
         MISSING_DESCRIPTION: 'resume.projects.validation.missingDescription',
         INVALID_URL: 'resume.projects.validation.invalidUrl',
         END_BEFORE_START: 'resume.projects.validation.endBeforeStart',
-        FUTURE_DATE: 'resume.projects.validation.futureDate' 
+        FUTURE_DATE: 'resume.projects.validation.futureDate',
+        INVALID_START_DATE: 'resume.projects.validation.invalidStartDate',
+        INVALID_END_DATE: 'resume.projects.validation.invalidEndDate'
       },
       FORM: {
         ADD_TITLE: 'resume.projects.form.addTitle',
@@ -600,7 +618,9 @@ export const TRANSLATION_KEYS = {
         MISSING_START_DATE: 'resume.volunteer.validation.missingStartDate',
         END_BEFORE_START: 'resume.volunteer.validation.endBeforeStart',
         FUTURE_DATE: 'resume.volunteer.validation.futureDate',
-        MISSING_SUMMARY: 'resume.volunteer.validation.missingSummary'
+        MISSING_SUMMARY: 'resume.volunteer.validation.missingSummary',
+        INVALID_DATE: 'resume.volunteer.validation.invalidDate',
+        INVALID_END_DATE: 'resume.volunteer.validation.invalidEndDate'
       },
       FORM: {
         ADD_TITLE: 'resume.volunteer.form.addTitle',

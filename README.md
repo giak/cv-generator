@@ -226,6 +226,23 @@ The application now features a comprehensive internationalization system:
   - Robust translation key structure for easy maintenance
   - Safe translation handling with fallback mechanism
 
+- ✅ **Domain Layer Internationalization**:
+
+  - Extraction of hardcoded messages from domain entities and value objects
+  - Implementation of Adapter pattern for i18n integration in the domain layer
+  - Centralized translation keys for validation messages
+  - Default adapters for backward compatibility
+  - Complete internationalization of key value objects:
+    - `url.value-object.ts`
+    - `date-range.value-object.ts`
+    - `work-date.value-object.ts`
+    - `email.value-object.ts`
+    - `phone.value-object.ts`
+  - Internationalized domain entities:
+    - `Work.ts`
+    - `Resume.ts`
+  - Structured approach that maintains Clean Architecture principles
+
 - ✅ **Internationalized Validation**:
 
   - Adapted composables (`useValidationResult`, `useValidationCatalogue`) for i18n
@@ -288,6 +305,51 @@ const { allErrors, setResult } = useValidationResult(null, {
   severity: 'error',
   i18nKey: 'validation.email.invalid', // Will be translated
   layer: ValidationLayerType.PRESENTATION
+}
+```
+
+```typescript
+// Example: Domain entity internationalization with Adapter pattern
+// DomainI18nPortInterface - Interface for i18n in domain layer
+export interface DomainI18nPortInterface {
+  translate(key: string, params?: Record<string, unknown>): string;
+  exists(key: string): boolean;
+}
+
+// DefaultI18nAdapter - Default implementation for backward compatibility
+class DefaultI18nAdapter implements DomainI18nPortInterface {
+  translate(key: string, _params?: Record<string, unknown>): string {
+    // Default fallback messages
+    const defaultMessages: Record<string, string> = {
+      [URL_VALIDATION_KEYS.MISSING_URL]: "L'URL est requise",
+      [URL_VALIDATION_KEYS.INVALID_URL]: "Format d'URL invalide"
+      // More default messages...
+    };
+
+    return defaultMessages[key] || key;
+  }
+
+  exists(_key: string): boolean {
+    return true;
+  }
+}
+
+// Factory method with i18n adapter injection
+public static create(
+  url: string,
+  i18n: DomainI18nPortInterface = defaultI18nAdapter
+): ResultType<Url> {
+  if (!url) {
+    return createFailure([{
+      code: ERROR_CODES.COMMON.REQUIRED_FIELD,
+      message: i18n.translate(URL_VALIDATION_KEYS.MISSING_URL),
+      i18nKey: URL_VALIDATION_KEYS.MISSING_URL,
+      field: "url",
+      severity: "error",
+      layer: ValidationLayerType.DOMAIN
+    }]);
+  }
+  // Remaining validation...
 }
 ```
 

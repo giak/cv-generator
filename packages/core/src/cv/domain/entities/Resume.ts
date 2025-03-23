@@ -1,27 +1,113 @@
-import type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface'
-import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type'
-import { Email } from '../value-objects/email.value-object'
-import { Phone } from '../value-objects/phone.value-object'
+import type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface';
+import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type';
+import { Email } from '../value-objects/email.value-object';
+import { Phone } from '../value-objects/phone.value-object';
+import { TRANSLATION_KEYS } from '@cv-generator/shared';
+import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
+
+/**
+ * Clés de traduction spécifiques pour l'entité Resume
+ */
+export const RESUME_VALIDATION_KEYS = {
+  // Basics
+  MISSING_BASICS: 'resume.basics.validation.missingBasics', // Clé personnalisée
+  MISSING_NAME: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.MISSING_NAME,
+  
+  // Common
+  INVALID_DATE_FORMAT: TRANSLATION_KEYS.COMMON.VALIDATION.INVALID_DATE_FORMAT,
+  
+  // Work
+  INVALID_WORK_DATE: 'resume.work.validation.invalidDate', // Clé personnalisée pour les indices
+  INVALID_WORK_END_DATE: 'resume.work.validation.invalidEndDate', // Clé personnalisée pour les indices
+  
+  // Volunteer
+  INVALID_VOLUNTEER_DATE: 'resume.volunteer.validation.invalidDate', // Clé personnalisée pour les indices
+  INVALID_VOLUNTEER_END_DATE: 'resume.volunteer.validation.invalidEndDate', // Clé personnalisée pour les indices
+  
+  // Education
+  INVALID_EDUCATION_DATE: 'resume.education.validation.invalidDate', // Clé personnalisée pour les indices
+  INVALID_EDUCATION_END_DATE: 'resume.education.validation.invalidEndDate', // Clé personnalisée pour les indices
+  
+  // Awards, Certificates, Publications
+  INVALID_AWARD_DATE: TRANSLATION_KEYS.RESUME.AWARDS.VALIDATION.INVALID_DATE,
+  INVALID_CERTIFICATE_DATE: TRANSLATION_KEYS.RESUME.CERTIFICATES.VALIDATION.INVALID_DATE,
+  INVALID_PUBLICATION_DATE: TRANSLATION_KEYS.RESUME.PUBLICATIONS.VALIDATION.INVALID_DATE,
+  
+  // Projects
+  INVALID_PROJECT_START_DATE: 'resume.projects.validation.invalidStartDate', // Clé personnalisée pour les indices
+  INVALID_PROJECT_END_DATE: 'resume.projects.validation.invalidEndDate' // Clé personnalisée pour les indices
+};
+
+/**
+ * Adaptateur i18n par défaut pour la compatibilité
+ */
+export class DefaultResumeI18nAdapter implements DomainI18nPortInterface {
+  translate(key: string, params?: Record<string, unknown>): string {
+    const index = params?.index as number;
+    const defaultMessages: Record<string, string> = {
+      [RESUME_VALIDATION_KEYS.MISSING_BASICS]: 'Informations de base requises',
+      [RESUME_VALIDATION_KEYS.MISSING_NAME]: 'Le nom est requis',
+      [RESUME_VALIDATION_KEYS.INVALID_DATE_FORMAT]: 'Format de date invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_WORK_DATE]: index !== undefined ? 
+        `Format de date invalide pour l'expérience ${index + 1}` : 'Format de date invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_WORK_END_DATE]: index !== undefined ? 
+        `Format de date de fin invalide pour l'expérience ${index + 1}` : 'Format de date de fin invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_DATE]: index !== undefined ? 
+        `Format de date invalide pour l'activité bénévole ${index + 1}` : 'Format de date invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_END_DATE]: index !== undefined ? 
+        `Format de date de fin invalide pour l'activité bénévole ${index + 1}` : 'Format de date de fin invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_EDUCATION_DATE]: index !== undefined ? 
+        `Format de date invalide pour l'éducation ${index + 1}` : 'Format de date invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_EDUCATION_END_DATE]: index !== undefined ? 
+        `Format de date de fin invalide pour l'éducation ${index + 1}` : 'Format de date de fin invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_AWARD_DATE]: index !== undefined ? 
+        `Format de date invalide pour la distinction ${index + 1}` : 'Format de date invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_CERTIFICATE_DATE]: index !== undefined ? 
+        `Format de date invalide pour le certificat ${index + 1}` : 'Format de date invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_PUBLICATION_DATE]: index !== undefined ? 
+        `Format de date invalide pour la publication ${index + 1}` : 'Format de date invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_PROJECT_START_DATE]: index !== undefined ? 
+        `Format de date de début invalide pour le projet ${index + 1}` : 'Format de date de début invalide',
+      [RESUME_VALIDATION_KEYS.INVALID_PROJECT_END_DATE]: index !== undefined ? 
+        `Format de date de fin invalide pour le projet ${index + 1}` : 'Format de date de fin invalide'
+    };
+
+    return defaultMessages[key] || key;
+  }
+
+  exists(_key: string): boolean {
+    return true;
+  }
+}
+
+// Création d'une instance de l'adaptateur par défaut
+const defaultI18nAdapter = new DefaultResumeI18nAdapter();
 
 /**
  * Resume entity representing a CV in JSON Resume format
  * Implements the JSON Resume schema: https://jsonresume.org/schema/
  */
 export class Resume {
-  private constructor(private readonly data: ResumeInterface) {}
+  private constructor(
+    private readonly data: ResumeInterface,
+    private readonly _i18n: DomainI18nPortInterface
+  ) {}
 
-  static create(data: Partial<ResumeInterface>): ValidationResultType & { resume?: Resume } {
+  static create(
+    data: Partial<ResumeInterface>,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): ValidationResultType & { resume?: Resume } {
     const errors: string[] = []
     
     // 1. Validation basique des données essentielles
     if (!data.basics) {
-      errors.push('Informations de base requises')
+      errors.push(i18n.translate(RESUME_VALIDATION_KEYS.MISSING_BASICS))
       return { isValid: false, errors }
     }
     
     // 2. Validation du nom (requis)
     if (!data.basics.name || data.basics.name.trim().length === 0) {
-      errors.push('Le nom est requis')
+      errors.push(i18n.translate(RESUME_VALIDATION_KEYS.MISSING_NAME))
     }
     
     // 3. Validation de l'email avec le value object Email
@@ -52,11 +138,11 @@ export class Resume {
     if (data.work && data.work.length > 0) {
       data.work.forEach((work, index) => {
         if (!this.isValidDate(work.startDate)) {
-          errors.push(`Format de date invalide pour l'expérience ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_WORK_DATE, { index }))
         }
         
         if (work.endDate && !this.isValidDate(work.endDate)) {
-          errors.push(`Format de date de fin invalide pour l'expérience ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_WORK_END_DATE, { index }))
         }
       })
     }
@@ -65,11 +151,11 @@ export class Resume {
     if (data.volunteer && data.volunteer.length > 0) {
       data.volunteer.forEach((vol, index) => {
         if (!this.isValidDate(vol.startDate)) {
-          errors.push(`Format de date invalide pour l'activité bénévole ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_DATE, { index }))
         }
         
         if (vol.endDate && !this.isValidDate(vol.endDate)) {
-          errors.push(`Format de date de fin invalide pour l'activité bénévole ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_END_DATE, { index }))
         }
       })
     }
@@ -78,11 +164,11 @@ export class Resume {
     if (data.education && data.education.length > 0) {
       data.education.forEach((edu, index) => {
         if (!this.isValidDate(edu.startDate)) {
-          errors.push(`Format de date invalide pour l'éducation ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_EDUCATION_DATE, { index }))
         }
         
         if (edu.endDate && !this.isValidDate(edu.endDate)) {
-          errors.push(`Format de date de fin invalide pour l'éducation ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_EDUCATION_END_DATE, { index }))
         }
       })
     }
@@ -91,7 +177,7 @@ export class Resume {
     if (data.awards && data.awards.length > 0) {
       data.awards.forEach((award, index) => {
         if (!this.isValidDate(award.date)) {
-          errors.push(`Format de date invalide pour la distinction ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_AWARD_DATE, { index }))
         }
       })
     }
@@ -100,7 +186,7 @@ export class Resume {
     if (data.certificates && data.certificates.length > 0) {
       data.certificates.forEach((cert, index) => {
         if (!this.isValidDate(cert.date)) {
-          errors.push(`Format de date invalide pour le certificat ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_CERTIFICATE_DATE, { index }))
         }
       })
     }
@@ -109,7 +195,7 @@ export class Resume {
     if (data.publications && data.publications.length > 0) {
       data.publications.forEach((pub, index) => {
         if (!this.isValidDate(pub.releaseDate)) {
-          errors.push(`Format de date invalide pour la publication ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_PUBLICATION_DATE, { index }))
         }
       })
     }
@@ -118,11 +204,11 @@ export class Resume {
     if (data.projects && data.projects.length > 0) {
       data.projects.forEach((project, index) => {
         if (project.startDate && !this.isValidDate(project.startDate)) {
-          errors.push(`Format de date de début invalide pour le projet ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_PROJECT_START_DATE, { index }))
         }
         
         if (project.endDate && !this.isValidDate(project.endDate)) {
-          errors.push(`Format de date de fin invalide pour le projet ${index + 1}`)
+          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_PROJECT_END_DATE, { index }))
         }
       })
     }
@@ -134,7 +220,7 @@ export class Resume {
     }
     
     // Créer l'instance avec les données validées
-    const resume = new Resume(data as ResumeInterface)
+    const resume = new Resume(data as ResumeInterface, i18n)
     return {
       isValid: true,
       resume

@@ -24,6 +24,12 @@ version: 1.1.0
   - `useValidationResult`: Traduction transparente des messages d'erreur de validation
   - Support réactif pour les changements de langue en temps réel
   - Maintien de la compatibilité avec l'API existante
+- Internationalisation des entités et value objects du domaine:
+  - Extraction des messages codés en dur dans les Value Objects (`url.value-object.ts`, `date-range.value-object.ts`, `work-date.value-object.ts`, etc.)
+  - Adaptation des entités du domaine (`Work.ts`, `Resume.ts`) pour utiliser les clés de traduction centralisées
+  - Implémentation du pattern Adapter pour l'injection de la fonctionnalité i18n dans les entités
+  - Conservation de la compatibilité avec le code existant grâce aux adaptateurs par défaut
+  - Centralisation des clés de validation dans `TRANSLATION_KEYS`
 - Infrastructure de test pour l'internationalisation:
   - Création d'un plugin de test pour Vue I18n (`i18n-plugin.ts`)
   - Utilitaire pour tester les composants dans plusieurs langues (`language-testing.ts`)
@@ -408,6 +414,72 @@ graph TD
     G[Bouton de section] -->|Click| A
     H[Bouton next/prev] -->|Click| A
     I[Liste de sections] -->|Click| C
+```
+
+> 💡 **Internationalisation des Entités du Domaine**
+
+```typescript
+// Définition des clés de traduction pour les Value Objects
+export const URL_VALIDATION_KEYS = {
+  MISSING_URL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.MISSING_URL,
+  INVALID_URL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.INVALID_URL,
+  INSECURE_URL: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.INSECURE_URL,
+  TEMPORARY_DOMAIN: TRANSLATION_KEYS.RESUME.BASICS.VALIDATION.TEMPORARY_DOMAIN
+};
+
+// Adaptateur i18n par défaut pour la compatibilité
+class DefaultI18nAdapter implements DomainI18nPortInterface {
+  translate(key: string, _params?: Record<string, unknown>): string {
+    // Messages par défaut pour maintenir la compatibilité
+    const defaultMessages: Record<string, string> = {
+      [URL_VALIDATION_KEYS.MISSING_URL]: "L'URL est requise",
+      [URL_VALIDATION_KEYS.INVALID_URL]: "Format d'URL invalide",
+      [URL_VALIDATION_KEYS.INSECURE_URL]: "URL non sécurisée (HTTP)",
+      [URL_VALIDATION_KEYS.TEMPORARY_DOMAIN]: "Domaine temporaire ou de test détecté"
+    };
+
+    return defaultMessages[key] || key;
+  }
+
+  exists(_key: string): boolean {
+    return true;
+  }
+}
+
+// Factory method avec injection de l'adaptateur i18n
+public static create(
+  url: string,
+  i18n: DomainI18nPortInterface = defaultI18nAdapter
+): ResultType<Url> {
+  // Validation avec messages traduits
+  if (!url || url.trim() === '') {
+    return createFailure([{
+      code: ERROR_CODES.COMMON.REQUIRED_FIELD,
+      message: i18n.translate(URL_VALIDATION_KEYS.MISSING_URL),
+      i18nKey: URL_VALIDATION_KEYS.MISSING_URL,
+      field: "url",
+      severity: "error",
+      layer: ValidationLayerType.DOMAIN
+    }]);
+  }
+
+  // Reste de la validation...
+}
+```
+
+```mermaid
+---
+title: Architecture d'Internationalisation du Domaine
+---
+graph TD
+    A[Domain Entity/Value Object] -->|Utilise| B[DomainI18nPortInterface]
+    B -->|Implémenté par| C[DefaultI18nAdapter]
+    B -->|Implémenté par| D[Runtime I18n Service]
+    A -->|Référence| E[TRANSLATION_KEYS]
+    E -->|Centralisé dans| F[packages/shared]
+    A -->|Factory Méthode| G["create(données, i18nAdapter)"]
+    G -->|Validation avec| H[Messages traduits]
+    H -->|ResultType avec| I[i18nKey + message]
 ```
 
 ### Planned Features 🔮

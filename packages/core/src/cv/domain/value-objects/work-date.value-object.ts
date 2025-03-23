@@ -4,20 +4,20 @@
  */
 
 import {
-    ResultType,
-    ValidationLayerType,
-    createSuccess,
-    createFailure,
-    ERROR_CODES
+  ResultType,
+  ValidationLayerType,
+  createSuccess,
+  createFailure,
+  ERROR_CODES,
+  TRANSLATION_KEYS
 } from '@cv-generator/shared';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
 
 // Définition des clés de traduction spécifiques pour les dates
-// À migrer vers TRANSLATION_KEYS dans @cv-generator/shared quand possible
 const DATE_VALIDATION_KEYS = {
-  MISSING_DATE: "resume.common.validation.missingDate",
-  INVALID_DATE_FORMAT: "resume.common.validation.invalidDateFormat",
-  INVALID_DATE: "resume.common.validation.invalidDate"
+  MISSING_DATE: TRANSLATION_KEYS.COMMON.VALIDATION.MISSING_DATE,
+  INVALID_DATE_FORMAT: TRANSLATION_KEYS.COMMON.VALIDATION.INVALID_DATE_FORMAT,
+  INVALID_DATE: TRANSLATION_KEYS.COMMON.VALIDATION.INVALID_DATE
 };
 
 /**

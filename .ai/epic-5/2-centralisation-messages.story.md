@@ -58,12 +58,12 @@ Story Points: 3
    1. - [x] Identifier tous les textes en dur dans les composants Vue
    2. - [x] Créer les clés correspondantes et les fichiers de traduction
    3. - [ ] Remplacer les textes par des appels à la fonction de traduction (Partiellement complété: BasicsForm.vue uniquement)
-4. - [ ] Extraire les messages des entités du domaine
+4. - [x] Extraire les messages des entités du domaine
 
-   1. - [ ] Identifier tous les messages en dur dans les Value Objects
-   2. - [ ] Identifier tous les messages en dur dans les Entités
-   3. - [ ] Créer les clés correspondantes et les fichiers de traduction
-   4. - [ ] Adapter les entités pour utiliser les clés de traduction
+   1. - [x] Identifier tous les messages en dur dans les Value Objects
+   2. - [x] Identifier tous les messages en dur dans les Entités
+   3. - [x] Créer les clés correspondantes et les fichiers de traduction
+   4. - [x] Adapter les entités pour utiliser les clés de traduction
 
 5. - [x] Supporter l'interpolation de paramètres
    1. - [x] Identifier les messages nécessitant des paramètres variables
@@ -81,18 +81,28 @@ Story Points: 3
 - ✅ Une documentation complète de l'implémentation est disponible
 - ✅ La fonction `safeTranslate` a été créée pour gérer les cas d'erreur de traduction
 - ✅ L'interpolation de paramètres a été testée et documentée
+- ✅ Les Value Objects du domaine ont été mis à jour pour utiliser les clés de traduction centralisées:
+  - ✅ `url.value-object.ts`
+  - ✅ `date-range.value-object.ts`
+  - ✅ `work-date.value-object.ts`
+  - ✅ `email.value-object.ts`
+  - ✅ `phone.value-object.ts`
+- ✅ Les entités du domaine ont été adaptées pour utiliser les clés de traduction:
+  - ✅ `Work.ts`
+  - ✅ `Resume.ts`
+- ✅ Des adaptateurs i18n par défaut ont été créés pour assurer la compatibilité avec le code existant
 
 ### Reste à Faire
 
 - 📌 Mettre à jour les 21 autres composants UI pour utiliser les clés de traduction (voir doc d'implémentation pour la liste)
-- 📌 Extraire les messages des entités du domaine et des Value Objects
-- 📌 Adapter les entités pour utiliser les clés de traduction
 - 📌 Effectuer des tests complets dans les deux langues supportées
 
 ### Problèmes Identifiés et Résolus
 
 - ⚠️ Incohérence dans les conventions de nommage des clés entre TypeScript et JSON (capitalisation)
 - ✅ Solution: Utiliser systématiquement MAJUSCULES dans TS et camelCase dans JSON
+- ⚠️ Structure des clés pour les entités du domaine ne correspondait pas exactement à la structure des codes d'erreur
+- ✅ Solution: Alignement des clés de traduction sur la structure des codes d'erreur tout en maintenant la cohérence
 
 ## Principes de Développement
 
@@ -278,3 +288,5 @@ return createFailure([
 - Tech Lead: Oui, pour permettre une internationalisation complète, même les textes techniques doivent être traduits
 - Dev: Comment gérer les messages avec des variables comme des nombres ou des noms?
 - Tech Lead: Utiliser la fonctionnalité d'interpolation de Vue I18n avec une syntaxe cohérente
+- Dev: J'ai terminé l'extraction des messages des Value Objects et entités du domaine
+- Tech Lead: Excellent travail! Cela contribue grandement à la cohérence de l'application

@@ -101,11 +101,12 @@
         "vagueLocation": "La localisation devrait être plus précise",
         "missingSummary": "Le résumé est obligatoire",
         "briefSummary": "Le résumé est trop court, ajoutez plus de détails",
-        "missingUrl": "[FR] missingUrl",
-        "invalidUrl": "[FR] invalidUrl",
-        "insecureUrl": "[FR] insecureUrl",
-        "temporaryDomain": "[FR] temporaryDomain",
-        "nameTooLong": "[FR] nameTooLong"
+        "missingUrl": "L'URL est requise",
+        "invalidUrl": "Format d'URL invalide",
+        "insecureUrl": "L'URL devrait utiliser HTTPS plutôt que HTTP",
+        "temporaryDomain": "Évitez d'utiliser des domaines temporaires",
+        "nameTooLong": "Le nom est trop long",
+        "missingBasics": "Informations de base requises"
       },
       "imageSuggestions": {
         "title": "Suggestions pour l'URL de l'image :",
@@ -174,8 +175,9 @@
         "briefDescription": "La description est trop brève, ajoutez plus de détails",
         "missingHighlights": "Ajoutez au moins un point fort",
         "vagueHighlights": "Les points forts devraient être plus spécifiques",
-        "invalidStartDate": "[FR] invalidStartDate",
-        "invalidEndDate": "[FR] invalidEndDate"
+        "invalidStartDate": "Date de début invalide",
+        "invalidEndDate": "Date de fin invalide",
+        "invalidDate": "Format de date invalide"
       },
       "form": {
         "addTitle": "Ajouter une expérience professionnelle",
@@ -238,7 +240,9 @@
         "missingStartDate": "La date de début est obligatoire",
         "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
         "missingGpa": "La moyenne est obligatoire",
-        "vagueCourses": "Les descriptions des cours devraient être plus spécifiques"
+        "vagueCourses": "Les descriptions des cours devraient être plus spécifiques",
+        "invalidDate": "Format de date invalide",
+        "invalidEndDate": "Format de date de fin invalide"
       },
       "form": {
         "addTitle": "Ajouter une formation",
@@ -369,13 +373,15 @@
         "invalidUrl": "Format d'URL invalide",
         "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
         "futureDate": "La date ne peut pas être dans le futur",
-        "vagueDescription": "[FR] vagueDescription",
-        "missingRole": "[FR] missingRole",
-        "missingHighlights": "[FR] missingHighlights",
-        "missingKeywords": "[FR] missingKeywords",
-        "missingStartDate": "[FR] missingStartDate",
-        "invalidDateFormat": "[FR] invalidDateFormat",
-        "missingUrl": "[FR] missingUrl"
+        "vagueDescription": "La description est trop vague",
+        "missingRole": "Le rôle est obligatoire",
+        "missingHighlights": "Ajoutez au moins un point fort",
+        "missingKeywords": "Ajoutez au moins un mot-clé",
+        "missingStartDate": "La date de début est obligatoire",
+        "invalidDateFormat": "Format de date invalide",
+        "missingUrl": "L'URL est requise",
+        "invalidStartDate": "Date de début invalide",
+        "invalidEndDate": "Date de fin invalide"
       },
       "form": {
         "addTitle": "Ajouter un projet",
@@ -686,9 +692,8 @@
         "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
         "futureDate": "La date ne peut pas être dans le futur",
         "missingSummary": "Le résumé est obligatoire",
-        "briefSummary": "[FR] briefSummary",
-        "missingHighlights": "[FR] missingHighlights",
-        "invalidDateFormat": "[FR] invalidDateFormat"
+        "invalidDate": "Format de date invalide",
+        "invalidEndDate": "Format de date de fin invalide"
       },
       "form": {
         "addTitle": "Ajouter une expérience bénévole",
