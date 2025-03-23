@@ -202,7 +202,8 @@
         "customOrder": "Ordre personnalisé",
         "showAll": "Voir toutes les expériences",
         "showLess": "Réduire la liste"
-      }
+      },
+      "description": "Ajoutez votre expérience professionnelle pour mettre en évidence votre progression de carrière."
     },
     "education": {
       "labels": {
@@ -284,7 +285,8 @@
         "deleteError": "Erreur lors de la suppression de la formation",
         "reorderError": "Erreur lors de la réorganisation des formations",
         "saveError": "Erreur lors de la sauvegarde de la formation"
-      }
+      },
+      "description": "Ajoutez vos diplômes et formations pour mettre en valeur votre parcours académique."
     },
     "skills": {
       "labels": {
@@ -896,6 +898,12 @@
     },
     "settings": {
       "description": ""
+    },
+    "work": {
+      "description": "Ajoutez votre expérience professionnelle pour mettre en évidence votre progression de carrière."
+    },
+    "education": {
+      "description": "Ajoutez vos diplômes et formations pour mettre en valeur votre parcours académique."
     }
   },
   "progressIndicator": {

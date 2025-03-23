@@ -11,7 +11,7 @@
     <CollectionManager
       :items="references"
       empty-text="t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.EMPTY_STATE_TITLE)"
-      add-button-text="t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.ADD_BUTTON)"
+      :add-button-text="t(TRANSLATION_KEYS.RESUME.REFERENCES.LIST.ADD_BUTTON)"
       :loading="isLoading"
       @add="openAddReference"
       @edit="(item) => openEditReference(item)"

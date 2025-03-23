@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="toasts.length > 0"
     :class="[
       'fixed z-50 p-4 flex flex-col gap-3 w-full max-w-[350px]',
       positionClasses

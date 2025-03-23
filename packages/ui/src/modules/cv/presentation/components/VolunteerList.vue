@@ -134,7 +134,7 @@ const handleReorder = async (newOrder: string[]) => {
     <CollectionManager
       :items="volunteers"
       empty-text="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.EMPTY_STATE_TITLE)"
-      add-button-text="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.ADD_BUTTON)"
+      :add-button-text="t(TRANSLATION_KEYS.RESUME.VOLUNTEER.LIST.ADD_BUTTON)"
       :loading="loading"
       @add="openAddDialog"
       @edit="(item) => openEditDialog(item, volunteers.indexOf(item))"
