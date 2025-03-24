@@ -4,11 +4,18 @@
 
 // Types
 export type {
+  ResultTypeInterface,
   ResultType,
   SuccessType,
   FailureType,
   OptionType,
   FormValidationResultType
+} from './types/result.type';
+
+export {
+  Success,
+  Failure,
+  SuccessWithWarnings
 } from './types/result.type';
 
 export type {
@@ -29,6 +36,9 @@ export {
   isFailure,
   map,
   flatMap,
+  getErrors,
+  getWarnings,
+  hasWarnings,
   getErrorsForField,
   combineValidationResults
 } from './utils/result.utils';

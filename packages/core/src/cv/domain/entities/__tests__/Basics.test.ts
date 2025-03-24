@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Basics, BASICS_VALIDATION_KEYS } from '../Basics';
+import { Basics, BASICS_VALIDATION_KEYS, BasicsSuccess, BasicsFailure, BasicsSuccessWithWarnings } from '../Basics';
 import { isSuccess, isFailure } from '@cv-generator/shared';
 import type { BasicsInterface } from '@cv-generator/shared/src/types/resume.interface';
 import { MockDomainI18nAdapter } from '../../../../shared/i18n/__mocks__/i18n.mock';
@@ -31,10 +31,11 @@ describe('Basics Entity', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      if (isSuccess(result)) {
+      expect(result).toBeInstanceOf(BasicsSuccess);
+      if (result instanceof BasicsSuccess) {
         expect(result.entity).toBeDefined();
-        expect(result.entity?.name).toBe('John Doe');
-        expect(result.entity?.email).toBe('john@example.com');
+        expect(result.entity.name).toBe('John Doe');
+        expect(result.entity.email).toBe('john@example.com');
       }
     });
     
@@ -51,8 +52,9 @@ describe('Basics Entity', () => {
       
       // Assert
       expect(isFailure(result)).toBe(true);
-      if (isFailure(result)) {
-        const nameErrors = result.error.filter(e => e.field === 'name');
+      expect(result).toBeInstanceOf(BasicsFailure);
+      if (result instanceof BasicsFailure) {
+        const nameErrors = result.getErrors().filter(e => e.field === 'name');
         expect(nameErrors.length).toBe(1);
         expect(nameErrors[0].message).toBe('Le nom est requis');
         expect(nameErrors[0].i18nKey).toBe(BASICS_VALIDATION_KEYS.MISSING_NAME);
@@ -73,8 +75,9 @@ describe('Basics Entity', () => {
       
       // Assert
       expect(isFailure(result)).toBe(true);
-      if (isFailure(result)) {
-        const nameErrors = result.error.filter(e => e.field === 'name');
+      expect(result).toBeInstanceOf(BasicsFailure);
+      if (result instanceof BasicsFailure) {
+        const nameErrors = result.getErrors().filter(e => e.field === 'name');
         expect(nameErrors.length).toBe(1);
         expect(nameErrors[0].message).toBe('Le nom ne doit pas dépasser 100 caractères');
         expect(nameErrors[0].i18nKey).toBe(BASICS_VALIDATION_KEYS.NAME_TOO_LONG);
@@ -94,8 +97,9 @@ describe('Basics Entity', () => {
       
       // Assert
       expect(isFailure(result)).toBe(true);
-      if (isFailure(result)) {
-        const emailErrors = result.error.filter(e => e.field === 'email');
+      expect(result).toBeInstanceOf(BasicsFailure);
+      if (result instanceof BasicsFailure) {
+        const emailErrors = result.getErrors().filter(e => e.field === 'email');
         expect(emailErrors.length).toBe(1);
         expect(emailErrors[0].message).toBe('L\'email est requis');
         expect(emailErrors[0].i18nKey).toBe(BASICS_VALIDATION_KEYS.MISSING_EMAIL);
@@ -115,8 +119,9 @@ describe('Basics Entity', () => {
       
       // Assert
       expect(isFailure(result)).toBe(true);
-      if (isFailure(result)) {
-        const emailErrors = result.error.filter(e => e.field === 'email');
+      expect(result).toBeInstanceOf(BasicsFailure);
+      if (result instanceof BasicsFailure) {
+        const emailErrors = result.getErrors().filter(e => e.field === 'email');
         expect(emailErrors.length).toBe(1);
         expect(emailErrors[0].message).toBe('Format email invalide');
         expect(emailErrors[0].i18nKey).toBe(EMAIL_VALIDATION_KEYS.INVALID_EMAIL);
@@ -136,17 +141,18 @@ describe('Basics Entity', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      if (isSuccess(result)) {
+      expect(result).toBeInstanceOf(BasicsSuccessWithWarnings);
+      if (result instanceof BasicsSuccessWithWarnings) {
         expect(result.warnings).toBeDefined();
-        expect(result.warnings?.length).toBeGreaterThan(0);
-        expect(result.warnings?.[0].message).toBe('Email personnel détecté');
-        expect(result.warnings?.[0].i18nKey).toBe(EMAIL_VALIDATION_KEYS.PERSONAL_EMAIL);
+        expect(result.warnings.length).toBeGreaterThan(0);
+        expect(result.warnings[0].message).toBe('Email personnel détecté');
+        expect(result.warnings[0].i18nKey).toBe(EMAIL_VALIDATION_KEYS.PERSONAL_EMAIL);
       }
     });
     
     it('should validate URL correctly', () => {
       // Arrange
-      const validData: Partial<BasicsInterface> = {
+      const data: Partial<BasicsInterface> = {
         name: 'John Doe',
         email: 'john@example.com',
         url: 'https://example.com',
@@ -154,11 +160,12 @@ describe('Basics Entity', () => {
       };
       
       // Act
-      const result = Basics.create(validData, mockI18n);
+      const result = Basics.create(data, mockI18n);
       
       // Assert
       expect(isSuccess(result)).toBe(true);
       if (isSuccess(result)) {
+        expect(result.entity).toBeDefined();
         expect(result.entity?.url).toBe('https://example.com');
       }
     });
@@ -177,10 +184,11 @@ describe('Basics Entity', () => {
       
       // Assert
       expect(isFailure(result)).toBe(true);
-      if (isFailure(result)) {
-        const urlErrors = result.error.filter(e => e.field === 'url');
+      expect(result).toBeInstanceOf(BasicsFailure);
+      if (result instanceof BasicsFailure) {
+        const urlErrors = result.getErrors().filter(e => e.field === 'url');
         expect(urlErrors.length).toBe(1);
-        expect(urlErrors[0].message).toBe("Format d'URL invalide");
+        expect(urlErrors[0].message).toBe('Format d\'URL invalide');
         expect(urlErrors[0].i18nKey).toBe(URL_VALIDATION_KEYS.INVALID_URL);
       }
     });
@@ -194,7 +202,7 @@ describe('Basics Entity', () => {
       // Assert
       expect(isSuccess(result)).toBe(true);
       if (isSuccess(result)) {
-        expect(result.value).toBe('John Doe');
+        expect(result.getValue()).toBe('John Doe');
       }
     });
     
@@ -226,7 +234,8 @@ describe('Basics Entity', () => {
       
       const result = Basics.create(originalData, mockI18n);
       expect(isSuccess(result)).toBe(true);
-      if (!isSuccess(result) || !result.entity) return;
+      expect(result).toBeInstanceOf(BasicsSuccess);
+      if (!(result instanceof BasicsSuccess)) return;
       
       const entity = result.entity;
       
@@ -238,10 +247,11 @@ describe('Basics Entity', () => {
       
       // Assert
       expect(isSuccess(updateResult)).toBe(true);
-      if (isSuccess(updateResult)) {
-        expect(updateResult.entity?.name).toBe('Jane Doe');
-        expect(updateResult.entity?.email).toBe('john@example.com'); // Unchanged
-        expect(updateResult.entity?.summary).toBe('Professional summary'); // New
+      expect(updateResult).toBeInstanceOf(BasicsSuccess);
+      if (updateResult instanceof BasicsSuccess) {
+        expect(updateResult.entity.name).toBe('Jane Doe');
+        expect(updateResult.entity.email).toBe('john@example.com'); // Unchanged
+        expect(updateResult.entity.summary).toBe('Professional summary'); // New
       }
     });
   });
@@ -260,7 +270,9 @@ describe('Basics Entity', () => {
       const result = Basics.create(data, mockI18n);
       expect(isSuccess(result)).toBe(true);
       
-      if (isSuccess(result) && result.entity) {
+      // Nous acceptons maintenant que le résultat soit soit BasicsSuccess soit BasicsSuccessWithWarnings
+      // car le numéro de téléphone ou l'email peuvent générer des avertissements
+      if (result instanceof BasicsSuccess || result instanceof BasicsSuccessWithWarnings) {
         // Act
         const json = result.entity.toJSON();
         

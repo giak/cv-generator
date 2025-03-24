@@ -4,7 +4,7 @@
  */
 
 import {
-  ResultType,
+  ResultTypeInterface,
   ValidationLayerType,
   createSuccess,
   createFailure,
@@ -126,12 +126,12 @@ export class WorkDate {
    * Applique les règles de validation du domaine
    * @param dateStr La date au format YYYY-MM-DD
    * @param i18n Interface pour l'internationalisation des messages (optionnel)
-   * @returns ResultType contenant soit l'objet WorkDate en cas de succès, soit les erreurs
+   * @returns ResultTypeInterface contenant soit l'objet WorkDate en cas de succès, soit les erreurs
    */
   public static createWithResultType(
     dateStr: string,
     i18n: DomainI18nPortInterface = defaultI18nAdapter
-  ): ResultType<WorkDate> {
+  ): ResultTypeInterface<WorkDate> {
     // Validation du format YYYY-MM-DD
     if (!dateStr) {
       return createFailure([{

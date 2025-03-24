@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WorkValidationService, WorkInterface } from '../../../src/cv/application/services/work-validation.service';
-import { isSuccess, isFailure, ValidationLayerType } from '@cv-generator/shared';
+import { isSuccess, isFailure, ValidationLayerType, getWarnings } from '@cv-generator/shared';
 import { DateRange } from '../../../src/cv/domain/value-objects/date-range.value-object';
 
 // Mock du Value Object DateRange
@@ -66,7 +66,8 @@ describe('WorkValidationService', () => {
       expect(DateRange.create).toHaveBeenCalledWith(
         validWork.startDate,
         validWork.endDate,
-        'work'
+        'work',
+        expect.anything() // Accepter n'importe quel adaptateur i18n comme 4ème paramètre
       );
     });
     
@@ -113,10 +114,9 @@ describe('WorkValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      // @ts-ignore: Testing the extended ResultType with warnings
-      expect(result.warnings).toBeDefined();
-      // @ts-ignore: Testing the extended ResultType with warnings
-      const vaguePositionWarning = result.warnings.find((w: any) => w.code === 'vague_position');
+      // Use getWarnings instead of directly accessing warnings
+      expect(getWarnings(result)).toBeDefined();
+      const vaguePositionWarning = getWarnings(result).find((w: any) => w.code === 'vague_position');
       expect(vaguePositionWarning).toBeDefined();
       expect(vaguePositionWarning.severity).toBe('warning');
       expect(vaguePositionWarning.layer).toBe(ValidationLayerType.APPLICATION);
@@ -173,8 +173,8 @@ describe('WorkValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      // @ts-ignore: Testing the extended ResultType with warnings
-      const briefSummaryWarning = result.warnings.find((w: any) => w.code === 'brief_description');
+      // Use getWarnings instead of directly accessing warnings
+      const briefSummaryWarning = getWarnings(result).find((w: any) => w.code === 'brief_description');
       expect(briefSummaryWarning).toBeDefined();
       expect(briefSummaryWarning.severity).toBe('warning');
     });
@@ -188,8 +188,8 @@ describe('WorkValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      // @ts-ignore: Testing the extended ResultType with warnings
-      const missingHighlightsWarning = result.warnings.find((w: any) => w.code === 'missing_highlights');
+      // Use getWarnings instead of directly accessing warnings
+      const missingHighlightsWarning = getWarnings(result).find((w: any) => w.code === 'missing_highlights');
       expect(missingHighlightsWarning).toBeDefined();
       expect(missingHighlightsWarning.severity).toBe('warning');
       expect(missingHighlightsWarning.layer).toBe(ValidationLayerType.APPLICATION);
@@ -207,8 +207,8 @@ describe('WorkValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      // @ts-ignore: Testing the extended ResultType with warnings
-      const vagueHighlightsInfo = result.warnings.find((w: any) => w.code === 'vague_highlights');
+      // Use getWarnings instead of directly accessing warnings
+      const vagueHighlightsInfo = getWarnings(result).find((w: any) => w.code === 'vague_highlights');
       expect(vagueHighlightsInfo).toBeDefined();
       expect(vagueHighlightsInfo.severity).toBe('info');
       expect(vagueHighlightsInfo.layer).toBe(ValidationLayerType.PRESENTATION);
@@ -284,11 +284,11 @@ describe('WorkValidationService', () => {
       // Assert
       expect(isSuccess(result)).toBe(true);
       // @ts-ignore: Testing the extended ResultType with warnings
-      expect(result.warnings).toBeDefined();
+      expect(getWarnings(result)).toBeDefined();
+      // Use getWarnings instead of directly accessing warnings
+      expect(getWarnings(result)[0].code).toBe('vague_position');
       // @ts-ignore: Testing the extended ResultType with warnings
-      expect(result.warnings[0].code).toBe('vague_position');
-      // @ts-ignore: Testing the extended ResultType with warnings
-      expect(result.warnings[0].severity).toBe('warning');
+      expect(getWarnings(result)[0].severity).toBe('warning');
     });
   });
 }); 

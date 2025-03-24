@@ -3,7 +3,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { SkillValidationService, SkillInterface, VALID_SKILL_LEVELS } from '../../../src/cv/application/services/skill-validation.service';
-import { isSuccess, isFailure, ValidationLayerType } from '@cv-generator/shared';
+import { isSuccess, isFailure, ValidationLayerType, getWarnings } from '@cv-generator/shared';
 
 describe('SkillValidationService', () => {
   let service: SkillValidationService;
@@ -59,10 +59,8 @@ describe('SkillValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      // @ts-ignore: Testing the extended ResultType with warnings
-      expect(result.warnings).toBeDefined();
-      // @ts-ignore: Testing the extended ResultType with warnings
-      const shortNameWarning = result.warnings.find((w: any) => w.code === 'brief_skill_name');
+      expect(getWarnings(result)).toBeDefined();
+      const shortNameWarning = getWarnings(result).find((w: any) => w.code === 'brief_skill_name');
       expect(shortNameWarning).toBeDefined();
       expect(shortNameWarning.severity).toBe('warning');
       expect(shortNameWarning.layer).toBe(ValidationLayerType.APPLICATION);
@@ -77,10 +75,8 @@ describe('SkillValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      // @ts-ignore: Testing the extended ResultType with warnings
-      expect(result.warnings).toBeDefined();
-      // @ts-ignore: Testing the extended ResultType with warnings
-      const genericSkillInfo = result.warnings.find((w: any) => w.code === 'generic_skill');
+      expect(getWarnings(result)).toBeDefined();
+      const genericSkillInfo = getWarnings(result).find((w: any) => w.code === 'generic_skill');
       expect(genericSkillInfo).toBeDefined();
       expect(genericSkillInfo.severity).toBe('info');
       expect(genericSkillInfo.layer).toBe(ValidationLayerType.APPLICATION);
@@ -95,8 +91,7 @@ describe('SkillValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      // @ts-ignore: Testing the extended ResultType with warnings
-      const levelWarning = result.warnings.find((w: any) => w.code === 'undefined_level');
+      const levelWarning = getWarnings(result).find((w: any) => w.code === 'undefined_level');
       expect(levelWarning).toBeDefined();
       expect(levelWarning.severity).toBe('warning');
     });
@@ -108,9 +103,7 @@ describe('SkillValidationService', () => {
         const result = service.validate(skill);
         
         expect(isSuccess(result)).toBe(true);
-        // @ts-ignore: Testing the extended ResultType with warnings
-        const warnings = result.warnings || [];
-        // @ts-ignore: Testing the extended ResultType with warnings
+        const warnings = getWarnings(result);
         const levelWarning = warnings.find((w: any) => w.code === 'undefined_level');
         expect(levelWarning).toBeUndefined();
       }
@@ -125,8 +118,7 @@ describe('SkillValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      // @ts-ignore: Testing the extended ResultType with warnings
-      const keywordsInfo = result.warnings.find((w: any) => w.code === 'missing_keywords');
+      const keywordsInfo = getWarnings(result).find((w: any) => w.code === 'missing_keywords');
       expect(keywordsInfo).toBeDefined();
       expect(keywordsInfo.severity).toBe('info');
       expect(keywordsInfo.layer).toBe(ValidationLayerType.PRESENTATION);
@@ -179,12 +171,9 @@ describe('SkillValidationService', () => {
       
       // Assert
       expect(isSuccess(result)).toBe(true);
-      // @ts-ignore: Testing the extended ResultType with warnings
-      expect(result.warnings).toBeDefined();
-      // @ts-ignore: Testing the extended ResultType with warnings
-      expect(result.warnings[0].code).toBe('generic_skill');
-      // @ts-ignore: Testing the extended ResultType with warnings
-      expect(result.warnings[0].severity).toBe('info');
+      expect(getWarnings(result)).toBeDefined();
+      expect(getWarnings(result)[0].code).toBe('generic_skill');
+      expect(getWarnings(result)[0].severity).toBe('info');
     });
   });
 }); 

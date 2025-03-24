@@ -4,14 +4,14 @@
  */
 
 import {
-  ResultType,
-  ValidationErrorInterface,
-  ValidationLayerType,
-  createSuccess,
-  createFailure,
-  createSuccessWithWarnings,
-  ERROR_CODES,
-  TRANSLATION_KEYS
+    ResultTypeInterface,
+    ValidationErrorInterface,
+    ValidationLayerType,
+    createSuccess,
+    createFailure,
+    createSuccessWithWarnings,
+    ERROR_CODES,
+    TRANSLATION_KEYS
 } from '@cv-generator/shared';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
 
@@ -74,12 +74,12 @@ export class Email {
    * Applique les règles de validation du domaine
    * @param email Adresse email à valider
    * @param i18n Interface pour l'internationalisation des messages (optionnel)
-   * @returns ResultType contenant soit l'objet Email en cas de succès, soit les erreurs
+   * @returns ResultTypeInterface contenant soit l'objet Email en cas de succès, soit les erreurs
    */
   public static create(
     email: string,
     i18n: DomainI18nPortInterface = defaultI18nAdapter
-  ): ResultType<Email> {
+  ): ResultTypeInterface<Email> {
     // Validation: Format d'email valide (incluant l'email vide)
     if (!email || email.trim() === '') {
       return createFailure([{

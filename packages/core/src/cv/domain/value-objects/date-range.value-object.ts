@@ -5,12 +5,13 @@
 
 import { z } from 'zod';
 import {
-  ResultType,
+  ResultTypeInterface,
   ValidationErrorInterface,
   ValidationLayerType,
   createSuccess,
   createFailure,
-  ERROR_CODES, createSuccessWithWarnings,
+  ERROR_CODES,
+  createSuccessWithWarnings,
   ValidationSeverityType,
   TRANSLATION_KEYS
 } from '@cv-generator/shared';
@@ -169,14 +170,14 @@ export class DateRange {
    * @param endDateStr Chaîne représentant la date de fin (format YYYY-MM-DD), null pour une expérience en cours
    * @param context Contexte pour les messages d'erreur (ex: "work" ou "education")
    * @param i18n Interface d'internationalisation pour les messages d'erreur
-   * @returns ResultType contenant soit l'objet DateRange, soit les erreurs
+   * @returns ResultTypeInterface contenant soit l'objet DateRange, soit les erreurs
    */
   public static create(
     startDateStr: string,
     endDateStr: string | null | undefined,
     context: 'work' | 'education' = 'work',
     i18n: DomainI18nPortInterface = DateRange.defaultI18n
-  ): ResultType<DateRange> {
+  ): ResultTypeInterface<DateRange> {
     // Validation avec Zod
     const validationResult = this.dateSchema(context, i18n).safeParse({ 
       startDate: startDateStr, 

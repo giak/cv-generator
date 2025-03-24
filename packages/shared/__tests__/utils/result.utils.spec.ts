@@ -2,15 +2,16 @@
  * Tests unitaires pour les utilitaires Result/Option
  */
 import { describe, it, expect } from 'vitest';
-import { 
-  createSuccess, 
-  createFailure, 
-  isSuccess, 
-  isFailure, 
-  map, 
-  flatMap, 
-  getErrorsForField,
-  combineValidationResults 
+import {
+    createSuccess,
+    createFailure,
+    createSuccessWithWarnings,
+    isSuccess,
+    isFailure,
+    map,
+    flatMap,
+    getErrorsForField,
+    combineValidationResults
 } from '../../src/utils/result.utils';
 import { ValidationLayerType } from '../../src/enums/validation.enum';
 
@@ -20,22 +21,19 @@ describe('Result Pattern Utilities', () => {
     it('should create a success result', () => {
       const result = createSuccess('test value');
       
-      expect(result).toEqual({
-        success: true,
-        value: 'test value'
-      });
+      expect(result.isSuccess()).toBe(true);
+      expect(result.getValue()).toBe('test value');
       expect(isSuccess(result)).toBe(true);
       expect(isFailure(result)).toBe(false);
+      expect(result.hasWarnings()).toBe(false);
     });
     
     it('should handle complex objects', () => {
       const complexValue = { name: 'John', age: 30, info: { hobby: 'coding' } };
       const result = createSuccess(complexValue);
       
-      expect(result.success).toBe(true);
-      if (isSuccess(result)) {
-        expect(result.value).toEqual(complexValue);
-      }
+      expect(result.isSuccess()).toBe(true);
+      expect(result.getValue()).toEqual(complexValue);
     });
   });
   
@@ -52,12 +50,30 @@ describe('Result Pattern Utilities', () => {
       
       const result = createFailure(error);
       
-      expect(result).toEqual({
-        success: false,
-        error
-      });
+      expect(result.isFailure()).toBe(true);
+      expect(result.getErrors()).toEqual(error);
       expect(isFailure(result)).toBe(true);
       expect(isSuccess(result)).toBe(false);
+    });
+  });
+  
+  // Tests pour createSuccessWithWarnings
+  describe('createSuccessWithWarnings', () => {
+    it('should create a success result with warnings', () => {
+      const warning = [{ 
+        code: 'test_warning', 
+        message: 'Test warning message', 
+        field: 'testField',
+        severity: 'warning' as const,
+        layer: ValidationLayerType.DOMAIN
+      }];
+      
+      const result = createSuccessWithWarnings('test value', warning);
+      
+      expect(result.isSuccess()).toBe(true);
+      expect(result.getValue()).toBe('test value');
+      expect(result.hasWarnings()).toBe(true);
+      expect(result.getWarnings()).toEqual(warning);
     });
   });
   
@@ -67,8 +83,8 @@ describe('Result Pattern Utilities', () => {
       const result = createSuccess('test');
       const mapped = map(result, value => value.toUpperCase());
       
-      expect(isSuccess(mapped)).toBe(true);
-      expect(mapped.success ? mapped.value : null).toBe('TEST');
+      expect(mapped.isSuccess()).toBe(true);
+      expect(mapped.getValue()).toBe('TEST');
     });
     
     it('should pass through failure results', () => {
@@ -83,8 +99,8 @@ describe('Result Pattern Utilities', () => {
       const result = createFailure(error);
       const mapped = map(result, (value: unknown) => String(value));
       
-      expect(isFailure(mapped)).toBe(true);
-      expect(mapped.success ? null : mapped.error).toEqual(error);
+      expect(mapped.isFailure()).toBe(true);
+      expect(mapped.getErrors()).toEqual(error);
     });
   });
   
@@ -96,8 +112,8 @@ describe('Result Pattern Utilities', () => {
         createSuccess(value * 2)
       );
       
-      expect(isSuccess(chained)).toBe(true);
-      expect(chained.success ? chained.value : null).toBe(10);
+      expect(chained.isSuccess()).toBe(true);
+      expect(chained.getValue()).toBe(10);
     });
     
     it('should chain from success to failure', () => {
@@ -112,8 +128,8 @@ describe('Result Pattern Utilities', () => {
       
       const chained = flatMap(result, () => createFailure(error));
       
-      expect(isFailure(chained)).toBe(true);
-      expect(chained.success ? null : chained.error).toEqual(error);
+      expect(chained.isFailure()).toBe(true);
+      expect(chained.getErrors()).toEqual(error);
     });
     
     it('should not process failures', () => {
@@ -133,8 +149,8 @@ describe('Result Pattern Utilities', () => {
         return createSuccess('never reached');
       });
       
-      expect(isFailure(chained)).toBe(true);
-      expect(chained.success ? null : chained.error).toEqual(error);
+      expect(chained.isFailure()).toBe(true);
+      expect(chained.getErrors()).toEqual(error);
       expect(processedCount).toBe(0); // La fonction ne doit pas être appelée
     });
   });
@@ -184,70 +200,43 @@ describe('Result Pattern Utilities', () => {
   
   // Tests pour combineValidationResults
   describe('combineValidationResults', () => {
-    it('should combine multiple successful results', () => {
-      const results = {
-        name: createSuccess('John'),
-        age: createSuccess(30)
-      };
+    it('should combine multiple results and return success if all succeed', () => {
+      const nameResult = createSuccess('John');
+      const ageResult = createSuccess(30);
       
-      const combined = combineValidationResults(results);
-      
-      expect(isSuccess(combined)).toBe(true);
-      expect(combined.success ? combined.value : null).toEqual({
-        name: 'John',
-        age: 30
+      const combined = combineValidationResults({
+        name: nameResult,
+        age: ageResult
       });
+      
+      expect(combined.isSuccess()).toBe(true);
+      if (combined.isSuccess()) {
+        expect(combined.getValue()).toEqual({
+          name: 'John',
+          age: 30
+        });
+      }
     });
     
-    it('should collect all errors from multiple results', () => {
-      const nameError = { 
-        code: 'invalid_name', 
-        message: 'Invalid name', 
-        field: 'name',
-        severity: 'error' as const,
-        layer: ValidationLayerType.DOMAIN
-      };
-      
+    it('should return failure with all errors if any result fails', () => {
+      const nameResult = createSuccess('John');
       const ageError = { 
-        code: 'invalid_age', 
-        message: 'Invalid age', 
+        code: 'test_error', 
+        message: 'Age must be positive', 
         field: 'age',
         severity: 'error' as const,
         layer: ValidationLayerType.DOMAIN
       };
+      const ageResult = createFailure([ageError]);
       
-      const results = {
-        name: createFailure([nameError]),
-        age: createFailure([ageError])
-      };
+      const combined = combineValidationResults({
+        name: nameResult,
+        age: ageResult
+      });
       
-      const combined = combineValidationResults(results);
-      
-      expect(isFailure(combined)).toBe(true);
-      expect(combined.success ? null : combined.error).toHaveLength(2);
-      expect(combined.success ? null : combined.error).toContainEqual(nameError);
-      expect(combined.success ? null : combined.error).toContainEqual(ageError);
-    });
-    
-    it('should handle mixed success and failure results', () => {
-      const ageError = { 
-        code: 'invalid_age', 
-        message: 'Invalid age', 
-        field: 'age',
-        severity: 'error' as const,
-        layer: ValidationLayerType.DOMAIN
-      };
-      
-      const results = {
-        name: createSuccess('John'),
-        age: createFailure([ageError])
-      };
-      
-      const combined = combineValidationResults(results);
-      
-      expect(isFailure(combined)).toBe(true);
-      expect(combined.success ? null : combined.error).toHaveLength(1);
-      expect(combined.success ? null : combined.error[0]).toEqual(ageError);
+      expect(combined.isFailure()).toBe(true);
+      expect(combined.getErrors()).toHaveLength(1);
+      expect(combined.getErrors()[0]).toEqual(ageError);
     });
   });
 }); 

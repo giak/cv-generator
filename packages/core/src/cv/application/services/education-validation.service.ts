@@ -8,8 +8,10 @@ import {
   ValidationLayerType,
   createSuccess,
   createFailure,
+  createSuccessWithWarnings,
   isFailure,
-  ERROR_CODES
+  getErrors,
+  ERROR_CODES,
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';
 import { DateRange } from '../../domain/value-objects/date-range.value-object';
@@ -122,7 +124,7 @@ export class EducationValidationService extends BaseValidationService<EducationI
     );
     
     if (isFailure(dateRangeResult)) {
-      errors.push(...dateRangeResult.error);
+      errors.push(...getErrors(dateRangeResult));
     }
     
     // Validation du GPA/mention (non obligatoire mais conseillé)
@@ -168,12 +170,8 @@ export class EducationValidationService extends BaseValidationService<EducationI
     
     // Si seulement des warnings/infos, on retourne un succès avec les warnings
     if (errors.length > 0) {
-      // Extension du pattern Result comme dans les autres services
-      return {
-        success: true,
-        value: education,
-        warnings: errors
-      } as any;
+      // Utilisation du pattern Result standardisé
+      return createSuccessWithWarnings(education, errors);
     }
     
     return createSuccess(education);
@@ -251,7 +249,7 @@ export class EducationValidationService extends BaseValidationService<EducationI
         
         if (isFailure(dateRangeResult)) {
           // On filtre les erreurs pour ne garder que celles du champ spécifié
-          const fieldErrors = dateRangeResult.error.filter(
+          const fieldErrors = getErrors(dateRangeResult).filter(
             err => err.field === fieldName
           );
           
@@ -309,12 +307,7 @@ export class EducationValidationService extends BaseValidationService<EducationI
     }
     
     if (errors.length > 0) {
-      // Extension du pattern Result
-      return {
-        success: true,
-        value: value as EducationInterface[K],
-        warnings: errors
-      } as any;
+      return createSuccessWithWarnings(value as EducationInterface[K], errors);
     }
     
     return createSuccess(value as EducationInterface[K]);

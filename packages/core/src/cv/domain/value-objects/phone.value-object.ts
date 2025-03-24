@@ -4,7 +4,7 @@
  */
 
 import {
-    ResultType,
+    ResultTypeInterface,
     ValidationErrorInterface,
     ValidationLayerType,
     createSuccess,
@@ -153,16 +153,16 @@ export class Phone {
   /**
    * Méthode factory standard pour créer une instance Phone avec ResultType
    * Applique les règles de validation du domaine
-   * @param phoneStr Numéro de téléphone à valider
+   * @param phoneNumber Le numéro de téléphone à valider
    * @param i18n Interface pour l'internationalisation des messages (optionnel)
-   * @returns ResultType contenant soit l'objet Phone en cas de succès, soit les erreurs
+   * @returns ResultTypeInterface contenant soit l'objet Phone en cas de succès, soit les erreurs
    */
   public static createWithResultType(
-    phoneStr: string,
+    phoneNumber: string,
     i18n: DomainI18nPortInterface = defaultI18nAdapter
-  ): ResultType<Phone> {
+  ): ResultTypeInterface<Phone> {
     // Validation de base
-    if (!phoneStr || phoneStr.trim() === '') {
+    if (!phoneNumber || phoneNumber.trim() === '') {
       return createFailure([{
         code: ERROR_CODES.RESUME.BASICS.MISSING_PHONE,
         message: i18n.translate(PHONE_VALIDATION_KEYS.MISSING_PHONE), 
@@ -174,7 +174,7 @@ export class Phone {
       }]);
     }
 
-    const cleanedPhone = phoneStr.replace(/[\s.-]/g, '');
+    const cleanedPhone = phoneNumber.replace(/[\s.-]/g, '');
     
     // Validation des critères spécifiques
     if (/[a-zA-Z]/.test(cleanedPhone)) {

@@ -8,7 +8,8 @@ import {
     ValidationLayerType,
     createSuccess,
     ERROR_CODES,
-    createFailure
+    createFailure,
+    createSuccessWithWarnings
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
@@ -22,7 +23,8 @@ export const SKILL_VALIDATION_KEYS = {
   BRIEF_SKILL_NAME: 'resume.skills.validation.briefSkillName',
   GENERIC_SKILL: 'resume.skills.validation.genericSkill',
   UNDEFINED_LEVEL: 'resume.skills.validation.undefinedLevel',
-  MISSING_KEYWORDS: 'resume.skills.validation.missingKeywords'
+  MISSING_KEYWORDS: 'resume.skills.validation.missingKeywords',
+  UNRECOGNIZED_LEVEL: 'resume.skills.validation.unrecognizedLevel'
 };
 
 /**
@@ -50,7 +52,6 @@ export const VALID_SKILL_LEVELS = [
  */
 export class SkillValidationService extends BaseValidationService<SkillInterface> {
   private i18nAdapter: DomainI18nPortInterface;
-  private skillSchema: z.ZodObject<any>;
   
   // Schémas individuels pour chaque champ
   private nameSchema: z.ZodType<string>;
@@ -70,12 +71,6 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
     this.levelSchema = z.string().optional();
     this.keywordsSchema = z.array(z.string()).optional();
     
-    // Initialisation du schéma principal
-    this.skillSchema = z.object({
-      name: this.nameSchema,
-      level: this.levelSchema,
-      keywords: this.keywordsSchema
-    });
     
     this.initSchema();
   }
@@ -121,12 +116,6 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
         message: this.i18nAdapter.translate(SKILL_VALIDATION_KEYS.MISSING_KEYWORDS)
       });
     
-    // Mise à jour du schéma principal
-    this.skillSchema = z.object({
-      name: this.nameSchema,
-      level: this.levelSchema,
-      keywords: this.keywordsSchema
-    });
   }
   
   /**
@@ -137,9 +126,10 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
   public validate(skill: SkillInterface): ResultType<SkillInterface> {
     // Validation manuelle pour les cas spécifiques
     const errors: ValidationErrorInterface[] = [];
+    const warnings: ValidationErrorInterface[] = [];
     
-    // Vérification du nom
-    if (!skill.name || skill.name.length < 1) {
+    // Vérification du nom de compétence
+    if (!skill.name || skill.name.trim() === '') {
       errors.push({
         code: ERROR_CODES.RESUME.SKILLS.MISSING_SKILL_NAME,
         message: this.i18nAdapter.translate(SKILL_VALIDATION_KEYS.MISSING_SKILL_NAME),
@@ -149,30 +139,35 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
         layer: ValidationLayerType.DOMAIN
       });
     } else if (skill.name.length < 3) {
-      errors.push({
+      warnings.push({
         code: ERROR_CODES.RESUME.SKILLS.BRIEF_SKILL_NAME,
         message: this.i18nAdapter.translate(SKILL_VALIDATION_KEYS.BRIEF_SKILL_NAME),
         field: 'name',
         i18nKey: SKILL_VALIDATION_KEYS.BRIEF_SKILL_NAME,
         severity: 'warning',
         layer: ValidationLayerType.APPLICATION,
-        suggestion: "Utilisez un nom complet plutôt qu'un acronyme"
+        suggestion: "Utilisez un nom plus descriptif pour cette compétence"
       });
-    } else if (['skill', 'competence', 'technology'].includes(skill.name.toLowerCase())) {
-      errors.push({
+    }
+    
+    // Vérification du nom générique (warning)
+    if (['skill', 'competence', 'technology', 'développement', 'development', 'programming', 'programmation']
+      .includes(skill.name?.toLowerCase() || '')) {
+      warnings.push({
         code: ERROR_CODES.RESUME.SKILLS.GENERIC_SKILL,
         message: this.i18nAdapter.translate(SKILL_VALIDATION_KEYS.GENERIC_SKILL),
         field: 'name',
         i18nKey: SKILL_VALIDATION_KEYS.GENERIC_SKILL,
         severity: 'info',
         layer: ValidationLayerType.APPLICATION,
-        suggestion: "Soyez plus spécifique sur cette compétence (ex: 'JavaScript' au lieu de 'Technologie')"
+        suggestion: "Utilisez un nom plus spécifique pour cette compétence"
       });
     }
-    
+
     // Vérification du niveau
-    if (skill.level === '') {
-      errors.push({
+    if (skill.level && !['beginner', 'intermediate', 'advanced', 'master', 'expert',
+      'débutant', 'intermédiaire', 'avancé', 'maître', 'expert'].includes(skill.level.toLowerCase())) {
+      warnings.push({
         code: ERROR_CODES.RESUME.SKILLS.UNDEFINED_LEVEL,
         message: this.i18nAdapter.translate(SKILL_VALIDATION_KEYS.UNDEFINED_LEVEL),
         field: 'level',
@@ -184,7 +179,7 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
     
     // Vérification des mots-clés
     if (!skill.keywords || skill.keywords.length === 0) {
-      errors.push({
+      warnings.push({
         code: ERROR_CODES.RESUME.SKILLS.MISSING_KEYWORDS,
         message: this.i18nAdapter.translate(SKILL_VALIDATION_KEYS.MISSING_KEYWORDS),
         field: 'keywords',
@@ -195,12 +190,17 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
       });
     }
     
-    // Si des erreurs ont été trouvées, retourner un échec
+    // Si des erreurs de sévérité "error" ont été trouvées, retourner un échec
     if (errors.length > 0) {
-      return createFailure(errors);
+      return createFailure([...errors, ...warnings]);
     }
     
-    // Sinon, retourner un succès
+    // Si uniquement des warnings, retourner un succès avec warnings
+    if (warnings.length > 0) {
+      return createSuccessWithWarnings(skill, warnings);
+    }
+    
+    // Sinon, retourner un succès simple
     return createSuccess(skill);
   }
 
@@ -216,6 +216,7 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
   ): ResultType<SkillInterface[K]> {
     // Validation manuelle pour chaque champ
     const errors: ValidationErrorInterface[] = [];
+    const warnings: ValidationErrorInterface[] = [];
     
     switch (fieldName) {
       case 'name':
@@ -229,7 +230,7 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
             layer: ValidationLayerType.DOMAIN
           });
         } else if (skill.name.length < 3) {
-          errors.push({
+          warnings.push({
             code: ERROR_CODES.RESUME.SKILLS.BRIEF_SKILL_NAME,
             message: this.i18nAdapter.translate(SKILL_VALIDATION_KEYS.BRIEF_SKILL_NAME),
             field: 'name',
@@ -238,8 +239,8 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
             layer: ValidationLayerType.APPLICATION,
             suggestion: "Utilisez un nom complet plutôt qu'un acronyme"
           });
-        } else if (['skill', 'competence', 'technology'].includes(skill.name.toLowerCase())) {
-          errors.push({
+        } else if (['skill', 'competence', 'technology', 'programming', 'programmation', 'développement', 'development'].includes(skill.name.toLowerCase())) {
+          warnings.push({
             code: ERROR_CODES.RESUME.SKILLS.GENERIC_SKILL,
             message: this.i18nAdapter.translate(SKILL_VALIDATION_KEYS.GENERIC_SKILL),
             field: 'name',
@@ -253,7 +254,7 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
         
       case 'level':
         if (skill.level === '') {
-          errors.push({
+          warnings.push({
             code: ERROR_CODES.RESUME.SKILLS.UNDEFINED_LEVEL,
             message: this.i18nAdapter.translate(SKILL_VALIDATION_KEYS.UNDEFINED_LEVEL),
             field: 'level',
@@ -285,6 +286,11 @@ export class SkillValidationService extends BaseValidationService<SkillInterface
     // Si des erreurs ont été trouvées, retourner un échec
     if (errors.length > 0) {
       return createFailure(errors);
+    }
+    
+    // Si des warnings ont été trouvés, retourner un succès avec warnings
+    if (warnings.length > 0) {
+      return createSuccessWithWarnings(skill[fieldName], warnings);
     }
     
     // Sinon, retourner un succès

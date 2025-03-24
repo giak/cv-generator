@@ -1,9 +1,45 @@
 import type { ResumeInterface } from '@cv-generator/shared/src/types/resume.interface';
 import type { ValidationResultType } from '@cv-generator/shared/src/types/resume.type';
+import {
+    ResultTypeInterface,
+    ValidationErrorInterface,
+    ValidationLayerType,
+    ERROR_CODES,
+    TRANSLATION_KEYS,
+    Success,
+    Failure
+} from '@cv-generator/shared';
 import { Email } from '../value-objects/email.value-object';
 import { Phone } from '../value-objects/phone.value-object';
-import { TRANSLATION_KEYS } from '@cv-generator/shared';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
+
+/**
+ * Type standard pour les résultats de l'entité Resume
+ * Conforme au pattern ResultTypeInterface standardisé
+ */
+export type ResumeResultType = ResultTypeInterface<ResumeInterface> & { 
+  entity?: Resume 
+};
+
+/**
+ * Classes d'implémentation pour ResumeResultType
+ */
+export class ResumeSuccess extends Success<ResumeInterface> implements ResumeResultType {
+  public readonly entity: Resume;
+  
+  constructor(resume: Resume) {
+    super(resume.toJSON());
+    this.entity = resume;
+  }
+}
+
+export class ResumeFailure extends Failure<ResumeInterface> implements ResumeResultType {
+  public readonly entity?: undefined;
+  
+  constructor(errors: ValidationErrorInterface[]) {
+    super(errors);
+  }
+}
 
 /**
  * Clés de traduction spécifiques pour l'entité Resume
@@ -93,44 +129,65 @@ export class Resume {
     private readonly _i18n: DomainI18nPortInterface
   ) {}
 
-  static create(
+  /**
+   * Méthode factory pour créer une instance validée de Resume avec le pattern ResultType standardisé
+   * @param data Les données brutes du CV
+   * @param i18n Interface pour l'internationalisation des messages
+   * @returns ResultTypeInterface contenant soit les données de Resume en cas de succès, soit les erreurs
+   */
+  static createWithResultType(
     data: Partial<ResumeInterface>,
     i18n: DomainI18nPortInterface = defaultI18nAdapter
-  ): ValidationResultType & { resume?: Resume } {
-    const errors: string[] = []
+  ): ResumeResultType {
+    const errors: ValidationErrorInterface[] = [];
     
     // 1. Validation basique des données essentielles
     if (!data.basics) {
-      errors.push(i18n.translate(RESUME_VALIDATION_KEYS.MISSING_BASICS))
-      return { isValid: false, errors }
+      errors.push({
+        code: ERROR_CODES.COMMON.REQUIRED_FIELD,
+        message: i18n.translate(RESUME_VALIDATION_KEYS.MISSING_BASICS),
+        i18nKey: RESUME_VALIDATION_KEYS.MISSING_BASICS,
+        field: "basics",
+        severity: "error",
+        layer: ValidationLayerType.DOMAIN,
+        suggestion: "Veuillez fournir les informations de base du CV"
+      });
+      
+      return new ResumeFailure(errors);
     }
     
     // 2. Validation du nom (requis)
     if (!data.basics.name || data.basics.name.trim().length === 0) {
-      errors.push(i18n.translate(RESUME_VALIDATION_KEYS.MISSING_NAME))
+      errors.push({
+        code: ERROR_CODES.RESUME.BASICS.MISSING_NAME,
+        message: i18n.translate(RESUME_VALIDATION_KEYS.MISSING_NAME),
+        i18nKey: RESUME_VALIDATION_KEYS.MISSING_NAME,
+        field: "basics.name",
+        severity: "error",
+        layer: ValidationLayerType.DOMAIN,
+        suggestion: "Veuillez fournir un nom"
+      });
     }
     
     // 3. Validation de l'email avec le value object Email
     if (data.basics?.email) {
-      const emailResult = Email.create(data.basics.email)
-      if (!emailResult.success) {
-        errors.push(emailResult.error[0].message)
+      const emailResult = Email.create(data.basics.email);
+      if (emailResult.isFailure()) {
+        errors.push(...emailResult.getErrors().map(err => ({
+          ...err,
+          field: "basics.email"
+        })));
       }
     }
     
     // 4. Validation du téléphone si fourni
     if (data.basics.phone) {
-      const phoneResult = Phone.create(data.basics.phone)
-      if (phoneResult.isFailure) {
-        // Le résultat peut être une chaîne ou un tableau
-        if (typeof phoneResult.error === 'string') {
-          errors.push(phoneResult.error)
-        } else if (Array.isArray(phoneResult.error)) {
-          // Si c'est un tableau, prendre le premier message
-          errors.push(phoneResult.error[0]?.message || 'Format de téléphone invalide')
-        } else {
-          errors.push('Format de téléphone invalide')
-        }
+      const phoneResult = Phone.createWithResultType(data.basics.phone);
+      if (phoneResult.isFailure()) {
+        errors.push(...phoneResult.getErrors().map(err => ({
+          ...err,
+          field: "basics.phone"
+        })));
       }
     }
     
@@ -138,175 +195,282 @@ export class Resume {
     if (data.work && data.work.length > 0) {
       data.work.forEach((work, index) => {
         if (!this.isValidDate(work.startDate)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_WORK_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_WORK_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_WORK_DATE,
+            field: `work[${index}].startDate`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
         
         if (work.endDate && !this.isValidDate(work.endDate)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_WORK_END_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_WORK_END_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_WORK_END_DATE,
+            field: `work[${index}].endDate`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
-      })
+      });
     }
 
     // 6. Validation des dates dans les activités bénévoles
     if (data.volunteer && data.volunteer.length > 0) {
       data.volunteer.forEach((vol, index) => {
         if (!this.isValidDate(vol.startDate)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_DATE,
+            field: `volunteer[${index}].startDate`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
         
         if (vol.endDate && !this.isValidDate(vol.endDate)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_END_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_END_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_VOLUNTEER_END_DATE,
+            field: `volunteer[${index}].endDate`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
-      })
+      });
     }
 
     // 7. Validation des dates dans l'éducation
     if (data.education && data.education.length > 0) {
       data.education.forEach((edu, index) => {
         if (!this.isValidDate(edu.startDate)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_EDUCATION_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_EDUCATION_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_EDUCATION_DATE,
+            field: `education[${index}].startDate`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
         
         if (edu.endDate && !this.isValidDate(edu.endDate)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_EDUCATION_END_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_EDUCATION_END_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_EDUCATION_END_DATE,
+            field: `education[${index}].endDate`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
-      })
+      });
     }
     
     // 8. Validation des dates des distinctions
     if (data.awards && data.awards.length > 0) {
       data.awards.forEach((award, index) => {
         if (!this.isValidDate(award.date)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_AWARD_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_AWARD_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_AWARD_DATE,
+            field: `awards[${index}].date`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
-      })
+      });
     }
 
     // 9. Validation des dates des certificats
     if (data.certificates && data.certificates.length > 0) {
       data.certificates.forEach((cert, index) => {
         if (!this.isValidDate(cert.date)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_CERTIFICATE_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_CERTIFICATE_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_CERTIFICATE_DATE,
+            field: `certificates[${index}].date`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
-      })
+      });
     }
 
     // 10. Validation des dates des publications
     if (data.publications && data.publications.length > 0) {
       data.publications.forEach((pub, index) => {
         if (!this.isValidDate(pub.releaseDate)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_PUBLICATION_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_PUBLICATION_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_PUBLICATION_DATE,
+            field: `publications[${index}].releaseDate`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
-      })
+      });
     }
 
     // 11. Validation des dates des projets
     if (data.projects && data.projects.length > 0) {
       data.projects.forEach((project, index) => {
         if (project.startDate && !this.isValidDate(project.startDate)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_PROJECT_START_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_PROJECT_START_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_PROJECT_START_DATE,
+            field: `projects[${index}].startDate`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
         
         if (project.endDate && !this.isValidDate(project.endDate)) {
-          errors.push(i18n.translate(RESUME_VALIDATION_KEYS.INVALID_PROJECT_END_DATE, { index }))
+          errors.push({
+            code: ERROR_CODES.COMMON.INVALID_DATE_FORMAT,
+            message: i18n.translate(RESUME_VALIDATION_KEYS.INVALID_PROJECT_END_DATE, { index }),
+            i18nKey: RESUME_VALIDATION_KEYS.INVALID_PROJECT_END_DATE,
+            field: `projects[${index}].endDate`,
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "Utilisez le format YYYY-MM-DD"
+          });
         }
-      })
+      });
     }
     
-    // Si des erreurs sont présentes, retourne le résultat d'échec
+    // Si des erreurs sont présentes, retourne un résultat d'échec
     if (errors.length > 0) {
-
-      return { isValid: false, errors }
+      return new ResumeFailure(errors);
     }
     
-    // Créer l'instance avec les données validées
-    const resume = new Resume(data as ResumeInterface, i18n)
-    return {
-      isValid: true,
-      resume
+    // Création de l'instance avec les données validées
+    const resume = new Resume(
+      // Utiliser l'objet data directement, ou un clone pour éviter les modifications
+      {
+        ...data as ResumeInterface
+      },
+      i18n
+    );
+    
+    // Retourner un résultat de succès avec l'entité attachée
+    return new ResumeSuccess(resume);
+  }
+
+  /**
+   * Méthode factory pour créer une instance validée de Resume
+   * @param data Les données brutes du CV
+   * @param i18n Interface pour l'internationalisation des messages
+   * @returns Un objet contenant le résultat de la validation et éventuellement l'instance de Resume
+   * @deprecated Utilisez createWithResultType à la place, qui retourne un ResultTypeInterface standard
+   */
+  static create(
+    data: Partial<ResumeInterface>,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): ValidationResultType & { resume?: Resume } {
+    const result = this.createWithResultType(data, i18n);
+    
+    if (result instanceof ResumeFailure) {
+      return {
+        isValid: false,
+        errors: result.getErrors().map(err => err.message)
+      };
+    } else {
+      return {
+        isValid: true,
+        errors: [], // Assurer que errors est un tableau vide pour le cas de succès
+        resume: result.entity
+      };
     }
   }
   
-  private static isValidDate(dateString: string): boolean {
+  private static isValidDate(dateString?: string): boolean {
+    if (!dateString) return false;
+    
     // Format ISO YYYY-MM-DD
-    const regex = /^\d{4}-\d{2}-\d{2}$/
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(dateString)) {
-      return false
+      return false;
     }
     
     // Validation que la date est valide
-    const date = new Date(dateString)
-    return !isNaN(date.getTime())
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
   }
 
   // Getters pour accéder aux propriétés en immutabilité
   get basics() {
-    return { ...this.data.basics }
+    return { ...this.data.basics };
   }
 
   get work() {
-    return this.data.work ? [...this.data.work] : []
+    return this.data.work ? [...this.data.work] : [];
   }
 
   get volunteer() {
-    return this.data.volunteer ? [...this.data.volunteer] : []
+    return this.data.volunteer ? [...this.data.volunteer] : [];
   }
 
   get education() {
-    return this.data.education ? [...this.data.education] : []
+    return this.data.education ? [...this.data.education] : [];
   }
 
   get awards() {
-    return this.data.awards ? [...this.data.awards] : []
+    return this.data.awards ? [...this.data.awards] : [];
   }
 
   get certificates() {
-    return this.data.certificates ? [...this.data.certificates] : []
+    return this.data.certificates ? [...this.data.certificates] : [];
   }
 
   get publications() {
-    return this.data.publications ? [...this.data.publications] : []
+    return this.data.publications ? [...this.data.publications] : [];
   }
 
   get skills() {
-    return this.data.skills ? [...this.data.skills] : []
+    return this.data.skills ? [...this.data.skills] : [];
   }
 
   get languages() {
-    return this.data.languages ? [...this.data.languages] : []
+    return this.data.languages ? [...this.data.languages] : [];
   }
 
   get interests() {
-    return this.data.interests ? [...this.data.interests] : []
+    return this.data.interests ? [...this.data.interests] : [];
   }
 
   get references() {
-    return this.data.references ? [...this.data.references] : []
+    return this.data.references ? [...this.data.references] : [];
   }
 
   get projects() {
-    return this.data.projects ? [...this.data.projects] : []
+    return this.data.projects ? [...this.data.projects] : [];
   }
 
   /**
-   * Convert the Resume entity to a JSON object conforming to the JSON Resume standard
-   * @returns ResumeInterface - A structured object that follows the JSON Resume schema
+   * Convertit l'entité en objet simple conforme à ResumeInterface
+   * @returns L'objet représentant le CV
    */
   toJSON(): ResumeInterface {
-    const json = {
-      basics: this.basics,
-      ...(this.work.length > 0 && { work: this.work }),
-      ...(this.volunteer.length > 0 && { volunteer: this.volunteer }),
-      ...(this.education.length > 0 && { education: this.education }),
-      awards: this.awards,
-      ...(this.certificates.length > 0 && { certificates: this.certificates }),
-      ...(this.publications.length > 0 && { publications: this.publications }),
-      skills: this.skills,
-      ...(this.languages.length > 0 && { languages: this.languages }),
-      ...(this.interests.length > 0 && { interests: this.interests }),
-      ...(this.references.length > 0 && { references: this.references }),
-      ...(this.projects.length > 0 && { projects: this.projects })
-    }
-    return json
+    return { ...this.data };
   }
 }

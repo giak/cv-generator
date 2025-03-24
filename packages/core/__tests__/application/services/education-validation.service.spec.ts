@@ -63,7 +63,8 @@ describe('EducationValidationService', () => {
       expect(DateRange.create).toHaveBeenCalledWith(
         validEducation.startDate,
         validEducation.endDate,
-        'education'
+        'education',
+        expect.anything()
       );
     });
     

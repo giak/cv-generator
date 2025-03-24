@@ -9,7 +9,8 @@ import {
   createSuccess,
   createSuccessWithWarnings,
   createFailure,
-  isFailure
+  isFailure,
+  getErrors,
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';
 import { DateRange } from '../../domain/value-objects/date-range.value-object';
@@ -76,7 +77,7 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
     // Validation du nom de l'entreprise (erreur critique)
     if (!work.company || work.company.trim() === '') {
       errors.push(this.createValidationError(
-        'MISSING_COMPANY',
+        'missing_company',
         WORK_VALIDATION_KEYS.MISSING_COMPANY,
         'company',
         ValidationLayerType.DOMAIN,
@@ -87,7 +88,7 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
     // Validation du poste (erreur critique)
     if (!work.position || work.position.trim() === '') {
       errors.push(this.createValidationError(
-        'MISSING_POSITION',
+        'missing_position',
         WORK_VALIDATION_KEYS.MISSING_POSITION,
         'position',
         ValidationLayerType.DOMAIN,
@@ -95,7 +96,7 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
       ));
     } else if (work.position.length < 5) {
       warnings.push(this.createValidationError(
-        'VAGUE_POSITION',
+        'vague_position',
         WORK_VALIDATION_KEYS.VAGUE_POSITION,
         'position',
         ValidationLayerType.APPLICATION,
@@ -114,22 +115,22 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
       );
       
       if (isFailure(dateRangeResult)) {
-        errors.push(...dateRangeResult.error);
+        errors.push(...getErrors(dateRangeResult));
       }
     }
     
     // Validation de la description (warning)
     if (!work.summary || work.summary.trim() === '') {
       errors.push(this.createValidationError(
-        'MISSING_SUMMARY',
+        'missing_summary',
         WORK_VALIDATION_KEYS.MISSING_SUMMARY,
         'summary',
-        ValidationLayerType.DOMAIN,
+        ValidationLayerType.APPLICATION,
         'error'
       ));
     } else if (work.summary.length < 50) {
       warnings.push(this.createValidationError(
-        'BRIEF_DESCRIPTION',
+        'brief_description',
         WORK_VALIDATION_KEYS.BRIEF_DESCRIPTION,
         'summary',
         ValidationLayerType.APPLICATION,
@@ -141,7 +142,7 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
     // Validation des points forts (warning)
     if (!work.highlights || work.highlights.length === 0) {
       warnings.push(this.createValidationError(
-        'MISSING_HIGHLIGHTS',
+        'missing_highlights',
         WORK_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
         'highlights',
         ValidationLayerType.APPLICATION,
@@ -152,11 +153,11 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
       const vagueHighlights = work.highlights.filter(h => h.length < 20);
       if (vagueHighlights.length > 0) {
         warnings.push(this.createValidationError(
-          'VAGUE_HIGHLIGHTS',
+          'vague_highlights',
           WORK_VALIDATION_KEYS.VAGUE_HIGHLIGHTS,
           'highlights',
-          ValidationLayerType.APPLICATION,
-          'warning',
+          ValidationLayerType.PRESENTATION,
+          'info',
           { suggestion: "Détaillez davantage vos réalisations" }
         ));
       }
@@ -187,7 +188,7 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
       case 'company':
         if (!value || (typeof value === 'string' && value.trim() === '')) {
           errors.push(this.createValidationError(
-            'MISSING_COMPANY',
+            'missing_company',
             WORK_VALIDATION_KEYS.MISSING_COMPANY,
             'company',
             ValidationLayerType.DOMAIN,
@@ -199,7 +200,7 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
       case 'position':
         if (!value || (typeof value === 'string' && value.trim() === '')) {
           errors.push(this.createValidationError(
-            'MISSING_POSITION',
+            'missing_position',
             WORK_VALIDATION_KEYS.MISSING_POSITION,
             'position',
             ValidationLayerType.DOMAIN,
@@ -207,7 +208,7 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
           ));
         } else if (typeof value === 'string' && value.length < 5) {
           warnings.push(this.createValidationError(
-            'VAGUE_POSITION',
+            'vague_position',
             WORK_VALIDATION_KEYS.VAGUE_POSITION,
             'position',
             ValidationLayerType.APPLICATION,
@@ -227,22 +228,30 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
         );
         
         if (isFailure(dateRangeResult)) {
-          errors.push(...dateRangeResult.error.filter(e => e.field === fieldName));
+          const fieldErrors = getErrors(dateRangeResult).filter(
+            err => err.field === fieldName
+          );
+          
+          if (fieldErrors.length > 0) {
+            errors.push(...fieldErrors);
+          } else {
+            return createSuccess(value as WorkInterface[K]);
+          }
         }
         break;
         
       case 'summary':
         if (!value || (typeof value === 'string' && value.trim() === '')) {
           errors.push(this.createValidationError(
-            'MISSING_SUMMARY',
+            'missing_summary',
             WORK_VALIDATION_KEYS.MISSING_SUMMARY,
             'summary',
-            ValidationLayerType.DOMAIN,
+            ValidationLayerType.APPLICATION,
             'error'
           ));
         } else if (typeof value === 'string' && value.length < 50) {
           warnings.push(this.createValidationError(
-            'BRIEF_DESCRIPTION',
+            'brief_description',
             WORK_VALIDATION_KEYS.BRIEF_DESCRIPTION,
             'summary',
             ValidationLayerType.APPLICATION,
@@ -256,7 +265,7 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
         const highlights = value as string[] | undefined;
         if (!highlights || !Array.isArray(highlights) || highlights.length === 0) {
           warnings.push(this.createValidationError(
-            'MISSING_HIGHLIGHTS',
+            'missing_highlights',
             WORK_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
             'highlights',
             ValidationLayerType.APPLICATION,
@@ -267,11 +276,11 @@ export class WorkValidationService extends BaseValidationService<WorkInterface> 
           const vagueHighlights = highlights.filter(h => h.length < 20);
           if (vagueHighlights.length > 0) {
             warnings.push(this.createValidationError(
-              'VAGUE_HIGHLIGHTS',
+              'vague_highlights',
               WORK_VALIDATION_KEYS.VAGUE_HIGHLIGHTS,
               'highlights',
-              ValidationLayerType.APPLICATION,
-              'warning',
+              ValidationLayerType.PRESENTATION,
+              'info',
               { suggestion: "Détaillez davantage vos réalisations" }
             ));
           }

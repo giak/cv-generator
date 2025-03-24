@@ -1,6 +1,13 @@
 import type { WorkInterface } from '@cv-generator/shared/src/types/resume.interface';
+import {
+  ValidationErrorInterface,
+  ValidationLayerType,
+  ResultTypeInterface, ERROR_CODES,
+  TRANSLATION_KEYS,
+  Success,
+  Failure
+} from '@cv-generator/shared';
 import { WorkDate } from '../value-objects/work-date.value-object';
-import { TRANSLATION_KEYS } from '@cv-generator/shared';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
 
 /**
@@ -43,7 +50,36 @@ export class DefaultWorkI18nAdapter implements DomainI18nPortInterface {
 const defaultI18nAdapter = new DefaultWorkI18nAdapter();
 
 /**
+ * Type standard pour les résultats de l'entité Work
+ * Conforme au pattern ResultTypeInterface standardisé
+ */
+export type WorkResultType = ResultTypeInterface<WorkInterface> & { 
+  entity?: Work 
+};
+
+/**
+ * Classes d'implémentation pour WorkResultType
+ */
+export class WorkSuccess extends Success<WorkInterface> implements WorkResultType {
+  public readonly entity: Work;
+  
+  constructor(work: Work) {
+    super(work.toJSON());
+    this.entity = work;
+  }
+}
+
+export class WorkFailure extends Failure<WorkInterface> implements WorkResultType {
+  public readonly entity?: undefined;
+  
+  constructor(errors: ValidationErrorInterface[]) {
+    super(errors);
+  }
+}
+
+/**
  * Type pour les données de validation de l'entité Work
+ * @deprecated Utilisez WorkResultType avec ResultTypeInterface à la place
  */
 export type WorkValidationResultType = {
   isValid: boolean
@@ -71,66 +107,115 @@ export class Work {
   ) {}
 
   /**
-   * Méthode factory pour créer une instance validée de Work
+   * Méthode factory pour créer une instance validée de Work avec le pattern ResultType standardisé
    * @param data Les données brutes de l'expérience professionnelle
    * @param i18n Interface pour l'internationalisation des messages
-   * @returns Un objet contenant le résultat de la validation et éventuellement l'instance de Work
+   * @returns ResultTypeInterface contenant soit les données de Work en cas de succès, soit les erreurs
    */
-  static create(
+  static createWithResultType(
     data: Partial<WorkInterface>,
     i18n: DomainI18nPortInterface = defaultI18nAdapter
-  ): WorkValidationResultType {
-
-    const errors: string[] = []
+  ): WorkResultType {
+    const errors: ValidationErrorInterface[] = [];
     
     // 1. Validation des champs requis
     if (!data.name || data.name.trim().length === 0) {
-      errors.push(i18n.translate(WORK_VALIDATION_KEYS.MISSING_COMPANY))
+      errors.push({
+        code: ERROR_CODES.RESUME.WORK.MISSING_COMPANY,
+        message: i18n.translate(WORK_VALIDATION_KEYS.MISSING_COMPANY),
+        i18nKey: WORK_VALIDATION_KEYS.MISSING_COMPANY,
+        field: "name",
+        severity: "error",
+        layer: ValidationLayerType.DOMAIN,
+        suggestion: "Veuillez entrer le nom de l'entreprise"
+      });
     }
     
     if (!data.position || data.position.trim().length === 0) {
-      errors.push(i18n.translate(WORK_VALIDATION_KEYS.MISSING_POSITION))
+      errors.push({
+        code: ERROR_CODES.RESUME.WORK.MISSING_POSITION,
+        message: i18n.translate(WORK_VALIDATION_KEYS.MISSING_POSITION),
+        i18nKey: WORK_VALIDATION_KEYS.MISSING_POSITION,
+        field: "position",
+        severity: "error",
+        layer: ValidationLayerType.DOMAIN,
+        suggestion: "Veuillez entrer le poste occupé"
+      });
     }
     
     // 2. Validation de l'URL si fournie
     if (data.url && !this.isValidUrl(data.url)) {
-      errors.push(i18n.translate(WORK_VALIDATION_KEYS.INVALID_URL))
+      errors.push({
+        code: ERROR_CODES.RESUME.PROJECT.INVALID_URL,
+        message: i18n.translate(WORK_VALIDATION_KEYS.INVALID_URL),
+        i18nKey: WORK_VALIDATION_KEYS.INVALID_URL,
+        field: "url",
+        severity: "error",
+        layer: ValidationLayerType.DOMAIN,
+        suggestion: "Veuillez entrer une URL valide (ex: https://exemple.com)"
+      });
     }
     
     // 3. Validation de la date de début (requise)
-    let startDate: WorkDate | undefined
+    let startDate: WorkDate | undefined;
     if (!data.startDate) {
-      errors.push(i18n.translate(WORK_VALIDATION_KEYS.MISSING_START_DATE))
+      errors.push({
+        code: ERROR_CODES.RESUME.WORK.MISSING_START_DATE,
+        message: i18n.translate(WORK_VALIDATION_KEYS.MISSING_START_DATE),
+        i18nKey: WORK_VALIDATION_KEYS.MISSING_START_DATE,
+        field: "startDate",
+        severity: "error",
+        layer: ValidationLayerType.DOMAIN,
+        suggestion: "Veuillez entrer la date de début (format YYYY-MM-DD)"
+      });
     } else {
-      const startDateResult = WorkDate.create(data.startDate)
-      if (startDateResult.isFailure) {
-        const errorMessage = i18n.translate(WORK_VALIDATION_KEYS.INVALID_START_DATE)
-        errors.push(startDateResult.error ? `${errorMessage}: ${startDateResult.error}` : errorMessage)
-      } else if (startDateResult.getValue) {
-        startDate = startDateResult.getValue()
+      const startDateResult = WorkDate.createWithResultType(data.startDate);
+      if (startDateResult.isFailure()) {
+        // Ajouter les erreurs de date avec le champ correct
+        errors.push(...startDateResult.getErrors().map(err => ({
+          ...err,
+          field: "startDate",
+          i18nKey: WORK_VALIDATION_KEYS.INVALID_START_DATE,
+          message: i18n.translate(WORK_VALIDATION_KEYS.INVALID_START_DATE)
+        })));
+      } else {
+        startDate = startDateResult.getValue();
       }
     }
     
     // 4. Validation de la date de fin si fournie
-    let endDate: WorkDate | undefined
+    let endDate: WorkDate | undefined;
     if (data.endDate) {
-      const endDateResult = WorkDate.create(data.endDate)
-      if (endDateResult.isFailure) {
-        const errorMessage = i18n.translate(WORK_VALIDATION_KEYS.INVALID_END_DATE)
-        errors.push(endDateResult.error ? `${errorMessage}: ${endDateResult.error}` : errorMessage)
-      } else if (endDateResult.getValue) {
-        endDate = endDateResult.getValue()
-      }
-      
-      // 5. Vérification de la cohérence des dates (fin > début)
-      if (startDate && endDate && endDate.isBefore(startDate)) {
-        errors.push(i18n.translate(WORK_VALIDATION_KEYS.END_BEFORE_START))
+      const endDateResult = WorkDate.createWithResultType(data.endDate);
+      if (endDateResult.isFailure()) {
+        // Ajouter les erreurs de date avec le champ correct
+        errors.push(...endDateResult.getErrors().map(err => ({
+          ...err,
+          field: "endDate",
+          i18nKey: WORK_VALIDATION_KEYS.INVALID_END_DATE,
+          message: i18n.translate(WORK_VALIDATION_KEYS.INVALID_END_DATE)
+        })));
+      } else {
+        endDate = endDateResult.getValue();
+        
+        // 5. Vérification de la cohérence des dates (fin > début)
+        if (startDate && endDate.isBefore(startDate)) {
+          errors.push({
+            code: ERROR_CODES.RESUME.WORK.END_BEFORE_START,
+            message: i18n.translate(WORK_VALIDATION_KEYS.END_BEFORE_START),
+            i18nKey: WORK_VALIDATION_KEYS.END_BEFORE_START,
+            field: "endDate",
+            severity: "error",
+            layer: ValidationLayerType.DOMAIN,
+            suggestion: "La date de fin doit être postérieure à la date de début"
+          });
+        }
       }
     }
     
-    // Si des erreurs sont présentes, retourne le résultat d'échec
+    // Si des erreurs sont présentes, retourne un résultat d'échec
     if (errors.length > 0) {
-      return { isValid: false, errors }
+      return new WorkFailure(errors);
     }
     
     // Création de l'instance avec les données validées
@@ -143,12 +228,37 @@ export class Work {
       data.summary,
       data.highlights || [],
       i18n
-    )
+    );
     
-    return {
-      isValid: true,
-      errors: [],
-      work
+    // Retourner un résultat de succès avec l'entité attachée
+    return new WorkSuccess(work);
+  }
+
+  /**
+   * Méthode factory pour créer une instance validée de Work
+   * @param data Les données brutes de l'expérience professionnelle
+   * @param i18n Interface pour l'internationalisation des messages
+   * @returns Un objet contenant le résultat de la validation et éventuellement l'instance de Work
+   * @deprecated Utilisez createWithResultType à la place, qui retourne un ResultTypeInterface standard
+   */
+  static create(
+    data: Partial<WorkInterface>,
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): WorkValidationResultType {
+    // Utilise la nouvelle méthode et convertit le résultat au format legacy
+    const result = this.createWithResultType(data, i18n);
+    
+    if (result.isFailure()) {
+      return {
+        isValid: false,
+        errors: result.getErrors().map(err => err.message),
+      };
+    } else {
+      return {
+        isValid: true,
+        errors: [],
+        work: result.entity
+      };
     }
   }
   
@@ -159,20 +269,19 @@ export class Work {
    */
   private static isValidUrl(url: string): boolean {
     try {
-      new URL(url)
-      return true
+      new URL(url);
+      return true;
     } catch (e) {
-      return false
+      return false;
     }
   }
   
   /**
-   * Crée une nouvelle instance avec les propriétés modifiées
-   * Pattern immuable pour les modifications
+   * Crée une nouvelle instance avec les propriétés modifiées, utilisant le pattern ResultType standardisé
    * @param props Les propriétés à modifier
-   * @returns Résultat de la validation avec la nouvelle instance ou des erreurs
+   * @returns ResultTypeInterface contenant soit les données mises à jour, soit les erreurs
    */
-  update(props: Partial<WorkInterface>): WorkValidationResultType {
+  updateWithResultType(props: Partial<WorkInterface>): WorkResultType {
     // Fusion des données actuelles avec les nouvelles propriétés
     const updatedData: Partial<WorkInterface> = {
       name: props.name !== undefined ? props.name : this.name,
@@ -182,41 +291,65 @@ export class Work {
       endDate: props.endDate !== undefined ? props.endDate : this.endDate?.getValue(),
       summary: props.summary !== undefined ? props.summary : this.summary,
       highlights: props.highlights !== undefined ? props.highlights : this.highlights
-    }
+    };
     
     // Utilisation de la méthode factory pour valider les nouvelles données
-    return Work.create(updatedData, this._i18n)
+    return Work.createWithResultType(updatedData, this._i18n);
+  }
+  
+  /**
+   * Crée une nouvelle instance avec les propriétés modifiées
+   * Pattern immuable pour les modifications
+   * @param props Les propriétés à modifier
+   * @returns Résultat de la validation avec la nouvelle instance ou des erreurs
+   * @deprecated Utilisez updateWithResultType à la place, qui retourne un ResultTypeInterface standard
+   */
+  update(props: Partial<WorkInterface>): WorkValidationResultType {
+    const result = this.updateWithResultType(props);
+    
+    if (result.isFailure()) {
+      return {
+        isValid: false,
+        errors: result.getErrors().map(err => err.message)
+      };
+    } else {
+      return {
+        isValid: true,
+        errors: [],
+        work: result.entity
+      };
+    }
   }
   
   /**
    * Accesseurs pour les propriétés (lecture seule)
    */
   get name(): string {
-    return this._name
+    return this._name;
   }
   
   get position(): string {
-    return this._position
+    return this._position;
   }
   
   get url(): string | undefined {
-    return this._url
+    return this._url;
   }
   
   get startDate(): WorkDate {
-    return this._startDate
+    return this._startDate;
   }
   
   get endDate(): WorkDate | undefined {
-    return this._endDate
+    return this._endDate;
   }
   
   get summary(): string | undefined {
-    return this._summary
+    return this._summary;
   }
   
   get highlights(): string[] {
-    return [...this._highlights] // Copie défensive
+    return [...this._highlights]; // Copie défensive
   }
   
   /**
@@ -224,7 +357,6 @@ export class Work {
    * @returns L'objet représentant l'expérience professionnelle
    */
   toJSON(): WorkInterface {
-
     const json: WorkInterface = {
       name: this.name,
       position: this.position,
@@ -233,8 +365,8 @@ export class Work {
       ...(this.endDate && { endDate: this.endDate.getValue() }),
       ...(this.summary && { summary: this.summary }),
       ...(this.highlights.length > 0 && { highlights: this.highlights })
-    }
+    };
 
-    return json
+    return json;
   }
 }

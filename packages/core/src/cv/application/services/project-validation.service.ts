@@ -8,6 +8,7 @@ import {
     ValidationLayerType,
     createSuccess,
     createFailure,
+    createSuccessWithWarnings,
     ERROR_CODES
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';
@@ -101,6 +102,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
    */
   public validate(project: ProjectInterface): ResultType<ProjectInterface> {
     const errors: ValidationErrorInterface[] = [];
+    const warnings: ValidationErrorInterface[] = [];
     
     // Validation du nom (erreur critique)
     if (!project.name || project.name.trim() === '') {
@@ -127,7 +129,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     // Validation des dates (erreur critique)
     if (project.startDate !== undefined) {
       if (project.startDate.trim() === '') {
-        errors.push(this.createValidationError(
+        warnings.push(this.createValidationError(
           ERROR_CODES.RESUME.PROJECT.MISSING_START_DATE,
           PROJECT_VALIDATION_KEYS.MISSING_START_DATE,
           'startDate',
@@ -159,7 +161,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     
     // Validation de la description (warning)
     if (project.description && project.description.length < 50) {
-      errors.push(this.createValidationError(
+      warnings.push(this.createValidationError(
         ERROR_CODES.RESUME.PROJECT.BRIEF_DESCRIPTION,
         PROJECT_VALIDATION_KEYS.VAGUE_DESCRIPTION,
         'description',
@@ -171,7 +173,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     
     // Validation des rôles (warning)
     if (!project.roles || project.roles.length === 0) {
-      errors.push(this.createValidationError(
+      warnings.push(this.createValidationError(
         ERROR_CODES.RESUME.PROJECT.MISSING_ROLE,
         PROJECT_VALIDATION_KEYS.MISSING_ROLE,
         'roles',
@@ -183,7 +185,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     
     // Validation des points forts (warning)
     if (!project.highlights || project.highlights.length === 0) {
-      errors.push(this.createValidationError(
+      warnings.push(this.createValidationError(
         ERROR_CODES.RESUME.PROJECT.MISSING_HIGHLIGHTS,
         PROJECT_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
         'highlights',
@@ -195,7 +197,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     
     // Validation des mots-clés (info)
     if (!project.keywords || project.keywords.length === 0) {
-      errors.push(this.createValidationError(
+      warnings.push(this.createValidationError(
         ERROR_CODES.RESUME.PROJECT.MISSING_KEYWORDS,
         PROJECT_VALIDATION_KEYS.MISSING_KEYWORDS,
         'keywords',
@@ -206,7 +208,11 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     }
     
     if (errors.length > 0) {
-      return createFailure(errors);
+      return createFailure([...errors, ...warnings]);
+    }
+    
+    if (warnings.length > 0) {
+      return createSuccessWithWarnings(project, warnings);
     }
     
     return createSuccess(project);
@@ -223,6 +229,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     fieldName: K
   ): ResultType<ProjectInterface[K]> {
     const errors: ValidationErrorInterface[] = [];
+    const warnings: ValidationErrorInterface[] = [];
     
     switch (fieldName) {
       case 'name':
@@ -247,7 +254,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
             'error'
           ));
         } else if (project.description.length < 50) {
-          errors.push(this.createValidationError(
+          warnings.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.BRIEF_DESCRIPTION,
             PROJECT_VALIDATION_KEYS.VAGUE_DESCRIPTION,
             'description',
@@ -260,7 +267,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
         
       case 'roles':
         if (!project.roles || project.roles.length === 0) {
-          errors.push(this.createValidationError(
+          warnings.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.MISSING_ROLE,
             PROJECT_VALIDATION_KEYS.MISSING_ROLE,
             'roles',
@@ -273,7 +280,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
         
       case 'highlights':
         if (!project.highlights || project.highlights.length === 0) {
-          errors.push(this.createValidationError(
+          warnings.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.MISSING_HIGHLIGHTS,
             PROJECT_VALIDATION_KEYS.MISSING_HIGHLIGHTS,
             'highlights',
@@ -286,7 +293,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
         
       case 'keywords':
         if (!project.keywords || project.keywords.length === 0) {
-          errors.push(this.createValidationError(
+          warnings.push(this.createValidationError(
             ERROR_CODES.RESUME.PROJECT.MISSING_KEYWORDS,
             PROJECT_VALIDATION_KEYS.MISSING_KEYWORDS,
             'keywords',
@@ -300,7 +307,7 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
       case 'startDate':
         if (project.startDate !== undefined) {
           if (project.startDate.trim() === '') {
-            errors.push(this.createValidationError(
+            warnings.push(this.createValidationError(
               ERROR_CODES.RESUME.PROJECT.MISSING_START_DATE,
               PROJECT_VALIDATION_KEYS.MISSING_START_DATE,
               'startDate',
@@ -335,7 +342,11 @@ export class ProjectValidationService extends BaseValidationService<ProjectInter
     }
     
     if (errors.length > 0) {
-      return createFailure(errors);
+      return createFailure([...errors, ...warnings]);
+    }
+
+    if (warnings.length > 0) {
+      return createSuccessWithWarnings(project[fieldName], warnings);
     }
     
     return createSuccess(project[fieldName]);

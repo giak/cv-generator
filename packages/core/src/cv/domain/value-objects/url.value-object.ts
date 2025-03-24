@@ -4,7 +4,7 @@
  */
 
 import {
-    ResultType,
+    ResultTypeInterface,
     ValidationErrorInterface,
     ValidationLayerType,
     createSuccess,
@@ -115,17 +115,18 @@ export class Url {
 
   /**
    * Méthode factory pour créer une instance d'URL avec ResultType
-   * Applique les règles de validation du domaine
-   * @param url URL à valider
-   * @param i18n Interface pour l'internationalisation des messages (optionnel)
-   * @returns ResultType contenant soit l'objet Url en cas de succès, soit les erreurs
+   * Validation complète selon les règles du domaine
+   * @param urlStr La chaîne URL à valider
+   * @param _context Le contexte d'utilisation pour adapter les messages (ex: "profile", "work")
+   * @returns ResultTypeInterface contenant soit l'objet Url en cas de succès, soit les erreurs
    */
   public static create(
-    url: string,
+    urlStr: string,
+    _context: string = 'link',
     i18n: DomainI18nPortInterface = defaultI18nAdapter
-  ): ResultType<Url> {
+  ): ResultTypeInterface<Url> {
     // Cas d'une URL vide ou undefined
-    if (!url || url.trim() === '') {
+    if (!urlStr || urlStr.trim() === '') {
       return createFailure([{
         code: ERROR_CODES.COMMON.REQUIRED_FIELD,
         message: i18n.translate(URL_VALIDATION_KEYS.MISSING_URL),
@@ -138,7 +139,7 @@ export class Url {
     }
 
     // Normalisation de l'URL (ajout du protocole si manquant)
-    let normalizedUrl = url.trim();
+    let normalizedUrl = urlStr.trim();
     if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
       normalizedUrl = 'https://' + normalizedUrl;
     }

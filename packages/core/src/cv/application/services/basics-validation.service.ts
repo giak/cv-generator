@@ -6,6 +6,8 @@
 import {
     ResultType,
     createFailure,
+    createSuccess,
+    createSuccessWithWarnings,
 } from '@cv-generator/shared';
 import { BaseValidationService } from './validation.service';
 import { Basics } from '../../domain/entities/Basics';
@@ -48,13 +50,16 @@ export class BasicsValidationService extends BaseValidationService<BasicsInterfa
     // Délègue la validation à l'entité de domaine avec l'adaptateur i18n
     const result = Basics.create(basics, this.i18nAdapter);
     
-    // Si la validation a réussi, on retourne les données validées
-    if (result.success) {
-      return result;
+    // Traiter le résultat en fonction de son état
+    if (result.isSuccess()) {
+      if (result.hasWarnings()) {
+        return createSuccessWithWarnings(basics, result.getWarnings());
+      }
+      return createSuccess(basics);
     }
     
-    // Sinon, on retourne les erreurs
-    return createFailure(result.error);
+    // Si échec, retourner le résultat d'échec
+    return createFailure(result.getErrors());
   }
 
   /**

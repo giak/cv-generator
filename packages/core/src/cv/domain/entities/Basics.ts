@@ -5,23 +5,66 @@
 
 import type { BasicsInterface, LocationInterface, ProfileInterface } from '@cv-generator/shared/src/types/resume.interface';
 import {
-  ResultType,
+  ResultTypeInterface,
   ValidationErrorInterface,
   ValidationLayerType,
   createSuccess,
   createFailure,
-  createSuccessWithWarnings,
-  TRANSLATION_KEYS
+  ERROR_CODES,
+  TRANSLATION_KEYS,
+  Success,
+  Failure
 } from '@cv-generator/shared';
 import { Email } from '../value-objects/email.value-object';
 import { Phone } from '../value-objects/phone.value-object';
 import { Url } from '../value-objects/url.value-object';
 import { DomainI18nPortInterface } from '../../../shared/i18n/domain-i18n.port';
 
-// Type for validation result
-export type BasicsValidationResultType = ResultType<BasicsInterface> & { 
-  entity?: Basics 
+/**
+ * Type standard pour les résultats de l'entité Basics
+ * Conforme au pattern ResultTypeInterface standardisé
+ */
+export type BasicsResultType = ResultTypeInterface<BasicsInterface> & { 
+  entity?: Basics,
+  warnings?: ValidationErrorInterface[]
 };
+
+/**
+ * Classes d'implémentation pour BasicsResultType
+ */
+export class BasicsSuccess extends Success<BasicsInterface> implements BasicsResultType {
+  public readonly entity: Basics;
+  
+  constructor(basics: Basics) {
+    super(basics.toJSON());
+    this.entity = basics;
+  }
+}
+
+export class BasicsSuccessWithWarnings extends Success<BasicsInterface> implements BasicsResultType {
+  public readonly entity: Basics;
+  public readonly warnings: ValidationErrorInterface[];
+  
+  constructor(basics: Basics, warnings: ValidationErrorInterface[]) {
+    super(basics.toJSON());
+    this.entity = basics;
+    this.warnings = warnings;
+  }
+}
+
+export class BasicsFailure extends Failure<BasicsInterface> implements BasicsResultType {
+  public readonly entity?: undefined;
+  
+  constructor(errors: ValidationErrorInterface[]) {
+    super(errors);
+  }
+}
+
+/**
+ * Type pour les données de validation de l'entité Basics
+ * @deprecated Utilisez BasicsResultType avec ResultTypeInterface à la place
+ */
+export type BasicsValidationResultType = BasicsResultType;
 
 // Export validation keys for Basics entity
 export const BASICS_VALIDATION_KEYS = {
@@ -69,26 +112,27 @@ export class Basics {
     private readonly _image: Url | null,
     private readonly _summary: string | null,
     private readonly _location: LocationInterface | null,
-    private readonly _profiles: ProfileInterface[]
+    private readonly _profiles: ProfileInterface[],
+    private readonly _i18n: DomainI18nPortInterface
   ) {}
 
   /**
    * Factory method to create a validated instance of Basics
    * @param data Raw data for basic information
    * @param i18n Internationalization adapter
-   * @returns Object containing validation result and possibly the Basics instance
+   * @returns ResultTypeInterface containing either the Basics data if successful, or errors
    */
-  static create(
+  static createWithResultType(
     data: Partial<BasicsInterface>, 
     i18n: DomainI18nPortInterface = defaultI18nAdapter
-  ): BasicsValidationResultType {
+  ): BasicsResultType {
     const errors: ValidationErrorInterface[] = [];
     const warnings: ValidationErrorInterface[] = [];
     
     // Validate name (required field)
     if (!data.name || data.name.trim() === '') {
       errors.push({
-        code: 'missing_name',
+        code: ERROR_CODES.RESUME.BASICS.MISSING_NAME,
         message: i18n.translate(BASICS_VALIDATION_KEYS.MISSING_NAME),
         i18nKey: BASICS_VALIDATION_KEYS.MISSING_NAME,
         field: 'name',
@@ -98,7 +142,7 @@ export class Basics {
       });
     } else if (data.name.length > 100) {
       errors.push({
-        code: 'name_too_long',
+        code: ERROR_CODES.COMMON.TOO_LONG,
         message: i18n.translate(BASICS_VALIDATION_KEYS.NAME_TOO_LONG),
         i18nKey: BASICS_VALIDATION_KEYS.NAME_TOO_LONG,
         field: 'name',
@@ -109,204 +153,184 @@ export class Basics {
     
     // Validate email with Email value object
     let emailObj: Email | null = null;
-    if (data.email) {
-      const emailResult = Email.create(data.email, i18n);
-      if (!emailResult.success) {
-        errors.push(...emailResult.error);
-      } else {
-        emailObj = emailResult.value;
-        // Add warnings if any
-        if (emailResult.warnings) {
-          warnings.push(...emailResult.warnings);
-        }
-      }
-    } else {
+    if (!data.email) {
       errors.push({
-        code: 'missing_email',
+        code: ERROR_CODES.RESUME.BASICS.MISSING_EMAIL,
         message: i18n.translate(BASICS_VALIDATION_KEYS.MISSING_EMAIL),
         i18nKey: BASICS_VALIDATION_KEYS.MISSING_EMAIL,
         field: 'email',
         severity: 'error',
-        layer: ValidationLayerType.DOMAIN,
-        suggestion: 'Veuillez fournir une adresse email valide'
+        layer: ValidationLayerType.DOMAIN
       });
+    } else {
+      const emailResult = Email.create(data.email, i18n);
+      if (emailResult.isSuccess()) {
+        emailObj = emailResult.getValue();
+        // Collect warnings from email validation
+        if (emailResult.hasWarnings()) {
+          warnings.push(...emailResult.getWarnings());
+        }
+      } else {
+        errors.push(...emailResult.getErrors());
+      }
     }
     
-    // Validate phone with Phone value object (if provided)
+    // Validate phone (optional)
     let phoneObj: Phone | null = null;
     if (data.phone) {
       const phoneResult = Phone.createWithResultType(data.phone, i18n);
-      if (!phoneResult.success) {
-        errors.push(...phoneResult.error);
+      if (phoneResult.isSuccess()) {
+        phoneObj = phoneResult.getValue();
+        // Collect warnings from phone validation
+        if (phoneResult.hasWarnings()) {
+          warnings.push(...phoneResult.getWarnings());
+        }
       } else {
-        phoneObj = phoneResult.value;
+        errors.push(...phoneResult.getErrors());
       }
     }
     
-    // Validate URL with Url value object (if provided)
+    // Validate URL (optional)
     let urlObj: Url | null = null;
     if (data.url) {
-      const urlResult = Url.create(data.url, i18n);
-      if (!urlResult.success) {
-        errors.push(...urlResult.error);
-      } else {
-        urlObj = urlResult.value;
-        // Add warnings if any
-        if (urlResult.warnings) {
-          warnings.push(...urlResult.warnings);
+      const urlResult = Url.create(data.url, 'website', i18n);
+      if (urlResult.isSuccess()) {
+        urlObj = urlResult.getValue();
+        // Collect warnings from URL validation
+        if (urlResult.hasWarnings()) {
+          warnings.push(...urlResult.getWarnings());
         }
+      } else {
+        errors.push(...urlResult.getErrors());
       }
     }
     
-    // Validate image URL with Url value object (if provided)
+    // Validate image URL (optional)
     let imageObj: Url | null = null;
     if (data.image) {
-      const imageResult = Url.create(data.image, i18n);
-      if (!imageResult.success) {
-        errors.push(...imageResult.error);
-      } else {
-        imageObj = imageResult.value;
-        // Add warnings if any
-        if (imageResult.warnings) {
-          warnings.push(...imageResult.warnings);
+      const imageResult = Url.create(data.image, 'image', i18n);
+      if (imageResult.isSuccess()) {
+        imageObj = imageResult.getValue();
+        // Collect warnings from image validation
+        if (imageResult.hasWarnings()) {
+          warnings.push(...imageResult.getWarnings());
         }
+      } else {
+        errors.push(...imageResult.getErrors());
       }
     }
     
-    // If there are errors, return failure
+    // If there are validation errors, return failure
     if (errors.length > 0) {
-      return createFailure(errors);
+      return new BasicsFailure([...errors, ...warnings]);
     }
     
-    // Create the entity with validated data
-    const entity = new Basics(
-      data.name!,
-      emailObj!,
-      phoneObj,
+    // Create a new Basics instance with the validated data
+    const basics = new Basics(
+      data.name!,  // Safe because we validated it's not empty
+      emailObj!,   // Safe because we validated it
+      phoneObj,    // Optional
       data.label || null,
-      urlObj,
-      imageObj,
+      urlObj,      // Optional
+      imageObj,    // Optional
       data.summary || null,
       data.location || null,
-      data.profiles || []
+      data.profiles || [],
+      i18n
     );
     
-    // If there are warnings, return success with warnings
+    // Return success with the entity (with warnings if any)
     if (warnings.length > 0) {
-      const result = createSuccessWithWarnings({
-        name: entity.name,
-        email: entity.email,
-        ...(entity.phone ? { phone: entity.phone } : {}),
-        ...(entity.label ? { label: entity.label } : {}),
-        ...(entity.url ? { url: entity.url } : {}),
-        ...(entity.image ? { image: entity.image } : {}),
-        ...(entity.summary ? { summary: entity.summary } : {}),
-        ...(entity.location ? { location: entity.location } : {}),
-        profiles: entity.profiles
-      }, warnings);
-      
-      // Attach the entity to the result for domain operations
-      return { ...result, entity };
+      return new BasicsSuccessWithWarnings(basics, warnings);
+    } else {
+      return new BasicsSuccess(basics);
     }
-    
-    // Otherwise, return success
-    const result = createSuccess({
-      name: entity.name,
-      email: entity.email,
-      ...(entity.phone ? { phone: entity.phone } : {}),
-      ...(entity.label ? { label: entity.label } : {}),
-      ...(entity.url ? { url: entity.url } : {}),
-      ...(entity.image ? { image: entity.image } : {}),
-      ...(entity.summary ? { summary: entity.summary } : {}),
-      ...(entity.location ? { location: entity.location } : {}),
-      profiles: entity.profiles
-    });
-    
-    // Attach the entity to the result for domain operations
-    return { ...result, entity };
+  }
+
+  /**
+   * Factory method to create a validated instance of Basics
+   * @param data Raw data for basic information
+   * @param i18n Internationalization adapter
+   * @returns ResultTypeInterface containing either the Basics data if successful, or errors
+   * @deprecated Use createWithResultType instead, which returns a standardized ResultTypeInterface
+   */
+  static create(
+    data: Partial<BasicsInterface>, 
+    i18n: DomainI18nPortInterface = defaultI18nAdapter
+  ): BasicsResultType {
+    return this.createWithResultType(data, i18n);
   }
   
   /**
-   * Validate just one field of the Basics entity
-   * @param data The basics data
-   * @param field The field to validate
+   * Validates a specific field from Basics data
+   * @param data The basics data containing the field to validate
+   * @param field The specific field to validate
    * @param i18n Internationalization adapter
-   * @returns Validation result for the specific field
+   * @returns ResultTypeInterface containing the validation result
    */
   static validateField(
     data: Partial<BasicsInterface>, 
     field: keyof BasicsInterface,
     i18n: DomainI18nPortInterface = defaultI18nAdapter
-  ): ResultType<unknown> {
+  ): ResultTypeInterface<unknown> {
     switch (field) {
       case 'name':
         if (!data.name || data.name.trim() === '') {
           return createFailure([{
-            code: 'missing_name',
+            code: ERROR_CODES.RESUME.BASICS.MISSING_NAME,
             message: i18n.translate(BASICS_VALIDATION_KEYS.MISSING_NAME),
             i18nKey: BASICS_VALIDATION_KEYS.MISSING_NAME,
-            field: 'name',
-            severity: 'error',
-            layer: ValidationLayerType.DOMAIN,
-            suggestion: 'Veuillez entrer votre nom complet'
-          }]);
-        } else if (data.name.length > 100) {
-          return createFailure([{
-            code: 'name_too_long',
-            message: i18n.translate(BASICS_VALIDATION_KEYS.NAME_TOO_LONG),
-            i18nKey: BASICS_VALIDATION_KEYS.NAME_TOO_LONG,
             field: 'name',
             severity: 'error',
             layer: ValidationLayerType.DOMAIN
           }]);
         }
         return createSuccess(data.name);
-        
+      
       case 'email':
         if (!data.email) {
           return createFailure([{
-            code: 'missing_email',
+            code: ERROR_CODES.RESUME.BASICS.MISSING_EMAIL,
             message: i18n.translate(BASICS_VALIDATION_KEYS.MISSING_EMAIL),
             i18nKey: BASICS_VALIDATION_KEYS.MISSING_EMAIL,
             field: 'email',
             severity: 'error',
-            layer: ValidationLayerType.DOMAIN,
-            suggestion: 'Veuillez fournir une adresse email valide'
+            layer: ValidationLayerType.DOMAIN
           }]);
         }
         return Email.create(data.email, i18n);
-        
+      
       case 'phone':
         if (!data.phone) {
           return createSuccess(null);
         }
         return Phone.createWithResultType(data.phone, i18n);
-        
+      
       case 'url':
         if (!data.url) {
           return createSuccess(null);
         }
-        return Url.create(data.url, i18n);
-        
+        return Url.create(data.url, 'website', i18n);
+      
       case 'image':
         if (!data.image) {
           return createSuccess(null);
         }
-        return Url.create(data.image, i18n);
-        
+        return Url.create(data.image, 'image', i18n);
+      
+      // Default case for other fields
       default:
-        // For other fields that don't have specific validation
-        return createSuccess(data[field] || null);
+        return createSuccess(data[field] ?? null);
     }
   }
   
   /**
-   * Create a new instance with modified properties
-   * Immutable pattern for modifications
+   * Creates a new instance with modified properties using the standardized ResultType pattern
+   * Implements immutable pattern for modifications
    * @param props Properties to modify
-   * @returns Validation result with the new instance or errors
+   * @returns ResultTypeInterface containing either the updated Basics if successful, or errors
    */
-  update(props: Partial<BasicsInterface>): BasicsValidationResultType {
+  updateWithResultType(props: Partial<BasicsInterface>): BasicsResultType {
     // Merge current data with new properties
     const updatedData: Partial<BasicsInterface> = {
       name: props.name !== undefined ? props.name : this.name,
@@ -320,12 +344,22 @@ export class Basics {
       profiles: props.profiles !== undefined ? props.profiles : this.profiles
     };
     
-    // Use factory method to validate the new data
-    return Basics.create(updatedData);
+    // Use factory method to validate new data
+    return Basics.createWithResultType(updatedData, this._i18n);
+  }
+
+  /**
+   * Creates a new instance with modified properties
+   * Implements immutable pattern for modifications
+   * @param props Properties to modify
+   * @returns Validation result with new instance or errors
+   * @deprecated Use updateWithResultType instead, which returns a standardized ResultTypeInterface
+   */
+  update(props: Partial<BasicsInterface>): BasicsResultType {
+    return this.updateWithResultType(props);
   }
   
-  // Getters for immutable access to properties
-  
+  // Getters for properties
   get name(): string {
     return this._name;
   }
@@ -339,7 +373,7 @@ export class Basics {
   }
   
   get phone(): string | undefined {
-    return this._phone ? this._phone.getValue() : undefined;
+    return this._phone?.getValue();
   }
   
   get phoneObj(): Phone | null {
@@ -351,7 +385,7 @@ export class Basics {
   }
   
   get url(): string | undefined {
-    return this._url ? this._url.getValue() : undefined;
+    return this._url?.getValue();
   }
   
   get urlObj(): Url | null {
@@ -359,7 +393,7 @@ export class Basics {
   }
   
   get image(): string | undefined {
-    return this._image ? this._image.getValue() : undefined;
+    return this._image?.getValue();
   }
   
   get imageObj(): Url | null {
@@ -371,27 +405,28 @@ export class Basics {
   }
   
   get location(): LocationInterface | undefined {
-    return this._location ? { ...this._location } : undefined;
+    return this._location || undefined;
   }
   
   get profiles(): ProfileInterface[] {
-    return [...this._profiles];
+    return [...this._profiles]; // Defensive copy
   }
   
+  
   /**
-   * Convert the Basics entity to a JSON object
-   * @returns BasicsInterface - A structured object that follows the schema
+   * Converts entity to plain object conforming to BasicsInterface
+   * @returns Object representing basics information
    */
   toJSON(): BasicsInterface {
     return {
       name: this.name,
       email: this.email,
-      ...(this.phone ? { phone: this.phone } : {}),
-      ...(this.label ? { label: this.label } : {}),
-      ...(this.url ? { url: this.url } : {}),
-      ...(this.image ? { image: this.image } : {}),
-      ...(this.summary ? { summary: this.summary } : {}),
-      ...(this.location ? { location: this.location } : {}),
+      ...(this.phone && { phone: this.phone }),
+      ...(this.label && { label: this.label }),
+      ...(this.url && { url: this.url }),
+      ...(this.image && { image: this.image }),
+      ...(this.summary && { summary: this.summary }),
+      ...(this.location && { location: this.location }),
       profiles: this.profiles
     };
   }
